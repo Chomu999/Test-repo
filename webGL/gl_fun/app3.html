@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<meta name="author" content="billbyte"/>
+<title>webgl app 3</title>
+
+<style>
+
+
+
+*{
+margin: 0;
+padding: 0;
+box-sizing:border-box;
+/* border: 0.1px solid red; */
+}
+
+
+
+html{
+font-size: 10px;
+}
+
+a{
+text-decoration: none;
+}
+
+li{
+list-style:none;
+}
+
+
+
+
+body{
+/* display:grid; */
+/* grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); */
+/* grid-template-rows: repeat(2, 1fr); */
+/* place-items:center; */
+/* gap: 1rem; */
+background: #3e3e3e;
+
+}
+
+canvas{
+margin: auto;
+background:#FF986E;
+}
+
+
+.error_box{
+margin: 2rem 0;
+background:transparent;
+overflow:hidden auto;
+}
+
+.title{
+color:#222A3B;
+font-size: 3rem;
+display:block;
+text-align: center;
+text-transform: capitalize;
+background: linear-gradient(45deg,red, blue);
+text-decoration: underline;
+}
+
+.error_box  p{
+margin:0.2rem 1rem;
+padding: 1rem ;
+
+background: #0009;
+color: #FF374E;
+border-radius: 1rem;
+}
+
+
+.hidden{
+display: none;
+}
+
+</style>
+
+</head>
+<body>
+
+<main>
+
+<canvas id="canvas"></canvas>
+
+<div class="error_box">
+<span class="title">error and warning</span>
+<pre></pre>
+</div>
+
+</main>
+
+<div class="hidden">
+<img src="/storage/emulated/0/Download/images (7).jpeg" id="img1" />
+<img src="/storage/emulated/0/Download/Zelda2.png" id="img2" />
+<img src="/storage/emulated/0/Download/images (9).jpeg" id="img3" />
+<img src="/storage/emulated/0/Download/images (10).jpeg" id="img4" />
+</div>
+
+<script>
+
+
+
+const {PI, cos, sin, tan, abs} = Math;
+
+
+
+const showError=(msg)=>{
+console.log(msg)
+const errorContainer=document.querySelector(".error_box > pre")
+if(!errorContainer)
+	return -1;
+errorContainer.innerHTML+=`<p>${msg}</p>`;
+}
+
+const showGlError =(ii=0)=>{
+for (let i in gl) if (gl[i] == ii) showError(i)
+}
+
+
+
+const canvas=document.querySelector("canvas");
+
+const gl=canvas.getContext("webgl2");
+
+
+class Rand{
+
+static Float(min=0, max=1){
+return Math.random() * (max - min) + min;
+}
+
+static Int(min=1, max=2){
+return Math.floor(Rand.Float(min, max));
+}
+
+static Choice(...args){
+return args[Rand.Int(0, args.length)];
+}
+
+
+}
+
+
+
+
+const shaderSource={
+
+simple:{
+vertex:`#version 300 es
+precision mediump float;
+
+layout (location=0) in vec4 aPos;
+layout (location=1) in vec4 aColor;
+
+
+uniform vec2 uOffset;
+
+
+
+out vec4 vColor;
+
+void main()
+{
+
+gl_Position = vec4(aPos.xy + uOffset, aPos.zw);
+//gl_PointSize = 150.0;
+
+vColor = aColor;
+
+
+}`,
+
+fragment:`#version 300 es
+precision mediump float;
+
+layout (location=0) out vec4 FragColor;
+
+
+in vec4 vColor;
+
+void main()
+{
+
+FragColor = vColor;
+
+}`
+},
+
+}
+
+
+
+const makeProgram=(gl, vss, fss)=>{
+const vs=gl.createShader(gl.VERTEX_SHADER)
+gl.shaderSource(vs, vss)
+gl.compileShader(vs)
+if(!gl.getShaderParameter(vs, gl.COMPILE_STATUS)){
+showError(`vertex error ${gl.getShaderInfoLog(vs)}
+${gl.getShaderSource(vs)}
+`)
+}
+
+const fs=gl.createShader(gl.FRAGMENT_SHADER)
+gl.shaderSource(fs, fss)
+gl.compileShader(fs)
+if(!gl.getShaderParameter(fs, gl.COMPILE_STATUS)){
+showError(`fragment error ${gl.getShaderInfoLog(fs)}
+${gl.getShaderSource(fs)}
+`)
+}
+
+
+const prog=gl.createProgram();
+gl.attachShader(prog, vs);
+gl.attachShader(prog, fs);
+
+gl.linkProgram(prog);
+if(!gl.getProgramParameter(prog, gl.LINK_STATUS)){
+showError(`${gl.getProgramInfoLog(prog)}`)
+}
+
+gl.useProgram(prog);
+
+gl.validateProgram(prog);
+if(!gl.getProgramParameter(prog, gl.VALIDATE_STATUS)){
+showError(`${gl.getProgramInfoLog(prog)}`)
+}
+
+return prog;
+}
+
+
+class Program{
+constructor(gl, vss, fss){
+this.ID=makeProgram(gl, vss, fss);
+
+this.ID.loc={
+u:{},
+a:{}
+};
+
+}
+
+Bind(){
+gl.useProgram(this.ID);
+}
+
+Unbind(){
+gl.useProgram(null);
+}
+
+Delete(){
+gl.deleteProgram(this.ID);
+}
+
+SetUniform1(name, value){
+gl.uniform1f(Program.GetUniformLocation(this.ID, this.ID.loc.u, name), value);
+}
+
+SetUniform2(name, value){
+gl.uniform2fv(Program.GetUniformLocation(this.ID, this.ID.loc.u, name), value);
+}
+
+SetUniform3(name, value){
+gl.uniform3fv(Program.GetUniformLocation(this.ID, this.ID.loc.u, name), value);
+}
+
+SetUniform4(name, value){
+gl.uniform4fv(Program.GetUniformLocation(this.ID, this.ID.loc.u, name), value);
+}
+
+static GetUniformLocation(prog, u, name){
+
+let result = !u[name] ? gl.getUniformLocation(prog, name): u[name];
+u[name] = result;
+return result;
+
+}
+
+}
+
+
+class Texture{
+constructor(imgData){
+this.ID= gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, this.ID);
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, !0)
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, imgData)
+
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+gl.bindTexture(gl.TEXTURE_2D, null)
+
+}
+
+Bind(){
+gl.bindTexture(gl.TEXTURE_2D, this.ID);
+}
+
+Unbind(){
+gl.bindTexture(gl.TEXTURE_2D, null);
+}
+
+Delete(){
+gl.deleteTexture(this.ID);
+}
+
+
+}
+
+
+
+class VA{
+constructor(){
+this.ID=gl.createVertexArray()
+}
+
+Bind(){
+gl.bindVertexArray(this.ID);
+}
+
+Unbind(){
+gl.bindVertexArray(null);
+}
+
+Delete(){
+gl.deleteVertexArray(this.ID);
+}
+
+LinkAttrib( layoutLocation=0, numberOfComponents=3, type=gl.FLOAT, normalize=!1, stride=0, offset=0){
+
+gl.enableVertexAttribArray(layoutLocation);
+gl.vertexAttribPointer(layoutLocation, numberOfComponents, type, normalize, stride, offset);
+
+}
+
+}
+
+
+class VB{
+constructor(Data){
+this.ID=gl.createBuffer()
+gl.bindBuffer(gl.ARRAY_BUFFER, this.ID);
+gl.bufferData(gl.ARRAY_BUFFER, Data, gl.STATIC_DRAW);
+
+}
+
+Bind(){
+gl.bindBuffer(gl.ARRAY_BUFFER, this.ID);
+}
+
+Unbind(){
+gl.bindBuffer(gl.ARRAY_BUFFER, null);
+}
+
+Delete(){
+gl.deleteBuffer(this.ID);
+}
+
+
+}
+
+
+class IB{
+constructor(Data){
+this.ID=gl.createBuffer()
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ID);
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, Data, gl.STATIC_DRAW);
+
+}
+
+Bind(){
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ID);
+}
+
+Unbind(){
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+}
+
+Delete(){
+gl.deleteBuffer(this.ID);
+}
+
+
+}
+
+
+
+
+class Material{
+constructor(){
+this.Program=new Program(gl, shaderSource.simple.vertex, shaderSource.simple.fragment)
+this.drawMethod = gl.TRIANGLES;
+
+this.Ambient=[0.0, 0.0, 0.5, 1.0]
+this.Diffuse=[0.0, 1.0, 0.5, 1.0]
+this.Specular=[1.0, 0.0, 0.5, 1.0]
+this.Shininess=1.0;
+
+this.color=[1.0, 0.0, 0.0, 1.0]
+}
+
+
+}
+
+class Geometry{
+constructor(){
+
+this.verticies=new Float32Array([
+  0.0,   0.5, 1.0, 0.0, 0.0, 1.0,
+ -0.5,  -0.5, 0.0, 0.0, 1.0, 1.0,
+  0.5,  -0.5, 0.0, 1.0, 0.0, 1.0,
+
+]);
+
+this.verticies2=new Float32Array([
+  0.0,   0.5,
+ -0.5,  -0.5,
+  0.5,  -0.5,
+
+]);
+
+
+this.indices=new Uint8Array([]);
+
+this.vbo=new VB(this.verticies)
+
+//showError(this.vbo)
+//this.ibo=new IB(this.indices)
+}
+
+
+}
+
+
+class Mesh{
+constructor(material, geometry){
+this.material = material;
+this.geometry = geometry;
+
+
+this.Position= [0, 0]
+}
+
+
+render(){
+this.material.Program.Bind();
+
+gl.drawElements(this.material.drawMethod, this.geometry.indices.length, gl.UNSIGNED_BYTE, 0)
+}
+
+
+}
+
+
+class Mesh2{
+constructor(material, geometry){
+this.material = material;
+this.geometry = geometry;
+
+
+this.Position= [0, -0.5]
+
+this.Scale= [1, 1]
+this.Rotation= [0, 0, 0]
+this.Vao=new VA()
+
+this.#Bind()
+
+}
+
+#Bind(){
+
+this.Vao.Bind()
+this.geometry.vbo.Bind()
+
+
+this.Vao.LinkAttrib(0, 2, gl.FLOAT, false, 6 * 4, 0 * 4)
+this.Vao.LinkAttrib(1, 4, gl.FLOAT, false, 6 * 4, 2 * 4)
+//Ebo1.Bind()
+
+
+}
+
+
+render(){
+
+this.material.Program.Bind();
+this.Vao.Bind()
+
+this.material.Program.SetUniform2("uOffset", this.Position);
+
+gl.drawArrays(this.material.drawMethod, 0, 3)
+
+//gl.drawElements(this.material.drawMethod, this.geometry.indices.length, gl.UNSIGNED_BYTE, 0)
+//showError("drawin")
+
+}
+
+
+}
+
+
+class Scene{
+constructor(){
+this.childrens=[]
+
+}
+
+add(...args){
+this.childrens.push(...args)
+}
+
+render(){
+
+
+this.childrens.forEach((child)=>{
+child.render()
+})
+
+}
+
+
+}
+
+class Renderer{
+constructor(width, height){
+this.width=width;
+this.height=height;
+this.Color=[0.9, 0.9, 0.9, 1.0];
+}
+
+Clear(){
+
+gl.viewport(0, 0, this.width, this.height);
+gl.clearColor(...this.Color);
+gl.clear(gl.COLOR_BUFFER_BIT );
+
+}
+
+render(scene){
+
+
+scene.render()
+
+}
+
+
+}
+
+
+
+
+
+
+
+const INIT=()=>{
+
+const width=360, height=360;
+
+gl.canvas.width=width;
+gl.canvas.height=height;
+
+
+showError(gl)
+
+const vss=`#version 300 es
+precision mediump float;
+layout (location=0) in vec4 aPos;
+layout (location=1) in vec4 aColor;
+
+
+out vec4 vColor;
+
+void main(){
+gl_Position = aPos;
+gl_PointSize = 12.0;
+
+vColor = aColor;
+}
+`
+
+const fss=`#version 300 es
+precision mediump float;
+layout (location=0) out vec4 FragColor;
+
+
+in vec4 vColor;
+
+void main(){
+FragColor = vColor;
+}
+`
+
+const prog =  makeProgram(gl, vss, fss)
+
+
+const _randerer = new Renderer(width, height);
+
+let numODot=1;
+
+const verticies=[
+0, 0, 1, 0, 1
+];
+
+
+showError(verticies)
+
+const vbo = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, vbo)
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verticies), gl.STATIC_DRAW)
+
+
+
+gl.enableVertexAttribArray(0)
+gl.vertexAttribPointer(0,2, gl.FLOAT, false, 5 * 4, 0 * 4)
+
+gl.enableVertexAttribArray(1)
+gl.vertexAttribPointer(1,3, gl.FLOAT, false, 5 * 4, 2 * 4)
+
+
+
+const update=()=>{
+
+gl.useProgram(prog);
+
+gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+
+gl.drawArrays(0, 0, numODot)
+
+}
+
+
+
+gl.enable(gl.BELND);
+gl.blendFunc(gl.BLEND_SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+
+
+
+const animate=(dt)=>{
+
+// clearing canvas
+_randerer.Clear()
+
+update();
+
+}
+
+
+
+
+
+
+
+let lastTime =0; // performance.now();
+
+const loop=(ts=0)=>{
+
+let dt = ts - lastTime;
+lastTime = ts;
+
+//showError(dt);
+animate(dt);
+
+requestAnimationFrame(loop)
+
+}
+
+requestAnimationFrame(loop)
+
+
+
+
+gl.canvas.addEventListener("touchmove", (e)=>{
+
+numODot += 1;
+
+let idk_x=((e.offsetX ?? e.touches[0].pageX) / width) * 2 - 1;
+let idk_y=((e.offsetY ?? e.touches[0].pageY) / height) * 2 - 1;
+//let arr = new Float32Array([idk_x, idk_y])
+//verticies.at(...arr);\
+let Color_Arr = [Rand.Float(), Rand.Float(), Rand.Float()];
+verticies.push(idk_x, idk_y < 0? abs(idk_y):-idk_y, ...Color_Arr);
+//let arr_verticies =new Float32Array([idk_x, idk_y < 0? abs(idk_y):-idk_y, ...Color_Arr]);
+
+//verticies[verticies.length/2 + 2] = idk_y;
+
+
+//showError(verticies.getLength)
+//showError(verticies)
+//gl.bindBuffer(gl.ARRAY_BUFFER, vbo)
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verticies), gl.STATIC_DRAW)
+//gl.bufferSubData(gl.ARRAY_BUFFER, arr_verticies.byteLength, arr_verticies)
+
+
+let result1 = gl.getParameter(gl.ARRAY_BUFFER)
+showError(result1);
+
+let result2 = gl.getBufferParameter(gl.ARRAY_BUFFER, gl.BUFFER_USAGE)
+showError(result2);
+
+let result3 = gl.getBufferParameter(gl.ARRAY_BUFFER, gl.BUFFER_SIZE)
+showError(result3);
+
+let result4 = gl.getBufferSubData(gl.ARRAY_BUFFER, gl.BUFFER_SIZE)
+showError(result4);
+
+//showError(arr_verticies)
+
+showGlError(35044)
+
+})
+
+
+}
+
+
+
+
+
+
+
+window.addEventListener("load", ()=>{
+
+try{
+
+
+INIT();
+
+
+showError("js is awesome".toUpperCase());
+
+
+}catch(e){
+showError(e);
+}
+
+});
+
+
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title> js Promise 1</title>
+
+<meta name="author" content="BhowmickByte">
+
+<meta name="viewport"
+content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=10.0">
+
+
+
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+
+html{
+font-size:10px;
+}
+
+
+body{
+width:100vw; height:100vh;
+}
+
+
+main{
+width:100%; height:100%;
+background:#000;
+display:grid;
+place-items:center;
+}
+
+canvas{
+background:transparent;
+}
+
+.res{
+display:none!important;
+}
+
+</style>
+
+
+</head>
+<body>
+
+<main id="main">
+
+<canvas id="canvas"></canvas>
+
+<div class="res">
+<!-- <img src="/storage/emulated/0/Download/Zelda2.png" alt="zelda" id=img1 /> -->
+</div>
+
+</main>
+
+
+
+
+<script type="module">
+
+
+
+
+
+
+
+
+const app=async()=>{
+
+
+
+
+
+
+let _freeTime=12;
+
+let a= async() => new Promise((resolve,reject)=>{
+const image=new Image();
+image.src="/storage/emulated/0/Download/Zelda2.png";
+image.onload = resolve(image)
+//ans>=_freeTime?resolve():reject();
+})
+
+let b=await a()
+console.log( b)
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+window.addEventListener("load", (event) =>{
+
+app();
+
+
+});
+
+
+
+</script>
+
+</body>
+</html>

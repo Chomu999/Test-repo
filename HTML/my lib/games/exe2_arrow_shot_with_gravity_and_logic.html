@@ -1,0 +1,754 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>HTML CANVAS GAME BOI</title>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+#main-box{
+margin:0;
+padding:0;
+background-color:#45000E;
+}
+
+
+#screen-leyar{
+margin:0;
+padding:0;
+width:390px;
+height:390px;
+position:absolute;
+top:1.545500000000004px;
+left:1.545500000000004px;
+background-color:transparent;
+
+box-shadow:0px 0px 80px 0.04px #0700B4;
+
+}
+
+#traget{
+margin:0px;padding:0;
+position:absolute;
+width:8px;height:8px;
+background:#FF00A7;
+border-radius:50%;
+}
+
+
+
+
+
+
+#btns_leyar{
+
+width:300px;
+height:300px;
+position:fixed;
+top:420px;
+left:46.545500000000004px;
+display:grid;
+grid-template-columns: repeat(3, 1fr);
+grid-template-rows: repeat(3, 1fr);
+grid-gap:4px;
+}
+
+
+.btnstyle{
+
+
+
+margin:0;
+padding:0;
+background-color:#0A00FF;
+
+box-shadow:0px 0px 8px 1px #0700B4;
+
+transition:0.250s;
+}
+
+.btnstyle:active{
+background-color:#00B7FF;
+}
+
+
+
+
+</style>
+
+</head>
+
+<body>
+
+
+<div id="main-box">
+<div id="screen-leyar">
+
+<canvas class="cvs"></canvas>
+
+</div>
+
+
+<div id="btns_leyar">
+
+<div id="btn_slort-1" class="btnSlort"></div>
+<div id="btn_slort-2" class="btnSlort"></div>
+<div id="btn_slort-3" class="btnSlort"></div>
+<div id="btn_slort-4" class="btnSlort"></div>
+<div id="btn_slort-5" class="btnSlort"></div>
+<div id="btn_slort-6" class="btnSlort"></div>
+<div id="btn_slort-7" class="btnSlort"></div>
+<div id="btn_slort-8" class="btnSlort"></div>
+<div id="btn_slort-9" class="btnSlort"></div>
+
+</div>
+
+
+
+
+<div id="traget"></div>
+</div>
+
+<script>
+
+
+let main=document.getElementById('main-box')
+
+let traget=document.getElementById('traget')
+
+let btn2=document.getElementById('btn_slort-2')
+
+
+let btn4=document.getElementById('btn_slort-4')
+
+
+let btn6=document.getElementById('btn_slort-6')
+
+let btn8=document.getElementById('btn_slort-8')
+
+
+
+
+
+let cvs=document.querySelector('canvas');
+let ctx = cvs.getContext('2d');
+
+const body=document.body;
+
+btt='btnstyle'
+
+function btnstyle(){
+
+btn2.classList.add(btt);
+
+btn4.classList.add(btt);
+btn6.classList.add(btt);
+
+btn8.classList.add(btt);
+
+}
+btnstyle()
+
+
+const mainW=window.innerWidth;
+const mainH=window.innerHeight;
+
+
+
+
+
+main.style.width=mainW
+main.style.height=mainH
+
+
+/*
+body.addEventListener('mouseenter', () => {
+console.log('clicked work')
+})
+
+
+body.addEventListener('mouseout', () => {
+console.log('clicked not work')
+})
+*/
+
+
+
+let cvsW=390
+let cvsH=390
+
+//console.log((393.091-390)/2)
+
+cvs.width=cvsW;
+cvs.height=cvsH;
+
+
+let cls='class'
+
+
+
+
+
+//buttonWork()
+
+const clk='click';
+
+
+
+class Player{
+constructor(x, y, radius, color){
+this.x=x
+this.y=y
+this.radius=radius
+this.color=color
+}
+draw(){
+ctx.beginPath()
+ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
+ctx.fillStyle=this.color
+ctx.fill()
+}
+}
+
+
+
+let gravity=0.05;
+
+class ARROW{
+constructor(x,y,radius,color,velocity){
+this.x=x
+this.y=y
+this.radius=radius
+this.color=color
+this.velocity=velocity
+}
+draw(){
+ctx.beginPath()
+ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
+ctx.fillStyle=this.color
+ctx.fill()
+}
+update(){
+this.draw()
+this.x += this.velocity.x
+this.y += this.velocity.y
+
+
+/*
+
+if(this.y + this.radius + this.velocity.y <= cvs.height){
+
+this.velocity.y += gravity
+//this.velocity.x -= 0.05
+}
+
+else{
+this.velocity.y = 0
+this.velocity.x = 0
+}
+
+
+
+//else{this.velocity.y = 0}
+
+*/
+
+}
+
+
+}
+
+
+class ARROW5{
+constructor(x,y,radius,color,velocity){
+this.x=x
+this.y=y
+this.radius=radius
+this.color=color
+this.velocity=velocity
+}
+draw(){
+ctx.beginPath()
+ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
+ctx.fillStyle=this.color
+ctx.fill()
+}
+update(){
+this.draw()
+this.x += this.velocity.x
+this.y += this.velocity.y
+
+
+
+
+if(this.y + this.radius + this.velocity.y <= cvs.height){
+
+this.velocity.y += gravity
+//this.velocity.x -= 0.05
+}
+
+else{
+this.velocity.y = 0
+this.velocity.x = 0
+}
+
+
+
+//else{this.velocity.y = 0}
+
+
+
+}
+
+}
+
+
+
+
+
+class Mario{
+constructor(width,height,color){
+this.position={x: 0, y: 0}
+this.velocity={x: 0, y: 0}
+this.width=width
+this.height=height
+this.color=color
+}
+
+draw(){
+ctx.fillStyle=this.color
+ctx.fillRect(this.position.x, this.position.y,this.width,this.height)
+}
+
+update(){
+this.draw()
+
+this.position.x += this.velocity.x
+this.position.y += this.velocity.y
+
+if(this.position.y + this.height + this.velocity.y <= cvs.height ){
+this.velocity.y += gravity
+}
+else{this.velocity.y = 0}
+}
+}
+
+
+
+
+
+
+
+plyX=cvsW/2
+plyY=cvsH/2
+
+
+const player = new Player(plyX, plyY, 30, 'red')
+
+//let arrow1=new ARROW(player/2,player/2,3,'blue',{x: 0,y: 0})
+
+//arrow1.update()
+
+
+
+
+let steps=4
+
+
+
+//player up ↓
+function player_UP(){
+mario.velocity.y -= steps*2
+
+}
+
+
+
+//player down ↓
+function player_DOWN(){
+mario.velocity.y += steps;
+
+}
+
+
+
+//player left ↓
+function player_LEFT(){
+mario.velocity.x -= steps;
+
+}
+
+
+
+//player right ↓
+function player_RIGHT(){
+mario.velocity.x += steps;
+
+}
+
+
+
+function salry(){
+
+let ss=prompt('what is yor salry ? per month');
+
+let a=ss;
+let b=a*12;
+let c=b/12;
+let d=c/30;
+let e=d/24;
+let f=e/60;
+
+let allInfo=`so you earn per year ${b}\n and your per month salry is ${c}\n and your per day salry is ${d}\n   and your per hour salry is ${e}\n  and your per minute salry is ${f}`;
+
+console.log(allInfo)
+
+console.log(`lol9 ${f*60}`)
+
+}
+//salry()
+
+
+let arrows2=[]
+
+
+
+
+let arrow1,arrow2,arrow3,arrow4,arrow5,arrow6,arrow7,arrow8,arrow9
+let mario;
+
+
+
+
+mario=new Mario(30,30,'#FF00A7')
+
+
+arrow5=new ARROW5(plyX,plyY,4,'green',{x:0,y:0})
+
+
+
+
+/*
+setInterval(()=>{
+
+arrows3=new ARROW(plyX,plyY,4,'blue',{x:2,y:1})
+
+
+
+},100)
+
+*/
+
+
+function gameLoop(){
+window.requestAnimationFrame(gameLoop);
+
+ctx.clearRect(0,0,cvsW,cvsH);
+
+player.draw()
+
+
+mario.update()
+
+arrow5.update()
+
+
+
+/*
+arrows2.forEach((arrow)=>{
+arrow.update()
+})
+
+*/
+
+//enemy.update()
+
+
+//console.log(player.position.x)
+
+
+
+
+
+
+}
+
+
+
+cvs.addEventListener('click', (e) => {
+
+
+//let x=e.x/1000
+//let y=e.y/1000
+
+
+
+
+
+
+
+
+
+
+
+
+
+traget.style.top=e.y;
+traget.style.left=e.x;
+
+
+
+
+let angle=Math.atan2(e.y - cvsH / 2,e.x - cvsW /2)
+
+let velocity = {
+x: Math.cos(angle),
+y: Math.sin(angle)
+}
+
+
+
+mario=new Mario(30,30,'#0044FF')
+
+
+
+arrow5=new ARROW5(plyX,plyY,4,'green',velocity)
+
+
+
+
+
+
+
+
+
+
+mario.update()
+
+arrow5.update()
+
+//arrow2.update()
+//arrow1.update()
+//arrow3.update()
+//arrow4.update()
+//arrow5.update()
+//arrow6.update()
+//arrow7.update()
+//arrow8.update()
+//arrow9.update()
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+//let a= e.y - cvsH /2, e.x - cvsW /2
+let b=Math.atan2(e.y - cvsH /2, e.x - cvsW /2);
+let vol={
+x: Math.cos(b),
+y: Math.sin(b)}
+
+console.log(Math.cos(b),Math.sin(b))
+
+arrows.push(new ARROW(
+    plyX,
+    plyY,
+    4,
+    'blue',
+    vol
+    ))
+
+*/
+
+/*
+
+let angle=Math.atan2(e.y - cvsH / 2,e.x - cvsW /2)
+
+let velocity = {
+    x: Math.cos(angle),
+    y: Math.sin(angle)
+}
+
+
+arrows.push(new ARROW(
+    plyX,
+    plyY,
+    'blue',
+    velocity
+    ))
+*/
+
+
+
+
+
+
+})
+
+
+let btnCode=0;
+
+
+btn2.addEventListener('click',()=>{
+
+btnCode = 87
+
+switch (btnCode){
+
+case 65:
+console.log('left')
+player_LEFT()
+break
+
+case 83:
+console.log('down')
+player_DOWN()
+break
+
+case 68:
+console.log('right')
+player_RIGHT()
+break
+
+case 87:
+console.log('up')
+player_UP()
+break
+
+
+}
+
+
+
+
+})
+
+
+
+btn4.addEventListener('click',()=>{
+
+btnCode = 65
+
+switch (btnCode){
+
+case 65:
+console.log('left')
+player_LEFT()
+break
+
+case 83:
+console.log('down')
+player_DOWN()
+break
+
+case 68:
+console.log('right')
+player_RIGHT()
+break
+
+case 87:
+console.log('up')
+player_UP()
+break
+
+
+}
+
+
+
+
+})
+
+btn6.addEventListener('click',()=>{
+
+btnCode = 68
+
+switch (btnCode){
+
+case 65:
+console.log('left')
+player_LEFT()
+break
+
+case 83:
+console.log('down')
+player_DOWN()
+break
+
+case 68:
+console.log('right')
+player_RIGHT()
+break
+
+case 87:
+console.log('up')
+player_UP()
+break
+
+
+}
+
+
+
+
+})
+
+btn8.addEventListener('click',()=>{
+
+btnCode = 83
+
+switch (btnCode){
+
+case 65:
+console.log('left')
+player_LEFT()
+break
+
+case 83:
+console.log('down')
+player_DOWN()
+break
+
+case 68:
+console.log('right')
+player_RIGHT()
+break
+
+case 87:
+console.log('up')
+player_UP()
+break
+
+
+}
+
+
+
+
+})
+
+
+gameLoop()
+
+
+
+</script>
+
+
+</body>
+</html>

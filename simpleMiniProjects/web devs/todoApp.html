@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<meta name="author" content="billbyte"/>
+<title>ToDo App dev </title>
+
+<style>
+
+
+
+*{
+margin: 0;
+padding: 0;
+box-sizing:border-box;
+}
+
+
+
+html{
+font-size: 10px;
+}
+
+a{
+text-decoration: none;
+}
+
+li{
+list-style:none;
+}
+
+
+
+
+main{
+width:100%;
+
+display:grid;
+place-items:center;
+gap:2rem;
+/* background: #3e3e3e; */
+
+}
+
+.Containers{
+width:100%;
+height: 22rem;
+border: 2px solid black;
+background: #969696;
+overflow: hidden auto;
+}
+
+ul.todolist > li{
+margin: 2rem 2rem;
+padding:2rem;
+line-height: 2rem;
+color: #000FFF;
+background: #80FF00;
+font-size: 3rem;
+}
+
+.dragS1{
+background: #FF00B7;
+opacity: 0.5;
+}
+
+</style>
+
+</head>
+<body>
+
+
+<main id="mainElement">
+
+<div class="Containers Container1" dropzone="true">
+
+<ul class="todolist">
+
+<li>hi1</li>
+<li>hi2</li>
+
+</ul>
+
+</div>
+<!-- -->
+<div class="Containers Container2">
+
+<textarea required id="todoText" rows="8" cols="40"></textarea>
+
+</div>
+
+<div class="Containers Container3">
+
+<button id="saveBTN">save TODO</button>
+</div>
+
+
+</main>
+
+<script>
+
+//const canvas=document.querySelector("canvas");
+//const gl=canvas.getContext("webgl2");
+
+
+
+
+
+
+
+
+const App=()=>{
+
+const todolistContainer=document.querySelector(".todolist")
+
+
+
+
+
+function saveToDo(text){
+todolistContainer.innerHTML+=`<li>${text}</li>`
+}
+
+function editToDo(text){
+todoText.value=text
+}
+
+
+
+
+
+
+saveBTN.addEventListener("click", (e)=>{
+
+if(!todoText.value) return;
+saveToDo(todoText.value);
+todoText.value=""
+
+})
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+window.addEventListener("load", ()=>{
+
+try{
+
+App();
+
+}catch(error){
+console.error(error);
+}
+
+});
+
+
+
+console.error("js is awesome");
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+:root{
+
+
+}
+
+
+html{
+font-size:10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style: none;
+}
+
+
+body{
+color-scheme: default;
+background: #353535;
+display: grid;
+place-items: center;
+}
+
+
+
+
+
+
+.wrapper{
+margin:1rem auto;
+padding:1rem;
+width: min(39rem, 100% - 1rem);
+background: #9400FF23;
+border-radius:2rem;
+border: .3rem solid #DADDDD;
+}
+
+.appContainer{
+position: relative;
+height: min( 100svh - 2rem, 100dvh - 2rem);
+overflow: hidden auto;
+background: #50687533;
+color: #EEEEEE;
+}
+
+
+.appContainer:before, .appContainer:after{
+content: '';
+position: absolute;
+width: 26rem;
+aspect-ratio: 1;
+rotate: 160deg;
+border-radius: 50%;
+box-shadow: 
+inset 0 0 20rem 1rem,
+0 0 20rem 1rem ;
+/* animation: ani 99s ease-in-out infinite; */
+z-index: -1;
+
+}
+
+.appContainer:before{
+--tragetY:60rem;
+bottom: 20rem;
+right: -9rem;
+background: linear-gradient(-45deg, #004FFF, orangered);
+}
+
+
+
+.appContainer:after{
+--tragetY:-60rem;
+top: 20rem;
+left: -9rem;
+background: linear-gradient(45deg, #A7FF4E, #FF005D);
+}
+
+.appContainer:hover{
+background: #2211;
+/* transform: translate(0, 30rem); */
+}
+
+
+.appMain{
+aspect-ratio: 2/4;
+background: #0001;
+backdrop-filter: blur(.8rem);
+color: #D0D0D0;
+z-index: 1000;
+}
+
+
+
+/* expairement */
+.appMain *{
+backdrop-filter: inherit;
+background: inherit;
+}
+
+
+.appTitle{
+margin: 1rem;
+padding: 1rem;
+font-size: 2rem;
+text-align: center;
+text-transform: capitalize;
+border-radius:9rem;
+}
+
+
+/* text container code section*/
+
+.imageContainer{
+aspect-ratio: 2/1;
+overflow:hidden auto;
+font-size: 2rem;
+text-transform: capitalize;
+}
+
+.imageContainer .images{
+margin: 0.3rem;
+padding: 0.2rem 0.6rem;
+width: 50%;
+
+display: inline-block;
+
+border: 0.3rem solid ;
+border-radius: 2rem;
+}
+
+
+
+/*any type of user Input container code section*/
+
+
+.inputContainer{
+aspect-ratio: 2;
+text-align: center;
+overflow: auto;
+}
+
+.inputContainer .inputs{
+padding: 1rem;
+margin: auto;
+display: inline-block;
+
+width: 100%;
+/* height: 20rem; */
+
+border: none;
+outline: none;
+border-radius: 2rem;
+  
+}
+
+/* button container code section*/
+
+.btnContainer{
+aspect-ratio: 2;
+overflow: hidden;
+text-align: center;
+align-items: space-around;
+}
+
+
+.btnContainer .btns{
+/* margin: 0 1rem; */
+padding: 1rem 2rem;
+display:inline-block;
+/* color: lime; */
+font-size: 2rem;
+text-transform: capitalize;
+border-radius: 2rem;
+}
+
+
+
+
+
+
+
+
+/*animation keys*/
+
+@keyframes ani{
+
+0%,100%{
+transform: translate(0, 0);
+}
+
+50%{
+transform: translate(0, var(--tragetY) );
+}
+
+}
+
+
+</style>
+
+<title>practice 3</title>
+
+
+
+<script  src="/storage/emulated/0/g_js_libs/tf.min.js"></script>
+
+
+</head>
+
+<body>
+
+
+
+<main class="wrapper appContainer">
+
+
+<div class="wrapper appMain">
+
+
+
+<div class="wrapper">
+  <h1 class="appTitle"> ISR M0del</h1>
+</div>
+
+
+<div class="wrapper imageContainer">
+
+<img class="images img1" src="/storage/emulated/0/Download/Zelda2.png" alt="abc" />
+
+</div>
+
+<div class="wrapper inputContainer">
+
+<!-- <input type="text" class="inputs textInput" value="a hello gu" /> -->
+<input type="file" class="inputs imageInput" />
+
+</div>
+
+
+<div class="wrapper btnContainer">
+<span class="btns trainBtn">train</span>
+<span class="btns enhanceBtn">enhance image </span>
+
+</div>
+
+
+</div>
+
+
+</main>
+
+
+<script>
+"use strict";
+
+
+
+//
+const strToHtml=(html)=>{
+const element = document.createElement("div");
+element.innerHTML = html;
+return  element.firstElementChild??undefined;
+}
+
+//sleep function helps to hold up workflow
+const sleep=async (t=1) => new Promise( res => setTimeout( () => res(true), t*1000) );
+
+
+const addImage=(text)=>{
+
+
+const canvas = document.createElement("canvas");
+const ctx =  canvas.getContext("2d");
+
+const imageContainer=document.querySelector(".imageContainer");
+if (!imageContainer) return;
+const imgEl = new Image();
+
+imgEl.alt = "my image";
+imgEl.src = "hfj";
+
+imgEl.classList.add("images");
+imageContainer.appendChild(imgEl);
+
+}
+
+
+//input encoded Text aka array 0f numbers and output string
+const decodeImage=async()=>{
+encodedTextArr.map(i=> String.fromCodePoint(i)).join("")??"err at decodeText function";
+}
+
+//input normal text aka string and output array of numbers aka encode Text
+const encodeImage= async () =>{
+text.split("").map(i=>i.charCodeAt())??"err at encodeText function";
+}
+
+
+
+const loadDataSet=async()=>{
+
+
+}
+
+
+
+// INITIAL point aka starting point
+const INITIAL = async ()=>{
+
+const trainBtn = document.querySelector(".trainBtn");
+const enhanceBtn = document.querySelector(".enhanceBtn");
+
+
+const model = tf.sequential();
+
+model.add(tf.layers.conv2d({
+filters:64,
+inputShape:[null,null, 3],
+kernelSize:3,
+activation:"relu",
+}));
+
+
+model.add(tf.layers.conv2d({
+filters:128,
+kernelSize:3,
+activation:"relu",
+}));
+
+model.add(tf.layers.conv2dTranspose({
+filters:3,
+kernelSize:3,
+strides:3,
+activation:"tanh",
+}));
+
+
+const myOptimizer ="adam";
+
+const myLoss ="meanSquaredError";
+//const myLoss ="categoricalCrossentropy";
+
+model.compile({loss:myLoss, optimizer:myOptimizer });
+
+model.summary()
+
+
+
+
+
+
+const trainModel=async()=>{
+
+
+return ;
+
+console.log("train start...");
+await model.fit(xtds, xtds, {
+  epochs:100,
+  batchSize:32,
+  callbacks: {
+    onEpochEnd: (epoch, logs) => {
+      console.log(`number of epoch ${epoch}    loss = ${logs.loss}`);
+    },
+  },
+});
+
+console.log("train end...");
+}
+
+
+const enhanceImage=async()=>{
+
+const textInputValue =  document.querySelector(".textInput").value??"null";
+
+
+
+const inputTensor = tf.tensor(
+[...encodeTextValue],
+[encodeTextValue.length, 1, 1]
+);
+console.log(inputTensor);
+inputTensor.print()
+//return;
+
+const out =  model.predict(inputTensor).abs().floor();
+
+out.print();
+
+return;
+
+const encodedTextArr = await out.array();
+
+
+//console.log(encodedTextArr.flat());
+//return;
+
+const finalResult = await decodeText(encodedTextArr);
+
+addText(finalResult);
+
+
+
+
+//const inputTensor = tf.randomNormal([
+//60, 1,1
+//]);
+
+
+//const text = "hi hello guu khalo".split(" ");
+//for(const i of text){
+//addText(i);
+//}
+
+
+}
+
+
+
+
+trainBtn.addEventListener("click", trainModel)
+
+
+enhanceBtn.addEventListener("click", enhanceImage)
+
+
+
+}
+
+
+
+
+
+
+try{
+
+console.log("JS is Awesome")
+
+if(tf){
+console.log(window);
+console.log(tf);
+
+console.log(tf.layers);
+console.log(tf.image);
+console.log(tf.browser);
+
+//let img1 = document.querySelector(".img1");
+//console.log(img1)
+
+//let idk1 = tf.browser.fromPixels(img1);
+//console.log(idk1)
+
+
+//let idk2 = tf.image.resizeBilinear(idk1);
+//console.log(idk2);
+
+
+
+INITIAL();
+
+}
+
+}catch(e){
+console.log(`JavaScript uncatch error : ${e.stack}`);
+}
+
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>random Color gen</title>
+<style>
+*{
+margin:0;padding:0;box-sizing:border-box;
+}
+
+
+
+.itemCenter{
+display:flex;
+justify-content:center;
+align-items:center;
+
+}
+
+
+
+.grid-two-columns{
+display:grid;
+grid-template-columns:1fr 1fr;
+}
+
+.grid-rows{
+display:grid;
+grid-template-rows:0.5fr 10fr 0.5fr;
+grid-template-columns:0.5fr 10fr 0.5fr;
+grid-gap:20px;
+
+}
+
+
+
+
+/* header styling start */
+
+
+
+
+/* 
+position:fixed;
+grid-column:1/2;
+grid-row:1/2;
+border:none;
+border-bottom:2px solid black;
+}
+ */
+
+
+
+
+
+
+
+
+header{
+width:100%;
+height:60px;
+
+background:rgba(0,0,0,0.2);
+}
+
+header .logo{
+background:#5F9FFF;
+}
+
+header nav ul{
+display:flex;
+padding:0 3px;
+justify-content:space-beetwen;
+align-items:center;
+}
+
+
+header nav ul li{
+padding:0 10px;
+background: #93F1FF;
+display:inline-block;
+text-transform:capitalize;
+font-size:15px;
+}
+
+main{
+width:100%;
+height:100%;
+background:#FFC5F1;
+
+}
+
+main .contentBox{
+width:90%;
+height:80%;
+background:rgba(0,0,0,0.08);
+background:rgba(194,84,20,0.48);
+box-shadow:2px 2px 10px 1px black;
+border-radius:10px;
+}
+
+main .contentBox button{
+margin:auto;
+padding:10px 10px;
+color:red;
+background:black;
+text-transform:capitalize;
+font-size:30px;
+background:#FF55BD;
+letter-spacing:2px;
+border:none;
+border-radius:0;
+grid-column:2/3;
+grid-row:1/2;
+}
+
+main .contentBox .innerContentBox{
+
+box-shadow:2px 2px 10px inset black;
+grid-column:1/4;
+grid-row:2/4;
+/* border-radius:20px 20px 0 0; */
+overflow:hidden;
+overflow-y:scroll;
+
+}
+
+.innerColorBox{
+width:100%;height:3000px;
+display:grid;
+grid-template-columns:repeat(4,1fr);
+grid-template-rows:repeat(25,1fr);
+grid-gap:3px;
+/* overflow:hidden; */
+/* overflow-y:scroll; */
+line-height:center;
+text-align:center;
+color:#ff2324;
+}
+
+
+
+
+
+li{
+list-style:none;
+}
+
+
+
+</style>
+</head>
+<body onload="genRandColor()">
+
+<header class="grid-two-columns">
+
+<div class="logo 
+itemCenter">
+<img src="" alt="logo" />
+</div>
+
+<nav class="itemCenter">
+
+<ul>
+    <li><a href="#">home</a></li>
+    <li><a href="#">services</a></li>
+    <li><a href="#">contect</a></li>
+    <li><a href="#">about</a></li>
+</ul>
+
+</nav>
+
+</header>
+
+<main class="itemCenter">
+
+<div class="contentBox grid-rows">
+
+<button class="btns btn1" onclick="genRandColor()">refresh</button>
+
+<div class="innerContentBox">
+
+<div class="innerColorBox">
+
+</div>
+
+</div>
+
+
+
+</div>
+
+
+
+</main>
+
+<footer>
+<p>copyRight c2020 by Biswajit</p>
+<ol>
+<li><a href="#">face book</a></li>
+<li><a href="#">you tube</a></li>
+<li><a href="#">git hub</a></li>
+</ol>
+</footer>
+
+<script>
+let body=document.body;
+//let myBtn = document.querySelector('.');
+
+let colorBox = document.querySelector('.innerColorBox');
+
+
+for(let i=0;i<100;i++){
+
+let c =document.createElement('div');
+c.classList.add(`allColors`)
+c.classList.add(`colour${i}`)
+colorBox.append(c)
+
+
+}
+
+
+//let element=document.querySelectorAll('.allColors')
+
+
+let colorChar='01234567890abcdef';
+let mainColor='';
+
+
+function randomHeXgen(){
+mainColor=''
+
+
+
+for(let i=0;i<6;i++){
+
+
+let r1=Math.floor(Math.random() * colorChar.length);
+
+ mainColor+=colorChar.substring(r1,r1+1);
+
+
+}
+return '#'+mainColor
+}
+
+
+
+function genRandColor(){
+
+
+
+let element=document.querySelectorAll('.allColors');
+
+
+element.forEach((e)=>{
+
+let r2 = randomHeXgen();
+let m2 = randomHeXgen();
+
+
+e.style.backgroundColor=r2;
+e.innerHTML=m2;
+
+})
+
+}
+
+
+//console.log(el[0])
+
+
+
+</script>
+</body>
+</html>

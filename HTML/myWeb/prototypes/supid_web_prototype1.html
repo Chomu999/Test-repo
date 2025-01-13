@@ -1,0 +1,499 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="author" content="Biswsjit Bhowmick" />
+
+<title>HTML CANVAS GAME BOI</title>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+:root{
+--c:#313DFF;
+--borderColor:#BABEFF;
+--praColor:#ABABAB;
+
+--phWidth:393px;
+--phHeight:393px;
+
+
+--pcWidth:1280px;
+--pcHeight:720px;
+
+
+}
+
+
+
+/* reuseble code */
+
+
+
+.grid-two-columns{
+display:grid;
+grid-template-columns:1fr 1fr;
+}
+
+
+.grid-three-columns{
+display:grid;
+grid-template-columns:repeat(3, 1fr);
+}
+
+
+
+.grid-two-columns{
+display:grid;
+grid-template-columns:1fr 1fr;
+}
+
+
+.grid-four-columns{
+display:grid;
+grid-template-columns:repeat(4, 1fr);
+}
+
+
+
+.grid-five-columns{
+display:grid;
+grid-template-columns:repeat(4, 1fr);
+}
+
+
+
+.grid-six-columns{
+display:grid;
+grid-template-columns:repeat(4, 1fr);
+}
+
+
+
+
+
+
+/* main div styling start */
+
+div#mainBox{
+margin:0;padding:0;
+width:100%;
+/* max-width:393px; */
+height:100rem;
+background-color:#D0D0D0;
+display:grid;
+grid-template-columns:1fr;
+grid-template-rows:0.5fr 10fr 0.5fr;
+
+}
+
+
+
+
+/* header styling start */
+
+
+
+
+
+div#header{
+width:100vw;
+background-color:red;
+display:grid;
+grid-template-columns:1fr 3fr;
+grid-template-rows: repeat(1, 1fr);
+
+position:fixed;
+grid-column:1/2;
+grid-row:1/2;
+border:none;
+border-bottom:2px solid black;
+}
+
+div#mainBox div#header div#logo{
+width:3rem;height:3rem;
+background-color:blue;
+}
+
+
+div#mainBox div#header nav{
+
+
+display:flex;
+justify-content:center;
+align-items:center;
+
+}
+
+
+div#mainBox div#header nav ul{
+
+
+}
+
+div#mainBox div#header nav ul li{
+color:var(--c);
+text-transform:capitalize;
+font-size:15px;
+border:2px solid var(--borderColor);
+display:inline-block;
+}
+
+
+
+
+/*contectBox styling start*/
+
+div#contectBox{
+background-color:rgba(0,0,0,0.2);
+grid-column:1/2;
+grid-row:2/3;
+}
+
+
+
+.highLight , i{
+padding:10px 10px;
+text-align:center;
+text-transform:capitalize;
+color:#540068;
+}
+
+
+div#trendingBox, div#todayNews{
+width:100vw;height:100vw;
+overflow-x:scroll;
+}
+
+
+div#innerTrendBox,div#NewsBox{
+padding:0 4rem;
+width:900vw;height:90vw;
+background-color:rgba(0,0,0,0.1);
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+/* gap:3rem; */
+
+}
+
+div#NewsBox{
+width:300vw;
+}
+
+div.items,div.news{
+width:14rem;height:14rem;
+background-color:#4200FF;
+border:0.2rem solid #170052;
+
+
+box-shadow:2px 2px 6px #C8CAC6;
+
+
+/* box-shadow:0 1px 2px 10px red; */
+
+/* display:inline-block; */
+}
+
+
+
+/* jobBox styling start*/
+
+
+div#jobBox{
+width:100vw;
+height:100vw;
+background-color:rgba(255,0,0,0.2);
+}
+
+
+
+
+/* footer styling start */
+
+div#mainBox div#footer{
+width:100vw;height:6rem;
+background-color:red;
+
+display:grid;
+grid-template-columns:1fr;
+grid-template-rows: repeat(2, 1fr);
+
+
+
+grid-column:1/2;
+grid-row:3/4;
+
+
+}
+
+div#footer p{
+
+background-color:blue;
+color:var(--praColor);
+grid-column:1/2;
+grid-row:1/2;
+
+display:flex;
+justify-content:center;
+align-items:center;
+
+
+}
+
+
+div#footer ol{
+background-color:blue;
+grid-column:1/2;
+grid-row:2/3;
+list-style:none;
+
+
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+
+
+div#footer ol li{
+letter-spacing:2px;
+}
+
+
+div#footer ol li a{
+color:#D7FFB0;
+text-decoration:none;
+font-size:20px;
+text-transform:capitalize;
+}
+
+/* 
+
+resbosic
+
+ */
+@media(max-width:39rem;){
+
+
+
+}
+
+
+
+
+
+div#last{
+width:1rem;height:1rem;
+background:tan;
+}
+
+
+</style>
+</head>
+<body>
+
+
+<div id="mainBox">
+
+<div id="header">
+<div id="logo"></div>
+<nav>
+
+<ul>
+    <li>home</li>
+    <li>contect</li>
+    <li>services</li>
+</ul>
+
+</nav>
+
+</div>
+
+
+
+<div id="contectBox">
+
+<p class="highLight">todays news</p>
+<div id="todayNews">
+
+
+
+
+<div id="NewsBox">
+
+<div class="news news1"></div>
+<div class="news news2"></div>
+<div class="news news3"></div>
+
+</div>
+
+</div>
+
+
+
+<p class="highLight">todays trending</p>
+<div id="trendingBox">
+
+<div id="innerTrendBox">
+
+<div class="items item1"></div>
+<div class="items item2"></div>
+<div class="items item3"></div>
+
+<div class="items item4"></div>
+<div class="items item5"></div>
+<div class="items item6"></div>
+
+<div class="items item7"></div>
+<div class="items item8"></div>
+<div class="items item9"></div>
+<div class="items item10"></div>
+
+</div>
+
+</div>
+
+
+<div id="jobBox">
+
+
+
+
+<form id="" action="" method="get" accept-charset="utf-8">
+
+
+<!!--user input -->
+
+<br>
+<br>
+
+<label for="fname">First Name</label>
+<input type="text" name="fname" id="fname" value="" placeholder="Rakesh" />
+<br>
+<label for="sname">Second Name</label>
+<input type="text" name="sname" id="sname" value="" placeholder="Thakur" />
+<br>
+<input type="email" name="Cemail" id="Cemail" value="" placeholder="biswajitbhoi@gmail.com"/>
+<br>
+
+<input type="number" min=10 name="Cnumber" id="Cnumber" value="" placeholder="8207277728"/>
+<br>
+
+<p class="highLight">upload some image</p>
+
+
+<br>
+
+<i>your photo</i>
+<input type="file" name="Cfile" id="Cfile1" value="" />
+<img id="userPhoto" class="formImg" src="" alt=""/>
+<br>
+
+<i>adhhar card</i>
+<input type="file" name="Cfile" id="Cfile2" value="" />
+<img id="userAdhharCard" class="formImg" src="" alt=""/>
+<br>
+
+<i>madhmik marcit</i>
+<input type="file" name="Cfile" id="Cfile3" value="" />
+<img id="userMadhmikMarcit" class="formImg" src="" alt=""/>
+<br>
+
+
+
+<br>
+<hr>
+<input type="submit" name="Csubmit" id="Csubmit" value="submit" />
+<br>
+
+
+
+
+</form>
+
+
+
+<button class="checkForm" onclick="checkForm2();">checkForm</button>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+
+
+
+<div id="footer">
+<p>2022 c copyright</p>
+<ol>
+    <li><a href="#">git hub</a></li>
+    <li><a href="#">you tube</a></li>
+    <li><a href="#">facebook</a></li>
+    <li><a href="#">instagram</a></li>
+</ol>
+
+</div>
+
+</div>
+
+<script>
+
+
+let userPhoto=document.getElementById('Cfile1'),
+userAdhharCard=document.getElementById('Cfile2'),
+userMadhmikMarcit=document.getElementById('Cfile3');
+
+let AllformImg=document.querySelectorAll('.formImg');
+
+let screenSize=300;
+let mainW=360;
+//=innerWidth;
+
+
+//console.log(AllformImg[0])
+
+function checkForm2(){
+AllformImg[0].src='./lol.png'
+AllformImg[1].src=userPhoto.value
+AllformImg[2].src=userPhoto.value
+
+console.log(AllformImg)
+}
+
+
+let l =userAdhharCard;
+
+//.setAttribute('value')
+//setInterval(()=>{
+
+
+//AllformImg[2].src=userAdhharCard.name;
+
+//console.log(l)
+
+
+//},800)
+
+</script>
+<div id="last"></div>
+</body>
+</html>

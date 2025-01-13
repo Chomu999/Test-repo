@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<meta name="author" content="billbyte"/>
+<title>Ray Marching Testing </title>
+
+<style>
+
+
+
+*{
+margin: 0;
+padding: 0;
+box-sizing:border-box;
+/* border: 0.1px solid red; */
+}
+
+
+
+html{
+font-size: 10px;
+}
+
+a{
+text-decoration: none;
+}
+
+li{
+list-style:none;
+}
+
+
+
+
+body{
+/* display:grid; */
+/* grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); */
+/* grid-template-rows: repeat(2, 1fr); */
+/* place-items:center; */
+/* gap: 1rem; */
+background: #3e3e3e;
+
+}
+
+main{
+display: grid;
+/* grid-template-columns: repeat(auto-fil, minmax(30rem, 1fr)); */
+grid-template-rows: repeat(auto-fil, minmax(1fr, 30rem));
+}
+
+canvas{
+margin: auto;
+background:#FF986E;
+}
+
+.control_box{
+background: brown;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+
+.control_box > button{
+padding: 2rem;
+font-size:2rem;
+text-transform: capitalize;
+background: #009AFF;
+border: 0;
+border-radius: 8rem;
+}
+
+.error_box{
+margin: 2rem 0;
+background:transparent;
+overflow:hidden auto;
+}
+
+.title{
+color:#222A3B;
+font-size: 3rem;
+display:block;
+text-align: center;
+text-transform: capitalize;
+background: linear-gradient(45deg,red, blue);
+text-decoration: underline;
+}
+
+.error_box  p{
+margin:0.2rem 1rem;
+padding: 1rem ;
+
+background: #0009;
+color: #FF374E;
+border-radius: 1rem;
+}
+
+
+.hidden{
+display: none;
+}
+
+</style>
+
+<!-- <script src="/storage/emulated/0/g_js_libs/CCapture.all.min.js"></script> -->
+<script src="/storage/emulated/0/g_js_libs/gl-matrix.js"></script>
+
+</head>
+<body>
+
+<main>
+
+<canvas id="canvas"></canvas>
+
+
+
+
+<div class="error_box">
+<span class="title">error and warning</span>
+<pre></pre>
+</div>
+
+</main>
+
+<div class="hidden">
+<img src="/storage/emulated/0/Download/images (7).jpeg" id="img1" />
+<img src="/storage/emulated/0/Download/Zelda2.png" id="img2" />
+<img src="/storage/emulated/0/Download/images (9).jpeg" id="img3" />
+<img src="/storage/emulated/0/Download/images (10).jpeg" id="img4" />
+</div>
+
+<script>
+
+
+
+const {PI, cos, sin, tan, abs} = Math;
+
+
+
+const showError=(msg)=>{
+console.log(msg)
+const errorContainer=document.querySelector(".error_box > pre")
+if(!errorContainer) return -1;
+errorContainer.innerHTML+=`<p>${msg}</p>`;
+}
+
+const showGlError =(ii=0)=>{
+for (let i in gl) if (gl[i] == ii) showError(i)
+}
+
+
+
+const canvas=document.querySelector("canvas");
+
+const gl=canvas.getContext("webgl2");
+
+
+
+
+
+class Rand{
+
+static Float(min=0, max=1){
+return Math.random() * (max - min) + min;
+}
+
+static Int(min=1, max=2){
+return Math.floor(Rand.Float(min, max));
+}
+
+static Choice(...args){
+return args[Rand.Int(0, args.length)];
+}
+
+
+}
+
+
+
+
+
+
+
+const makeProgram=(gl, vss, fss)=>{
+const vs=gl.createShader(gl.VERTEX_SHADER)
+gl.shaderSource(vs, vss)
+gl.compileShader(vs)
+if(!gl.getShaderParameter(vs, gl.COMPILE_STATUS)){
+showError(`vertex error ${gl.getShaderInfoLog(vs)}
+${gl.getShaderSource(vs)}
+`)
+}
+
+const fs=gl.createShader(gl.FRAGMENT_SHADER)
+gl.shaderSource(fs, fss)
+gl.compileShader(fs)
+if(!gl.getShaderParameter(fs, gl.COMPILE_STATUS)){
+showError(`fragment error ${gl.getShaderInfoLog(fs)}
+${gl.getShaderSource(fs)}
+`)
+}
+
+
+const prog=gl.createProgram();
+gl.attachShader(prog, vs);
+gl.attachShader(prog, fs);
+
+gl.linkProgram(prog);
+if(!gl.getProgramParameter(prog, gl.LINK_STATUS)){
+showError(`${gl.getProgramInfoLog(prog)}`)
+}
+
+gl.useProgram(prog);
+
+gl.validateProgram(prog);
+if(!gl.getProgramParameter(prog, gl.VALIDATE_STATUS)){
+showError(`${gl.getProgramInfoLog(prog)}`)
+}
+
+return prog;
+}
+
+
+class Program{
+constructor(vss, fss){
+this.ID=makeProgram(gl, vss, fss);
+
+this.ID.loc={
+u:{},
+a:{}
+};
+
+}
+
+Bind(){
+gl.useProgram(this.ID);
+}
+
+Unbind(){
+gl.useProgram(null);
+}
+
+Delete(){
+gl.deleteProgram(this.ID);
+}
+
+SetUniform1(name, value){
+gl.uniform1f(Program.GetUniformLocation(this.ID, this.ID.loc.u, name), value);
+}
+
+SetUniform2(name, value){
+gl.uniform2fv(Program.GetUniformLocation(this.ID, this.ID.loc.u, name), value);
+}
+
+SetUniform3(name, value){
+gl.uniform3fv(Program.GetUniformLocation(this.ID, this.ID.loc.u, name), value);
+}
+
+SetUniform4(name, value){
+gl.uniform4fv(Program.GetUniformLocation(this.ID, this.ID.loc.u, name), value);
+}
+
+SetUniformMat4(name, value){
+gl.uniformMatrix4fv(Program.GetUniformLocation(this.ID, this.ID.loc.u, name), gl.FLOAT, value)
+
+}
+
+static GetUniformLocation(prog, u, name){
+
+let result = !u[name] ? gl.getUniformLocation(prog, name): u[name];
+u[name] = result;
+return result;
+
+}
+
+}
+
+
+class Texture{
+constructor(imgData){
+this.ID= gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, this.ID);
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, !0)
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, imgData)
+
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+gl.bindTexture(gl.TEXTURE_2D, null)
+
+}
+
+Bind(){
+gl.bindTexture(gl.TEXTURE_2D, this.ID);
+}
+
+Unbind(){
+gl.bindTexture(gl.TEXTURE_2D, null);
+}
+
+Delete(){
+gl.deleteTexture(this.ID);
+}
+
+
+}
+
+
+
+class VA{
+constructor(){
+this.ID=gl.createVertexArray()
+}
+
+Bind(){
+gl.bindVertexArray(this.ID);
+}
+
+Unbind(){
+gl.bindVertexArray(null);
+}
+
+Delete(){
+gl.deleteVertexArray(this.ID);
+}
+
+LA(vbo, layoutLocation=0, numberOfComponents=3, type=gl.FLOAT, normalize=!1, stride=0, offset=0){
+if (vbo instanceof VB) vbo.Bind()
+gl.enableVertexAttribArray(layoutLocation);
+gl.vertexAttribPointer(layoutLocation, numberOfComponents, type, normalize, stride, offset);
+
+}
+
+}
+
+
+class VB{
+constructor(Data){
+this.ID=gl.createBuffer()
+gl.bindBuffer(gl.ARRAY_BUFFER, this.ID);
+gl.bufferData(gl.ARRAY_BUFFER, Data, gl.STATIC_DRAW);
+
+}
+
+Bind(){
+gl.bindBuffer(gl.ARRAY_BUFFER, this.ID);
+}
+
+Unbind(){
+gl.bindBuffer(gl.ARRAY_BUFFER, null);
+}
+
+Delete(){
+gl.deleteBuffer(this.ID);
+}
+
+
+}
+
+
+class IB{
+constructor(Data){
+this.ID=gl.createBuffer()
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ID);
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, Data, gl.STATIC_DRAW);
+
+}
+
+Bind(){
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ID);
+}
+
+Unbind(){
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+}
+
+Delete(){
+gl.deleteBuffer(this.ID);
+}
+
+
+}
+
+
+
+
+
+
+
+
+
+class Mesh{
+constructor(material, geometry){
+this.material = material;
+this.geometry = geometry;
+
+this.modelMat=mat4.create()
+
+this.Position= [0, -0.5]
+
+this.Scale= [1, 1]
+this.Rotation= [0, 0, 0]
+this.Vao=new VA()
+
+this.#Bind()
+
+}
+
+#Bind(){
+
+this.Vao.Bind()
+this.geometry.vbo.Bind()
+
+
+this.Vao.LA(this.geometry.vbo, 0, 3, gl.FLOAT, false, 8 * 4, 0 * 4)
+this.Vao.LA(null, 1, 2, gl.FLOAT, false, 8 * 4, 3 * 4)
+this.Vao.LA(null, 1, 3, gl.FLOAT, false, 8 * 4, 5 * 4)
+//Ebo1.Bind()
+
+
+}
+
+
+_render(){
+
+this.material.Program.Bind();
+this.Vao.Bind()
+
+this.#_update(1)
+this.material.Program.SetUniform2("uOffset", this.Position);
+
+gl.drawArrays(this.material.drawMethod, 0, 3)
+
+//gl.drawElements(this.material.drawMethod, this.geometry.indices.length, gl.UNSIGNED_BYTE, 0)
+//showError("drawin")
+
+}
+
+#_update(dt=0){
+
+showError("hi form mesh class")
+}
+
+
+}
+
+
+class Scene{
+constructor(){
+this.childrens=[]
+
+}
+
+add_child(...args){
+this.childrens.push(...args)
+}
+
+_render(){
+
+
+this.childrens.forEach((child)=>{
+child._render()
+})
+
+}
+
+
+}
+
+
+class Renderer{
+constructor(width, height){
+this.width=width;
+this.height=height;
+this.Color=[0.9, 0.9, 0.9, 1.0];
+}
+
+Clear(){
+
+gl.viewport(0, 0, this.width, this.height);
+gl.clearColor(...this.Color);
+gl.clear(gl.COLOR_BUFFER_BIT );
+
+}
+
+render(scene){
+
+
+scene._render()
+
+}
+
+set color(value){
+this.Color = value;
+}
+
+}
+
+
+class TextureLoader{
+constructor(){
+this.path="/storage/emulated/0/";
+}
+
+load(url){
+
+let img = new Image();
+img.src = this.path +url;
+let tex = new Texture(img);
+return tex;
+}
+
+}
+
+
+
+
+
+
+const INIT=()=>{
+
+const width=360, height=360;
+
+gl.canvas.width=width;
+gl.canvas.height=height;
+const clearColor = [0.3, 0.2, 0.4, 1.0];
+showError(gl)
+
+
+
+
+
+
+const ray_marching_shader_source={
+vertex:`#version 300 es
+precision mediump float;
+
+
+uniform vec3 uPos;
+
+
+
+void main(){
+
+
+gl_Position = vec4(uPos.xy, 0.0, 1.0);
+gl_PointSize = uPos.z;
+
+
+}
+`,
+
+
+fragment:`#version 300 es
+precision mediump float;
+layout (location=0) out vec4 FragColor;
+
+
+
+uniform vec2 uRes;
+uniform float uTime;
+uniform vec4 uMouse;
+
+
+
+
+vec3 palette(float t){
+vec3 a = vec3(0.5, 0.5, 0.5);
+vec3 b = vec3(0.5, 0.5, 0.5);
+vec3 c = vec3(1.0, 1.0, 1.0);
+vec3 d = vec3(0.263, 0.416, 0.557);
+
+return a + b * cos(6.28138*(c*t+d));
+
+}
+
+mat2 rot2D(float angle){
+float c = cos(angle);
+float s = sin(angle);
+return mat2(c, -s, s, c);
+}
+
+vec3 rot3D(vec3 p, vec3 axis, float angle){
+return mix(dot(axis, p) * axis, p, cos(angle)) + cross(axis, p) * sin(axis);
+}
+
+float sdSphere(vec3 p, float s){
+
+return length(p) - s;
+}
+
+float sdBox(vec3 p, vec3 b){
+vec3 q = abs(p) - b;
+return length(max(q, 0.0)) + min(max(q.x, max(q.y, q.z)), 0.0);
+}
+
+float sdOctahedron(vec3 p, float s){
+vec3 q = abs(p);
+return (p.x + p.y + p.z - s) * 0.57735027;
+}
+
+float opUnion(float d1, float d2){
+return min(d1, d2);
+}
+
+float opSubtraction(float d1, float d2){
+return max(-d1, d2);
+}
+
+float opIntersection(float d1, float d2){
+return max(d1, d2);
+}
+
+float smin(float a, float b, float k){
+float h = max(k-abs(a-b), 0.0)/k;
+return min(a, b) - h*h*h*k*(1.0/6.0);
+}
+
+
+float map(vec3 p){
+
+
+p.z += uTime * 0.2; // forward movement
+//p.x += uTime * 0.2; // forward movement
+
+// space repetition
+p.xy = (fract(p.xy) - 0.5);
+p.z = mod(p.z, 0.25) - 0.125;
+p = fract(p) - 0.5;
+
+
+float box = sdBox(p, vec3(0.05)); // cube sdf
+
+//float sphere = sdSphere(p - uTime, 0.02); // sphere sdf
+
+
+
+
+
+return box;
+}
+
+
+void main(){
+
+vec2 uv = (gl_FragCoord.xy * 2. - uRes.xy ) / uRes.y;
+vec2 m = (uMouse.xy * 2. - uRes.xy ) / uRes.y * 3.;
+
+
+
+// initialization
+vec3 ray_origin = vec3(0., 0., -3.);
+//
+vec3 ray_direction = vec3(uv * 0.6, 0.91);//normalize(vec3(uv * 1.5, 1.5));
+
+vec3 col = vec3(0.); // final pixel color
+
+//
+float t = 0.;
+
+
+
+
+// vertical camera Rotation
+
+//ray_origin.yz *= rot2D(-m.y);
+//ray_origin.yz *= rot2D(-m.y);
+
+// horizontal camera Rotation
+
+//ray_origin.xz *= rot2D(-m.x);
+//ray_origin.xz *= rot2D(-m.x);
+
+
+
+if (uMouse.z < 0.) m = vec2(cos(uTime*0.2), sin(uTime*0.2));
+
+// ray marching
+int i;
+for(i=0; i < 80;i++){
+vec3 p = ray_origin + ray_direction * t; // Position along the ray
+
+p.xy *= rot2D(t*0.2 * m.x);
+p.y += sin(t * (m.y + 1.0) * 0.5) * 0.35;
+
+float d = map(p); // current distance to the scene
+
+t += d; // "march" the ray
+
+//col = vec3(i) / 80.;
+
+if (d < .001 || t > 100.) break;
+}
+
+// coloring
+col = palette(t * .04  + float(i)*0.005); // color based on distance
+
+FragColor = vec4(col, 1.0);
+
+
+
+}
+`,
+}
+
+
+const prog =  new Program( ray_marching_shader_source.vertex, ray_marching_shader_source.fragment)
+
+const mouse_coord={
+x:0, y:0, z:0, w:1
+};
+
+
+
+const update=(dt)=>{
+
+prog.Bind();
+
+
+prog.SetUniform1("uTime", dt)
+prog.SetUniform2("uRes", [width, height]);
+prog.SetUniform3("uPos", [0, 0, width]);
+
+prog.SetUniform4("uMouse", [mouse_coord.x, mouse_coord.y, mouse_coord.z, mouse_coord.w]);
+
+
+gl.drawArrays(gl.POINTS, 0, 1);
+
+}
+
+
+
+
+
+const animate=(dt)=>{
+
+// clearing canvas
+
+
+gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+gl.clearColor(...clearColor);
+gl.clear(gl.COLOR_BUFFER_BIT );
+
+update(dt);
+
+
+}
+
+
+
+
+
+
+
+// performance.now();
+
+const loop=(ts=0)=>{
+
+let dt = ts * 0.001 ?? 0.5;
+
+
+animate(dt);
+
+requestAnimationFrame(loop)
+
+}
+
+loop()
+
+
+
+
+//showError(window)
+
+document.addEventListener("touchstart", (e)=>{
+if(!e.touches[0]) return;
+mouse_coord.x = e.touches[0].pageX;
+mouse_coord.y = e.touches[0].pageY;
+mouse_coord.z = 1;
+mouse_coord.w = 1;
+})
+
+document.addEventListener("touchmove", (e)=>{
+if(!e.touches[0]) return;
+mouse_coord.x = e.touches[0].pageX;
+mouse_coord.y = e.touches[0].pageY;
+mouse_coord.z = -1;
+})
+
+document.addEventListener("touchend", (e)=>{
+if(!e.touches[0]) return;
+//mouse_coord.x = e.touches[0].pageX;
+//mouse_coord.y = e.touches[0].pageY;
+mouse_coord.z = 1;
+mouse_coord.w = -1;
+})
+
+
+
+
+}
+
+
+
+
+
+
+
+window.addEventListener("load", ()=>{
+
+try{
+
+
+INIT();
+
+
+showError("js is awesome".toUpperCase());
+
+}catch(e){
+showError(e);
+}
+
+});
+
+
+
+</script>
+
+</body>
+</html>

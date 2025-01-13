@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>canvas art game v1.0.0</title>
+<style >
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+width:100vw; height:100vh;
+overflow:hidden;
+}
+
+main{
+width:100%; height:100%;
+background-color:#CBCBCB;
+}
+
+img{
+display:none;
+}
+
+
+</style>
+
+
+<script>
+
+class rand{
+
+//return float
+static float(){
+return Math.random();
+}
+
+//return int
+static int(min=10,max=100){
+return Math.floor(rand.float() * (max-min) + min);
+}
+
+//return String
+static choice(arr){
+return arr[rand.int(0,arr.length)]
+}
+
+//return a hex color
+static color(){
+let color='#'
+for(let i=0;i<6;++i){
+color+=`${rand.choice('0123456789abcdef')}`;
+}
+return color;
+}
+
+
+}
+
+
+</script>
+
+</head>
+
+<body>
+
+<main id="mainBox">
+
+<canvas id="canvas"></canvas>
+<div class="res">
+
+<img src="/storage/emulated/0/pictures/pizza.png" alt="pizza" id=img1>
+</div>
+
+</main>
+
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+let dayTimer=0;dayTimeIntarvel=30;
+
+canvas.width=innerWidth;
+canvas.height=innerHeight;
+
+
+
+
+let _x=150, _y=150, _width=40, _height=40;
+
+class Sprite{
+constructor({img, pos={x:_x,y:_y}, width=_width, height=_height}){
+this.image=img;
+
+this.pos=pos
+
+this.width=width;
+this.height=height;
+
+this.frame={
+min: {x:0, y:0},
+max: {x:4, y:1},
+};
+
+this.sprite={ width:0, height:0 }
+
+this.image.addEventListener("load",()=>{
+this.frame.max.x= 4;
+this.frame.max.y= 1;
+
+this.sprite.width=(this.image.width / this.frame.max.x);
+this.sprite.height=(this.image.height / this.frame.max.y) ;
+
+});
+
+}
+
+draw(c){
+
+c.drawImage(img1,
+this.sprite.width*this.frame.min.x,
+this.sprite.height*this.frame.min.y,
+
+this.sprite.width, this.sprite.height,
+
+this.pos.x, this.pos.y,
+
+this.width,  this.height
+);
+}
+
+update(dt){
+
+// sprite animation //
+if(Math.round(dt%6) == 0){
+
+if(this.frame.min.x < this.frame.max.x-1) this.frame.min.x+=1;
+else this.frame.min.x=0;
+
+if(this.frame.min.y < this.frame.max.y-1) this.frame.min.y+=1;
+else this.frame.min.y=0;
+
+}
+
+}
+
+}
+
+
+
+
+
+
+
+
+let pizza=new Sprite({img:img1});
+
+
+
+console.log(pizza);
+
+
+const animate=(dt)=>{
+ctx.fillStyle="black";
+ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+
+pizza.draw(ctx);
+pizza.update(dt);
+
+
+
+
+}
+
+
+
+
+
+
+const GameLoop=(ts)=>{
+
+
+if(dayTimer < dayTimeIntarvel) dayTimer+=0.3;
+else dayTimer=0;
+
+animate(dayTimer);
+
+requestAnimationFrame(GameLoop);
+
+}
+GameLoop(0)
+
+
+
+canvas.addEventListener("pointerrawupdate",(e)=>{
+
+
+})
+
+</script>
+
+</body>
+</html>
+

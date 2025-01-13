@@ -1,0 +1,247 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<!-- 
+<meta name="viewport" content="width=device-width, initial-scale=5.0 maximum-scale=5.0 user-scalable=0">
+ -->
+ 
+ <meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=9.0">
+<title>basic webgl lib3 lol</title>
+
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+body{
+background: gray;
+}
+
+canvas{
+
+position:absolute;
+top:50%;
+left:50%;
+transform: translate(-50%,-50%);
+
+}
+</style>
+
+<script defer src="./ShaderUtil.js"></script>
+
+</head>
+
+<body>
+
+
+
+<canvas class="canvas"></canvas>
+
+
+
+
+
+<script>
+
+const canvas=document.querySelector('canvas.canvas');
+const gl=canvas.getContext('webgl2');
+
+
+canvasResizer(canvas)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+let vertexShaderSrc=`#version 300 es
+precision mediump float;
+
+in vec4 aPos;
+in vec4 aColor;
+
+
+out vec4 vColor;
+
+
+void main(){
+
+
+vColor = aColor;
+
+gl_Position = aPos;
+
+
+}
+`;
+
+
+//
+let fragmentShaderSrc=`#version 300 es
+precision mediump float;
+
+out mediump vec4 FragColor;
+
+in vec4 vColor;
+
+
+
+void main(){
+
+
+FragColor = vColor;
+
+}
+`;
+
+
+
+
+
+
+
+const INIT =()=>{
+
+
+
+//
+
+
+
+
+
+
+//
+
+
+//
+
+let myProgram = ShaderUtil.createGLProgram(gl, vertexShaderSrc, fragmentShaderSrc);
+
+
+//
+
+
+const vertex_data =new Float32Array([
+    //x y z             r g b
+    0.0,  0.5,  0.0,    0.0, 0.0, 0.5,
+   -0.5, -0.5,  0.0,    0.5, 0.0, 0.0,
+    0.5, -0.5,  0.0,    0.0, 0.5, 0.0,
+]);
+
+
+
+
+//let myTriangle = [
+//    // x y z         r g b
+//    0.0 ,0.5,0.0,    1.0, 0.0, 0.0,
+//    -0.5 ,-0.5,0.0,  0.0, 1.0, 0.0,
+//    0.5 ,-0.5,0.0,   0.0, 0.0, 1.0,
+//];
+
+
+
+
+
+
+
+
+let pos_buffer = ShaderUtil.createGLBuffer(gl, vertex_data);
+
+//let myTriangleColor_Buf = ShaderUtil.createGLBuffer(gl,myTriangleColor);
+
+
+//DYNAMIC_DRAW STATIC_DRAW
+
+
+
+let aPosLoc = ShaderUtil.getGLAtrbLoc(gl, myProgram, 'aPos');
+let aColorLoc = ShaderUtil.getGLAtrbLoc(gl ,myProgram, 'aColor');
+
+//gl.useProgram(null)
+
+//
+
+gl.enableVertexAttribArray(aPosLoc);
+gl.vertexAttribPointer(aPosLoc, 3, gl.FLOAT, gl.FALSE, 6 * 4, 0);
+
+
+gl.enableVertexAttribArray(aColorLoc);
+gl.vertexAttribPointer(aColorLoc, 3, gl.FLOAT, gl.FALSE, 6 * 4,  3 * 4);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const gameLoop=()=>{
+
+
+gl.clearColor(0.5, 0.0, 0.9,1);
+gl.viewport(0, 0, canvas.width, canvas.height);
+gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+
+
+
+gl.useProgram(myProgram);
+
+gl.drawArrays(gl.TRIANGLES, 0, 3);
+//gl.drawArrays(gl.ELEMENTS, 0, 3);
+
+
+
+
+
+requestAnimationFrame(gameLoop);
+
+
+}
+
+gameLoop();
+
+
+
+}
+
+window.addEventListener("load", ()=>{
+
+INIT();
+
+
+})
+
+
+</script>
+
+
+</body>
+</html>

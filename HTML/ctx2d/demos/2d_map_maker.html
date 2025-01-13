@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+
+<title>2d map maker</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+html{
+font-size:10px;
+}
+
+body{
+background:black;
+}
+
+
+
+
+
+#mainBox{
+margin:0;padding:0;
+position:relative;
+width:100vw; height:100vh;
+background-color:#000;
+
+}
+
+.hidden{
+display: none;
+}
+
+
+
+</style>
+
+
+
+</head>
+<body>
+
+
+<main id="mainBox">
+
+<canvas id=canvas></canvas>
+
+</main>
+
+<div class="hidden">
+<img src="/storage/emulated/0/pictures/tilesetv3.png" id="tilesetv1" alt="tileSetv1">
+</div>
+
+<script type="module">
+
+
+
+const canvas = document.querySelector("canvas");
+const ctx = canvas.getContext("2d");
+
+ctx.imageSmoothingEnabled = false
+
+class Rand{
+
+//return float
+static Float(min=1,max=10){
+return Math.random() * (max-min) + min;
+}
+
+//return int
+static Int(min=10,max=100){
+return Math.floor(Rand.Float(min,max));
+}
+
+//return String
+static Choice(...arr){
+return arr[Rand.Int(0,arr.length)]
+}
+
+//return a hex color
+static Color(length=3){
+let color='#'
+for(let i=0;i<length;++i){
+color+=Rand.Choice(...'0123456789abcdef'.split(""));
+}
+return color;
+}
+
+
+}
+
+
+class Scene{
+constructor(){
+this.childrens=[]
+}
+
+add_child(...child){
+this.childrens.push(...child);
+}
+
+render(c, dt=0){
+this.childrens.forEach((child)=>{
+child.render(c, dt);
+});
+
+}
+
+
+}
+
+
+class Renderer{
+constructor(ctx){
+this.ctx = ctx;
+this.dt=1;
+this.clearColor="#070707";
+
+}
+
+clear(){
+
+this.ctx.fillStyle=this.clearColor;
+this.ctx.fillRect(0,0, this.ctx.canvas.width, this.ctx.canvas.height);
+
+}
+
+render(_scene){
+_scene.render(this.ctx, this.dt);
+}
+
+}
+
+class Input{
+constructor(){
+
+}
+static keys=new Set()
+
+static is_key_pressed(key_name){
+return (Input.keys[keys])?true:false;
+}
+
+static mouse={
+pos: { x: 0, y: 0},
+}
+
+static INIT(){
+
+
+window.addEventListener("keydown", (e)=>{
+if (!e.key) return;
+
+Input.keys[e.key] = true;
+});
+
+window.addEventListener("keyup", (e)=>{
+if (!e.key) return;
+
+Input.keys[e.key] = true;
+
+});
+
+
+window.addEventListener("mousemove", (e)=>{
+
+Input.mouse.pos = { x: e.x, y: e.y };
+console.log(Input.mouse.pos)
+});
+
+
+}
+
+
+}
+
+
+class Tile{
+
+constructor({tex_coord, pos, width, height,}){
+this.tex_coord = tex_coord;
+
+this.pos= pos;
+this.width = width;
+this.height = height;
+
+}
+
+draw(c){
+
+
+c.drawImage(tilesetv1,
+this.tex_coord.x, this.tex_coord.y,
+this.tex_coord.width, this.tex_coord.height,
+this.pos.x, this.pos.y,
+this.width, this.height);
+
+}
+
+update(dt){
+
+}
+
+
+render(c, dt){
+this.draw(c)
+this.update(dt)
+}
+}
+
+
+class TileMap{
+constructor(){
+this.pos={x: 0, y:0}
+this.layers=[]
+this.cells=[];
+
+}
+
+draw(c){
+
+}
+
+set_cell(pos, tex_coord){
+
+
+
+}
+
+update(dt){
+
+}
+
+render(c, dt){
+this.draw(c);
+this.update(dt)
+
+this.layers.forEach((layer)=>{
+layer.render(c, dt)
+});
+
+}
+
+}
+
+
+
+const drawImage=()=>{
+ctx.drawImage(tilesetv1,
+2 * 16, 2 * 16,
+16, 16,
+16, 160,
+128, 128);
+}
+
+const LoadFile=async(path, type="json")=>{
+const file = await fetch(path);
+if (type == "json") return await file.json();
+else if(type == "text") return await file.text();
+else return -1;
+}
+
+const parse_map=(arr2D, width, height, a_width, a_height)=>{
+let out=[];
+
+for(let x=0; x<arr2D.length;x++){
+
+for(let y=0;y<arr2D[x].length;y++){
+
+if (arr2D[x][y] == "___") continue;
+
+let tex_coord = arr2D[x][y].split("/");
+
+
+out.push({
+pos:{ x: y * width, y: x * height },
+tex_coord:{
+x: parseInt(tex_coord[0]) * a_width,
+y: parseInt(tex_coord[1]) * a_height,
+width: a_width, height: a_height,
+},
+});
+
+}
+
+}
+
+
+return out;
+}
+
+
+
+
+const app=async(ctx)=>{
+
+const map_path ="/storage/emulated/0/g-games/testing/resources/game/maps/map_1.json"
+const map_data = await LoadFile(map_path, "json");
+
+
+
+const _Renderer = new Renderer(ctx);
+
+const _Scene = new Scene()
+
+
+const tile_width = 16;
+const tile_height = 16;
+
+//const tile_color = "#FF3D6D";
+
+
+let tile_pos = parse_map(map_data.layers[0].data, tile_width, tile_height, 32, 32)
+
+
+const camera ={
+
+pos:{ x:0, y:0 },
+
+
+
+}
+
+
+const tiles = [];
+
+for(let i of tile_pos){
+
+tiles.push(
+new Tile({
+tex_coord: i.tex_coord,
+pos: i.pos,
+width: tile_width, height: tile_height,
+}))
+
+
+}
+
+
+_Scene.add_child(...tiles);
+
+
+
+
+const animate=(dt)=>{
+_Renderer.clear()
+_Renderer.render(_Scene)
+
+
+
+
+}
+
+
+
+
+let lt=0;
+
+const MainLoop=(ts=0)=>{
+
+let dt = ts - lt;
+lt = ts;
+
+
+animate(dt);
+window.requestAnimationFrame(MainLoop);
+
+}
+
+
+
+MainLoop(0);
+
+
+
+
+
+}
+
+
+
+
+
+//
+
+
+
+
+window.addEventListener("load",()=>{
+try{
+
+canvas.width =window.innerWidth;
+canvas.height=window.innerHeight;
+
+
+console.log(ctx)
+
+app(ctx)
+
+
+
+//Input.INIT()
+
+
+}catch(e){
+console.log(e.message, e.stack)
+}
+
+
+})
+
+
+window.addEventListener("resize",()=>{
+canvas.width = window.innerWidth
+canvas.height = window.innerHeight
+
+})
+
+
+
+
+
+
+
+</script>
+
+</body>
+</html>
+

@@ -1,0 +1,151 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>HTML CANVAS GAME BOI</title>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+#main-box{
+margin:0;
+padding:0;
+width:100%;
+height:100%;
+background-color:#fff;
+}
+
+/* 
+canvas{
+position:absolute;
+top:40px;
+
+}
+ */
+
+
+</style>
+</head>
+<body>
+
+
+
+<div id="main-box">
+
+<canvas id="cvs"></canvas>
+
+</div>
+
+
+
+
+<script>
+
+let cvs=document.querySelector('#cvs');
+let ctx = cvs.getContext('2d');
+
+
+//const cvsW=390;
+//const cvsH=390;
+
+let boxMinSize=5;
+
+let mainW=window.innerWidth;
+let mainH=window.innerHeight;
+
+
+let cvsW = mainW;
+let cvsH = mainH;
+
+cvs.width=cvsW;
+cvs.height=cvsH;
+
+function dramin(x,y,dx,dy,r){
+this.x=x;
+this.y=y;
+this.dx=dx;
+this.dy=dy;
+this.r=r;
+this.draw = function(){
+
+ctx.beginPath();
+ctx.arc(this.x,this.y,this.r,0,Math.PI * 2,false);
+//ctx.strokeStyle='blue';
+ctx.fillStyle='rgba(255,0,0,0.2)'
+ctx.stroke();
+ctx.fill()
+}
+
+this.update = function(){
+this.draw()
+if(this.x + this.r > cvs.width || this.x - this.r < 0){
+this.dx = -this.dx
+}
+if(this.y + this.r > cvs.height || this.y - this.r < 0){
+this.dy = -this.dy
+}
+this.x += this.dx * 1.4
+this.y += this.dy * 1.2
+}
+}
+
+
+let boxs=[];
+
+let boxInt=Math.floor(Math.random() * 100 + 10)
+
+for(let i=0;i<boxInt;i++){
+let r= Math.floor(Math.random() * (cvsW / 10) + boxMinSize);
+let x=Math.random() * cvsW - r;
+let y=Math.random() * cvsH -r;
+
+let dx=(Math.random() - 0.5);
+let dy=(Math.random() - 0.5);
+boxs.push( new dramin(x,y,dx,dy,r));
+}
+
+function gameLoop(){
+window.requestAnimationFrame(gameLoop);
+ctx.clearRect(0,0,cvsW,cvsH);
+
+
+for(let i=0;i<boxs.length;i++){
+boxs[i].update();
+}
+
+
+
+}
+
+gameLoop()
+
+
+
+let mouse = ['mousedown','mousemove','mouseup']
+
+
+window.addEventListener(mouse[0],(e)=>{
+
+console.log(e.x, e.y)
+//console.log(MouseEvent)
+})
+
+
+window.addEventListener(mouse[1],(e)=>{
+
+console.log(e.x, e.y)
+//console.log(MouseEvent)
+})
+
+
+
+
+
+</script>
+</body>
+</html>

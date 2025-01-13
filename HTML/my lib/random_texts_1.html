@@ -1,0 +1,707 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>HTML CANVAS GAME BOI</title>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+#main-box{
+margin:0;
+padding:0;
+width:100%;
+height:100%;
+background-color:#9f9f9f;
+}
+
+.btnss{
+width:300px;
+height:300px;
+position:absolute;
+left:46.5px;
+top:260px;
+color:red;
+outline:none;
+background-color:rgba(0,0,255,0.1);
+border:none;
+opacity:0.4;
+}
+.btnss:active,.btnss:hover{
+
+background-color:rgba(0,0,255,1);
+}
+
+
+
+#btn_box{
+width:330px;
+height:330px;
+position:fixed;
+top:396px;
+opacity:0.3;
+left:31.545500000000004px;
+display:grid;
+grid-template-columns: repeat(3, 1fr);
+grid-template-rows: repeat(3, 1fr);
+grid-gap:2px;
+}
+
+.btn{
+background-color:#0084FF;
+}
+
+.btn:active,.btn:hover{
+background-color:#0014FF;
+}
+
+.btn2{
+grid-column:2/3;
+grid-row:1/2;
+}
+
+.btn4{
+grid-column:1/2;
+grid-row:2/3;
+}
+
+.btn6{
+grid-column:3/4;
+grid-row:2/3;
+}
+
+.btn8{
+grid-column:2/3;
+grid-row:3/4;
+}
+
+
+</style>
+</head>
+<body>
+
+
+
+<div id="main-box">
+<button class="btnss">button</button>
+
+
+
+<div id="btn_box">
+
+<div class="btn btn2"></div>
+<div class="btn btn4"></div>
+<div class="btn btn6"></div>
+<div class="btn btn8"></div>
+
+</div>
+
+<canvas id="cvs"></canvas>
+
+</div>
+
+<p>
+    
+
+mohitbiswas62665769@gmail.com
+
+</p>
+
+
+<script>
+
+
+let btn2,btn4,btn6,btn8;
+
+let btn_box=document.getElementById('btn_box');
+
+
+let myAbout={
+myWeb:'https://bistor.com/home.html',
+myYT:'https://youtube.com/c/bistor',
+myFB:'https://facebook.com/p/bistor'
+}
+
+console.log(myAbout.myWeb)
+
+
+for(let i=0;i<20;i++){
+console.log(
+`
+
+
+
+`
+)
+}
+
+
+
+
+
+
+
+
+
+
+
+btn2=document.querySelector('.btn2')
+btn4=document.querySelector('.btn4')
+btn6=document.querySelector('.btn6')
+btn8=document.querySelector('.btn8')
+
+
+
+btn_box.style.display='none';
+
+let cvs=document.querySelector('#cvs');
+let ctx = cvs.getContext('2d');
+
+let speed = 3;
+
+//ctx.strokeStyle='#000'
+//ctx.stroke()
+
+
+let boxMinSize=5;
+
+let mainW=window.innerWidth;
+let mainH=window.innerHeight;
+
+
+
+const cvsW=390;
+const cvsH=390;
+
+//console.log((mainW-330) / 2 )
+//let cvsW = mainW;
+//let cvsH = mainH;
+
+cvs.width=cvsW;
+cvs.height=cvsH;
+
+
+let colours=['#00BAFF','#FF8000','#FF0068','#E300FF','#3600FF'];
+let gravity = 2;
+let frection = 0.69;
+
+function randint(min,max){
+return Math.floor(Math.random() * (max-min) + min)
+}
+
+function randColor(color){
+return color[Math.floor(Math.random() * colours.length )]
+}
+
+
+
+
+function Box2(x,y,dx,dy,r,color){
+this.x=x;
+this.y=y;
+this.dx=dx;
+this.dy=dy;
+this.r=r;
+this.color=color;
+this.draw = function(){
+
+ctx.beginPath();
+
+ctx.arc(this.x,this.y,this.r,0,Math.PI * 2,false);
+ctx.fillStyle=this.color;
+//ctx.strokeStyle=this.color2;
+ctx.lineWidth=3;
+ctx.stroke();
+ctx.fill()
+ctx.closePath()
+}
+
+this.update = function(){
+
+if(this.y + this.r + this.dy > cvs.height){
+this.dy = -this.dy * frection
+}else{
+this.dy += gravity
+}
+
+
+if(this.x + this.r + this.dx > cvs.width || this.x - this.r <= 0 ){
+this.dx = -this.dx
+}
+
+
+
+this.x += this.dx
+this.y += this.dy
+
+this.draw()
+
+
+}
+
+
+}
+
+
+
+
+class Lord1{
+constructor(width,height,x,y,color){
+this.position={x: x, y: y}
+this.velocity={x: 0, y: 0}
+this.width=width
+this.height=height
+this.color=color
+}
+
+draw(){
+ctx.fillStyle=this.color
+ctx.fillRect(this.position.x, this.position.y, this.width,this.height)
+}
+
+update(){
+
+
+
+
+//if(this.height + this.position.y > 400 && this.height - this.position.y <=0){
+//this.velocity.y = 0
+//}else{this.velocity.y += gravity}
+
+
+//if(this.height + this.position.y + this.velocity.y >= 400){
+//this.velocity.y = -this.position.y * 0.069
+//}else{this.velocity.y += gravity}
+
+//if(this.velocity.y + this.height + this < 400){}
+
+
+this.draw()
+
+if(this.position.y + this.height + this.velocity.y >= cvs.height && this.position.x + this.width + this.velocity.x <= cvs.width){
+this.velocity.y = -this.velocity.y * frection
+}
+
+
+else{
+this.velocity.y += gravity
+}
+
+
+
+
+
+//if(this.height + this.velocity.y > &&){
+//document.write('lol')}
+
+
+this.position.x += this.velocity.x
+this.position.y += this.velocity.y
+}
+
+}
+
+
+
+
+
+
+
+
+
+class PPLAYER1{
+constructor(w,h,color){
+this.pos={x: 0, y: 0}
+this.speed={x: 0, y: 0}
+this.w=w
+this.h=h
+this.color=color
+}
+
+draw(){
+
+ctx.beginPath();
+ctx.fillStyle=this.color
+ctx.fillRect(this.pos.x,this.pos.y,this.w,this.h)
+ctx.fill()
+ctx.closePath()
+}
+
+
+update(){
+
+this.draw()
+
+
+
+this.pos.x += this.speed.x
+this.pos.y += this.speed.y
+
+if(this.pos.y + this.h + this.speed.y <= cvs.height ){
+this.speed.y += gravity
+}
+else{this.speed.y = 0}
+
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+class PLand1{
+constructor(w,h,color){
+this.pos={x: 100, y: 200}
+this.w=w
+this.h=h
+this.color=color
+}
+
+draw(){
+
+ctx.beginPath();
+ctx.fillStyle=this.color
+ctx.fillRect(this.pos.x,this.pos.y,this.w,this.h)
+ctx.fill()
+ctx.closePath()
+}
+
+
+}
+
+
+
+let balls = {
+x: 200,
+y: 200,
+r: 20,
+c: 'red',
+dx: speed,
+dy: -speed,
+draw: function(){
+
+ctx.beginPath();
+ctx.arc(this.x,this.y,this.r,0,Math.PI * 2,true);
+ctx.fillStyle=this.c;
+ctx.strokeStyle='blue';
+ctx.lineWidth=3;
+ctx.stroke();
+ctx.fill();
+ctx.closePath();
+},
+update: function(){
+
+this.draw()
+
+if(this.x + this.r > cvs.height || this.x - this.r < 0){
+this.dx = -this.dx;
+}
+
+
+
+if(this.y + this.r > cvs.height || this.y - this.r < 0){
+this.dy = -this.dy;
+}
+
+
+this.x += this.dx * 1.78
+this.y += this.dy * 1.69
+
+}
+};
+
+
+
+
+
+
+
+
+function load(){
+
+
+let to=['touchstart',
+'touchmove',
+'touchend']
+
+
+let ppMoveU = false;
+let ppMoveL = false;
+
+let ppStep=3.69;
+
+let plyW=80;
+let plyH=30;
+
+
+let player=new PPLAYER1(plyW,plyH,'#FF00D8')
+
+let land=new PLand1(plyW*3,plyH,'#7D00FF')
+
+
+
+
+
+
+
+
+
+
+function ppU(){
+ppMoveU = true
+if(ppMoveU == true){
+player.speed.y -= ppStep * 10;
+}}
+
+
+function ppL(){
+ppMoveL = true
+if(ppMoveL == true){
+player.speed.x -= ppStep;
+}}
+
+function ppR(){
+ppMoveL = true
+if(ppMoveL == true){
+player.speed.x += ppStep;
+}}
+
+
+function ppD(){
+ppMoveU = true
+if(ppMoveU == true){
+player.speed.y += ppStep;
+}}
+
+
+
+
+function ppStopL(){
+
+if(ppMoveL == true){
+player.speed.x = 0;
+ppMoveL = false;
+}}
+
+
+
+function ppStopU(){
+
+if(ppMoveU == true){
+player.speed.y = 0;
+ppMoveU = false;
+}}
+
+
+
+
+
+
+btn2.addEventListener(to[0],ppU)
+btn4.addEventListener(to[0],ppL)
+btn6.addEventListener(to[0],ppR)
+btn8.addEventListener(to[0],ppD)
+
+btn2.addEventListener(to[2],ppStopU)
+btn4.addEventListener(to[2],ppStopL)
+btn6.addEventListener(to[2],ppStopL)
+btn8.addEventListener(to[2],ppStopU)
+
+
+
+
+
+
+
+
+
+
+
+//let boxs=[];
+
+
+//let boxInt=randint(9 , 69)
+
+
+//let r,x,y,dx,dy,color;
+/*
+for(let i=0;i<boxInt;i++){
+
+
+r= randint(5 , 50);
+x= randint(r , cvs.width - r);
+y= randint(r , cvs.height - r);
+dx= randint(-1 , 3);
+dy= randint(-1 , 3);
+color= randColor(colours)
+boxs.push( new Box2(x,y,dx,dy,r,color));
+}
+*/
+
+
+
+
+
+
+
+/*
+
+let nices=[]
+let w,h,x1,y1,r22,clol;
+r22=randint(200,3000)
+
+for(let i=0;i<r22;i++){
+
+
+clol=randColor(colours)
+
+w=randint(6,50)
+h=randint(6,50)
+x1=randint(w,cvs.width - w)
+y1=randint(-h,cvs.height)
+
+nices.push(new Lord1(w,h,x1,y1,clol))
+
+
+//nices.position.x += x1
+//nices.position.y += y1
+
+}
+
+
+
+
+
+
+*/
+
+
+
+
+function flot(){
+
+if(player.pos.y + player.h <= land.pos.y && player.pos.y + player.h + player.speed.y >= land.pos.y ){
+player.speed.y = 0
+}
+}
+
+
+
+function gameLoop(){
+window.requestAnimationFrame(gameLoop);
+ctx.clearRect(0,0,cvsW,cvsH);
+//ctx.stroke()
+
+
+/*
+for(let i=0;i<nices.length;i++){
+nices[i].update();
+}
+*/
+
+
+player.update();
+
+balls.update()
+
+land.draw();
+
+
+
+
+//flot()
+
+
+if(player.pos.y + player.h <= land.pos.y &&
+player.pos.y + player.h + player.speed.y >= land.pos.y &&
+player.pos.x + player.w >= land.pos.x &&
+player.pos.x <= land.pos.x + land.w){
+
+player.speed.y = 0
+
+}
+
+
+if(balls.x >= player.pos.x &&
+balls.x <= player.pos.x + player.w &&
+balls.y + balls.r >= cvs.width - player.h
+){
+balls.dy += -1
+}
+
+
+
+
+
+
+
+if(balls.y + balls.r > cvs.height){
+
+load()
+
+}
+
+
+
+
+
+}
+
+gameLoop()
+
+
+}
+
+
+let btn=document.querySelector('.btnss')
+
+btn.addEventListener('click',(e)=>{
+
+
+
+//alert('warrnig');
+btn.style.display='none'
+/*
+setTimeout(()=>{
+console.log(btn_box)
+btn.style.display='block'
+},6000)
+*/
+load()
+
+btn_box.style.display='grid'
+
+})
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
+</body>
+</html>

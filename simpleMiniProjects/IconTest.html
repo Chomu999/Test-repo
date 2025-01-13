@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+<link rel="stylesheet" href="/storage/emulated/0/g_js_libs/font-awesome/css/font-awesome.min.css" />
+
+
+<title>Icon Test</title>
+
+<style>
+
+*:after,*,*:before{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+:root{
+
+--box-shadow:
+4px 4px 8px  #0008 inset,
+-4px -4px 8px #fff8 inset;
+
+--box-shadow2:
+4px 4px 8px  #0008,
+-4px -4px 8px #fff8,
+-4px -4px 8px #0008 inset,
+4px 4px 8px #fff8 inset
+;
+
+}
+
+*::selection{
+color: red;
+background: tan;
+}
+
+
+@property col{
+syntax:"<color>";
+initial:red;
+
+}
+
+html{
+font-size: 10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style-type: none;
+}
+
+body{
+background: #f0f0f0;
+}
+
+
+
+
+.wrapper{
+margin: 1rem auto;
+padding: 1rem;
+width: min(38rem, 100% - 2rem);
+border-radius: 1rem;
+
+box-shadow: var(--box-shadow);
+}
+
+.appContainer{
+height: clamp(70rem, 200vh, 100dvh - 3rem);
+background: #c0c0c0;
+}
+
+.titleContainer{
+background: #cacaca;
+text-align: center;
+border-radius: 2rem;
+}
+
+.appTitle{
+margin: 0.6rem 0.4rem;
+padding: 0.4rem 0.8rem;
+/* color: #424242; */
+
+background: transparent;
+
+background: linear-gradient(45deg,gray 20%, white, gray);
+text-shadow: 2px 2px 2px #7772;
+background-clip: text;
+color: transparent;
+
+
+font-size: 3rem;
+font-weight: 800;
+font-family: Tahoma;
+text-transform: capitalize;
+border-radius: 1rem;
+box-shadow: var(--box-shadow);
+}
+
+
+
+
+.iconContainer{
+aspect-ratio: 1;
+overflow: hidden auto;
+background: #cacaca;
+text-align: center;
+box-shadow: var(--box-shadow);
+}
+
+
+.card{
+margin: auto;
+width: 20rem;
+height: 20rem;
+
+display: grid;
+place-items: center;
+/* border: 2px solid  */;
+border-radius: 1rem;
+font-size: 2rem;
+box-shadow: var(--box-shadow);
+}
+
+.card i{
+padding: 0.8rem;
+/* border: 2px solid  */;
+box-shadow: var(--box-shadow);
+border-radius: 0.6rem;
+color: white;
+color:var(--col);
+}
+
+
+
+.btnContainer{
+
+display: flex;
+justify-content: space-around;
+align-items: center;
+}
+
+
+
+.btn{
+padding:0.2rem 0.4rem 0.6rem;
+background:#FFA5CF;
+color: white;
+font-size: 5rem;
+border: none;
+/* border: 2px solid  */;
+font-weight: 900;
+border-radius: 1rem;
+box-shadow: var(--box-shadow2);
+}
+
+
+
+
+</style>
+
+
+
+
+
+</head>
+<body>
+
+
+<main class="wrapper appContainer">
+<div class="wrapper titleContainer">
+  <h1 class="appTitle">font Awesome test</h1>
+</div>
+
+
+<div class="wrapper iconContainer">
+
+
+
+<div class="card">
+<i class="fa fa-5x fa-key"></i>
+</div>
+
+
+<div class="wrapper btnContainer">
+
+<button class="btn nextBtn">
+<i class="fa fa-arrow-left"></i>
+</button>
+<button class="btn colorChangeBtn">Color</button>
+
+<button class="btn prevBtn">
+
+<i class="fa fa-arrow-right"></i>
+</button>
+</div>
+
+
+</div>
+
+
+
+</main>
+
+
+<!-- <script src="/storage/emulated/0/g_js_libs/eruda.min.js"></script> -->
+
+<script type="module">
+"use strict";
+
+
+//some utils
+class Rand{
+
+static Float(min=0, max=1){
+return Math.random() * (max - min+1) + min;
+}
+
+static Int(min=6, max=9){
+return Math.floor( Rand.Float(min, max));
+}
+
+static Choice(...args){
+return args[Rand.Int(0, args.length - 1)];
+}
+
+static Color(len=3){
+let outColor="#";
+for(let i=0;i<len;++i){
+outColor+=Rand.Choice(..."0123456789abcdef".split(""));
+}
+return outColor;
+}
+
+}
+
+
+
+//querySelector
+
+const INITIAL=async()=>{
+
+const iconContainer = document.querySelector(".iconContainer .card i");
+
+const nextBtn= document.querySelector('.nextBtn');
+const colorChangeBtn= document.querySelector('.colorChangeBtn');
+const prevBtn= document.querySelector('.prevBtn');
+
+const IconsList = `
+arrow-up,arrow-left,arrow-right,arrow-down,home,
+search,music,glass,
+user,heart,ban,check,remove,
+power-off,eject,tags,
+text-width,text-height,print,
+signal,download,road,list,video-camera,
+gear,inbox,refresh,dedent,
+flag,headphones,camera,pencil,
+adjust,arrows,play,stop,pause,motorcycle,
+backward,forward,star,star-half,asterisk,
+crosshairs,expand,compress,plus,minus,
+gift,leaf,fire,eye,eye-slash,warning,plane,calendar,
+random,comment,magnet,folder,folder-open,
+key,upload,phone,trophy,sign-in,sign-out,
+twitter,github,facebook-f,bell,unlock,lock,microphone,
+whatsapp,telegram
+`.replaceAll("\n", "").split(",");
+
+
+
+nextBtn.addEventListener("click", ()=>{
+IconsList.push(IconsList.shift())
+let ival = IconsList[0];
+iconContainer.classList.replace(iconContainer.classList.item(iconContainer.classList.length - 1), `fa-${ival}`);
+});
+
+colorChangeBtn.addEventListener("click", ()=>{
+iconContainer.style.color=Rand.Color(6);
+});
+
+prevBtn.addEventListener("click", ()=>{
+IconsList.unshift(IconsList.pop())
+let ival = IconsList[0];
+iconContainer.classList.replace(iconContainer.classList.item(iconContainer.classList.length - 1), `fa-${ival}`);
+});
+
+
+
+
+}
+
+
+try{
+console.log("JavaScript is Awesome ".__proto__);
+
+INITIAL()
+
+}catch(err){
+console.log(`javascript uncatch error: ${err} `);
+}
+
+
+</script>
+
+</body>
+</html>

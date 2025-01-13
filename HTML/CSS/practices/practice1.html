@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+<title>HTML And CSS</title>
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+
+.my-button {
+  background-color: #007bff;
+  color: #ffffff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+transition: background-color 0.3s ease; /* added transition effect */
+}
+
+.my-button:hover {
+  background-color: red; /* added hover effect */
+
+}
+
+
+
+.my-button2 {
+  background-color: #007bff;
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  font-size: 1.2rem;
+  font-family: Arial, sans-serif;
+}
+
+.my-button2:hover {
+  background-color: #0069d9;
+  transform: translateY(-0.1rem);
+  box-shadow: 0 0.2rem 0.5rem rgba(0, 0, 0, 0.2);
+}
+
+
+
+
+.my-button3 {
+  background-color: #007bff;
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  font-size: 1.2rem;
+  font-family: Arial, sans-serif;
+  display: inline-block; /* added to make the button an inline-block element */
+  text-align: center; /* added to center the text horizontally */
+  width: 10rem; /* added to set a specific width */
+}
+
+.my-button3:hover {
+  background-color: #0069d9;
+  transform: translateY(-0.1rem);
+  box-shadow: 0 0.2rem 0.5rem rgba(0, 0, 0, 0.2);
+}
+
+.my-button3:active {
+  transform: translateY(0.1rem);
+  box-shadow: 0 0.1rem 0.3rem rgba(0, 0, 0, 0.2);
+}
+
+
+
+
+
+.my-button4 {
+  /* previous styles */
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  font-size: 1.2rem;
+  font-family: Arial, sans-serif;
+  display: inline-block;
+  text-align: center;
+  width: 10rem;
+  /* new styles */
+  font-weight: bold;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.1rem;
+  padding: 0.5rem 1rem;
+  margin: 1rem;
+}
+
+.my-button4:hover {
+  /* previous hover styles */
+  background-color: #0069d9;
+  transform: translateY(-0.1rem);
+  box-shadow: 0 0.2rem 0.5rem rgba(0, 0, 0, 0.2);
+}
+
+.my-button4:active {
+  /* previous active styles */
+  transform: translateY(0.1rem);
+  box-shadow: 0 0.1rem 0.3rem rgba(0, 0, 0, 0.2);
+}
+
+.my-button4:focus {
+  /* new focus styles */
+  outline: none;
+  box-shadow: 0 0 0 0.2rem #007bff;
+}
+
+
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+  background-color: #ccc;
+  border-radius: 20px;
+  transition: background-color 0.3s ease;
+}
+
+.toggle-switch-input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-switch-slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  background-color: #fff;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+}
+
+.toggle-switch-input:checked + .toggle-switch-slider {
+  transform: translateX(20px);
+}
+
+.toggle-switch-input:checked + .toggle-switch-slider::before {
+  content: "";
+  position: absolute;
+  left: -20px;
+  width: 20px;
+  height: 20px;
+  background-color: #007bff;
+  border-radius: 50%;
+}
+
+.toggle-switch-input:focus + .toggle-switch-slider {
+  box-shadow: 0 0 0 2px #007bff;
+}
+
+
+</style>
+
+
+</head>
+<body>
+
+
+
+
+
+
+
+<button class="my-button">Click me!</button>
+<button class="my-button2">Click me!</button>
+<button class="my-button3">Click me!</button>
+<button class="my-button4">Click me!</button>
+
+
+
+<label class="toggle-switch">
+  <input type="checkbox" class="toggle-switch-input" />
+  <span class="toggle-switch-slider"></span>
+</label>
+
+
+<script>
+
+const Init=()=>{
+console.log("js is awesome".toUpperCase())
+
+const encodedCookieData1 =`eyJjb29raWVuYmFzZSI6ImFzZGZhc2RmYXNkZmFzZGZhc2RmYXNkZmFzZGZhc2QiLCJzZXNzaW9uc2FzZGZhc2RmYXNkZmFzZGZhc2RmYXNkZmFzZGZhc2Q`;
+const decodedCookieData1 = atob(encodedCookieData1);
+
+const encodedCookieData2 = `TWFyeWFuIEJhc2U2NCBlbmNvZGVkIHN0cmluZw==`;
+const decodedCookieData2 = atob(encodedCookieData2);
+
+//const encodedCookieData3 = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNiYWNmNmE1LTM3MmItNDcyNy1hYjU4LTY5NjlkODYxZjgzYSIsInR5cGUiOiJmcmVlIiwiaWF0IjoxNzE5OTUwNzY5fQ._0RaLxdJHaeuEgJtbUv7CIpsf2N8aRgkK1Hlz3aIUCc;googtrans=/auto/en; googtrans=/auto/en; fetchToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmZXRjaERhdGUiOiIyMDI0LTA3LTEyVDE5OjM0OjMxLjIwM1oiLCJ0cmFja0lkIjoiZDg0MjRjNzEtOGNhNi00MGNjLWJlZTMtYzk1MzMzYjY5YjcyIiwiaWF0IjoxNzIwODEyNzM0fQ.54zHsGJQyUXoirnWQltN6pk8UkE-WvOGvqHHj8xQCYQ`;
+const encodedCookieData3 = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmZXRjaERhdGUiOiIyMDI0LTA3LTEyVDE5OjM0OjMxLjIwM1oiLCJ0cmFja0lkIjoiZDg0MjRjNzEtOGNhNi00MGNjLWJlZTMtYzk1MzMzYjY5YjcyIiwiaWF0IjoxNzIwODEyNzM0fQ.54zHsGJQyUXoirnWQltN6pk8UkE-WvOGvqHHj8xQCYQ`;
+const decodedCookieData3 = atob(encodedCookieData3);
+//console.log(window)
+
+console.log(encodedCookieData1, decodedCookieData1);
+
+console.log(encodedCookieData2, decodedCookieData2);
+console.log(encodedCookieData3, decodedCookieData3);
+
+}
+
+
+
+try{
+Init()
+}catch(err){
+  console.log(err)
+}
+
+
+</script>
+
+</body>
+</html>

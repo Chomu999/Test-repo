@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+:root{
+
+
+}
+
+
+html{
+font-size:10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style: none;
+}
+
+
+body{
+color-scheme: default;
+background: #180044;
+
+}
+
+
+main{
+margin: 2rem 0;
+height: min(80rem, 100% - 5rem);
+overflow: auto;
+}
+
+
+.wrapper{
+margin:1rem;
+padding:1rem;
+width: min(39rem, 100% - 2rem);
+background: #9400FF23;
+border-radius:2rem;
+}
+
+.appTitle{
+margin: 1rem;
+padding: 1rem;
+color:#FF0400;
+background: #170061;
+font-size: 2rem;
+text-align: center;
+text-transform: capitalize;
+border-radius:9rem;
+}
+
+
+/* prediction container code section*/
+
+.predictionContainer{
+aspect-ratio: 2/1;
+background: #A4FFE2;
+overflow: auto;
+font-size: 2rem;
+text-transform: capitalize;
+}
+
+.predictionContainer .predict{
+color: red;
+lighting-color: orange;
+}
+
+/* user Input container code section*/
+
+
+.userInputContainer{
+aspect-ratio: 1;
+background: #0060FF;
+overflow: auto;
+image-rendering: pixelated;
+}
+
+.userInputContainer canvas{
+margin: auto;
+display: block;
+width: 100%;
+/* height: 20rem; */
+
+background:#EA8F93;
+}
+
+/* button container code section*/
+
+.btnContainer{
+aspect-ratio: 5;
+background: #0060FF;
+overflow: auto;
+text-align: center;
+align-items: space-around;
+}
+
+
+.btnContainer .btns{
+margin: 0 1rem;
+padding: 1rem;
+display:inline-block;
+background: purple;
+color: lime;
+font-size: 2rem;
+text-transform: capitalize;
+border-radius: 2rem;
+}
+
+
+
+
+
+
+/* error box code section*/
+
+
+
+.error_box{
+aspect-ratio: 2;
+overflow:hidden;
+}
+
+.error_box .errorTitle{
+/* display:block; */
+padding: .8rem;
+text-align: center;
+font-size: 2rem;
+color: #CEF7FF;
+background: linear-gradient(45deg,red, blue);
+text-decoration: underline;
+border-radius: 4em;
+}
+
+.error_box .errorContainer{
+margin:0.2rem 0;
+padding: 1rem;
+aspect-ratio: 3;
+background: #ededed;
+
+overflow: auto;
+border-radius: 1rem;
+
+
+
+}
+
+.error_box  p{
+margin:0.2rem 1rem;
+padding: 1rem ;
+font-weight: bold;
+background: #C6C6C6;
+color: #424242;
+border-radius: 1rem;
+}
+
+/* 
+utils classes
+
+*/
+
+.hide{
+display: none;
+}
+
+
+
+</style>
+
+<title>image resizer  model</title>
+
+
+
+<script  src="/storage/emulated/0/g_js_libs/tf.min.js"></script>
+
+<!-- <script  src="/storage/emulated/0/g_js_libs/tfjs-core.js"></script> -->
+
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/tensorflow/4.20.0/tf.min.js" integrity="sha512-p8IRHL1NJ9vHblBMhRwNP1YGLgrbn1QQjcDblL+38ZFtL2GvJHmxxMsAov3q6ujQWKBstrOnprtb+W3hvJPwQw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
+
+
+</head>
+<body>
+
+<main class="wrapper">
+
+
+<div class="wrapper">
+
+
+<h2 class="appTitle">image resolution enhancer</h2>
+
+</div>
+
+
+<div class="wrapper predictionContainer">
+
+</div>
+
+
+<div class="wrapper btnContainer">
+<span class="btns eraseBtn">erase</span>
+<span class="btns predictBtn">predictBtn</span>
+<span class="btns trainBtn">train</span>
+
+</div>
+
+</main>
+
+
+<script>
+
+
+
+
+"use strict";
+
+
+function ShowTensor(tensor){
+console.log(tensor);
+console.log("shape :", tensor.shape);
+console.log("rank :", tensor.rank);
+console.log("size :", tensor.size);
+tensor.print();
+}
+
+
+
+async function INITIAL() {
+
+const eraseBtn = document.querySelector(".eraseBtn")
+const predictBtn = document.querySelector(".predictBtn")
+const trainBtn = document.querySelector(".trainBtn")
+
+console.log(ctx);
+
+
+
+const model = tf.sequential();
+
+model.add(tf.layers.flatten({inputShape: [28, 28]}));
+model.add(tf.layers.dense({units: 128, activation: 'relu'}));
+model.add(tf.layers.dropout({rate: 0.2}));
+model.add(tf.layers.dense({units: 10, activation: 'softmax'}));
+
+
+// fetch(mnist_test_url).then(res=>{
+// return res.text();
+// }).then(data=>{
+//   console.log(data);
+// });
+
+
+// // Load MNIST dataset from local files
+// const trainData = tf.data.csv(mnist_train_url, {
+//   columnConfigs: {
+//     label: { isLabel: true }
+//   }
+// });
+
+// const testData = tf.data.csv(mnist_test_url, {
+//   columnConfigs: {
+//     label: { isLabel: true }
+//   }
+// });
+
+// const mnistData = tf.data.csv(mnist_train_url, {
+//   columnConfigs:{
+//     // isLabel: true,
+//     "duplicate_column_name" :"new_name_"+Math.random(),
+//   },
+// });
+// // console.log(mnistData);
+
+// mnistData.forEachAsync((row)=>{
+// console.log(row);
+// });
+
+
+
+model.compile({optimizer: 'adam', loss: 'sparseCategoricalCrossentropy', metrics: ['accuracy']});
+
+
+console.log("before training");
+model.summary()
+
+
+const trainModel=async()=>{
+
+const data = tf.randomNormal([100, 784]).reshape([1, 28, 28]);
+const labels = tf.randomUniform([100, 1], 0, 9, "int32");
+
+console.log(data);
+console.log(labels);
+
+const dataset = tf.data.array([data, labels]);
+
+console.log(dataset);
+await model.fit(dataset, {
+  epochs:10,
+  batchSize: 32,
+  callbacks:{
+    onEpochEnd:(epoch, log)=>{
+      console.log(`epochs \t ${epoch}:\n accuracy \t ${log.acc}:\n loss \t ${log.loss}: `);
+    }
+  },
+});
+
+
+
+// await model.fit(trainData, {
+//   epochs:10,
+//   validationData: testData,
+//   callbacks:{
+//     onEpochEnd:(epoch, log)=>{
+//       console.log(`epochs \t ${epoch}:\n accuracy \t ${log.acc}:\n loss \t ${log.loss}: `);
+//     }
+//   },
+// });
+
+
+}
+
+//1. A flatten layer to reshape the input data (28x28 images) into a 1D array.
+//2. A dense layer with 128 units, ReLU activation, and dropout (20%).
+//3. A final dense layer with 10 units (one for each digit class) and softmax activation.
+
+
+
+
+const predictDigit=async()=>{
+
+const imgDataArr = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height).data;
+
+let inputArr = [];
+for (let i =0;i<imgDataArr.length;i+=4){
+const gray = (imgDataArr[i] + imgDataArr[i+1] + imgDataArr[i+2] / 3)
+inputArr.push(gray);
+}
+
+
+let inputTensor = tf.tensor(inputArr, [1, 28, 28]);
+console.log(inputTensor)
+
+const outputTensor = model.predict(inputTensor);
+console.log(outputTensor)
+
+const predictions =await outputTensor.data()
+
+console.log(predictions);
+
+
+}
+
+
+const eraseCanvas=()=>{
+
+ctx.clearRect(0,0, ctx.canvas.width, ctx.canvas.height);
+
+}
+
+
+
+
+ctx.canvas.addEventListener("touchstart", (e)=>{
+
+const x = parseInt(e.changedTouches[0].clientX / ctx.canvas.width);
+const y =parseInt((e.changedTouches[0].clientY/ctx.canvas.height))
+
+
+ctx.beginPath();
+ctx.fillRect(x, y, 1, 1);
+ctx.closePath()
+});
+
+
+
+ctx.canvas.addEventListener("touchmove", (e)=>{
+
+const x = parseInt(e.changedTouches[0].clientX / ctx.canvas.width);
+const y =parseInt((e.changedTouches[0].clientY/ctx.canvas.height))
+
+
+ctx.beginPath()
+ctx.fillRect(x, y, 1, 1);
+ctx.closePath()
+});
+
+
+ctx.canvas.addEventListener("touchend", (e)=>{
+
+
+const x = parseInt(e.changedTouches[0].clientX / ctx.canvas.width);
+const y =parseInt((e.changedTouches[0].clientY/ctx.canvas.height))
+
+ctx.beginPath()
+ctx.fillRect(x, y, 1, 1);
+ctx.closePath();
+
+});
+
+
+//emiting clear canvas function
+eraseBtn.addEventListener("click", ()=> eraseCanvas());
+
+//emiting predict number function
+predictBtn.addEventListener("click", predictDigit );
+
+//emiting train model  function
+trainBtn.addEventListener("click", trainModel );
+
+}
+
+
+
+
+try{
+
+console.log(tf);
+console.log(tf.data);
+INITIAL()
+}catch(err){
+throw new Error(`javascript uncatch error ${err}`)
+}
+
+</script>
+
+</body>
+</html>

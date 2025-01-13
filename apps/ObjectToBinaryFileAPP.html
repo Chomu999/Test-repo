@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, user-scalable=no" />
+<meta name="author" content="bhowmickbyte, " />
+
+<style>
+*{
+margin: 0; padding: 0; box-sizing: border-box;
+}
+
+html{
+font-size: 10px;
+}
+a{
+text-decoration:none;
+color: inharit;
+}
+
+body{
+width:100vw; height:100vh;
+}
+
+main{
+width: 100%; height: 100%;
+background:#101524;
+}
+
+
+
+div.containerNames{
+width: 100%; height: 6rem;
+display: flex;
+align-items: center;
+justify-content: space-around;
+background: red;
+}
+
+div.containerNames textarea{
+width:40%; height: 90%;
+background: #f0aabb88;
+color: #1ee11e;
+border-radius: 2rem 2rem;
+text-align: center;
+}
+
+div.container{
+width: 100%; height: 16rem;
+display: flex;
+align-items: center;
+justify-content: space-around;
+background: green;
+}
+
+div.container textarea{
+width:40%; height: 80%;
+background: #f0aabb88;
+color: #1ee11e;
+border-radius: 1rem 1rem;
+text-align: center;
+}
+
+div.containerDowloads{
+margin: auto;
+width:100%;
+display:flex;
+align-items:center;
+justify-content: space-around;
+background: blue;
+}
+
+div.containerDowloads > a{
+padding: 2rem 3rem;
+font-size: 2rem;
+text-transform: capitalize;
+background: #00FF6D;
+color: #ff009f;
+border-radius: 2rem 3rem;
+}
+
+
+div.resource{
+display: none;
+}
+
+</style>
+
+<title>3d Object Convert To Binary File App</title>
+</head>
+<body>
+
+<main id="main">
+
+ 
+<div class="containerNames">
+<textarea id="VertexFileNameValue" placeholder="Enter Vertex File Name here"></textarea>
+<textarea id="IndexFileNameValue" placeholder="Enter Index File Name here"></textarea>
+</div>
+
+<div class="container">
+<textarea id="VertexValue" placeholder="Put Vertex Data here"></textarea>
+<textarea id="IndexValue" placeholder="Put Index Data here"></textarea>
+</div>
+
+<div class="containerDowloads">
+ <a id="DownloadVertex" href="#">Download Vertex</a>
+ <a id="DownloadIndex" href="#">Download Index</a>
+</div>
+
+
+</main>
+
+<script>
+
+
+
+class Rand{
+static Float(min=1,max=2){
+return Math.random() * (max-min+1) + min
+}
+
+static Int(min=10,max=20){
+return Math.floor(Rand.Float(min,max))
+}
+
+static Choice(...args){
+return args[Rand.Int(0,args.length-1)]
+}
+
+}
+
+
+
+const ParseData=(DataText, type="vertex")=>{
+if(type=="vertex"){
+
+let Data = DataText.split(" ").join("#").split("#")
+
+let fainlData=[]
+for(const i of Data)
+{
+if (i !== "") fainlData.push(parseFloat(i))
+}
+
+return new Float32Array(fainlData.slice(1, fainlData.length)).buffer;
+}
+
+if (type=="index"){
+
+let Data = DataText.split("\n").join().split(",")
+
+console.log(Data)
+
+let fainlData=[]
+for(const i of Data)
+{
+if (i !== "") fainlData.push(parseFloat(i))
+}
+
+return new Uint8Array(fainlData).buffer
+}
+
+}
+
+
+const StoreData=(anchor, Data, FileNameANDFileFormat="dummy.txt")=>{
+
+const _bloa=new Blob(Data)
+const _url = URL.createObjectURL(_bloa)
+anchor.download=FileNameANDFileFormat
+anchor.href=_url
+}
+
+const App = () =>{
+
+
+const VerFileNameValue=document.querySelector("div.containerNames > textarea#VertexFileNameValue")
+const IndFileNameValue=document.querySelector("div.containerNames > textarea#IndexFileNameValue")
+
+const VerValue=document.querySelector("textarea#VertexValue")
+const IndValue=document.querySelector("textarea#IndexValue")
+
+
+const dv=document.querySelector("div.containerDowloads > a#DownloadVertex")
+const di=document.querySelector("div.containerDowloads > a#DownloadIndex")
+
+
+dv.addEventListener("click", ()=>{
+
+if (!VerValue.value) return
+if (!VerFileNameValue.value) return
+
+const Data=ParseData(VerValue.value, "vertex")
+console.log(Data)
+
+StoreData(dv, [Data], VerFileNameValue.value+".bin")
+
+})
+
+di.addEventListener("click", ()=>{
+
+
+if (!IndValue.value) return
+if (!IndFileNameValue.value) return
+
+const Data=ParseData(IndValue.value, "index")
+console.log(Data)
+
+StoreData(di, [Data], IndFileNameValue.value+".bin")
+
+})
+
+
+
+
+
+
+}
+
+
+
+const Init=()=>{
+
+App()
+
+
+}
+
+window.addEventListener("load", ()=>{
+
+Init()
+
+})
+
+
+let aaaa=[
+    0,1,2,
+                               2
+
+,
+
+
+              
+3
+
+
+
+
+,0
+]
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<meta name="author" content="billbyte"/>
+<title>webgl app testing 2 recoding</title>
+
+<style>
+
+
+
+*{
+margin: 0;
+padding: 0;
+box-sizing:border-box;
+/* border: 0.1px solid red; */
+}
+
+
+
+html{
+font-size: 10px;
+}
+
+a{
+text-decoration: none;
+}
+
+li{
+list-style:none;
+}
+
+
+
+
+body{
+/* display:grid; */
+/* grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); */
+/* grid-template-rows: repeat(2, 1fr); */
+/* place-items:center; */
+/* gap: 1rem; */
+background: #3e3e3e;
+
+}
+
+main{
+display: grid;
+/* grid-template-columns: repeat(auto-fil, minmax(30rem, 1fr)); */
+grid-template-rows: repeat(auto-fil, minmax(1fr, 30rem));
+}
+
+canvas{
+margin: auto;
+background:#FF986E;
+}
+
+.control_box{
+background: brown;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+
+.control_box > button{
+padding: 2rem;
+font-size:2rem;
+text-transform: capitalize;
+background: #009AFF;
+border: 0;
+border-radius: 8rem;
+}
+
+.error_box{
+margin: 2rem 0;
+background:transparent;
+overflow:hidden auto;
+}
+
+.title{
+color:#222A3B;
+font-size: 3rem;
+display:block;
+text-align: center;
+text-transform: capitalize;
+background: linear-gradient(45deg,red, blue);
+text-decoration: underline;
+}
+
+.error_box  p{
+margin:0.2rem 1rem;
+padding: 1rem ;
+
+background: #0009;
+color: #FF374E;
+border-radius: 1rem;
+}
+
+
+.hidden{
+display: none;
+}
+
+</style>
+
+<script src="/storage/emulated/0/g_js_libs/CCapture.all.min.js"></script>
+<script src="/storage/emulated/0/g_js_libs/gl-matrix.js"></script>
+
+</head>
+<body>
+
+<main>
+
+<canvas id="canvas"></canvas>
+
+
+
+<div class="control_box">
+
+<button id="btn_start_recoding"> start</button>
+<button id="btn_end_recoding"> end</button>
+</div>
+
+<div class="error_box">
+<span class="title">error and warning</span>
+<pre></pre>
+</div>
+
+</main>
+
+<div class="hidden">
+<img src="/storage/emulated/0/Download/images (7).jpeg" id="img1" />
+<img src="/storage/emulated/0/Download/Zelda2.png" id="img2" />
+<img src="/storage/emulated/0/Download/images (9).jpeg" id="img3" />
+<img src="/storage/emulated/0/Download/images (10).jpeg" id="img4" />
+</div>
+
+<script>
+
+
+
+const {PI, cos, sin, tan, abs} = Math;
+
+
+
+const showError=(msg)=>{
+console.log(msg)
+const errorContainer=document.querySelector(".error_box > pre")
+if(!errorContainer) return -1;
+errorContainer.innerHTML+=`<p>${msg}</p>`;
+}
+
+const showGlError =(ii=0)=>{
+for (let i in gl) if (gl[i] == ii) showError(i)
+}
+
+
+const canvas=document.querySelector("canvas");
+
+const gl=canvas.getContext("webgl2");
+
+const c_recoder = new CCapture({format:"webm"})
+
+let is_recoding=!1;
+
+
+
+class Rand{
+
+static Float(min=0, max=1){
+return Math.random() * (max - min) + min;
+}
+
+static Int(min=1, max=2){
+return Math.floor(Rand.Float(min, max));
+}
+
+static Choice(...args){
+return args[Rand.Int(0, args.length)];
+}
+
+
+}
+
+
+
+
+
+
+
+const makeProgram=(gl, vss, fss)=>{
+const vs=gl.createShader(gl.VERTEX_SHADER)
+gl.shaderSource(vs, vss)
+gl.compileShader(vs)
+if(!gl.getShaderParameter(vs, gl.COMPILE_STATUS)){
+showError(`vertex error ${gl.getShaderInfoLog(vs)}
+${gl.getShaderSource(vs)}
+`)
+}
+
+const fs=gl.createShader(gl.FRAGMENT_SHADER)
+gl.shaderSource(fs, fss)
+gl.compileShader(fs)
+if(!gl.getShaderParameter(fs, gl.COMPILE_STATUS)){
+showError(`fragment error ${gl.getShaderInfoLog(fs)}
+${gl.getShaderSource(fs)}
+`)
+}
+
+
+const prog=gl.createProgram();
+gl.attachShader(prog, vs);
+gl.attachShader(prog, fs);
+
+gl.linkProgram(prog);
+if(!gl.getProgramParameter(prog, gl.LINK_STATUS)){
+showError(`${gl.getProgramInfoLog(prog)}`)
+}
+
+gl.useProgram(prog);
+
+gl.validateProgram(prog);
+if(!gl.getProgramParameter(prog, gl.VALIDATE_STATUS)){
+showError(`${gl.getProgramInfoLog(prog)}`)
+}
+
+return prog;
+}
+
+
+class Program{
+constructor(vss, fss){
+this.ID=makeProgram(gl, vss, fss);
+
+this.ID.loc={
+u:{},
+a:{}
+};
+
+}
+
+Bind(){
+gl.useProgram(this.ID);
+}
+
+Unbind(){
+gl.useProgram(null);
+}
+
+Delete(){
+gl.deleteProgram(this.ID);
+}
+
+SetUniform1(name, value){
+gl.uniform1f(Program.GetUniformLocation(this.ID, this.ID.loc.u, name), value);
+}
+
+SetUniform2(name, value){
+gl.uniform2fv(Program.GetUniformLocation(this.ID, this.ID.loc.u, name), value);
+}
+
+SetUniform3(name, value){
+gl.uniform3fv(Program.GetUniformLocation(this.ID, this.ID.loc.u, name), value);
+}
+
+SetUniform4(name, value){
+gl.uniform4fv(Program.GetUniformLocation(this.ID, this.ID.loc.u, name), value);
+}
+
+SetUniformMat4(name, value){
+gl.uniformMatrix4fv(Program.GetUniformLocation(this.ID, this.ID.loc.u, name), gl.FLOAT, value)
+
+}
+
+static GetUniformLocation(prog, u, name){
+
+let result = !u[name] ? gl.getUniformLocation(prog, name): u[name];
+u[name] = result;
+return result;
+
+}
+
+}
+
+
+class Texture{
+constructor(imgData){
+this.ID= gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, this.ID);
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, !0)
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, imgData)
+
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+gl.bindTexture(gl.TEXTURE_2D, null)
+
+}
+
+Bind(){
+gl.bindTexture(gl.TEXTURE_2D, this.ID);
+}
+
+Unbind(){
+gl.bindTexture(gl.TEXTURE_2D, null);
+}
+
+Delete(){
+gl.deleteTexture(this.ID);
+}
+
+
+}
+
+
+
+class VA{
+constructor(){
+this.ID=gl.createVertexArray()
+}
+
+Bind(){
+gl.bindVertexArray(this.ID);
+}
+
+Unbind(){
+gl.bindVertexArray(null);
+}
+
+Delete(){
+gl.deleteVertexArray(this.ID);
+}
+
+LA(vbo, layoutLocation=0, numberOfComponents=3, type=gl.FLOAT, normalize=!1, stride=0, offset=0){
+if (vbo instanceof VB) vbo.Bind()
+gl.enableVertexAttribArray(layoutLocation);
+gl.vertexAttribPointer(layoutLocation, numberOfComponents, type, normalize, stride, offset);
+
+}
+
+}
+
+
+class VB{
+constructor(Data){
+this.ID=gl.createBuffer()
+gl.bindBuffer(gl.ARRAY_BUFFER, this.ID);
+gl.bufferData(gl.ARRAY_BUFFER, Data, gl.STATIC_DRAW);
+
+}
+
+Bind(){
+gl.bindBuffer(gl.ARRAY_BUFFER, this.ID);
+}
+
+Unbind(){
+gl.bindBuffer(gl.ARRAY_BUFFER, null);
+}
+
+Delete(){
+gl.deleteBuffer(this.ID);
+}
+
+
+}
+
+
+class IB{
+constructor(Data){
+this.ID=gl.createBuffer()
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ID);
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, Data, gl.STATIC_DRAW);
+
+}
+
+Bind(){
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ID);
+}
+
+Unbind(){
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+}
+
+Delete(){
+gl.deleteBuffer(this.ID);
+}
+
+
+}
+
+
+
+
+class Material{
+constructor(){
+this.Program=new Program(gl, shaderSource.simple.vertex, shaderSource.simple.fragment)
+this.drawMethod = gl.TRIANGLES;
+
+this.Ambient=[0.0, 0.0, 0.5, 1.0]
+this.Diffuse=[0.0, 1.0, 0.5, 1.0]
+this.Specular=[1.0, 0.0, 0.5, 1.0]
+this.Shininess=1.0;
+
+this.color=[1.0, 0.0, 0.0, 1.0]
+}
+
+#_update(dt=0){
+showError("hi form Materials class")
+
+}
+
+}
+
+class Geometry{
+constructor(){
+
+this.verticies=new Float32Array([
+  0.0,   0.5, 1.0, 0.0, 0.0, 1.0,
+ -0.5,  -0.5, 0.0, 0.0, 1.0, 1.0,
+  0.5,  -0.5, 0.0, 1.0, 0.0, 1.0,
+
+]);
+
+this.verticies2=new Float32Array([
+  0.0,   0.5,
+ -0.5,  -0.5,
+  0.5,  -0.5,
+
+]);
+
+
+this.indices=new Uint8Array([]);
+
+this.vbo=new VB(this.verticies)
+
+//showError(this.vbo)
+//this.ibo=new IB(this.indices)
+}
+
+
+}
+
+
+
+
+class Mesh{
+constructor(material, geometry){
+this.material = material;
+this.geometry = geometry;
+
+this.modelMat=mat4.create()
+
+this.Position= [0, -0.5]
+
+this.Scale= [1, 1]
+this.Rotation= [0, 0, 0]
+this.Vao=new VA()
+
+this.#Bind()
+
+}
+
+#Bind(){
+
+this.Vao.Bind()
+this.geometry.vbo.Bind()
+
+
+this.Vao.LA(this.geometry.vbo, 0, 3, gl.FLOAT, false, 8 * 4, 0 * 4)
+this.Vao.LA(null, 1, 2, gl.FLOAT, false, 8 * 4, 3 * 4)
+this.Vao.LA(null, 1, 3, gl.FLOAT, false, 8 * 4, 5 * 4)
+//Ebo1.Bind()
+
+
+}
+
+
+_render(){
+
+this.material.Program.Bind();
+this.Vao.Bind()
+
+this.#_update(1)
+this.material.Program.SetUniform2("uOffset", this.Position);
+
+gl.drawArrays(this.material.drawMethod, 0, 3)
+
+//gl.drawElements(this.material.drawMethod, this.geometry.indices.length, gl.UNSIGNED_BYTE, 0)
+//showError("drawin")
+
+}
+
+#_update(dt=0){
+
+showError("hi form mesh class")
+}
+
+
+}
+
+
+class Scene{
+constructor(){
+this.childrens=[]
+
+}
+
+add_child(...args){
+this.childrens.push(...args)
+}
+
+_render(){
+
+
+this.childrens.forEach((child)=>{
+child._render()
+})
+
+}
+
+
+}
+
+
+class Renderer{
+constructor(width, height){
+this.width=width;
+this.height=height;
+this.Color=[0.9, 0.9, 0.9, 1.0];
+}
+
+Clear(){
+
+gl.viewport(0, 0, this.width, this.height);
+gl.clearColor(...this.Color);
+gl.clear(gl.COLOR_BUFFER_BIT );
+
+}
+
+render(scene){
+
+
+scene._render()
+
+}
+
+set color(value){
+this.Color = value;
+}
+
+}
+
+
+
+
+
+
+
+const INIT=()=>{
+
+const width=360, height=360;
+
+gl.canvas.width=width;
+gl.canvas.height=height;
+
+showError(gl)
+const _randerer = new Renderer(width, height);
+
+
+
+
+const shader1={
+vertex:`#version 300 es
+precision mediump float;
+layout (location=0) in vec4 aPos;
+layout (location=1) in vec2 aUv;
+
+
+
+out vec2 vUv;
+
+void main(){
+
+vUv = aUv;
+
+gl_Position = aPos;
+gl_Position.w =   0.5;
+
+}
+`,
+
+
+fragment:`#version 300 es
+precision mediump float;
+layout (location=0) out vec4 FragColor;
+
+
+uniform sampler2D uTex;
+
+uniform float uTime;
+uniform vec2 uRes;
+
+
+in vec2 vUv;
+
+
+void main(){
+
+float angle = uTime * 0.25;
+vec2 uv = gl_FragCoord.xy / uRes.xy * 3.0 - 1.5;
+
+for (float i = 0.0;i < 32.0; i += 2.0){
+
+
+uv = abs(uv);
+uv -= 0.5;
+uv *= 1.2;
+uv *= mat2(
+  cos(angle), -sin(angle),
+  sin(angle), cos(angle)
+) ;
+
+}
+
+vec4 fcolor= vec4( length(uv) * cos(uTime), length(uv * vec2(0.5, 0.1)), length(uv * vec2(0.2, 1.0) ), 1.0);
+
+//vec4 fcolor= vec4( vec3(length(uv)), 1.0);
+
+vec4 img = texture(uTex, vUv);
+
+//float s = uTime;
+
+FragColor = mix(img, fcolor, 0.9);
+
+}
+`,
+}
+
+
+
+const prog =  new Program( shader1.vertex, shader1.fragment)
+
+
+let tex1 = new Texture(img1)
+
+const PositionVerticesData=new Float32Array([
+
+	// x y z 
+	-.5,  .5,
+	-.5, -.5,
+	 .5, -.5,
+	 .5,  .5,
+
+
+
+])
+
+const UVVerticesData=new Float32Array([
+
+	// uv
+
+	0, 1,
+	0, 0,
+	1, 0,
+	1, 1,
+
+
+
+])
+
+const indicesData=new Uint8Array([
+0,1,2,
+0,2,3,
+])
+
+
+
+let Vao1=new VA();
+let Vbo1=new VB(PositionVerticesData);
+let Vbo2=new VB(UVVerticesData);
+let Ibo1=new IB(indicesData);
+
+Vao1.Bind()
+Vao1.LA(Vbo1, 0, 2)
+Vao1.LA(Vbo2, 1, 2)
+Ibo1.Bind()
+
+
+
+
+let x=0, y=0;
+
+const update=(dt)=>{
+
+prog.Bind()
+Vao1.Bind()
+tex1.Bind()
+prog.SetUniform1("uTime", dt)
+prog.SetUniform2("uRes", [width, height])
+
+//prog.SetUniform2("uOffset", [x, y])
+
+
+gl.drawElements(gl.TRIANGLES,  indicesData.length, gl.UNSIGNED_BYTE, 0)
+
+
+}
+
+
+
+//gl.enable(gl.BELND);
+//gl.blendFunc(gl.BLEND_SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+
+
+
+const animate=(dt)=>{
+
+// clearing canvas
+_randerer.Clear()
+
+update(dt);
+
+c_recoder.capture(gl.canvas);
+
+}
+
+
+
+
+
+
+
+// performance.now();
+
+const loop=(ts=0)=>{
+
+let dt = ts * 0.001 ?? 0.5;
+
+
+animate(dt);
+
+requestAnimationFrame(loop)
+
+}
+
+loop()
+
+
+
+
+//showError(window)
+
+
+
+const start_recoding=()=>{
+is_recoding = true;
+c_recoder.start();
+}
+
+const end_recoding=()=>{
+is_recoding = false;
+c_recoder.stop()
+c_recoder.save()
+}
+
+
+btn_start_recoding.addEventListener("click", start_recoding)
+btn_end_recoding.addEventListener("click", end_recoding)
+
+
+}
+
+
+
+
+
+
+
+window.addEventListener("load", ()=>{
+
+try{
+
+
+INIT();
+
+
+showError("js is awesome".toUpperCase());
+
+}catch(e){
+showError(e);
+}
+
+});
+
+
+
+</script>
+
+</body>
+</html>

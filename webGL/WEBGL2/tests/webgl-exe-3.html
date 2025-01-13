@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+
+<title>webGL exe 3</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
+html{
+font-size:10px;
+}
+
+
+body{
+width:100vw; height:100vh;
+}
+
+main{
+width:100%; height:100%;
+background:#e3e3e311;
+display: grid;
+place-items:center;
+}
+
+.res{
+display: none;
+}
+
+</style>
+<script src="/storage/emulated/0/g_js_libs/gl-matrix.js" type="application/javascript" charset="utf-8"></script>
+</head>
+<body>
+
+<main>
+<canvas id=canvas></canvas>
+<div class="res">
+<img src="/storage/emulated/0/Download/Zelda2.png" alt="Zelda And Link" id="img1">
+</div>
+</main>
+
+<script>
+
+console.error("server is down please try again")
+
+const randInt=(min=10,max=100)=>Math.floor(Math.random() * (max-min) + min);
+
+const loadBinModel=async(url_)=>{
+const file=await fetch(url_)
+return await file.arrayBuffer()
+}
+
+
+const gen_RGBA=()=>{
+let arr=[];
+for(let i=0;i<3;++i) arr.push(randInt(0,255));
+arr.push(1.0)
+return arr;
+}
+
+const randColor=(l=9)=>{
+let myArr=[]
+for(let i=0;i<l;++i)myArr.push(gen_RGBA())
+myArr=myArr.flat()
+return new Uint8Array(myArr)
+}
+
+
+
+
+const app=async(gl)=>{
+
+
+const vertexShaderSource=`#version 300 es
+precision mediump float;
+
+in vec4 aPos;
+//in vec4 aColor;
+in vec2 aTexCoord;
+
+
+uniform mat4 uMatrix;
+
+
+//out vec4 vColor;
+out vec2 vTexCoord;
+
+void main(){
+gl_Position=uMatrix * aPos;
+//vColor=aColor;
+vTexCoord=aTexCoord;
+
+}
+`
+
+const fragmentShaderSource=`#version 300 es
+precision mediump float;
+
+out vec4 FragColor;
+
+uniform sampler2D tex;
+
+//in vec4 vColor;
+in vec2 vTexCoord;
+
+void main(){
+FragColor = texture(tex, vTexCoord);// * vColor;
+}
+
+`
+
+/*
+getProgramInfoLog: ƒ getProgramInfoLog()
+getProgramParameter: ƒ getProgramParameter()
+getQuery: ƒ getQuery
+
+
+etShaderInfoLog: ƒ getShaderInfoLog()
+getShaderParameter: ƒ getShaderParameter()
+getShaderPrecisionFormat: ƒ getShaderPrecisionFormat()
+getShaderSource: ƒ getShade
+
+*/
+
+
+
+const vs=gl.createShader(gl.VERTEX_SHADER)
+gl.shaderSource(vs, vertexShaderSource)
+gl.compileShader(vs)
+if(!gl.getShaderParameter(vs, gl.COMPILE_STATUS)){
+console.error("vs error", gl.getShaderInfoLog(vs))
+console.info("vs source", gl.getShaderSource(vs))
+}
+
+const fs=gl.createShader(gl.FRAGMENT_SHADER)
+gl.shaderSource(fs, fragmentShaderSource)
+gl.compileShader(fs)
+if(!gl.getShaderParameter(fs, gl.COMPILE_STATUS)){
+console.error("fs error", gl.getShaderInfoLog(fs))
+console.info("fs source", gl.getShaderSource(fs))
+}
+
+const prog=gl.createProgram()
+
+gl.attachShader(prog, vs)
+gl.attachShader(prog, fs)
+
+gl.linkProgram(prog)
+if(!gl.getProgramParameter(prog, gl.LINK_STATUS)){
+console.warn("program is not linked", gl.getProgramInfoLog(prog))
+}
+
+gl.useProgram(prog)
+gl.validateProgram(prog)
+if(!gl.getProgramParameter(prog, gl.VALIDATE_STATUS)){
+console.warn("program is not valid ", gl.getProgramInfoLog(prog))
+}
+//gl.useProgram(prog)
+
+
+
+
+
+const ourData=await loadBinModel("./models/binary/rock.bin")
+
+
+const ourIndices=await loadBinModel("./models/binary/rock.indices.bin")
+
+const vbo=gl.createBuffer()
+gl.bindBuffer(gl.ARRAY_BUFFER, vbo)
+gl.bufferData(gl.ARRAY_BUFFER, ourData, gl.STATIC_DRAW)
+
+const ebo=gl.createBuffer()
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, ourIndices, gl.STATIC_DRAW)
+
+
+const aPosLoc=gl.getAttribLocation(prog, "aPos")
+const aTexCoordLoc=gl.getAttribLocation(prog, "aTexCoord")
+const aColorLoc=gl.getAttribLocation(prog, "aColor")
+
+
+gl.enableVertexAttribArray(aPosLoc)
+gl.vertexAttribPointer(aPosLoc, 3, gl.FLOAT, gl.FALSE, 8*4, 0)
+
+
+//gl.enableVertexAttribArray(aColorLoc)
+//gl.vertexAttribPointer(aColorLoc, 3, gl.FLOAT, gl.FALSE, 8*4, 3*4)
+
+gl.enableVertexAttribArray(aTexCoordLoc)
+gl.vertexAttribPointer(aTexCoordLoc, 2, gl.FLOAT, gl.FALSE, 8*4, 6*4)
+
+const imgColor=randColor(9)
+
+const tex =gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, tex);
+
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA,3,3, 0, gl.RGBA, gl.UNSIGNED_BYTE, imgColor)
+
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+
+const uMatrixLoc=gl.getUniformLocation(prog, "uMatrix")
+
+const matrixVal=mat4.create()
+
+
+setInterval(()=>{
+
+
+gl.clearColor(0.2, 0.3, 0.3, 1.0)
+gl.clear(gl.COLOR_BUFFER_BIT)
+gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
+
+
+
+mat4.rotate(matrixVal, matrixVal,  Math.PI*2/180, [-1.0, 1.0, 0.0])
+//mat4.rotateX(matrixVal, matrixVal, Math.PI*2/360)
+
+gl.uniformMatrix4fv(uMatrixLoc, gl.FLOAT, matrixVal)
+
+
+//gl.drawArrays(gl.TRIANGLES, 0, 120)
+gl.drawElements(gl.TRIANGLES, 128, gl.UNSIGNED_BYTE, 0)
+
+}, 1000/30)
+
+
+
+
+}
+
+
+
+
+
+
+window.addEventListener("load", ()=>{
+
+
+const canvas=document.getElementById("canvas")
+const gl=canvas.getContext("webgl2")
+canvas.width=innerWidth*0.8
+canvas.height=innerHeight
+console.log(gl)
+
+
+app(gl)
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
+</body>
+</html>

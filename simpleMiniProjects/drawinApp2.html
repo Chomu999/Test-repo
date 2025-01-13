@@ -1,0 +1,318 @@
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+
+<meta name="author" content="biswajit bhowmick"/>
+
+
+<meta name="viewport"
+content="width=device-width, user-scalable=no,            initial-scale=1.0, maximum-scale=1.0">
+
+<title>HTML clock APP 2</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+html{
+font-size:10px;
+}
+
+body{
+width:100vw; height:100vh;
+background:#000;
+overflow:hidden;
+}
+
+#main{
+width:100%; height:100%;
+display:inline;
+}
+
+
+.cvsParent{
+width:100%; height:85%;
+position:relative;
+display:block;
+z-index:5;
+}
+
+canvas{
+position: absolute;
+}
+
+
+div#toolsBox{
+padding:1rem 0;
+width:100%; height:15%;
+
+position:relative;
+
+background:rgba(255, 255, 255, 0.3);
+z-index:10;
+}
+
+
+
+.tools{
+margin:auto;
+width:90%; height:30%;
+display:flex;
+justify-content:space-around;
+align-items:center;
+background:rgba(255, 0, 0, 0.3);
+}
+
+
+div#clearBtn{
+color:red;
+background:tan;
+}
+
+
+</style>
+
+</head>
+
+<body>
+
+
+<main id="main">
+
+<div class="cvsParent" id=cvsParent >
+ 
+<canvas id=canvas1 ></canvas>
+<canvas id=canvas2 ></canvas>
+
+</div>
+
+<div id="toolsBox">
+
+<div class="tools">
+
+<input value="white" type="color" id="color"/>
+
+<input type="range" min="1" max="30" id="penSize"/>
+
+<select id=opBar value="aaloo">
+<option value="round">round</option>
+<option value="butt">butt</option>
+</select>
+
+<p id="clearBtn">clear canvas</p>
+
+</div>
+
+</div>
+
+</main>
+
+
+
+<script>
+
+
+
+
+
+
+let mainheight,mainwidth;
+
+
+let cls,clk,ani,px,id;
+
+cls='class';
+clk='click';
+
+
+const canvas=document.querySelector('#canvas1');
+const ctx = canvas.getContext('2d');
+
+const canvas2=document.querySelector('#canvas2');
+const ctx2 = canvas2.getContext('2d');
+console.log(ctx);
+
+
+
+//const cvsW=cvsParent.getClientRects()[0].width;
+//const cvsH=cvsParent.getClientRects()[0].height;
+
+
+canvas.width=cvsParent.getClientRects()[0].width;
+canvas.height=cvsParent.getClientRects()[0].height;
+
+canvas2.width=canvas.width;
+canvas2.height=canvas.height;
+
+
+
+
+ctx.strokeStyle="white";
+
+ctx.lineCap="butt";
+
+
+
+
+
+
+
+
+
+//main=document.getElementById('main');
+//toolB=document.getElementById('toolsBox')
+
+let color=document.getElementById('color');
+let size=document.getElementById('penSize');
+let clearBtn=document.getElementById('clearBtn');
+
+
+
+
+
+
+
+
+
+
+let touch=['touchstart','touchmove','touchend'];
+
+let its_drawin = false;
+
+
+const ops={
+color:"white",
+size:3,
+mode:"round",
+opacity:10,
+}
+
+
+
+
+
+
+
+
+
+let arr=[]
+
+
+canvas2.addEventListener("pointerrawupdate",(e)=>{
+
+
+
+if(!e.x && !e.y) return;
+
+
+arr.push({x:e.x, y:e.y});
+
+//console.log(e)
+
+
+
+ctx2.save();
+ctx2.beginPath();
+ctx2.strokeStyle="white";
+
+ctx2.moveTo(arr[0].x, arr[0].y);
+
+for(let i=0;i<arr.length;i++){
+ctx2.lineTo(arr[i].x, arr[i].y);
+}
+
+ctx2.stroke();
+ctx2.closePath();
+
+ctx2.restore();
+
+
+
+//its_drawin = false;
+
+
+});
+
+
+
+
+canvas2.addEventListener("touchend",(e)=>{
+
+//clear 2nd canvas
+ctx2.clearRect(0,0,canvas2.width,canvas2.height);
+
+if(!arr[0]) return;
+
+ctx.save();
+ctx.beginPath();
+ctx.fillStyle="white";
+ctx.strokeStyle=ops.color;
+ctx.lineWidth=ops.size;
+ctx.lineCap=ops.mode;
+ctx.globalAlpha=1.0;//ops.opacity/100;
+
+ctx.moveTo(arr[0].x, arr[0].y);
+
+for(let i=0;i<arr.length;i++){
+ctx.lineTo(arr[i].x, arr[i].y);
+}
+
+ctx.stroke();
+//ctx.fill();
+ctx.closePath();
+
+ctx.restore();
+
+
+arr=[];
+
+})
+
+
+
+
+clearBtn.addEventListener("click",(e)=>{
+
+
+ctx.save();
+ctx.beginPath();
+ctx.fillStyle="black";
+
+ctx.globalAlpha=1.0;//ops.opacity/100;
+ctx.fillRect(0,0,canvas.width,canvas.height);
+ctx.closePath();
+
+ctx.restore();
+
+
+//ctx.clearRect(0,0,canvas.width,canvas.height);
+})
+
+
+document.addEventListener("change", (event)=>{
+
+ops.color=color.value;
+ops.size=size.value;
+ops.mode=opBar.value;
+
+//console.log(opBar.value)
+
+
+})
+
+//getBoundingClientRect: ƒ getBoundingClientRect()
+//getClientRects
+
+//console.log( 10/100 )
+
+</script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<meta name="author" content="billbyte"/>
+<title>webgl app testing 6</title>
+
+<style>
+
+
+
+*{
+margin: 0;
+padding: 0;
+box-sizing:border-box;
+/* border: 0.1px solid red; */
+}
+
+
+
+html{
+font-size: 10px;
+}
+
+a{
+text-decoration: none;
+}
+
+li{
+list-style:none;
+}
+
+
+
+
+body{
+/* display:grid; */
+/* grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); */
+/* grid-template-rows: repeat(2, 1fr); */
+/* place-items:center; */
+/* gap: 1rem; */
+background: #3e3e3e;
+
+}
+
+main{
+display: grid;
+/* grid-template-columns: repeat(auto-fil, minmax(30rem, 1fr)); */
+grid-template-rows: repeat(auto-fil, minmax(1fr, 30rem));
+}
+
+canvas{
+margin: auto;
+background:#FF986E;
+}
+
+.control_box{
+background: brown;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+
+.control_box > button{
+padding: 2rem;
+font-size:2rem;
+text-transform: capitalize;
+background: #009AFF;
+border: 0;
+border-radius: 8rem;
+}
+
+.error_box{
+margin: 2rem 0;
+background:transparent;
+overflow:hidden auto;
+}
+
+.title{
+color:#222A3B;
+font-size: 3rem;
+display:block;
+text-align: center;
+text-transform: capitalize;
+background: linear-gradient(45deg,red, blue);
+text-decoration: underline;
+}
+
+.error_box  p{
+margin:0.2rem 1rem;
+padding: 1rem ;
+
+background: #0009;
+color: #FF374E;
+border-radius: 1rem;
+}
+
+
+.hidden{
+display: none;
+}
+
+</style>
+
+<!-- <script src="/storage/emulated/0/g_js_libs/CCapture.all.min.js"></script> -->
+<script src="/storage/emulated/0/g_js_libs/gl-matrix.js"></script>
+
+</head>
+<body>
+
+<main>
+
+<canvas id="canvas"></canvas>
+
+
+
+
+<div class="error_box">
+<span class="title">error and warning</span>
+<pre></pre>
+</div>
+
+</main>
+
+<div class="hidden">
+<img src="/storage/emulated/0/Download/images (7).jpeg" id="img1" />
+<img src="/storage/emulated/0/Download/Zelda2.png" id="img2" />
+<img src="/storage/emulated/0/Download/images (9).jpeg" id="img3" />
+<img src="/storage/emulated/0/Download/images (10).jpeg" id="img4" />
+</div>
+
+<script>
+
+
+
+const {PI, cos, sin, tan, abs} = Math;
+
+
+
+const showError=(msg)=>{
+console.log(msg)
+const errorContainer=document.querySelector(".error_box > pre")
+if(!errorContainer) return -1;
+errorContainer.innerHTML+=`<p>${msg}</p>`;
+}
+
+const showGlError =(ii=0)=>{
+for (let i in gl) if (gl[i] == ii) showError(i)
+}
+
+
+
+const canvas=document.querySelector("canvas");
+
+const gl=canvas.getContext("webgl2");
+
+
+
+
+
+class Rand{
+
+static Float(min=0, max=1){
+return Math.random() * (max - min) + min;
+}
+
+static Int(min=1, max=2){
+return Math.floor(Rand.Float(min, max));
+}
+
+static Choice(...args){
+return args[Rand.Int(0, args.length)];
+}
+
+
+}
+
+
+
+
+
+
+
+const makeProgram=(gl, vss, fss)=>{
+const vs=gl.createShader(gl.VERTEX_SHADER)
+gl.shaderSource(vs, vss)
+gl.compileShader(vs)
+if(!gl.getShaderParameter(vs, gl.COMPILE_STATUS)){
+showError(`vertex error ${gl.getShaderInfoLog(vs)}
+${gl.getShaderSource(vs)}
+`)
+}
+
+const fs=gl.createShader(gl.FRAGMENT_SHADER)
+gl.shaderSource(fs, fss)
+gl.compileShader(fs)
+if(!gl.getShaderParameter(fs, gl.COMPILE_STATUS)){
+showError(`fragment error ${gl.getShaderInfoLog(fs)}
+${gl.getShaderSource(fs)}
+`)
+}
+
+
+const prog=gl.createProgram();
+gl.attachShader(prog, vs);
+gl.attachShader(prog, fs);
+
+gl.linkProgram(prog);
+if(!gl.getProgramParameter(prog, gl.LINK_STATUS)){
+showError(`${gl.getProgramInfoLog(prog)}`)
+}
+
+gl.useProgram(prog);
+
+gl.validateProgram(prog);
+if(!gl.getProgramParameter(prog, gl.VALIDATE_STATUS)){
+showError(`${gl.getProgramInfoLog(prog)}`)
+}
+
+return prog;
+}
+
+
+class Program{
+constructor(vss, fss){
+this.ID=makeProgram(gl, vss, fss);
+
+this.ID.loc={
+u:{},
+a:{}
+};
+
+}
+
+Bind(){
+gl.useProgram(this.ID);
+}
+
+Unbind(){
+gl.useProgram(null);
+}
+
+Delete(){
+gl.deleteProgram(this.ID);
+}
+
+SetUniform1(name, value){
+gl.uniform1f(Program.GetUniformLocation(this.ID, this.ID.loc.u, name), value);
+}
+
+SetUniform2(name, value){
+gl.uniform2fv(Program.GetUniformLocation(this.ID, this.ID.loc.u, name), value);
+}
+
+SetUniform3(name, value){
+gl.uniform3fv(Program.GetUniformLocation(this.ID, this.ID.loc.u, name), value);
+}
+
+SetUniform4(name, value){
+gl.uniform4fv(Program.GetUniformLocation(this.ID, this.ID.loc.u, name), value);
+}
+
+SetUniformMat4(name, value){
+gl.uniformMatrix4fv(Program.GetUniformLocation(this.ID, this.ID.loc.u, name), gl.FLOAT, value)
+
+}
+
+static GetUniformLocation(prog, u, name){
+
+let result = !u[name] ? gl.getUniformLocation(prog, name): u[name];
+u[name] = result;
+return result;
+
+}
+
+}
+
+
+class Texture{
+constructor(imgData){
+this.ID= gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, this.ID);
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, !0)
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, imgData)
+
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+gl.bindTexture(gl.TEXTURE_2D, null)
+
+}
+
+Bind(){
+gl.bindTexture(gl.TEXTURE_2D, this.ID);
+}
+
+Unbind(){
+gl.bindTexture(gl.TEXTURE_2D, null);
+}
+
+Delete(){
+gl.deleteTexture(this.ID);
+}
+
+
+}
+
+
+
+class VA{
+constructor(){
+this.ID=gl.createVertexArray()
+}
+
+Bind(){
+gl.bindVertexArray(this.ID);
+}
+
+Unbind(){
+gl.bindVertexArray(null);
+}
+
+Delete(){
+gl.deleteVertexArray(this.ID);
+}
+
+LA(vbo, layoutLocation=0, numberOfComponents=3, type=gl.FLOAT, normalize=!1, stride=0, offset=0){
+if (vbo instanceof VB) vbo.Bind()
+gl.enableVertexAttribArray(layoutLocation);
+gl.vertexAttribPointer(layoutLocation, numberOfComponents, type, normalize, stride, offset);
+
+}
+
+}
+
+
+class VB{
+constructor(Data){
+this.ID=gl.createBuffer()
+gl.bindBuffer(gl.ARRAY_BUFFER, this.ID);
+gl.bufferData(gl.ARRAY_BUFFER, Data, gl.STATIC_DRAW);
+
+}
+
+Bind(){
+gl.bindBuffer(gl.ARRAY_BUFFER, this.ID);
+}
+
+Unbind(){
+gl.bindBuffer(gl.ARRAY_BUFFER, null);
+}
+
+Delete(){
+gl.deleteBuffer(this.ID);
+}
+
+
+}
+
+
+class IB{
+constructor(Data){
+this.ID=gl.createBuffer()
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ID);
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, Data, gl.STATIC_DRAW);
+
+}
+
+Bind(){
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ID);
+}
+
+Unbind(){
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+}
+
+Delete(){
+gl.deleteBuffer(this.ID);
+}
+
+
+}
+
+
+
+
+
+
+
+
+
+class Mesh{
+constructor(material, geometry){
+this.material = material;
+this.geometry = geometry;
+
+this.modelMat=mat4.create()
+
+this.Position= [0, -0.5]
+
+this.Scale= [1, 1]
+this.Rotation= [0, 0, 0]
+this.Vao=new VA()
+
+this.#Bind()
+
+}
+
+#Bind(){
+
+this.Vao.Bind()
+this.geometry.vbo.Bind()
+
+
+this.Vao.LA(this.geometry.vbo, 0, 3, gl.FLOAT, false, 8 * 4, 0 * 4)
+this.Vao.LA(null, 1, 2, gl.FLOAT, false, 8 * 4, 3 * 4)
+this.Vao.LA(null, 1, 3, gl.FLOAT, false, 8 * 4, 5 * 4)
+//Ebo1.Bind()
+
+
+}
+
+
+_render(){
+
+this.material.Program.Bind();
+this.Vao.Bind()
+
+this.#_update(1)
+this.material.Program.SetUniform2("uOffset", this.Position);
+
+gl.drawArrays(this.material.drawMethod, 0, 3)
+
+//gl.drawElements(this.material.drawMethod, this.geometry.indices.length, gl.UNSIGNED_BYTE, 0)
+//showError("drawin")
+
+}
+
+#_update(dt=0){
+
+showError("hi form mesh class")
+}
+
+
+}
+
+
+class Scene{
+constructor(){
+this.childrens=[]
+
+}
+
+add_child(...args){
+this.childrens.push(...args)
+}
+
+_render(){
+
+
+this.childrens.forEach((child)=>{
+child._render()
+})
+
+}
+
+
+}
+
+
+class Renderer{
+constructor(width, height){
+this.width=width;
+this.height=height;
+this.Color=[0.9, 0.9, 0.9, 1.0];
+}
+
+Clear(){
+
+gl.viewport(0, 0, this.width, this.height);
+gl.clearColor(...this.Color);
+gl.clear(gl.COLOR_BUFFER_BIT );
+
+}
+
+render(scene){
+
+
+scene._render()
+
+}
+
+set color(value){
+this.Color = value;
+}
+
+}
+
+
+class TextureLoader{
+constructor(){
+this.path="/storage/emulated/0/";
+}
+
+load(url){
+
+let img = new Image();
+img.src = this.path +url;
+let tex = new Texture(img);
+return tex;
+}
+
+}
+
+
+
+
+
+
+const INIT=()=>{
+
+const width=360, height=360;
+
+gl.canvas.width=width;
+gl.canvas.height=height;
+const clearColor = [0.3, 0.2, 0.4, 1.0];
+showError(gl)
+
+
+
+
+
+
+const shader2={
+vertex:`#version 300 es
+precision mediump float;
+
+
+uniform vec3 uPos;
+
+
+
+void main(){
+
+
+gl_Position = vec4(uPos.xy, 0.0, 1.0);
+gl_PointSize = uPos.z;
+
+
+}
+`,
+
+
+fragment:`#version 300 es
+precision mediump float;
+layout (location=0) out vec4 FragColor;
+
+
+
+uniform vec2 uRes;
+uniform float uTime;
+
+vec3 palette(float t){
+vec3 a = vec3(0.5, 0.5, 0.5);
+vec3 b = vec3(0.5, 0.5, 0.5);
+vec3 c = vec3(1.0, 1.0, 1.0);
+vec3 d = vec3(0.263, 0.416, 0.557);
+
+return a + b * cos(6.28138*(c*t+d));
+
+}
+
+
+void main(){
+
+vec2 uv = (gl_FragCoord.xy * 2.0 - uRes.xy) / uRes.y;
+vec2 uv0 = uv;
+
+vec3 finalColor = vec3(0.0);
+
+for(float i = 0.0; i < 4.0; i += 1.0){
+
+
+uv = fract(uv * 1.5) - 0.5;
+
+float d = length(uv) * exp(-length(uv0));
+
+vec3 color = palette(length(uv0)  + uTime*0.2);
+
+d = sin(d * 2.0 + uTime) / 10.0 ;
+
+d = abs(d);
+d = pow(0.01 / d, 2.0);
+
+//d = step(0.1, d);
+//d = smoothstep(0.5, 0.9, d);
+
+
+finalColor += color * d;
+
+}
+
+FragColor = vec4(finalColor, 1.0);
+
+
+
+}
+`,
+}
+
+const shader3={
+vertex:`#version 300 es
+precision mediump float;
+
+
+uniform vec3 uPos;
+
+
+
+void main(){
+
+
+gl_Position = vec4(uPos.xy, 0.0, 1.0);
+gl_PointSize = uPos.z;
+
+
+}
+`,
+
+
+fragment:`#version 300 es
+precision mediump float;
+layout (location=0) out vec4 FragColor;
+
+
+
+uniform vec2 uRes;
+uniform float uTime;
+
+vec3 palette(float t){
+vec3 a = vec3(0.5, 0.5, 0.5);
+vec3 b = vec3(0.5, 0.5, 0.5);
+vec3 c = vec3(1.0, 1.0, 1.0);
+vec3 d = vec3(0.263, 0.416, 0.557);
+
+return a + b * cos(6.28138*(c*t+d));
+
+}
+
+
+void main(){
+
+vec2 uv = (gl_FragCoord.xy * 2.0 - uRes.xy) / uRes.y;
+vec2 uv0 = uv;
+
+vec3 finalColor = vec3(0.0);
+
+for(float i = 0.0; i < 4.0; i += 1.0){
+
+
+uv = fract(uv * 1.5) - 0.5;
+
+float d = length(uv +  i ) * exp(-length(uv0));
+
+vec3 color = palette(length(uv0) + i*.4 + uTime*0.2);
+
+d = sin(d * 2.0 + uTime) / 10.0 ;
+
+d = abs(d  / 1.0);
+d = pow(0.01 / d, 2.0);
+
+//d = step(0.1, d);
+//d = smoothstep(0.5, 0.9, d);
+
+
+
+d = tan(d  * i * uTime*0.5);
+//d = pow(0.01 / d, 2.0);
+d == length(uv + i);
+
+finalColor += color * d;
+
+}
+
+FragColor = vec4(finalColor, 1.0);
+
+
+
+}
+`,
+}
+
+const shader4={
+vertex:`#version 300 es
+precision mediump float;
+
+
+uniform vec3 uPos;
+
+
+
+void main(){
+
+
+gl_Position = vec4(uPos.xy, 0.0, 1.0);
+gl_PointSize = uPos.z;
+
+
+}
+`,
+
+
+fragment:`#version 300 es
+precision mediump float;
+layout (location=0) out vec4 FragColor;
+
+
+
+uniform vec2 uRes;
+uniform float uTime;
+
+vec2 randomGradient(vec2 p) {
+  p = p + 0.02;
+  float x = dot(p, vec2(123.4, 234.5));
+  float y = dot(p, vec2(234.5, 345.6));
+  vec2 gradient = vec2(x, y);
+  gradient = sin(gradient);
+  gradient = gradient * 43758.5453;
+
+  // part 4.5 - update noise function with time
+  gradient = sin(gradient + uTime);
+  return gradient;
+
+  // gradient = sin(gradient);
+  // return gradient;
+}
+
+// inigo quilez - https://iquilezles.org/articles/distfunctions2d/
+float sdfCircle(in vec2 p, in float r) {
+  return length(p) - r;
+}
+
+// inigo quilez - https://iquilezles.org/articles/distfunctions2d/
+float sdfOrientedBox(in vec2 p, in vec2 a, in vec2 b, float th) {
+  float l = length(b - a);
+  vec2 d = (b - a) / l;
+  vec2 q = (p - (a + b) * 0.5);
+  q = mat2(d.x, -d.y, d.y, d.x) * q;
+  q = abs(q) - vec2(l, th) * 0.5;
+  return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0);
+}
+
+vec2 cubic(vec2 p) {
+  return p * p * (3.0 - p * 2.0);
+}
+
+vec2 quintic(vec2 p) {
+  return p * p * p * (10.0 + p * (-15.0 + p * 6.0));
+}
+
+void main() {
+  // part 0 - basic shader setup
+  vec2 uv = gl_FragCoord.xy / uRes;
+
+  // uncomment for final final demo
+  uv = gl_FragCoord.xy / uRes.y;
+
+  vec3 black = vec3(0.0);
+  vec3 white = vec3(1.0);
+  vec3 color = black;
+
+  // part 1 - set up a grid of cells
+  uv = uv * 7.0;
+  vec2 gridId = floor(uv);
+  vec2 gridUv = fract(uv);
+  color = vec3(gridId, 0.0);
+  color = vec3(gridUv, 0.0);
+
+  // part 2.1 - start by finding the coords of grid corners
+  vec2 bl = gridId + vec2(0.0, 0.0);
+  vec2 br = gridId + vec2(1.0, 0.0);
+  vec2 tl = gridId + vec2(0.0, 1.0);
+  vec2 tr = gridId + vec2(1.0, 1.0);
+
+  // part 2.2 - find random gradient for each grid corner
+  vec2 gradBl = randomGradient(bl);
+  vec2 gradBr = randomGradient(br);
+  vec2 gradTl = randomGradient(tl);
+  vec2 gradTr = randomGradient(tr);
+
+  // part 2.3 - visualize gradients (for demo purposes)
+  vec2 gridCell = gridId + gridUv;
+  float distG1 = sdfOrientedBox(gridCell, bl, bl + gradBl / 2.0, 0.02);
+  float distG2 = sdfOrientedBox(gridCell, br, br + gradBr / 2.0, 0.02);
+  float distG3 = sdfOrientedBox(gridCell, tl, tl + gradTl / 2.0, 0.02);
+  float distG4 = sdfOrientedBox(gridCell, tr, tr + gradTr / 2.0, 0.02);
+  if (distG1 < 0.0 || distG2 < 0.0 || distG3 < 0.0 || distG4 < 0.0) {
+    color = vec3(1.0);
+  }
+
+  // part 3.1 - visualize a single center pixel on each grid cell
+  float circleRadius = 0.025;
+  vec2 circleCenter = vec2(0.5, 0.5);
+  float distToCircle = sdfCircle(gridUv - circleCenter, circleRadius);
+  color = distToCircle > 0.0 ? color : white;
+
+  // part 3.2 - find distance from current pixel to each grid corner
+  vec2 distFromPixelToBl = gridUv - vec2(0.0, 0.0);
+  vec2 distFromPixelToBr = gridUv - vec2(1.0, 0.0);
+  vec2 distFromPixelToTl = gridUv - vec2(0.0, 1.0);
+  vec2 distFromPixelToTr = gridUv - vec2(1.0, 1.0);
+
+  // part 4.1 - calculate the dot products of gradients + distances
+  float dotBl = dot(gradBl, distFromPixelToBl);
+  float dotBr = dot(gradBr, distFromPixelToBr);
+  float dotTl = dot(gradTl, distFromPixelToTl);
+  float dotTr = dot(gradTr, distFromPixelToTr);
+
+  // part 4.4 - smooth out gridUvs
+  // gridUv = smoothstep(0.0, 1.0, gridUv);
+  // gridUv = cubic(gridUv);
+  gridUv = quintic(gridUv);
+
+  // part 4.2 - perform linear interpolation between 4 dot products
+  float b = mix(dotBl, dotBr, gridUv.x);
+  float t = mix(dotTl, dotTr, gridUv.x);
+  float perlin = mix(b, t, gridUv.y);
+
+  // part 4.3 - display perlin noise
+  color = vec3(perlin + 0.2);
+   // color = distToCircle > 0.0 ? color : white;
+   // if (distG1 < 0.0 || distG2 < 0.0 || distG3 < 0.0 || distG4 < 0.0) {
+   //  color = vec3(1.0);
+   // }
+
+  // part 4.5 - update randomGradient function with time
+
+  // part 5.1 - billow noise
+  // float billow = abs(perlin);
+  // color = vec3(billow);
+
+  // part 5.2 - ridged noise
+  float ridgedNoise = 1.0 - abs(perlin);
+  ridgedNoise = ridgedNoise * ridgedNoise;
+  color = vec3(ridgedNoise);
+
+  FragColor = vec4(color, 1.0);
+}
+
+
+`,
+}
+
+shader5_source={
+vertex:`#version 300 es
+precision mediump float;
+
+uniform vec3 uPos;
+
+void main(){
+gl_Position = vec4(uPos.xy, 0., 1.0);
+gl_PointSize = uPos.z;
+}
+`,
+
+fragment:`#version 300 es
+precision mediump float;
+layout (location = 0) out vec4  FragColor;
+
+uniform float uTime;
+uniform vec2 uRes;
+
+void main(){
+
+vec2 uv = gl_FragCoord.xy / uRes.xy;
+
+FragColor = vec4(uv + sin(uTime), 1., 1.);
+}
+`,
+}
+
+
+const prog =  new Program( shader5_source.vertex, shader.fragment)
+
+
+
+
+
+const update=(dt)=>{
+
+prog.Bind();
+
+
+prog.SetUniform1("uTime", dt)
+prog.SetUniform2("uRes", [width, height]);
+prog.SetUniform3("uPos", [0, 0, width]);
+
+
+gl.drawArrays(gl.POINTS, 0, 1);
+
+}
+
+
+
+
+
+const animate=(dt)=>{
+
+// clearing canvas
+
+
+gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+gl.clearColor(...clearColor);
+gl.clear(gl.COLOR_BUFFER_BIT );
+
+update(dt);
+
+
+}
+
+
+
+
+
+
+
+// performance.now();
+
+const loop=(ts=0)=>{
+
+let dt = ts * 0.001 ?? 0.5;
+
+
+animate(dt);
+
+requestAnimationFrame(loop)
+
+}
+
+loop()
+
+
+
+
+//showError(window)
+
+
+
+
+}
+
+
+
+
+
+
+
+window.addEventListener("load", ()=>{
+
+try{
+
+
+INIT();
+
+
+showError("js is awesome".toUpperCase());
+
+}catch(e){
+showError(e);
+}
+
+});
+
+
+
+</script>
+
+</body>
+</html>

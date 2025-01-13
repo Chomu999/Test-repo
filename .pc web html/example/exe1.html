@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=1.0 user-scalable=0">
+
+<title>pc code</title>
+
+<meta name="author" content="BhowmickByte" />
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+body{
+width:100vw; height:100vh;
+background:#0A151B;
+}
+
+main{
+width:100%; height:100%;
+display:grid;
+place-items:center;
+}
+
+main div.res{
+display: none;
+}
+
+</style>
+
+
+
+<script>
+
+const _str='01234565789abcdef';
+
+
+const choice = arr => arr[Math.floor(Math.random() * arr.length)];
+
+
+const randint=(min,max) => Math.floor(Math.random() * (max-min) + min);
+
+const getColor=()=>{
+let out="#";
+
+for(let i=0;i<6;++i){
+out+=choice(_str);
+}
+return out;
+}
+
+function IScollision(ObjectA,ObjectB){
+return (ObjectA.pos.x + ObjectA.width >= ObjectB.pos.x &&
+ObjectA.pos.x <= ObjectB.pos.x + ObjectB.width &&
+ObjectA.pos.y + ObjectA.height >= ObjectB.pos.y &&
+ObjectA.pos.y <= ObjectB.pos.y + ObjectB.height);
+}
+
+const CanvasReSizer=(ctx)=>{
+ctx.canvas.width=innerWidth;
+ctx.canvas.height=innerHeight;
+}
+
+const pointBar=({c, text="HP" ,color="green",pos={x:0, y:0},width=200,height=20,p=1})=>{
+
+c.fillStyle=color;
+c.fillRect(pos.x, pos.y, width*p, height);
+
+c.strokeStyle=color;
+c.strokeRect(pos.x, pos.y, width, height);
+
+Text({c:c,text:text, pos:pos})
+}
+
+const Text=({c, text=0, pos,})=>{
+c.fillText( text, pos.x, pos.y);
+}
+
+</script>
+
+
+</head>
+<body>
+
+<main>
+<canvas id="canvas"></canvas>
+
+<div class="res">
+</div>
+
+</main>
+
+<script>
+
+
+
+
+
+class Box{
+constructor({pos={x:0, y:0}, width=20, height=20, color="red"}){
+this.pos=pos;
+this.width=width;
+this.height=height
+this.color=color;
+this.velocity={x:0, y:0};
+}
+
+draw(c){
+c.fillStyle=this.color;
+c.fillRect(this.pos.x,this.pos.y, this.width, this.height)
+}
+
+update(c){
+
+
+this.draw(c);
+
+this.pos.x += this.velocity.x;
+this.pos.y += this.velocity.y;
+}
+
+
+}
+
+class Enemy extends Box{
+constructor({game, pos={x:200, y:200}, width=50, height=60, color="brown",velocity={x:0, y:1}}){
+super({pos, width, height, color})
+this.game=game;
+this.velocity=velocity;
+this.damage=randint(1,this.width);
+this.free=0;
+}
+update(c){
+if(!this.free) return;
+super.update(c);
+if(this.pos.y > this.game.height){
+this.reset();
+}
+
+}
+
+
+reset(){
+
+
+this.width= this.height=randint(10,40);
+this.color= getColor();
+this.damage=randint(1,this.width);
+this.pos.x=this.width * randint(0,11);
+this.pos.y=0-this.height;
+this.velocity.y=randint(1,4);
+}
+start(){
+this.free=1;
+}
+}
+
+
+
+
+
+
+const action={
+up:0,
+left:0,
+right:0,
+down:0,
+speed:2,
+}
+
+
+class Game{
+constructor(c){
+this.width=c.width
+this.height=c.height
+this.over=0;
+this.enemies=[];
+
+for(let i=0;i<5;++i){
+this.enemies.push(new Enemy({game:this,
+pos:{x:randint(0, this.width), y:randint(0, this.height)}, color:getColor(),
+}));
+this.enemies[i].start()
+}
+this.player=new Box({})
+this.player.health=100;
+
+
+
+this._controls()
+}
+
+render(c){
+
+
+
+this.enemies.forEach((enemy)=>{
+enemy.update(c)
+})
+
+
+this.player.update(c);
+
+if(action.up) this.player.velocity.y=-action.speed;
+if(action.left) this.player.velocity.x=-action.speed;
+if(action.right) this.player.velocity.x=action.speed;
+if(action.down) this.player.velocity.y=action.speed;
+
+if(!action.up && !action.down) this.player.velocity.y=0;
+if(!action.left && !action.right) this.player.velocity.x=0;
+
+
+this.enemies.forEach((enemy)=>{
+if(IScollision(this.player,enemy)){
+enemy.reset();
+this.player.health-=enemy.damage;
+}
+});
+
+
+pointBar({c:c,text:`HP ${this.player.health}`, pos:{x:0, y:30}, p:this.player.health*0.01, width:150, height:30, color:"#9AE781"})
+
+
+if(this.player.health <= 0) this.over=1;
+
+}
+
+
+
+
+
+_controls(){
+
+
+
+
+window.addEventListener("keydown",(e)=>{
+
+
+const conditon=e.key;
+if(!conditon) return;
+
+if(conditon=='w')action.up=1;
+if(conditon=='a')action.left=1;
+if(conditon=='d')action.right=1;
+if(conditon=='s')action.down=1;
+
+})
+
+window.addEventListener("keyup",(e)=>{
+
+
+const conditon=e.key;
+if(!conditon) return;
+
+if(conditon=='w')action.up=0;
+if(conditon=='a')action.left=0;
+if(conditon=='d')action.right=0;
+if(conditon=='s')action.down=0;
+
+})
+
+
+
+}
+
+
+
+
+
+}
+
+
+
+
+const app=(ctx)=>{
+//ctx.font="100px sans-serif";
+
+
+const c={
+width:ctx.canvas.width,
+height:ctx.canvas.height,
+}
+
+
+
+
+const game=new Game(c);
+
+
+const animate=()=>{
+if(game.over) return;
+
+ctx.fillStyle="#07002E";
+ctx.fillRect(0, 0, c.width, c.height);
+game.render(ctx);
+
+window.requestAnimationFrame(animate);
+
+
+}
+animate()
+
+
+
+
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+const init=()=>{
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+CanvasReSizer(ctx)
+console.log(ctx)
+app(ctx)
+}
+
+
+window.addEventListener('load',()=>{
+
+init()
+
+
+
+})
+
+
+
+
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>HTML CANVAS GAME BOI</title>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+#mainBox{
+margin:0;padding:0;
+width:100vw;height:100vh;
+background-color:#C6C6C6;
+}
+
+#innerBox{
+margin:0;padding:0;
+width:80vw;height:70vh;
+position:fixed;
+background-color:rgba(255,0,0,0.3);
+top:50%;left:50%;
+transform: translate(-50%,-50%);
+}
+#textBox{
+width:100%;height:400px;
+background-color:rgba(29,9,7,0.6);
+}
+
+.hereText{
+color:red;
+
+}
+
+.newPragraph{
+color:blue;
+position:absolute;
+top:90%;left:50%;
+transform: translate(-50%,-50%);
+}
+</style>
+</head>
+<body>
+
+<div id="mainBox">
+<div id="innerBox">
+
+<div id="textBox">
+<p class="hereText">lol</p>
+</div>
+
+<button class="newPragraph">New Pragraph</button>
+</div>
+</div>
+<script>
+let hereText=document.querySelector('.hereText');
+let newPragraph=document.querySelector('.newPragraph');
+
+
+let clicked=false;
+
+
+let arrows=[];
+
+function r(min,max){
+return Math.floor(Math.random() * (max-min) + min)
+}
+
+
+
+
+function gameLoop(){
+requestAnimationFrame(gameLoop)
+
+
+
+
+}gameLoop()
+
+window.addEventListener('resize',()=>{
+cvs.width=mainW;
+cvs.height=mainH;
+})
+/*
+console.log(cvs.style)
+console.log(console)
+console.info(cvs.style.display)
+console.table(cvs.style)
+
+let l=window.clientInformation
+ */
+console.log(13*5 )
+
+
+let Weeks=['Sun','Mon','Tue','Wen','Thu','Fri','Sat']
+let Months=[
+'Jan',
+'Feb',
+'Mar',
+'Apr',
+'Mey',
+'Jun',
+'Jul',
+'Aug',
+'Sep',
+'Oct',
+'Nov',
+'Dec'
+]
+let d = new Date();
+
+
+console.log(`${d.getFullYear()} || ${Months[d.getMonth()]} || ${d.getDate()} || ${Weeks[d.getDay()]} || ${d.getHours()}`)
+console.log(Months[d.getMonth()])
+console.log(d.getFullYear())
+console.log(d.getHours())
+console.log(d.getMinutes())
+console.log(d)
+
+</script>
+</body>
+</html>

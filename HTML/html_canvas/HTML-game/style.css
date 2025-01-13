@@ -1,0 +1,70 @@
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+#mainBox{
+width:100vw; height:100vh;
+/* background-color:tan; */
+}
+
+
+.cvs{
+position:fixed;
+top:0;left:31.54px;
+outline:1px solid black;
+}
+
+
+#btnBox{
+position:fixed;
+bottom:0;right:43px;
+width:300px; height:300px;
+background-color:orangered;
+}
+
+
+div#mainBox div#btnBox{
+margin:0;padding:0;position:fixed;
+background-color:#FF7049;
+width:330px;height:330px;
+top:389px;left:33.51px;
+display:grid;
+grid-template-columns: repeat(3, 1fr);
+grid-template-rows: repeat(3, 1fr);
+grid-gap:2px;
+opacity:70%;
+overflow:hidden;
+}
+
+
+.btn2{
+grid-column:2/3;
+grid-row:1/2;
+}
+
+.btn4{
+grid-column:1/2;
+grid-row:2/3;
+}
+
+.btn6{
+grid-column:3/4;
+grid-row:2/3;
+}
+
+
+.btn8{
+grid-column:2/3;
+grid-row:3/4;
+}
+
+.btns{
+background-color:#0001B5;
+}
+
+.btns:active{
+background-color:#0096FF;
+}
+

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+
+<title>3d object to binary file</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
+html{
+font-size:10px;
+}
+
+
+body{
+width:100vw; height:100vh;
+}
+
+main{
+width:100%; height:100%;
+background:#e3e3e311;
+display: grid;
+place-items:center;
+}
+
+
+.contailer{
+margin:auto;
+width:90%; height:100%;
+}
+
+
+a{
+color:red;
+background:blue;
+font-size:2rem;
+
+}
+
+p{
+color:#07FF00;
+font-size:1rem;
+}
+
+
+
+</style>
+</head>
+<body>
+
+<main>
+<div class="contailer">
+
+<a href="#" id="a">DOWNLOAD</a>
+
+<p id="fileResult"></p>
+
+</div>
+</main>
+
+<script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const strToFloat=(str)=>{
+const Numbers=[]
+for(const s of str){
+Numbers.push(parseFloat(s))
+}
+return Numbers;
+}
+
+const loadFile=async(url)=>{
+const d=await fetch(url)
+return await d.text()
+}
+
+
+
+
+
+const parseArrayBuffer=(data)=>{
+
+const lines=data.split("\n")
+
+const positions=[]
+const texCoords=[]
+const normals=[]
+
+const arrayBufferSource=[]
+
+for(const line of lines){
+
+const [commad, ...values]=line.split(" ",3)
+
+if(commad == "v"){
+positions.push(strToFloat(values))
+}
+
+else if(commad == "vt"){
+texCoords.push(strToFloat(...values))
+}
+
+else if(commad == "vn"){
+normals.push(strToFloat(...values))
+}
+
+else if(commad == "f"){
+
+for(const group of values){
+
+const [pi, ti, ni]=group.split("/")
+
+arrayBufferSource.push( ...positions[pi - 1])
+arrayBufferSource.push( ...texCoords[ti - 1])
+arrayBufferSource.push( ...normals[ni - 1])
+}
+
+}
+
+}
+
+return new Float32Array(arrayBufferSource)//.buffer
+
+}
+
+
+const Download=(a, fileName, ab)=>{
+const _b=new Blob([ab], {type: "application/octet-stream"})
+const _url=URL.createObjectURL(_b)
+a.type="application/octet-stream"
+a.download=fileName
+a.href=_url
+}
+
+const app=async()=>{
+
+
+const file=await loadFile("./models/rock02.obj")
+
+const ab=parseArrayBuffer(file);
+
+Download(a, "rock.bin", ab)
+//console.log(ab)//
+
+//fileResult.innerText = ab
+
+
+let arr=[
+"0.001", "0.1849", "0.0319", "-0.9822",
+"0.001", "0.1849", "0.0319", "-0.9822",
+"0.001", "0.1849", "0.0319", "-0.9822",
+]
+
+console.log(arr["1"])
+
+
+}
+
+app()
+
+
+
+
+
+
+
+
+
+</script>
+</body>
+</html>

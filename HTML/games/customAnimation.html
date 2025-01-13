@@ -1,0 +1,302 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>HTML CANVAS Multi Ball GAME</title>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+background:tan;
+}
+
+#controlBox{
+position:absolute;
+top:50px;
+}
+</style>
+</head>
+<body>
+
+
+
+<canvas class="cvs"></canvas>
+
+<div id="controlBox">
+<!-- 
+<input type="range" name="range" id="range" min=0 max="9" value="0" />
+
+ -->
+<label for="Animations">Animations</label>
+
+
+<select id="Animations" name="animations">
+
+<option value="idle">Idle</option>
+<option value="jump">Jump</option>
+<option value="fall">Fall</option>
+<option value="run">Run</option>
+<option value="damage">Damage</option>
+<option value="sit">Sit</option>
+<option value="roll">Roll</option>
+<option value="bite">Bite</option>
+<option value="death">Death</option>
+
+</select>
+
+ 
+ 
+ 
+ 
+</div>
+<script>
+
+const controlBox=document.querySelector('#controlBox');
+
+const canvas=document.querySelector('.cvs');
+const ctx = canvas.getContext('2d');
+
+
+let playerSatet='idle';
+
+const mouse={
+x:undefined,
+y:undefined,
+};
+
+let gameSpeed=3;
+let mainGameLoop;
+
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+
+
+const playerImg='./img/shadow_dog.png';
+
+
+function randint(min,max){
+return Math.floor(Math.random() * (max-min) + min)
+}
+
+
+
+
+
+const animationSatets={
+
+idle:{
+FrameX:7,
+FrameY:0,
+},
+
+jump:{
+FrameX:7,
+FrameY:1
+},
+
+fall:{
+FrameX:7,
+FrameY:2,
+},
+
+run:{
+FrameX:8,
+FrameY:3,
+},
+
+damage:{
+FrameX:10,
+FrameY:4,
+},
+
+sit:{
+FrameX:5,
+FrameY:5,
+},
+roll:{
+FrameX:7,
+FrameY:6,
+},
+
+bite:{
+FrameX:7,
+FrameY:7,
+},
+
+death:{
+FrameX:12,
+FrameY:8,
+},
+
+};
+
+
+const Destance=(x1,y1,x2,y2)=>{
+const dx = x2 - x1;
+const dy = y2 - y1;
+return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+}
+
+
+
+
+
+
+
+const ISCircleCollision = (ObjectA,ObjectB) => {
+
+let dist=Math.hypot(ObjectA.x - ObjectB.x, ObjectA.y - ObjectB.y);
+
+return (dist - ObjectB.radius - ObjectA.radius < 0.5);
+}
+
+
+
+
+class NewMob{
+constructor(x,y,width,height){
+this.x=x;
+this.y=y;
+this.width=width;
+this.height=height;
+this.fillC=`hsl(${randint(0,370)},100%,50%,1)`;
+}
+draw(ctx){
+
+ctx.beginPath()
+ctx.strokeStyle='black';
+ctx.fillStyle=this.fillC;
+ctx.fillRect(this.x,this.y,this.width,this.height)
+//`hsl(${randint(0,180)},100%,50%,1)`;
+
+//ctx.arc(this.x,this.y,this.radius,0,Math.PI*2);
+//ctx.fill();
+ctx.stroke();
+ctx.closePath();
+
+}
+
+}
+
+
+
+
+
+class spriteAnim extends NewMob{
+constructor(img,x,y,width,height){
+super(x,y,width,height);
+
+this.IMAGE = new Image();
+this.IMAGE.src=img;
+
+
+this.frame={x:0,y:0};
+
+this.total={c:12,r:10};
+
+this.sprite={width:0,height:0};
+this.IMAGE.onload = ()=>{
+
+this.sprite.width = this.IMAGE.width/12;
+this.sprite.height = this.IMAGE.height/10;
+
+}
+
+}
+
+
+
+drawImg(ctx){
+
+
+
+ctx.drawImage(this.IMAGE,
+this.frame.x * this.sprite.width,
+this.frame.y * this.sprite.height,
+this.sprite.width,this.sprite.height,
+this.x,this.y,
+this.width,this.height);
+
+}
+
+
+update(){
+
+if(this.frame.x < this.total.c - 1){
+this.frame.x++;
+
+}else this.frame.x = 0;
+
+
+
+}
+
+}
+
+
+
+
+
+const player = new spriteAnim(playerImg,0,500,128,128);
+
+
+
+const gameLoop=()=>{
+
+requestAnimationFrame(gameLoop);
+
+ctx.fillStyle='white';
+ctx.fillRect(0,0,canvas.width,canvas.height);
+
+
+//player.draw(ctx)
+
+
+
+
+player.total.c = animationSatets[playerSatet].FrameX;
+
+player.frame.y = animationSatets[playerSatet].FrameY;
+
+
+player.drawImg(ctx)
+
+
+
+
+if(gameSpeed % 4 == 0){
+player.update();
+}
+
+if(player.x < canvas.width + player.width) player.x += 1;
+else player.x = -player.width;
+
+
+gameSpeed++;
+
+}
+gameLoop();
+
+
+
+controlBox.addEventListener('change',(e)=>{
+
+
+playerSatet = e.target.value;
+
+
+});
+
+
+
+
+</script>
+</body>
+</html>

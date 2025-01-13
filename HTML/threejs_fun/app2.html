@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<meta name="author" content="billbyte"/>
+
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+html{
+font-size:10px;
+}
+
+
+.ControlBox{
+margin:auto;
+padding:1rem;
+width:100vw; height:100vh;
+position:absolute;
+bottom:0; left:0;
+/* transform: translate(-50%,0); */
+background:rgba(20,0,20,0.1);
+display:grid;
+grid-template-columns:repeat(3,1fr);
+grid-template-rows:repeat(3,1fr);
+grid-gap:1rem;
+/* z-index:10; */
+}
+
+.btns{
+background:rgba(220,80,200,0.1);
+}
+
+.forward{
+grid-column:2/3;
+grid-row:1/2;
+}
+
+.left{
+grid-column:1/2;
+grid-row:2/3;
+}
+
+.shift{
+grid-column:2/3;
+grid-row:2/3;
+}
+
+.right{
+grid-column:3/4;
+grid-row:2/3;
+}
+
+.backward{
+grid-column:2/3;
+grid-row:3/4;
+}
+
+</style>
+
+
+
+
+<title>threejs app 2</title>
+
+</head>
+<body>
+<main id="main" width="100%" height="100%">
+
+<p id="outScreen"></p>
+<canvas data-gl="gl"></canvas>
+
+
+
+</main>
+
+
+
+<!-- <script src="/storage/emulated/0/g_js_libs/ammo.js"></script> -->
+<script src="/storage/emulated/0/g_js_libs/three.min.js"></script>
+<script src="/storage/emulated/0/g_js_libs/OrbitControls.js"></script>
+
+
+<script>
+
+const shader ={
+vertex:`
+
+void main(){
+gl_Position = projectionMatrix * modelviewMatrix * vec4(position 1.0);
+}
+`,
+
+fragment:`
+
+void main(){
+gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+}
+`,
+
+}
+
+
+/*
+MeshBasicMaterial: ƒ class bi extends Mi{constructor(t){super(),this.isMeshBasicMaterial=!0,this.type="MeshBasicMaterial",this.color=new Zt(16777215),this.map=null,this.lightMap=null,this.lightMapIntensity=1,this.aoMap=null,this.aoMapIntensity=1,this.specularMap=null,this.alphaMap=null,this.envMap=null,this.combine=0,this.reflectivity=1,this.refractionRatio=.98,this.wireframe=!1,this.wireframeLinewidth=1,this.wireframeLinecap="round",this.wireframeLinejoin="round",this.fog=!0,this.setValues(t)}copy(t){return super.c...
+MeshDepthMaterial: ƒ class zs extends Mi{constructor(t){super(),this.isMeshDepthMaterial=!0,this.type="MeshDepthMaterial",this.depthPacking=3200,this.map=null,this.alphaMap=null,this.displacementMap=null,this.displacementScale=1,this.displacementBias=0,this.wireframe=!1,this.wireframeLinewidth=1,this.setValues(t)}copy(t){return super.copy(t),this.depthPacking=t.depthPacking,this.map=t.map,this.alphaMap=t.alphaMap,this.displacementMap=t.displacementMap,this.displacementScale=t.displacementScale,this.displacementBias=...
+MeshDistanceMaterial: ƒ class Us extends Mi{constructor(t){super(),this.isMeshDistanceMaterial=!0,this.type="MeshDistanceMaterial",this.referencePosition=new oe,this.nearDistance=1,this.farDistance=1e3,this.map=null,this.alphaMap=null,this.displacementMap=null,this.displacementScale=1,this.displacementBias=0,this.setValues(t)}copy(t){return super.copy(t),this.referencePosition.copy(t.referencePosition),this.nearDistance=t.nearDistance,this.farDistance=t.farDistance,this.map=t.map,this.alphaMap=t.alphaMap,this.displacem...
+MeshLambertMaterial: ƒ class Ul extends Mi{constructor(t){super(),this.isMeshLambertMaterial=!0,this.type="MeshLambertMaterial",this.color=new Zt(16777215),this.map=null,this.lightMap=null,this.lightMapIntensity=1,this.aoMap=null,this.aoMapIntensity=1,this.emissive=new Zt(0),this.emissiveIntensity=1,this.emissiveMap=null,this.bumpMap=null,this.bumpScale=1,this.normalMap=null,this.normalMapType=0,this.normalScale=new It(1,1),this.displacementMap=null,this.displacementScale=1,this.displacementBias=0,this.specularMap=nul...
+MeshMatcapMaterial: ƒ class Bl extends Mi{constructor(t){super(),this.isMeshMatcapMaterial=!0,this.defines={MATCAP:""},this.type="MeshMatcapMaterial",this.color=new Zt(16777215),this.matcap=null,this.map=null,this.bumpMap=null,this.bumpScale=1,this.normalMap=null,this.normalMapType=0,this.normalScale=new It(1,1),this.displacementMap=null,this.displacementScale=1,this.displacementBias=0,this.alphaMap=null,this.flatShading=!1,this.fog=!0,this.setValues(t)}copy(t){return super.copy(t),this.defines={MATCAP:""},this.color...
+MeshNormalMaterial: ƒ class zl extends Mi{constructor(t){super(),this.isMeshNormalMaterial=!0,this.type="MeshNormalMaterial",this.bumpMap=null,this.bumpScale=1,this.normalMap=null,this.normalMapType=0,this.normalScale=new It(1,1),this.displacementMap=null,this.displacementScale=1,this.displacementBias=0,this.wireframe=!1,this.wireframeLinewidth=1,this.flatShading=!1,this.setValues(t)}copy(t){return super.copy(t),this.bumpMap=t.bumpMap,this.bumpScale=t.bumpScale,this.normalMap=t.normalMap,this.normalMapType=t.normalMa...
+MeshPhongMaterial: ƒ class Nl extends Mi{constructor(t){super(),this.isMeshPhongMaterial=!0,this.type="MeshPhongMaterial",this.color=new Zt(16777215),this.specular=new Zt(1118481),this.shininess=30,this.map=null,this.lightMap=null,this.lightMapIntensity=1,this.aoMap=null,this.aoMapIntensity=1,this.emissive=new Zt(0),this.emissiveIntensity=1,this.emissiveMap=null,this.bumpMap=null,this.bumpScale=1,this.normalMap=null,this.normalMapType=0,this.normalScale=new It(1,1),this.displacementMap=null,this.displacementScale=1,...
+MeshPhysicalMaterial: ƒ ()
+MeshStandardMaterial: ƒ class Il extends Mi{constructor(t){super(),this.isMeshStandardMaterial=!0,this.defines={STANDARD:""},this.type="MeshStandardMaterial",this.color=new Zt(16777215),this.roughness=1,this.metalness=0,this.map=null,this.lightMap=null,this.lightMapIntensity=1,this.aoMap=null,this.aoMapIntensity=1,this.emissive=new Zt(0),this.emissiveIntensity=1,this.emissiveMap=null,this.bumpMap=null,this.bumpScale=1,this.normalMap=null,this.normalMapType=0,this.normalScale=new It(1,1),this.displacementMap=null,this.d...
+MeshToonMaterial: ƒ class Ol extends 
+*/
+
+</script>
+
+<script>
+
+
+
+
+
+const INIT=()=>{
+//const gui = new dat.gui.GUI();
+
+
+
+
+const renderer = new THREE.WebGLRenderer({
+    antialis :true,
+    canvas:document.querySelector('canvas'),
+});
+
+
+
+renderer.shadowMap.enabled= true;
+renderer.shadowMap.type= THREE.PCFSoftShadowMap;
+
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.setPixelRatio(window.devicePixelRatio);
+
+
+
+
+renderer.setSize(window.innerWidth, window.innerHeight);
+
+
+//renderer.setClearColor('#2C00FF');
+
+const fov=75;
+const aspect= window.innerWidth / window.innerHeight;
+const near=1.0;
+const far=10000.0;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+
+scene.background=new THREE.Color('#0085FF');
+//scene.fog=new THREE.FogExp2('#00187A', 1000, 20);
+
+const _mat =new THREE.MeshBasicMaterial()
+const _mat2 =new THREE.MeshBasicMaterial()
+const _mat3 =new THREE.ShaderMaterial()
+const _geo =new THREE.BoxGeometry(2, 3, 2)
+
+const _mesh = new THREE.Mesh(_geo, _mat3)
+_mesh.position.z = -20
+
+
+
+console.log(renderer)
+console.log(_mesh)
+scene.add(_mesh)
+
+
+
+const animate=(dt)=>{
+
+_mesh.rotation.x += 0.005;
+_mesh.rotation.y += 0.005;
+
+}
+
+
+
+
+const update=(dt)=>{
+
+animate(dt);
+}
+
+
+
+
+
+
+const render=()=>{
+renderer.clear();
+renderer.render(scene, camera);
+}
+
+
+const gameLoop=(time)=>{
+
+const dt=time * 0.001 ?? 0.5;
+
+update(dt);
+render();
+
+
+
+
+//window.requestAnimationFrame(gameLoop);
+
+}
+
+renderer.setAnimationLoop(gameLoop);
+
+
+}
+
+
+
+
+
+
+
+window.addEventListener('load',(e)=>{
+
+
+INIT()
+
+
+
+
+});
+
+
+
+</script>
+
+</body>
+</html>

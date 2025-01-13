@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=10.0 user-scalable=no" />
+
+<title>webgl2 app test 1</title>
+
+<style>
+
+*{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+html{
+font-size: 10px;
+}
+
+body{
+width:100vw; height:100vh;
+}
+
+div#rootElement{
+width:100%; height:100%;
+background: #003AFF88;
+display: grid;
+place-items: center;
+}
+
+div#rootElement > div.resouce{
+display: none;
+}
+
+</style>
+
+
+</head>
+<body>
+
+
+<div class="rootElement" id="rootElement">
+
+<div class="resouce">
+<img src="/storage/emulated/0/Download/Zelda2.png" id="img1" alt="link and zelda" />
+<img src="/storage/emulated/0/Download/images (7).jpeg" id="img2" alt="link and zelda" />
+</div>
+
+</div>
+
+
+<script>
+var app;
+const canvas = document.createElement("canvas")
+const gl = canvas.getContext("webgl2")
+
+
+
+const numGen = function * (targetNum=0){
+let x=0;
+for(;x<targetNum;) yield x++;
+return x;
+}
+
+// console.log(numGen())
+
+
+
+
+class Rand{
+
+static Flaot(min=1, max=2){
+return Math.random() * (max-min) + min;
+}
+
+static Int(min=10, max=20){
+return Math.floor( Rand.Flaot(min, max+1));// + min;
+}
+
+static Choice(...args){
+return args[Rand.Int(0,args.length-1)]
+}
+
+}
+
+
+
+
+class VA{
+constructor(){
+this.ID = gl.createVertexArray()
+}
+
+Bind(){
+gl.bindVertexArray(this.ID)
+}
+Unbind(){
+gl.bindVertexArray( null)
+}
+Delete(){
+gl.deleteVertexArray(this.ID)
+}
+
+linkAttrib(layoutLocation=0, numOfComponents=4, stride=0, offset=0){
+gl.vertexAttribPointer(layoutLocation, numOfComponents, gl.FLOAT, gl.FALSE, stride, offset)
+gl.enableVertexAttribArray(layoutLocation)
+}
+
+}
+
+class VB{
+constructor(vData){
+this.ID = gl.createBuffer()
+gl.bindBuffer(gl.ARRAY_BUFFER, this.ID)
+gl.bufferData(gl.ARRAY_BUFFER, vData, gl.STATIC_DRAW)
+}
+
+Bind(){
+gl.bindBuffer(gl.ARRAY_BUFFER, this.ID)
+}
+Unbind(){
+gl.bindBuffer(gl.ARRAY_BUFFER, null)
+}
+Delete(){
+gl.deleteBuffer(this.ID)
+}
+
+}
+
+class EB{
+constructor(iData){
+this.ID = gl.createBuffer()
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ID)
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, iData, gl.STATIC_DRAW)
+}
+
+Bind(){
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ID)
+}
+
+Unbind(){
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null)
+}
+
+Delete(){
+gl.deleteBuffer(this.ID)
+}
+
+}
+
+const texSlot=numGen(32)
+
+class Texture{
+constructor(imgData){
+this.ID = gl.createTexture()
+this.Slot=texSlot.next().value
+gl.bindTexture(gl.TEXTURE_2D, this.ID)
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, !0)
+
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, imgData)
+
+}
+
+Bind(){
+gl.activeTexture(gl.TEXTURE0+this.Slot)
+gl.bindTexture(gl.TEXTURE_2D, this.ID)
+}
+
+Unbind(){
+gl.bindTexture(gl.TEXTURE_2D, null)
+}
+
+Delete(){
+gl.deleteTexture(this.ID)
+}
+
+}
+
+
+class Program{
+constructor(vss, fss){
+this.ID = this.#MAKE_PROGRAM(vss, fss)
+}
+
+Bind(){
+gl.useProgram(this.ID)
+}
+Unbind(){
+gl.useProgram(null)
+}
+Delete(){
+gl.deleteProgram(this.ID)
+}
+
+#MAKE_SHADER(type, source){
+const vof = type==gl.VERTEX_SHADER?"VERTEX":"FRAGMENT";
+const Shader = gl.createShader(type);
+
+gl.shaderSource(Shader, source)
+gl.compileShader(Shader)
+if(!gl.getShaderParameter(Shader, gl.COMPILE_STATUS)){
+console.log(vof ,"Error ", gl.getShaderInfoLog(Shader))
+console.log(vof, " Shader Source", gl.getShaderSource(Shader))
+}
+return Shader;
+}
+
+#MAKE_PROGRAM(vSource, fSource,){
+
+const vs = this.#MAKE_SHADER(gl.VERTEX_SHADER, vSource);
+const fs = this.#MAKE_SHADER(gl.FRAGMENT_SHADER, fSource);
+
+const Prog = gl.createProgram()
+gl.attachShader(Prog, vs)
+gl.attachShader(Prog, fs)
+gl.linkProgram(Prog)
+
+if(!gl.getProgramParameter(Prog, gl.LINK_STATUS)){
+console.log(gl.getProgramInfoLog(Prog))
+}
+
+gl.useProgram(Prog)
+gl.validateProgram(Prog)
+
+if(!gl.getProgramParameter(Prog, gl.VALIDATE_STATUS)){
+console.log(gl.getProgramInfoLog(Prog))
+}
+
+return Prog;
+}
+
+}
+
+
+
+
+
+
+
+
+class App{
+constructor(gl){
+this.gl=gl;
+this.#INIT()
+}
+
+#INIT(){
+const gl=this.gl;
+console.log(gl)
+
+const vss=`#version 300 es
+layout (location = 0) in vec4 aPos;
+layout (location = 1) in vec2 aUV;
+
+out vec2 vUV;
+
+void main()
+{
+gl_Position = aPos;
+
+vUV = aUV;
+}
+`
+
+const fss=`#version 300 es
+precision mediump float;
+
+out vec4 FragColor;
+
+uniform sampler2D uTex[2];
+
+in vec2 vUV;
+
+void main()
+{
+FragColor = texture(uTex[0], vUV) * texture(uTex[1], vUV);
+}
+`
+const verData=new Float32Array([
+  
+  0.5,  0.5,       1,  1,
+ -0.5,  0.5,       0,  1,
+ -0.5, -0.5,       0,  0,
+  0.5, -0.5,       1,  0,
+
+
+])
+
+const indData = new Uint8Array([
+
+0,1,2,
+0,2,3,
+
+
+])
+
+const prog = new Program(vss, fss)
+
+const locs={
+u:{
+uTex:[
+gl.getUniformLocation(prog.ID, "uTex[0]"),
+gl.getUniformLocation(prog.ID, "uTex[1]"),
+]
+}
+}
+
+const tex = new Texture(img1)
+gl.uniform1i(locs.u.uTex[0],tex.Slot)
+
+const tex2 = new Texture(img2)
+gl.uniform1i(locs.u.uTex[1],tex2.Slot)
+
+const vao = new VA()
+const vbo = new VB(verData)
+const ebo = new EB(indData)
+
+vao.Bind()
+
+vbo.Bind()
+//gl.vertexAttribPointer(0, 2, gl.FLOAT, gl.FALSE, 4*4, 0)
+//gl.enableVertexAttribArray(0)
+
+//gl.vertexAttribPointer(1, 2, gl.FLOAT, gl.FALSE, 4*4, 2*4)
+//gl.enableVertexAttribArray(1)
+vao.linkAttrib(0, 2, 4*4, 0)
+vao.linkAttrib(1, 2, 4*4, 2*4)
+
+
+ebo["Bind"]()
+
+vbo.Unbind()
+vao.Unbind()
+ebo.Unbind()
+tex.Unbind()
+tex2.Unbind()
+prog.Unbind()
+
+this.mainLoop = ()=>{
+gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
+gl.clearColor(0, 0, 1.0, 1.0)
+gl.clear(gl.COLOR_BUFFER_BIT)
+
+//gl.drawArrays(gl.TRIANGLES, 0, 6)
+
+prog.Bind()
+tex.Bind()
+tex2.Bind()
+vao.Bind()
+
+gl.drawElements(gl.TRIANGLES, indData.byteLength, gl.UNSIGNED_BYTE, 0)
+
+}
+
+}
+
+}
+
+
+window.addEventListener("load", ()=>{
+gl.canvas.width=window.innerWidth
+gl.canvas.height=window.innerHeight
+rootElement.appendChild(gl.canvas)
+app = new App(gl);
+app.mainLoop()
+
+console.log("JS is Awesome")
+
+})
+
+
+</script>
+
+</body>
+</html>

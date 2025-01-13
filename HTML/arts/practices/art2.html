@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+
+
+<title>JS art</title>
+
+<style>
+
+*:after,*,*:before{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+:root{
+
+--box-shadow:
+4px 4px 8px  #0008 inset,
+-4px -4px 8px #fff8 inset;
+
+--box-shadow2:
+4px 4px 8px  #0008,
+-4px -4px 8px #fff8,
+-4px -4px 8px #0008 inset,
+4px 4px 8px #fff8 inset
+;
+
+}
+
+*::selection{
+color: red;
+background: tan;
+}
+
+
+@property col{
+syntax:"<color>";
+initial:red;
+
+}
+
+html{
+font-size: 10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style-type: none;
+}
+
+body{
+background: #f0f0f0;
+}
+
+
+
+
+canvas{
+margin: 2rem auto;
+display: block;
+border: 2px solid ;
+}
+
+</style>
+
+
+
+
+
+</head>
+<body>
+
+
+
+
+
+
+<!-- <script src="/storage/emulated/0/g_js_libs/eruda.min.js"></script> -->
+
+<script src="/sdcard/g_js_libs/p5.min.js"></script>
+
+<script>
+
+//console.log(p5.File)
+
+function setup(){
+createCanvas(300, 300);
+}
+
+
+function mousePressed(e){
+console.log(e);
+}
+
+
+function draw(){
+
+
+
+randomSeed(400)
+let r =random(255);
+fill(r, 0, 0);
+
+noStroke();
+rect(r, 40, 60, 60);
+
+//let noiseValue = no
+
+
+}
+
+
+</script>
+
+</body>
+</html>

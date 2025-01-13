@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+
+<style>
+
+*:after,*,*:before{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+:root{
+
+}
+
+*::selection{
+color: red;
+background: tan;
+}
+
+html{
+font-size: 10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style-type: none;
+}
+
+
+
+
+
+.wrapper{
+margin: 1rem auto;
+padding: 1rem;
+width: min(38rem, 100% - 2rem);
+background: #00000034;
+border-radius: 1rem;
+}
+
+
+.msgContainer{
+background: #C800FF;
+aspect-ratio: 3;
+}
+
+.msgContainer  .msgs{
+margin: 1rem;
+padding: 1rem;
+display:inline-block;
+color: tan;
+background: #FF006D;
+font-size: 1.2rem;
+border-radius: 1rem;
+}
+
+
+
+
+.colorPattenContainer{
+aspect-ratio: 1;
+display: grid;
+/* grid-template-rows: 20rem 16rem 10rem 5rem; */
+grid-template-rows:repeat(2, 1fr);
+grid-template-columns:repeat(2, 1fr);
+
+gap:3rem;
+background: #A3FFFC77;
+}
+
+.colorBox{
+background:yellow;
+border:1rem solid #DBDBDB;
+border-radius: 50%;
+}
+
+.colorBoxhover{
+background: #FFFFFF!important;
+}
+
+
+
+.btnContainer{
+aspect-ratio: 2;
+background: #008CFF;
+font-size: 2rem;
+text-align: center;
+align-items: center;
+}
+
+.btns{
+--color:#0300FF;
+--colorHover:#C200FF;
+margin:0.4rem 2rem;
+padding: 0.5rem;
+background: #5069FF;
+color: var(--color);
+border: none;
+border-radius: 1rem;
+border-bottom: 2rem solid currentColor;
+transition:.2s linear;
+}
+
+
+.btns:hover{
+--color:var(--colorHover, red);
+border-bottom:0.5rem solid currentColor;
+transform: translate(0, 50%);
+}
+
+
+
+.optionContainer{
+background: #00C7FF;
+text-align: center;
+}
+
+.optionContainer *{
+font-size: 2rem;
+color: #FF009C;
+}
+
+
+
+
+</style>
+
+<title>Color Patten</title>
+
+</head>
+<body>
+
+
+<main>
+
+<div class="wrapper msgContainer">
+
+<b class="msgs botMsg">hi hello gu khalo</b>
+<b class="msgs userMsg">hi hello gu khalo</b>
+<b class="msgs userMsg">hi hello gu khalo</b>
+<b class="msgs userMsg">hi hello gu khalo</b>
+
+</div>
+
+<div class="wrapper colorPattenContainer">
+</div>
+
+<div class="wrapper btnContainer">
+
+<button class="btns left startGame">start Game</button>
+<button class="btns center finishGame">center</button>
+<button class="btns right restartGame">Restart Game</button>
+
+
+
+
+<div class="wrapper optionContainer">
+
+<label for="defficaltySelector">defficaltySelector</label>
+<select  id="defficaltySelector">
+  <option value="easy">easy</option>
+  <option value="normal">normal</option>
+  <option value="hard">hard</option>
+</select>
+
+</div>
+
+</div>
+
+</main>
+
+
+<!-- <script src="/storage/emulated/0/g_js_libs/eruda.min.js"></script> -->
+
+<script type="module">
+"use strict";
+
+
+//some utils
+class Rand{
+
+static Float(min=0, max=1){
+return Math.random() * (max - min+1) + min;
+}
+
+static Int(min=6, max=9){
+return Math.floor( Rand.Float(min, max));
+}
+
+static Choice(...args){
+return args[Rand.Int(0, args.length - 1)];
+}
+
+static Color(len=3){
+let outColor="#";
+for(let i=0;i<len;++i){
+outColor+=Rand.Choice(..."0123456789abcdef".split(""));
+}
+return outColor;
+}
+
+}
+
+
+//help to create html nested element easily
+const strToHTML=(_str_)=>{
+const element = document.createElement("div");
+element.innerHTML=_str_??"null";
+return element?.firstElementChild;
+}
+
+//help to hold time and workflow
+const sleep=time=>new Promise((res,rej)=>{
+setTimeout(()=>{res(true)}, time*1000);
+});
+
+
+const test=async()=>{
+
+console.log("hi 1")
+console.log("hi 2")
+await sleep(5)
+console.log("hi 3")
+await sleep(5)
+
+console.log("hi 4")
+console.log("hi 5")
+
+}
+
+const setupGame=async(level, container)=>{
+if(!container) return null;
+
+container.innerHTML="";
+
+for(let i=0;i<level.row*level.col;i++){
+container.appendChild(strToHTML(`<div class="colorBox box${i}"></div>`));
+}
+
+container.style.background=Rand.Color(8);
+container.style.gridTemplateRows=`repeat(${level.row}, 1fr)`;
+container.style.gridTemplateColumns=`repeat(${level.col}, 1fr)`;
+
+return await [...container.children];
+}
+
+
+const INITIAL=async()=>{
+
+const colorPattenContainer = document.querySelector(".colorPattenContainer");
+
+const defficaltySelector = document.querySelector("#defficaltySelector");
+
+const startGameBtn = document.querySelector(".startGame");
+const finishGameBtn = document.querySelector(".finishGame");
+const restartGameBtn = document.querySelector(".restartGame");
+
+
+
+
+const defficaltyLevel={
+easy:{
+row:2,
+col:2,
+num:{x: 2, y: 4},
+},
+normal:{
+row:3,
+col:3,
+num:{x: 3, y: 9},
+},
+hard:{
+row:4,
+col:4,
+num:{x: 4, y: 16},
+},
+};
+
+
+
+
+
+let pattenGuess = [];
+let userGuess = [];
+let level = "easy";
+let winIndicator = 0;
+let isUserTurn = false;
+let colorBoxHoverClassName = "colorBoxhover";
+
+
+
+const colorBoxs = await setupGame(defficaltyLevel[level], colorPattenContainer);
+
+const pattenSize = colorBoxs.length;
+
+
+for(let i  of colorBoxs){
+i.style.background = Rand.Color(6);
+}
+
+
+
+
+
+
+
+//
+const botTurn=async()=>{
+
+pattenGuess=[];
+
+const waitTime = 1; // 1s
+const nums = defficaltyLevel[level].num;
+const numOfGuess = Rand.Int(nums.x, nums.y);
+
+for(let i=0;i<numOfGuess;i++){
+
+const indexOfColorBox = Rand.Int(0, colorBoxs.length - 1);
+const element = colorBoxs[indexOfColorBox];
+pattenGuess.push(element?.classList[1]);
+element.classList.toggle( colorBoxHoverClassName);
+await sleep(0.5);
+element.classList.toggle( colorBoxHoverClassName);
+await sleep(waitTime);
+
+};
+
+
+isUserTurn=true;
+
+
+}
+
+
+const userTurn=async(e)=>{
+
+if(!isUserTurn) return 2;
+const element=e?.srcElement;
+
+userGuess.push(element?.classList[1]);
+element.classList.toggle( colorBoxHoverClassName);
+await sleep(0.5);
+element.classList.toggle(colorBoxHoverClassName);
+
+
+if(userGuess.length >= pattenGuess.length){
+checkWin()
+return;
+}
+
+
+}
+
+
+
+const restartGame=async()=>{
+
+
+pattenGuess=[];
+userGuess=[];
+winIndicator=0;
+isUserTurn=false;
+level=defficaltySelector?.value??"easy";
+
+
+let tempArr = await setupGame(defficaltyLevel[level], colorPattenContainer);
+
+colorBoxs.splice(0, colorBoxs.length);
+
+
+for(let i =0;i<tempArr.length;i++){
+colorBoxs[i]=tempArr[i];
+colorBoxs[i].style.background = Rand.Color(6);
+}
+
+
+
+
+}
+
+
+const checkWin=()=>{
+
+if(pattenGuess.length <= 0) return;
+for(const i in pattenGuess){
+if(pattenGuess[i] === userGuess[i]){
+winIndicator++;
+}else break;
+
+}
+
+if(pattenGuess.length === winIndicator){
+alert("you win :)\n do you wanna play it again xd");
+restartGame();
+}else{
+alert("you loose try again : )");
+restartGame();
+}
+
+
+}
+
+
+
+
+
+
+startGameBtn.addEventListener("click", botTurn);
+
+
+
+colorPattenContainer.addEventListener("click", userTurn);
+
+
+finishGameBtn.addEventListener("click", checkWin);
+
+
+restartGameBtn.addEventListener("click", restartGame);
+
+
+
+
+}
+
+
+
+try{
+INITIAL()
+
+}catch(err){
+console.log(`javascript uncatch error: ${err} `);
+}
+
+
+</script>
+
+</body>
+</html>

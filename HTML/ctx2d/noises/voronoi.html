@@ -1,0 +1,201 @@
+<!doctype html>
+<html>
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"/>
+<meta name="author" content="billbyte">
+
+
+<style>
+
+*{
+margin: 0; padding: 0;
+box-sizing: border-box;
+}
+
+html{
+font-size:10px;
+}
+body{
+background:#212121;
+}
+main{
+width:100%;
+height: 80dvh;
+background: #424242;
+display: grid;
+place-items: center;
+}
+canvas{
+background: saddlebrown;
+}
+
+</style>
+
+<title>voronoi noise</title>
+
+</head>
+<body>
+
+<main>
+
+<canvas id="canvas"></canvas>
+
+</main>
+
+
+<script>
+
+//querySelector
+//querySelectorAll
+
+
+
+const { PI:pi, min, max, cos, abs, sin, tan, random, floor, ceil} = Math;
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas?.getContext("2d");
+
+
+const canvasResizer=(canvas)=>{
+let cSize = (innerWidth > innerHeight)?innerHeight:innerWidth;
+canvas.width=cSize;
+canvas.height=cSize;
+}
+
+
+
+
+class Rand{
+
+static Float(min=1, max=2){
+return random() * (max-min+1) + min;
+}
+
+static Int(min=10, max=20){
+return floor(Rand.Float(min, max));
+}
+
+static Choice(...args){
+return args[Rand.Int(0, args.length - 1)];
+}
+
+}
+
+
+
+
+
+// Function to calculate the distance between two points
+function distance(p1, p2) {
+  const dx = p2[0] - p1[0];
+  const dy = p2[1] - p1[1];
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+// Function to generate the Voronoi diagram
+function generateVoronoi(seeds, width, height) {
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      let closestSeed = null;
+      let minDistance = Infinity;
+      for (const seed of seeds) {
+        const dist = distance([x, y], seed);
+        if (dist < minDistance) {
+          closestSeed = seed;
+          minDistance = dist;
+        }
+      }
+      ctx.fillStyle = `hsl(${Math.random() * 360}, 100%, 50%)`;
+      ctx.fillRect(x, y, 1, 1);
+    }
+  }
+}
+
+
+
+
+const INIT=(ctx)=>{
+
+const {width, height} = ctx.canvas;
+// clearing Color or other word background color
+const clearColor = "#121111";
+
+console.log("init")
+
+const seeds = [];
+
+const numSeeds = 100;
+
+for(let i = 0; i < numSeeds; i++) {
+  seeds.push([Rand.Float(0, width), Rand.Float(0,  height)]);
+}
+
+
+
+const animate=(dt=1)=>{
+//console.log("loop");
+//ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+
+ctx.fillStyle = clearColor;
+ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+
+
+generateVoronoi(seeds, width, height)
+
+
+
+
+}
+
+
+
+// parent Loop 
+const mainLoop=(ts=0)=>{
+
+//calc delta time
+let dt = ts * 0.001 ?? 0.5;
+//console.log("loop")
+animate(dt);
+//webkitRequestAnimationFrame(mainLoop);
+}
+
+if (1) mainLoop()
+
+else setInterval(mainLoop , 1000)
+
+
+
+
+
+// some control
+
+
+
+// resizing canvas
+window.addEventListener("resize", ()=>{
+canvasResizer(ctx.canvas);
+})
+
+
+
+
+}
+
+
+window.addEventListener("load", ()=>{
+try{
+canvasResizer(ctx.canvas)
+INIT(ctx)
+}catch(e){
+console.log(e.message, e.stack);
+}
+
+})
+
+</script>
+
+
+</body>
+</html>

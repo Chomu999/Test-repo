@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=10.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+<style>
+
+*:before, *, *:after{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+html{
+font-size: 10px;
+}
+
+ul{
+list-style-type: none;
+}
+
+a{
+text-decoration: none;
+}
+
+.wrapper{
+margin:1rem auto;
+padding: 1rem;
+width: min(38rem, 100% - 2rem);
+background:#DCDCDC66 ;
+border-radius: 2rem;
+box-shadow:
+2rem 1.2rem 10rem 0.1rem #191919,
+2rem 2rem 1rem 0.1rem #eeeeee inset;
+}
+
+.appContainer{
+aspect-ratio: 1;
+overflow: hidden auto;
+}
+
+.appContainer .appTitle{
+margin: 1rem;
+padding: 1rem;
+/* background: linear-gradient(45deg, red, blue); */
+color: #9E00FF;
+text-shadow:
+0 0 1rem green,
+0 0 0.5rem yellow
+
+;
+text-align: center;
+border: 1rem solid currentColor;
+border-radius: 2rem;
+}
+
+.timeContainer{
+/* background: #00AAFF66; */
+aspect-ratio: 2;
+text-align: center;
+align-items: center;
+
+}
+
+.timeContainer h2{
+color: #414D50;
+font-size: 2rem;
+font-weight: bold;
+}
+
+
+</style>
+
+<title>Simple react app</title>
+
+
+
+<script  src="/storage/emulated/0/g_js_libs/react.development18.2.0.js"></script>
+<script  src="/storage/emulated/0/g_js_libs/react-dom.development18.2.0.js"></script>
+<script  src="/storage/emulated/0/g_js_libs/babel2.min.js"></script>
+
+</head>
+<body>
+
+
+<div class="rootElement" id="react-app"></div>
+
+
+
+
+
+
+
+<script type="text/babel" data-presets="env,react">
+
+//
+const {useState} = React;
+
+
+
+
+
+const App =()=>{
+
+
+const [ctime, setCTime] = useState(Date())
+
+setInterval(()=>{
+setCTime(Date())
+}, 1000);
+
+return (
+<>
+
+<div className="wrapper appContainer">
+
+<h1 className="appTitle">Simple React Time App </h1>
+
+<div  className="wrapper timeContainer">
+<h2>time is : {ctime}</h2>
+</div>
+
+</div>
+
+</>
+);
+
+}
+
+const root = ReactDOM.createRoot(document.getElementById("react-app"));
+
+root.render(
+<App/>
+);
+
+
+
+
+</script>
+
+
+
+
+
+
+
+</body>
+</html>

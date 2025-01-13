@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=10.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+<link rel="stylesheet" href="expenseForm.css" type="text/css" media="all" />
+
+<title>simpel react app </title>
+
+
+
+<script  src="/storage/emulated/0/g_js_libs/react.development18.2.0.js"></script>
+<script  src="/storage/emulated/0/g_js_libs/react-dom.development18.2.0.js"></script>
+<script  src="/storage/emulated/0/g_js_libs/babel2.min.js"></script>
+
+</head>
+<body>
+
+
+<div class="rootElement" id="react-app"></div>
+
+
+
+
+
+
+
+
+<!-- <script type="text/babel" data-preset="env" data-plugins="transform-modules-commonjs"></script> -->
+
+<!-- <script type="text/babel" src="./hello.js"></script> -->
+
+
+<!-- <script type="text/babel" src="hello.js" data-presets="env,react" data-plugins="transform-modules-commonjs,transform-react-jsx,transform-class-properties,transform-object-rest-spread"></script> -->
+
+
+<!-- <script type="text/babel" src="hello.js" data-presets="@babel/env,@babel/react" data-plugins="transform-modules-commonjs,transform-react-jsx,transform-class-properties,transform-object-rest-spread"></script> -->
+
+
+
+<script type="text/babel" data-presets="env,react">
+
+console.log(window)
+const utils = Babel.transformFileSync('./utils.js', { presets: ['env', 'react'] }).code;
+eval(utils);
+utils.Hi();
+
+
+
+//import "hello.css"
+//import {Hi} from "./utils.js";
+
+
+const getCurrentTime = () => new Date().toDateString();
+
+
+const App =()=> (
+<div className="wrapper">
+<div className="wrapper">
+<h1>the time is : <b className="red"> {getCurrentTime()}</b></h1>
+</div>
+</div>
+);
+
+
+const root = ReactDOM.createRoot(document.getElementById("react-app"));
+
+root.render(
+<React.StrictMode>
+<App/>
+</React.StrictMode>
+);
+
+
+
+
+</script>
+
+
+
+
+
+
+
+</body>
+</html>

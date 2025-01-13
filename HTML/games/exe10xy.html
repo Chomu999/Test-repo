@@ -1,0 +1,156 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>HTML canvas bird game</title>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+#mainBox{
+margin:0;padding:0;
+width:100vw;height:100vh;
+background-color:#CBCBCB;
+}
+#cvs{
+/* 
+position:absolute;
+top:50%;left:50%;
+transform:translate(-50%,-50%);
+border:2px solid blue; */
+}
+
+
+
+
+</style>
+</head>
+<body>
+
+
+<div id="mainBox">
+
+
+<canvas id="cvs"></canvas>
+<!-- 
+<p class="gamePlay">tap to play</p>
+ -->
+</div>
+
+
+<script>
+
+
+let cvs=document.getElementById('cvs');
+let ctx = cvs.getContext('2d')
+
+
+cvs.width= innerWidth;
+cvs.height= innerHeight;
+
+
+let mouse={
+x:undefined,
+y:undefined
+}
+
+let c={
+x:undefined,
+y:undefined
+}
+
+
+
+
+
+
+
+function CTXtext(c,t,x=cvs.width/1.76,y=15){
+ctx.fillStyle=c;
+ctx.fillText(`${t}`,x,y);
+}
+
+
+class Block{
+constructor(x,y,w,h,color){
+this.x=x
+this.y=y
+this.width=w
+this.height=h
+this.color=color
+}
+
+draw(){
+ctx.fillStyle=this.color
+ctx.fillRect(this.x,this.y,this.width,this.height)
+
+}
+
+}
+
+
+let Endblock=new Block(30,30,50,50,'red')
+
+
+
+
+function gameLoop(){
+window.requestAnimationFrame(gameLoop)
+ctx.fillStyle='black'
+ctx.fillRect(0,0,cvs.width,cvs.height)
+
+
+//Endblock.draw()
+ctx.wordSpacing="20px"
+CTXtext('red',`X-Axis:${c.x} Y-Axis:${c.y}`,10,30)
+
+
+
+
+
+
+
+ctx.fillStyle='#0022FF'
+ctx.fillRect(cvs.width/2,0,1,cvs.height)
+ctx.fillRect(0,cvs.height/2,cvs.width,1)
+
+}gameLoop()
+
+
+addEventListener('touchmove',(e)=>{
+
+
+mouse.x = e.changedTouches[0].clientX;
+/// innerWidth) * 2 - 1
+mouse.y = e.changedTouches[0].clientY;
+//innerHeight) * 2 + 1
+
+
+
+let angle=Math.atan2(mouse.y - ctx.canvas.height / 2, mouse.x - ctx.canvas.width /2)
+
+let velocity = {
+    x: Math.cos(angle),
+    y: Math.sin(angle)
+};
+
+c.x = velocity.x
+c.y = velocity.y
+
+//console.log(mouse.x)
+//console.log(mouse.y)
+
+
+})
+
+
+console.log(ctx)
+
+</script>
+</body>
+</html>

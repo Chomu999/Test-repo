@@ -1,0 +1,471 @@
+<!DOCTYPE HTML>
+<html lang="en-in">
+<head>
+
+<meta charset="utf-8">
+
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=10.0, user-scalable=no"/>
+
+<meta name="author" content="bhowmickbyte, ">
+
+<style>
+
+*:before,*,*:after{
+margin:0; padding:0; box-sizing:border-box;
+}
+
+
+:root{
+--angle:45deg;
+--angle_1:-45deg;
+
+--c0:#FF7400;
+--c1:#0094FF;
+--c2:#8100FF;
+--c3:#FF78A8;
+--c4:#FF004C;
+--c5:#FF00DB;
+--c6:#72729E;
+--c7:#FF708A;
+--c8:#F86EBF;
+
+--c9:chocolate;
+
+--c10:white;
+--c11:black;
+
+--half_black_trans_c1:#0004;
+--half_black_trans_c2:#0008;
+
+--half_red_trans_c1:#f004;
+--half_red_trans_c2:#f004;
+
+--half_green_trans_c1:#0f04;
+--half_green_trans_c2:#0f08;
+
+--half_transparent_bg:linear-gradient(var(--half_black_trans_c1));
+
+--grad_bg_c1:linear-gradient(var(--angle), var(--c1), var(--c2), var(--c3), var(--c4), var(--c5), var(--c6), var(--c7),var(--c8));
+--grad_bg_c2: linear-gradient(var(--angle), var(--c10), var(--c11), var(--c10));
+
+
+
+--bg_ani_width:10rem;
+--bg_ani_height:10rem;
+--bg_ani_scroll_speed:calc(3 * 100%);
+--bg_ani_time:30s;
+
+
+}
+
+html{
+font-size: 10px;
+}
+
+
+
+main{
+
+width:100%; height:100%;
+}
+
+
+.bg_ani{
+
+background: var(--grad_bg_c2);
+background-size: var(--bg_ani_width) var(--bg_ani_height);
+animation:bg_ani  var(--bg_ani_time) linear 10 alternate;
+}
+
+@keyframes bg_ani{
+0%{
+background-size: var(--bg_ani_width) var(--bg_ani_height);
+}
+
+100%{
+/* background: blue; */
+/* background-size:100% 50%; */
+background-position:1000% var(--bg_ani_scroll_speed);
+}
+
+}
+
+.wrapper{
+width: min(38rem, 100% - 3rem);
+margin-inline: auto;
+background: var(--half_black_trans_c1);
+border-radius:2rem;
+}
+
+.header.title{
+padding: 2rem;
+color: #C5C7C3;
+text-align: center;
+font-size: 3rem;
+text-shadow: 3px 2px 2px #777, 3px 2px 2px #f00;
+text-transform: capitalize;
+}
+
+canvas{
+margin: auto;
+display: block;
+background: var(--half_green_trans_c1);
+border: 1px solid #0008;
+}
+
+
+.para{
+padding:1rem;
+color: #E7E7E7;
+font-size: 1.8rem;
+text-align: center;
+text-transform: capitalize;
+}
+
+
+
+.control_box{
+margin:2rem auto;
+padding: 1rem;
+width:30rem;
+height: 30rem;
+display: grid;
+grid-template-rows: repeat(3,1fr);
+grid-template-columns: repeat(3,1fr);
+gap: 1rem;
+background: var(--half_red_trans_c1);
+border-radius: 2rem;
+}
+
+.control_box > .btns{
+/* width:4rem  height: 4rem; */
+background: var(--c9);
+border-radius: 2rem;
+}
+
+
+/*
+
+grid-row :s_y/e_y;
+grid-column :s_x/e_x;
+grid-area:s_y/s_x/e_y/e_x;
+*/
+
+.btns.up{
+/* grid-row: 1/2;
+grid-column: 2/3; */
+
+grid-area: 1/2/2/3;
+}
+
+.left{
+grid-area: 2/1/3/2;
+
+}
+
+.right{
+grid-area: 2/3/3/4;
+
+}
+
+.down{
+grid-area: 3/2/4/3;
+
+}
+
+.btns.reset{
+grid-area: 2/2/3/3;
+background: var(--grad_bg_c2);
+}
+
+
+div.resource{
+display:none;
+}
+
+img{
+width:100%;
+}
+
+</style>
+
+<title>js Physics Engine testing</title>
+</head>
+<body class="bg_ani">
+
+<main class="aloo">
+
+<div class="wrapper">
+<h1 class="header title"> js Physics Engine testing</h1>
+
+<canvas id="canvas" tabindex="0"></canvas>
+
+<p class="para"> this is js only</p>
+
+</div>
+
+<div class="wrapper">
+
+<div class="control_box">
+
+<div class="btns up" data-keys="w"></div>
+<div class="btns down" data-keys="s"></div>
+<div class="btns reset" data-keys="reset"></div>
+<div class="btns left" data-keys="a"></div>
+<div class="btns right" data-keys="d"></div>
+
+</div>
+
+</div>
+
+
+</div>
+
+</main>
+
+<script>
+
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+
+console.log(ctx)
+
+const control_box = document.querySelector(".control_box");
+
+const BALLS=[];
+
+let is_pressed=false;
+let last_key = ""
+
+const {PI:pi}=Math;
+
+ctx.canvas.width = 330;
+ctx.canvas.height = 330;
+
+
+
+class Vec2{
+constructor(x=0,y=0){
+this.x=x;
+this.y=y;
+}
+
+
+add(a){
+return new Vec2(this.x + a.x, this.y + a.y);
+}
+sub(a){
+return new Vec2(this.x - a.x, this.y - a.y);
+}
+div(a){
+return new Vec2(this.x + a.x, this.y + a.y);
+}
+mul(a){
+return new Vec2(this.x + a.x, this.y + a.y);
+}
+
+
+static ZERO = new Vec2(0,0);
+
+static UP = new Vec2(0,-1);
+static LEFT = new Vec2(-1,0);
+static DOWN = new Vec2(0,1);
+static RIGHT = new Vec2(1,0);
+
+
+}
+
+
+
+
+let move={
+left:!1,
+up:!1,
+right:!1,
+down:!1,
+}
+
+class Ball{
+constructor(x=0,y=0,radius=0){
+this.x=x;
+this.y=y;
+this.radius=radius;
+BALLS.push(this)
+}
+draw(){
+ctx.beginPath();
+ctx.strokeStyle="black";
+ctx.fillStyle="red";
+ctx.arc(this.x, this.y, this.radius, 0, 2*pi);
+ctx.stroke();
+ctx.fill();
+ctx.closePath();
+}
+}
+
+
+
+
+let ball1= new Ball(200, 200, 20);
+let ball2= new Ball(150, 30, 20);
+
+//ball1.player = !0
+ball2.player = !0
+
+
+
+
+const animate=(dt)=>{
+//console.log("loop", dt)
+
+ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+
+
+BALLS.forEach((b)=>{
+b.draw();
+if(b.player){
+key_control(b);
+}
+})
+
+//moves()
+}
+
+
+let lt =0;
+const mainLoop=(ts=0)=>{
+let dt = ts-lt;
+lt=ts;
+animate(dt)
+window?.webkitRequestAnimationFrame(mainLoop)
+}
+mainLoop()
+
+
+
+
+
+//controle
+
+
+
+
+
+function key_control(b){
+
+if(!is_pressed){
+
+switch (last_key){
+case 'a':
+move.left=false;
+break;
+case 'd':
+move.right=false;
+break;
+case 's':
+move.down=false;
+break;
+case 'w':
+move.up=false;
+break;
+
+}
+
+return 0;
+
+}
+
+switch (last_key){
+case 'a':
+move.left=true;
+break;
+case 'd':
+move.right=true;;
+break;
+case 's':
+move.down=true;
+break;
+case 'w':
+move.up=true;
+break;
+case 'reset':
+for(let i in move) move[i] = false;
+break;
+default: for(const i in move) move[i] = false;
+}
+
+
+if(move.left){
+b.x--;
+}
+if(move.up){
+b.y--;
+}
+if(move.right){
+b.x++;
+}
+if(move.down){
+b.y++;
+}
+
+
+
+
+}
+
+
+
+control_box.addEventListener("pointerdown", (e)=>{
+
+//console.log("DOWN")
+let key = e?.srcElement?.dataset?.keys;
+is_pressed=true;
+last_key = !key?"":key;
+
+//console.log(last_key)
+})
+
+
+
+control_box.addEventListener("pointerrawupdate", (e)=>{
+//console.log("MOVE")
+let key = e?.srcElement?.dataset?.keys;
+is_pressed=true;
+last_key = !key?"":key;
+//console.log(last_key)
+})
+
+
+control_box.addEventListener("pointerleave", (e)=>{
+
+//console.log("UP leave")
+let key = e?.srcElement?.dataset?.keys;
+is_pressed=false;
+last_key = ""
+console.log("leave")
+
+
+})
+
+control_box.addEventListener("touchend", (e)=>{
+
+//console.log("UP")
+let key = e?.srcElement?.dataset?.keys;
+is_pressed=false;
+last_key = ""
+//console.log(last_key)
+
+
+})
+
+
+
+
+
+
+
+</script>
+
+</body>
+</html>

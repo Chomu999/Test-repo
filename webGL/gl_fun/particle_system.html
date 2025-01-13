@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+<meta name="author" content="bytebhowmick"/>
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+
+<title>Simple Webgl2 Particle System</title>
+
+<style>
+
+
+
+*{
+margin: 0;
+padding: 0;
+box-sizing:border-box;
+/* border: 0.1px solid red; */
+}
+
+
+
+html{
+font-size: 10px;
+}
+
+a{
+text-decoration: none;
+}
+
+li{
+list-style:none;
+}
+
+
+
+
+body{
+background: #3e3e3e;
+
+}
+
+canvas{
+margin: auto;
+display: block;
+background:#FF986E;
+}
+
+
+.error_box{
+margin: 2rem 0;
+background:transparent;
+overflow:hidden auto;
+}
+
+.title{
+color:#222A3B;
+font-size: 3rem;
+display:block;
+text-align: center;
+text-transform: capitalize;
+background: linear-gradient(45deg,red, blue);
+text-decoration: underline;
+}
+
+.error_box  p{
+margin:0.2rem 1rem;
+padding: 1rem ;
+
+background: #0009;
+color: #FF374E;
+border-radius: 1rem;
+}
+
+
+.hidden{
+display: none;
+}
+
+</style>
+
+</head>
+<body>
+
+<main>
+
+<canvas id="canvas"></canvas>
+
+<div class="error_box">
+<span class="title">error and warning</span>
+<pre></pre>
+</div>
+
+</main>
+
+
+<!-- <script src="/storage/emulated/0/g_js_libs/gl-matrix.js"></script> -->
+
+<script>
+"use stcick"
+
+const canvas = document.getElementById('canvas');
+const gl = canvas.getContext('webgl2');
+
+gl.canvas.width = 360;
+gl.canvas.height = 360;
+
+
+
+
+// some globel variables
+const minSize = 1, maxSize = 10;
+const minSpeed = 2, maxSpeed = -2;
+const minLifeTime = 1, maxLifeTime = 2;
+
+
+class ParticleSystem {
+  constructor(x, y) {
+    this.emitter = { x, y };
+    this.particles = [];
+    this.speed = ()=> Rand.Float(minSpeed, maxSpeed);
+    this.lifetime = () => Rand.Float(minLifeTime, maxLifeTime);
+    this.spread = 45;
+    this.amount = 2;
+    this.gravity = 0.8;
+    this.wild = 0.06;
+  }
+
+  addBurst(amount=1){
+    for (let i = 0; i < amount; i++) {
+      const particle = new Particle(
+        this.emitter,
+        this.speed(),
+        Rand.Float() * this.spread - this.spread / 2,
+        this.lifetime()
+      );
+      this.particles.push(particle);
+    }
+  }
+
+  emit() {
+  this.addBurst(this.amount);
+  }
+
+  render(gl, dt, color_loc, pos_loc){
+    gl.uniform4fv(color_loc, [1.0, 0.0, 0.0, 1.0]);
+    gl.uniform3fv(pos_loc, [this.emitter.x, this.emitter.y, 10]);
+    gl.drawArrays(gl.POINTS, 0, 1);
+    for(let i=0;i<this.particles.length;i++){
+      const p = this.particles[i];
+      if(!p) return;
+      gl.uniform4fv(color_loc, p.color);
+      gl.uniform3fv(pos_loc, [p.position.x, p.position.y, p.size]);
+      p.velocity.y += this.gravity * dt;
+      p.velocity.x += this.wild * dt;
+      p.update(dt);
+      p.draw(gl);
+    }
+    for(let i=0;i<this.particles.length;i++){
+      const p = this.particles[i];
+      if(!p) return;
+      if(p.markOfDelete){
+        this.particles.splice(i, 1);
+      }
+    }
+  }
+}
+
+// Particle data structure
+class Particle {
+  constructor(position, speed, angle, lifetime) {
+    this.position = {x:position.x, y:position.y};
+    this.velocity = {
+      x: speed * Math.sin(angle),
+      y: speed * Math.cos(angle)
+    };
+    this.lifetime = lifetime;
+    this.color = [Rand.Float(0, 1), Rand.Float(0, 1), Rand.Float(0, 1), Rand.Float(0, 1)];
+    this.size = Rand.Float(minSize, maxSize);
+    this.markOfDelete = false;
+  }
+  update(dt){
+    this.position.x += this.velocity.x * dt;
+    this.position.y += this.velocity.y * dt;
+    //this.size += dt * 10;
+    this.lifetime -= dt*0.8;
+    this.markOfDelete = this.lifetime < 0.00?true:false;
+  }
+
+  draw(gl){
+    gl.drawArrays(gl.POINTS, 0, 1);
+  }
+
+
+}
+
+
+class Rand{
+
+static Float(min=0, max=1){
+return Math.random() * (max - min) + min;
+}
+
+static Int(min=1, max=2){
+return Math.floor(Rand.Float(min, max));
+}
+
+static Choice(...args){
+return args[Rand.Int(0, args.length)];
+}
+
+
+}
+
+
+
+
+
+const makeProgram=(vss, fss)=>{
+const vs=gl.createShader(gl.VERTEX_SHADER)
+gl.shaderSource(vs, vss)
+gl.compileShader(vs)
+if(!gl.getShaderParameter(vs, gl.COMPILE_STATUS)){
+console.log(`vertex error ${gl.getShaderInfoLog(vs)}
+${gl.getShaderSource(vs)}
+`)
+}
+
+const fs=gl.createShader(gl.FRAGMENT_SHADER)
+gl.shaderSource(fs, fss)
+gl.compileShader(fs)
+if(!gl.getShaderParameter(fs, gl.COMPILE_STATUS)){
+console.log(`fragment error ${gl.getShaderInfoLog(fs)}
+${gl.getShaderSource(fs)}
+`)
+}
+
+
+const prog=gl.createProgram();
+gl.attachShader(prog, vs);
+gl.attachShader(prog, fs);
+
+gl.linkProgram(prog);
+if(!gl.getProgramParameter(prog, gl.LINK_STATUS)){
+console.log(`${gl.getProgramInfoLog(prog)}`)
+}
+
+gl.useProgram(prog);
+
+gl.validateProgram(prog);
+if(!gl.getProgramParameter(prog, gl.VALIDATE_STATUS)){
+console.log(`${gl.getProgramInfoLog(prog)}`)
+}
+
+return prog;
+}
+
+
+
+
+
+
+
+
+// Particle system settings
+
+// Shader programs
+const vertexShader = `
+  uniform vec3 uPos;
+  void main() {
+    gl_Position = vec4(uPos.xyx, 1.0);
+    gl_PointSize = uPos.z;
+  }
+`;
+
+const fragmentShader = `
+  precision mediump float;
+  uniform vec4 uColor;
+
+
+  void main() {
+    vec2 uv = gl_FragCoord.xy;
+    //uv *= 2.0;
+    gl_FragColor = uColor; //vec4(d, d, d, 1.0);// * uColor;
+  }
+`;
+
+const program = makeProgram(vertexShader, fragmentShader);
+
+//gl.useProgram(program);
+
+const pos_loc = gl.getUniformLocation(program, 'uPos');
+const color_loc = gl.getUniformLocation(program, 'uColor');
+if(!pos_loc || !color_loc){
+console.log(`position location ${pos_loc}, color location ${color_loc}`);
+}
+
+
+//addBurst(100);
+
+
+const ps = new ParticleSystem(0, 0);
+
+
+
+
+// Main loop
+let lastTime=performance.now();
+
+function mainLoop(ts) {
+  gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+  gl.clearColor(0.2, 0.2, 0.2, 1);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+
+  const currentTime = performance.now();  
+  const dt = (currentTime - lastTime) / 1000;
+  lastTime = currentTime;
+  
+
+
+  //const posX = Math.sin(dt) * 10.6;
+  //const posY = Math.cos(dt) * 10.6;
+  //ps.emitter.x = posX;
+  //ps.emitter.y = posY;
+
+  //ps.emitter.x = Math.sin( dt) * ps.emitter.x;
+  //ps.emitter.y = Math.cos( dt);
+  //ps.emitter.x = Math.sin( dt) * 10;
+  //ps.emitter.y = Math.cos( dt) * 10;
+  //ps.emitter.y = posY;
+
+  ps.emit();
+  ps.render(gl, dt, color_loc, pos_loc)
+  requestAnimationFrame(mainLoop);
+}
+
+mainLoop(0);
+
+
+
+
+
+
+window.addEventListener("dblclick", ()=>{
+
+console.log(ps.emitter.x, ps.emitter.y);
+//console.log("adding ")
+ps.addBurst(500);
+
+})
+
+
+
+
+</script>
+
+</body>
+</html>

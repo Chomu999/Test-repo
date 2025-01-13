@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=1.0 user-scalable=0">
+<meta name="author" content="billbyte" />
+
+<title>Shader Toy Clone App</title>
+
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+html{
+font-size: 10px;
+}
+
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style: none;
+}
+
+body{
+background:#0A151B;
+}
+
+.wrapper{
+width:min(40rem, 100% - 2rem);
+margin-inline: auto;
+background:#eeeaa044;
+}
+
+nav{
+margin: 2rem;
+display: flex;
+background: #FF00CC;
+color: red;
+}
+
+nav ul{
+margin: 0;
+padding:  0;
+background: #00B7FF;
+}
+
+nav ul li{
+display:inline;
+font-size: 1rem;
+background: red;
+color: blue;
+text-transform: uppercase;
+border-radius: 55rem;
+}
+
+
+
+.shader_text{
+margin:2rem auto ;
+width: 30rem;
+aspect-ratio: 1;
+font-size:2.8rem;
+display: block;
+background: #020202;
+color: #00CE4E;
+tab-size: 2;
+border: none;
+}
+
+.fileNameInput{
+margin:2rem auto ;
+width: 30rem;
+display: block;
+background: #020202;
+color: #00CE4E;
+}
+
+
+canvas{
+margin: auto;
+display: block;
+background:#5C5C5C;
+}
+
+
+</style>
+
+
+
+
+</head>
+<body>
+
+
+<div class="wrapper canvasWrapper">
+
+<canvas class="gl"></canvas>
+<button id="fullscreenBtn" class="fullscreenBtn">fullscreen toggle</button>
+</div>
+
+
+
+<div class="wrapper ">
+
+<nav class="controls loop">
+
+<ul>
+	<li data-loop="start">start</li>
+	<li data-loop="stop">stop</li>
+</ul>
+
+</nav>
+
+</div>
+
+<div class="wrapper ">
+<nav class="controls editor">
+
+<ul>
+	<li data-shader="compile">compile</li>
+	<li data-shader="download">download</li>
+</ul>
+
+</nav>
+
+
+<textarea class="fileNameInput" id="fileNameInput" placeholder="enter file name" value="dummy_shader.glsl">dummy_shader.glsl</textarea>
+<textarea data-shader-text="fs" class="shader_text" id="shader_text"></textarea>
+</div>
+
+
+
+
+<script>
+
+const canvasWrapper = document.querySelector(".canvasWrapper");
+const canvas = document.querySelector("canvas");
+const gl = canvas.getContext("webgl2");
+//canvas.width = 300
+//canvas.height = 300
+document.fullscreenEnabled = true
+
+
+
+
+const makeProgram=(gl, vss, fss)=>{
+const vs=gl.createShader(gl.VERTEX_SHADER)
+gl.shaderSource(vs, vss)
+gl.compileShader(vs)
+if(!gl.getShaderParameter(vs, gl.COMPILE_STATUS)){
+console.log(`vertex error ${gl.getShaderInfoLog(vs)}
+${gl.getShaderSource(vs)}
+`)
+}
+
+const fs=gl.createShader(gl.FRAGMENT_SHADER)
+gl.shaderSource(fs, fss)
+gl.compileShader(fs)
+if(!gl.getShaderParameter(fs, gl.COMPILE_STATUS)){
+console.log(`fragment error ${gl.getShaderInfoLog(fs)}
+${gl.getShaderSource(fs)}
+`)
+}
+
+
+const prog=gl.createProgram();
+gl.attachShader(prog, vs);
+gl.attachShader(prog, fs);
+
+gl.linkProgram(prog);
+if(!gl.getProgramParameter(prog, gl.LINK_STATUS)){
+console.log(`${gl.getProgramInfoLog(prog)}`)
+}
+
+gl.useProgram(prog);
+
+gl.validateProgram(prog);
+if(!gl.getProgramParameter(prog, gl.VALIDATE_STATUS)){
+console.log(`${gl.getProgramInfoLog(prog)}`)
+}
+
+return prog;
+}
+
+
+class Program{
+constructor(vss, fss){
+this.ID=makeProgram(gl, vss, fss);
+
+this.ID.loc={
+u:{},
+a:{}
+};
+
+}
+
+Bind(){
+gl.useProgram(this.ID);
+}
+
+Unbind(){
+gl.useProgram(null);
+}
+
+Delete(){
+gl.deleteProgram(this.ID);
+}
+
+SetUniform1(name, value){
+gl.uniform1f(Program.GetUniformLocation(this.ID, this.ID.loc.u, name), value);
+}
+
+SetUniform2(name, value){
+gl.uniform2fv(Program.GetUniformLocation(this.ID, this.ID.loc.u, name), value);
+}
+
+SetUniform3(name, value){
+gl.uniform3fv(Program.GetUniformLocation(this.ID, this.ID.loc.u, name), value);
+}
+
+SetUniform4(name, value){
+gl.uniform4fv(Program.GetUniformLocation(this.ID, this.ID.loc.u, name), value);
+}
+
+SetUniformMat4(name, value){
+gl.uniformMatrix4fv(Program.GetUniformLocation(this.ID, this.ID.loc.u, name), gl.FLOAT, value)
+
+}
+
+static GetUniformLocation(prog, u, name){
+
+let result = !u[name] ? gl.getUniformLocation(prog, name): u[name];
+u[name] = result;
+return result;
+
+}
+
+}
+
+
+
+
+class VA{
+constructor(){
+this.ID=gl.createVertexArray()
+}
+
+Bind(){
+gl.bindVertexArray(this.ID);
+}
+
+Unbind(){
+gl.bindVertexArray(null);
+}
+
+Delete(){
+gl.deleteVertexArray(this.ID);
+}
+
+LA(vbo=null, layoutLocation=0, numberOfComponents=3, type=gl.FLOAT, normalize=!1, stride=0, offset=0){
+if (vbo instanceof VB) vbo.Bind()
+gl.enableVertexAttribArray(layoutLocation);
+gl.vertexAttribPointer(layoutLocation, numberOfComponents, type, normalize, stride, offset);
+
+}
+
+}
+
+
+class VB{
+constructor(Data){
+this.ID=gl.createBuffer()
+gl.bindBuffer(gl.ARRAY_BUFFER, this.ID);
+gl.bufferData(gl.ARRAY_BUFFER, Data, gl.STATIC_DRAW);
+
+}
+
+Bind(){
+gl.bindBuffer(gl.ARRAY_BUFFER, this.ID);
+}
+
+Unbind(){
+gl.bindBuffer(gl.ARRAY_BUFFER, null);
+}
+
+Delete(){
+gl.deleteBuffer(this.ID);
+}
+
+
+}
+
+
+class IB{
+constructor(Data){
+this.ID=gl.createBuffer()
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ID);
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, Data, gl.STATIC_DRAW);
+
+}
+
+Bind(){
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ID);
+}
+
+Unbind(){
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+}
+
+Delete(){
+gl.deleteBuffer(this.ID);
+}
+
+
+}
+
+const craft={
+program:(vs, fs)=> new Program(vs, fs),
+
+}
+
+
+const _app=(gl)=>{
+
+
+const loop_controls_elmt = document.querySelector(".controls.loop")
+const controls_elmt = document.querySelector(".controls.editor")
+const text_ = document.querySelector(`textarea[data-shader-text="fs"]`)
+
+let loop_running;
+
+let user_data={
+code:{
+vs:`
+
+void mainVertex(){
+gl_Position = vec4(uPos.xy, 0.0, 1.0);
+gl_PointSize = uPos.z;
+}
+
+`,
+fs:`
+void mainImage(out vec4 fragColor, vec2 fragCoord){
+	fragColor = vec4(sin(uTime), 0.0, 0.0, 1.0);
+}
+`,
+}
+}
+let admit_data={
+code:{
+vs:`#version 300 es
+
+precision mediump float;
+layout (location=0)in vec4 aPos;
+
+//uniform float uTime;
+
+
+void main(){
+gl_Position = aPos;
+gl_PointSize = 130.;
+}
+
+`,
+fs:`#version 300 es
+
+precision mediump float;
+
+out vec4 FragColor;
+
+
+uniform float uTime;
+uniform vec3 uRes;
+
+
+#include <mainImage>
+
+void main(){
+
+mainImage(FragColor, gl_FragCoord.xy);
+
+}
+`,
+}
+}
+
+text_.value = user_data.code.fs
+
+
+let prog;
+
+
+
+
+const _compile=()=>{
+user_data.code.fs = text_.value;
+let vs = admit_data.code.vs.replace("#include <mainVertex>", user_data.code.vs)
+let fs = admit_data.code.fs.replace("#include <mainImage>", user_data.code.fs)
+prog = craft.program(vs, fs)
+
+}
+
+_compile()
+
+const vertexPositionArr=new Float32Array([
+   1,  1,
+  -1,  1,
+  -1, -1,
+   1, -1,
+])
+
+const indexArr=new Uint8Array([
+0,1,2,
+2,3,0
+])
+
+const vao1 = new VA()
+const vbo1 = new VB(vertexPositionArr)
+const ibo1 = new IB(indexArr)
+
+vao1.Bind()
+vao1.LA(vbo1, 0, 2, gl.FLOAT, false, 0, 0)
+ibo1.Bind()
+
+
+//FRAGMENT_SHADER
+//ATTACHED_SHADERS
+
+const _download_shader=(program)=>{
+
+let _shaders = gl.getAttachedShaders(program.ID);
+//console.log(gl.getShaderSource())
+let _s_type = ["vs", "fs"];
+for(let i=0;i< _shaders.length;i++){
+
+let _anchor = document.createElement("a");
+let _data =gl.getShaderSource(_shaders[i]);
+
+let _name = _s_type[i] + "_" + fileNameInput.value;
+if (!_name){
+alert("please enter file name")
+return;
+}
+
+let _b = new Blob([_data])
+let _url = webkitURL.createObjectURL(_b)
+_anchor.download = _name;
+_anchor.href = _url;
+_anchor.click()
+}
+
+
+
+console.log("shaders is downloading maybe")
+
+}
+
+
+const animate=(dt)=>{
+gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+gl.clearColor(0.09, 0.09, 0.09, 1.0);
+gl.clear(gl.COLOR_BUFFER_BIT);
+
+
+//console.log(dt)
+prog.Bind();
+prog.SetUniform1("uTime", [dt]);
+prog.SetUniform3("uRes", [gl.canvas.width, gl.canvas.height, gl.canvas.width * gl.canvas.height])
+
+
+vao1.Bind()
+//gl.drawArrays(0, 0, 1);
+//gl.drawArrays(gl.TRIANGLES, 0, 3);
+gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_BYTE, 0);
+
+}
+
+
+const MainLoop=(ts=0)=>{
+
+let dt = ts * 0.001 ?? 0.5;
+
+animate(dt)
+loop_running = window?.requestAnimationFrame(MainLoop)
+//console.log(loop_running)
+}
+MainLoop()
+
+
+
+fullscreenBtn.addEventListener("click", ()=>{
+
+// TODO fullscreen method
+if (canvasWrapper?.fullscreen){
+canvasWrapper.exitFullscreen();
+}else{
+canvasWrapper?.requestFullscreen()
+const canvasSize = (innerWidth>innerHeight)?innerHeight:innerWidth;
+gl.canvas.width = canvasSize - 20;
+gl.canvas.height = canvasSize - 20;
+}
+
+console.log(canvasWrapper.fullscreenElement)
+});
+
+canvasWrapper.addEventListener("fullscreenerror", (e)=>{
+console.log("full screen error", e)
+})
+
+
+controls_elmt.addEventListener("click", (e)=>{
+if(!e.target) return;
+let condition = e.target.getAttribute("data-shader");
+
+
+if(condition === "compile"){
+console.clear()
+_compile()
+}
+
+else if(condition === "download"){
+_download_shader(prog)
+}
+
+});
+
+
+loop_controls_elmt.addEventListener("click", (e)=>{
+if(!e.target) return;
+let condition = e.target.getAttribute("data-loop");
+
+
+if(condition === "start"){
+console.log("animation is start")
+MainLoop()
+}
+
+if(condition === "stop"){
+console.log("animation is stop")
+cancelAnimationFrame(loop_running)
+}
+
+});
+
+
+
+
+
+}
+
+
+try{
+console.log("js is awesome".toUpperCase())
+
+console.log(gl)
+
+console.log(document)
+_app(gl)
+
+}catch(e){
+console.log(e)
+}
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+<meta name="author" content="bytebhowmick"/>
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+
+<title>webgl simple hello world example</title>
+
+
+
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+
+html{
+font-size:10px;
+}
+
+
+body{
+background:#00000099;
+}
+
+
+main{
+display: block;
+display:grid;
+place-items:center;
+}
+
+canvas{
+
+background:#FF8C3A;
+image-rendering: pixelated;
+image-rendering: pixelated;
+}
+
+
+</style>
+</head>
+<body>
+
+<main id="main">
+
+<canvas id="canvas"></canvas>
+
+
+
+
+</main>
+
+  
+
+
+<script>
+
+
+
+
+
+const GLReSizer=(gl)=>{
+let cs=innerWidth>innerHeight?cinnerHeight:innerWidth;
+gl.canvas.width=cs;
+gl.canvas.height=cs;
+}
+
+
+
+
+const _INIT=(gl)=>{
+
+
+
+let vsC=`#version 300 es
+precision mediump float;
+
+void main(){
+gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
+gl_PointSize = 380.0;
+}
+`;
+
+
+let fsC=`#version 300 es
+precision mediump float;
+
+out vec4 FragColor;
+
+
+
+
+uniform float uTime;
+uniform vec2 uRes;
+
+
+vec3 palette(float t){
+vec3 a = vec3(0.2, 0.3, 0.5);
+vec3 b = vec3(0.0, 0.5, 0.3);
+vec3 c = vec3(0.8, 0.5, 0.2);
+vec3 d = vec3(0.1, 0.4, 0.7);
+
+return a + b * cos(6.28318*c*t+d);
+}
+
+void main(){
+
+vec2 uv = (gl_FragCoord.xy * 2.0 - uRes.xy) / uRes.y;
+vec2 uv0 = uv;
+vec3 finalColor;
+
+
+for(float i = 0.0; i < 3.0; i += 1.0){
+uv = fract(uv) * 2.0 - 1.0;
+
+float d = length(uv) * exp( -length(uv0));
+
+vec3 col = palette( length(uv0) + i*uTime + uTime*0.5);
+
+d = sin(d * 4.0 + uTime) / 8.0;
+
+d = abs(d );
+
+d = pow(0.02 / d, 1.06);
+
+
+finalColor += col * d;
+}
+
+FragColor = vec4(finalColor, 1.0);
+}
+`;
+
+
+let prog=gl.createProgram();
+let vs=gl.createShader(gl.VERTEX_SHADER);
+let fs=gl.createShader(gl.FRAGMENT_SHADER);
+
+
+gl.shaderSource(vs, vsC);
+gl.shaderSource(fs, fsC);
+
+gl.compileShader(vs);
+if(!gl.getShaderParameter(vs, gl.COMPILE_STATUS))
+{
+console.log(`
+vertex shader error : ${gl.getShaderInfoLog(vs)}
+vertex shader source : ${gl.getShaderSource(vs)}`);
+}
+
+
+gl.compileShader(fs);
+if(!gl.getShaderParameter(fs, gl.COMPILE_STATUS))
+{
+console.log(`
+fragment shader error : ${gl.getShaderInfoLog(fs)}
+fragment shader source : ${gl.getShaderSource(fs)}`);
+}
+
+
+
+gl.attachShader(prog, vs);
+gl.attachShader(prog, fs);
+
+
+
+gl.linkProgram(prog);
+if(!gl.getProgramParameter(prog, gl.LINK_STATUS))
+{
+console.log("shader program link error  : "+ gl.getProgramInfoLog(prog));
+}
+
+gl.useProgram(prog);
+gl.validateProgram(prog);
+if(!gl.getProgramParameter(prog, gl.VALIDATE_STATUS))
+{
+console.log("shader program Validate error  : "+ gl.getProgramInfoLog(prog));
+}
+
+gl.useProgram(null);
+
+
+
+
+let uTimeLoc = gl.getUniformLocation(prog, "uTime");
+let uResLoc = gl.getUniformLocation(prog, "uRes");
+//let uMouseLoc = gl.getUniformLocation(prog, "uMouse")
+
+
+console.log(uTimeLoc, uResLoc)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//gl.vertexAttrib2f(0, 1, 1);
+gl.useProgram(prog);
+const MainLoop=(ts)=>{
+let dt = ts * 0.001 ?? 0.5;
+//console.log(dt);
+
+gl.clearColor(0.2, 0.2, 0.7, 1.0);
+gl.clear(gl.COLOR_BUFFER_BIT);
+gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+
+
+
+gl.uniform1f(uTimeLoc, dt)
+gl.uniform2fv(uResLoc, [gl.canvas.width, gl.canvas.height])
+
+gl.drawArrays(gl.POINTS, 0, 1);
+
+requestAnimationFrame(MainLoop);
+
+}
+
+requestAnimationFrame(MainLoop)
+console.log(document)
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+window.addEventListener("load", () => {
+
+const canvas=document.querySelector("canvas");
+
+const gl=canvas.getContext("webgl2");
+window.gl=gl;
+
+GLReSizer(gl);
+
+_INIT(gl);
+
+console.log(gl);
+
+
+//console.log(canvas);
+
+
+})
+
+
+
+window.addEventListener("resize", ()=>{
+
+GLReSizer(gl);
+})
+
+</script>
+
+</body>
+</html>

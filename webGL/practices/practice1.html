@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>webGL practice part 1</title>
+
+<style>
+
+*{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+html{
+font-size: 10px;
+}
+
+body{
+background: #00021B;
+}
+
+
+.appTitle{
+margin: 1rem ;
+padding: 1rem;
+text-align: center;
+background: #234500;
+color: #D2FFD6;
+border-radius: 1rem;
+}
+
+.canvasCont{
+width:100vmin;
+aspect-ratio: 1;
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+}
+
+canvas{
+margin: auto;
+width: 98%;
+display: block;
+background: salmon;
+}
+
+
+</style>
+
+</head>
+
+<body>
+
+
+<h1 class="appTitle">webGL practice part 1</h1>
+
+<div class="wrapper canvasCont">
+<canvas id="canvas"></canvas>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+<script>
+
+
+const INITIAL=async()=>{
+
+
+
+const canvas = document.getElementById("canvas");
+const gl = canvas.getContext("webgl2");
+
+//width or height
+
+const maxSize = (innerWidth>innerHeight)?innerHeight:innerWidth;
+canvas.width=maxSize;
+canvas.height=maxSize;
+
+
+console.log(gl);
+
+
+
+const vertexShaderSource=`#version 300 es
+
+void main(){
+gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
+gl_PointSize = 150.0;
+}
+`;
+
+const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+gl.shaderSource(vertexShader, vertexShaderSource);
+gl.compileShader(vertexShader);
+if(!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)){
+console.log(`vertexShader error ${gl.getShaderInfoLog(vertexShader)} \n  ${gl.getShaderSource(vertexShader)}`);
+}
+
+
+const fragmentShaderSource=`#version 300 es
+precision mediump float;
+layout (location=0) out vec4 FragColor;
+
+void main(){
+FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+}
+`;
+
+const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+gl.shaderSource(fragmentShader, fragmentShaderSource);
+gl.compileShader(fragmentShader);
+if(!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)){
+console.log(`fragmentShader error ${gl.getShaderInfoLog(fragmentShader)} \n  ${gl.getShaderSource(fragmentShader)}`);
+}
+
+const shaderProgram = gl.createProgram();
+gl.attachShader(shaderProgram, vertexShader)
+gl.attachShader(shaderProgram, fragmentShader)
+
+gl.linkProgram(shaderProgram);
+if(!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)){
+console.log(`link not sucsses ${gl.getProgramInfoLog(shaderProgram)}`);
+}
+gl.validateProgram(shaderProgram);
+if(!gl.getProgramParameter(shaderProgram, gl.VALIDATE_STATUS)){
+console.log(`invalide shaderProgram ${gl.getProgramInfoLog(shaderProgram)}`);
+}
+gl.useProgram(shaderProgram);
+
+
+
+
+
+
+
+
+
+
+function update(dt){
+gl.viewport(0, 0, canvas.width, canvas.height);
+gl.clearColor(0.2, 0.2, 0.2, 1.0);
+gl.clear(gl.COLOR_BUFFER_BIT);
+
+
+
+
+gl.drawArrays(gl.POINT, 0, 1);
+
+}
+
+
+
+let lastTime=0;
+function animate(timeStamp) {
+const dt = timeStamp - lastTime;
+lastTime = timeStamp;
+update(dt);
+webkitRequestAnimationFrame(animate)
+}
+webkitRequestAnimationFrame(animate)
+
+
+}
+
+
+
+try{
+	INITIAL()
+}catch(err){
+	console.log(err)
+}
+
+</script>
+
+</body>
+</html>

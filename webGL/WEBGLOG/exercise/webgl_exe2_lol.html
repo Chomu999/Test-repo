@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<!-- 
+<meta name="viewport" content="width=device-width, initial-scale=5.0 maximum-scale=5.0 user-scalable=0">
+ -->
+ 
+ <meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=99.0">
+<title>HTML 3d Element</title>
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+body{
+background: #333;
+}
+
+canvas{
+position:absolute;
+inset: 50% 0 0 50%;
+transform: translate(-50%,-50%);
+
+}
+</style>
+
+
+<script src="gl-matrix.js"></script>
+
+<script src="/storage/emulated/0/g_js_libs/dat.gui.min.js"></script>
+
+</head>
+
+<body>
+
+<canvas id="canvas"></canvas>
+
+
+
+
+<script>
+
+const canvas=document.querySelector('canvas#canvas');
+const gl=canvas.getContext('webgl');
+
+const cvsSize=(innerWidth>innerHeight)?innerHeight:innerWidth;
+
+gl.canvas.width=cvsSize;
+gl.canvas.height=cvsSize;
+
+window.gui = new dat.gui.GUI();
+
+
+const camera={
+pos:{ x:5 , y:-10 , z:-10 },
+rot:{ x:0 , y:10 , z:20 },
+}
+
+
+const rc = ()=>{
+return Math.random();
+}
+
+
+
+
+
+//VERTEX_SHADER lol
+let vShaderSrc=`
+precision mediump float;
+
+attribute vec3 a_vPos;
+attribute vec4 a_vColor;
+
+uniform mat4 mWorld;
+uniform mat4 mView;
+uniform mat4 mProj;
+
+varying vec4 fragColor;
+
+void main(){
+    fragColor = a_vColor;
+    gl_Position = mProj * mView * mWorld * vec4(a_vPos, 1.0);
+}
+`;
+
+//FRAGMENT_SHADER lol
+
+let fShaderSrc=`
+precision mediump float;
+
+
+varying vec4 fragColor;
+
+void main(void){
+    gl_FragColor = fragColor;
+}
+`;
+
+
+
+//gl.enable(gl.DEPTH_TEST)
+//gl.depthFunc(gl.LEQUAL)
+//gl.clearColor(0, 20, 6, 1)
+//gl.clearDepth(1.0)
+
+gl.enable(gl.DEPTH_TEST);
+gl.enable(gl.CULL_FACE);
+gl.frontFace(gl.CCW);
+gl.cullFace(gl.BACK);
+//console.log(gl)
+
+
+
+
+
+
+
+
+
+let VShader = gl.createShader(gl.VERTEX_SHADER);
+let FShader = gl.createShader(gl.FRAGMENT_SHADER);
+
+gl.shaderSource(VShader,vShaderSrc);
+gl.shaderSource(FShader,fShaderSrc);
+
+
+
+gl.compileShader(VShader);
+
+if(!gl.getShaderParameter(VShader, gl.COMPILE_STATUS)){
+console.error(`Shader compilation failed: ${gl.getShaderInfoLog(VShader)}`);
+gl.deleteShader(VShader);
+}
+
+
+
+gl.compileShader(FShader);
+
+if(!gl.getShaderParameter(FShader, gl.COMPILE_STATUS)){
+console.error(`Shader compilation failed: ${gl.getShaderInfoLog(FShader)}`);
+gl.deleteShader(FShader);
+}
+
+
+let myProgram = gl.createProgram();
+gl.attachShader(myProgram,VShader);
+gl.attachShader(myProgram,FShader);
+gl.linkProgram(myProgram);
+
+//Check if successful
+if(!gl.getProgramParameter(myProgram, gl.LINK_STATUS)){
+console.error("Error creating shader program.",gl.getProgramInfoLog(myProgram));
+gl.deleteProgram(myProgram);
+}
+
+
+
+gl.validateProgram(myProgram);
+if(!gl.getProgramParameter(myProgram, gl.VALIDATE_STATUS)){
+console.error("Error Validating Program", gl.getProgramInfoLog(myProgram));
+}
+
+
+
+
+
+
+
+
+
+
+
+let CubeVertices = new Float32Array([
+ // X, Y, Z         R,  G,  B,  A
+		// Top
+		-1.0,1.0,-1.0,   0.9,0.9,0.9,1.0,
+		-1.0,1.0,1.0,    0.9,0.9,0.9,1.0,
+		1.0,1.0,1.0,     0.9,0.9,0.9,1.0,
+		1.0,1.0,-1.0,    0.9,0.9,0.9,1.0,
+
+		// Left
+		-1.0,1.0,1.0,    1.0,0.0,1.0,1.0,
+		-1.0,-1.0,1.0,   1.0,0.0,1.0,1.0,
+		-1.0,-1.0,-1.0,  1.0,0.0,1.0,1.0,
+		-1.0,1.0,-1.0,   1.0,0.0,1.0,1.0,
+
+		// Right
+		1.0,1.0,1.0,    1.0,1.0,0.0,1.0,
+		1.0,-1.0,1.0,   1.0,1.0,0.0,1.0,
+		1.0,-1.0,-1.0,  1.0,1.0,0.0,1.0,
+		1.0,1.0,-1.0,   1.0,1.0,0.0,1.0,
+
+		// Front
+		1.0,1.0,1.0,    0.0,0.5,1.0,1.0,
+		1.0,-1.0,1.0,   0.0,0.5,1.0,1.0,
+		-1.0,-1.0,1.0,  0.0,0.5,1.0,1.0,
+		-1.0,1.0,1.0,   0.0,0.5,1.0,1.0,
+
+		// Back
+		1.0,1.0,-1.0,    0.5,0.5,1.0,1.0,
+		1.0,-1.0,-1.0,   0.5,0.5,1.0,1.0,
+		-1.0,-1.0,-1.0,  0.5,0.5,1.0,1.0,
+		-1.0,1.0,-1.0,   0.5,0.5,1.0,1.0,
+
+		// Bottom
+		-1.0,-1.0,-1.0,   0.0,0.5,0.6,1.0,
+		-1.0,-1.0,1.0,    0.0,0.5,0.6,1.0,
+		1.0,-1.0,1.0,     0.0,0.5,0.6,1.0,
+		1.0,-1.0,-1.0,    0.0,0.5,0.6,1.0,
+
+]);
+
+
+
+
+const CubeIndices =new Uint16Array([
+		// Top
+		0, 1, 2,
+		0, 2, 3,
+
+		// Left
+		5, 4, 6,
+		6, 4, 7,
+
+		// Right
+		8, 9, 10,
+		8, 10, 11,
+
+		// Front
+		13, 12, 14,
+		15, 14, 12,
+
+		// Back
+		16, 17, 18,
+		16, 18, 19,
+
+		// Bottom
+		21, 20, 22,
+		22, 20, 23,
+	]);
+
+
+
+let vbo1 = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, vbo1);
+gl.bufferData(gl.ARRAY_BUFFER, CubeVertices, gl.STATIC_DRAW);
+
+
+
+let ibo1 = gl.createBuffer();
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo1);
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, CubeIndices, gl.STATIC_DRAW);
+
+
+let my_GLSL_vel_a_vPos = gl.getAttribLocation(myProgram, `a_vPos`);
+
+let my_GLSL_vel_a_vColor = gl.getAttribLocation(myProgram, `a_vColor`);
+
+
+
+gl.enableVertexAttribArray(my_GLSL_vel_a_vPos);
+
+
+gl.vertexAttribPointer(
+    my_GLSL_vel_a_vPos,
+    3,
+    gl.FLOAT,
+    gl.FALSE,
+    7 * Float32Array.BYTES_PER_ELEMENT,//total Element in each Colan
+    0
+);
+
+gl.enableVertexAttribArray(my_GLSL_vel_a_vColor);
+gl.vertexAttribPointer(
+    my_GLSL_vel_a_vColor,
+    4,
+    gl.FLOAT,
+    gl.FALSE,
+    7 * Float32Array.BYTES_PER_ELEMENT,
+    3 * Float32Array.BYTES_PER_ELEMENT
+);
+
+
+gl.useProgram(myProgram);
+
+
+let my_GLSL_vel_mWorld = gl.getUniformLocation(myProgram, 'mWorld');
+
+let my_GLSL_vel_mView = gl.getUniformLocation(myProgram, 'mView');
+
+let my_GLSL_vel_mProj = gl.getUniformLocation(myProgram, 'mProj');
+
+
+let World_Matrix = mat4.create()
+let View_Matrix = mat4.create()
+let Proj_Matrix = mat4.create()
+
+mat4.identity(World_Matrix);
+//mat4.identity(View_Matrix);
+mat4.lookAt(View_Matrix, [0,0,-10], [0,0,0], [0,1,0]);
+mat4.identity(Proj_Matrix);
+mat4.perspective(Proj_Matrix, glMatrix.toRadian(45), canvas.width / canvas.height, 1.0, 1000.0);
+
+
+gl.uniformMatrix4fv(my_GLSL_vel_mWorld, gl.FALSE, World_Matrix);
+gl.uniformMatrix4fv(my_GLSL_vel_mView, gl.FALSE, View_Matrix);
+gl.uniformMatrix4fv(my_GLSL_vel_mProj, gl.FALSE, Proj_Matrix);
+
+
+
+//gl.useProgram(myProgram);
+//gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+let posF = gui.addFolder("pos");
+
+posF.add(camera.pos, "x", -100, 100, 1);
+posF.add(camera.pos, "y", -100, 100, 1);
+posF.add(camera.pos, "z", -100, 100, 1);
+
+
+let rotF = gui.addFolder("rot");
+
+rotF.add(camera.rot, "x", -100, 100, 1);
+rotF.add(camera.rot, "y", -100, 100, 1);
+rotF.add(camera.rot, "z", -100, 100, 1);
+
+
+//////
+let yRotationMatrix= new Float32Array(16);
+let xRotationMatrix= new Float32Array(16);
+mat4.identity(yRotationMatrix);
+mat4.identity(xRotationMatrix);
+
+let Identity_Matrix= mat4.create();
+
+let angle=0;
+
+
+
+let lastTime=performance.now()
+const gameLoop=()=>{
+//claculating delta Time
+let  currentTime = performance.now();
+let dt = (currentTime - lastTime) / 1000;
+lastTime = currentTime;
+
+angle=(performance.now() / 1000 / 6 * 2 * Math.PI);
+
+
+// cleaning canvas
+gl.clearColor(0.02, 0.02, 0.02, 1.0);
+gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
+gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+
+
+
+//mat4.rotate(World_Matrix, Identity_Matrix, angle, [0, 1, 0]);
+//console.log(dt)
+
+//mat4.rotate(yRotationMatrix, Identity_Matrix, angle, [0, 1, 0]);
+
+//mat4.rotate(xRotationMatrix, Identity_Matrix, angle / 4, [ 0, 0, -4]);
+
+//mat4.mul(World_Matrix, Identity_Matrix, xRotationMatrix);
+
+mat4.rotate(World_Matrix, World_Matrix, dt * Math.PI, [1, 0, 1]);
+
+
+mat4.lookAt(View_Matrix,
+[camera.pos.x, camera.pos.y, camera.pos.z],
+[0, 0, 0],
+[camera.rot.x, camera.rot.y, camera.rot.z]);
+
+
+gl.uniformMatrix4fv(my_GLSL_vel_mWorld, gl.FALSE, World_Matrix);
+
+gl.uniformMatrix4fv(my_GLSL_vel_mView, gl.FALSE, View_Matrix);
+
+//mat4.mul(World_Matrix, yRotationMatrix);
+//gl.uniformMatrix4fv(my_GLSL_vel_mWorld, gl.FALSE, World_Matrix);
+
+
+
+gl.drawElements(gl.TRIANGLES, CubeIndices.length, gl.UNSIGNED_SHORT, 0);
+
+
+
+
+
+
+requestAnimationFrame(gameLoop);
+
+}
+
+requestAnimationFrame(gameLoop);
+
+
+
+
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,244 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<!-- 
+<meta name="viewport" content="width=device-width, initial-scale=5.0 maximum-scale=5.0 user-scalable=0">
+ -->
+ 
+ <meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=9.0">
+<title>basic webgl lib lol</title>
+
+
+<script defer src="./ShaderUtil.js"></script>
+
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+body{
+background: gray;
+}
+
+canvas{
+
+position:absolute;
+top:50%;
+left:50%;
+transform: translate(-50%,-50%);
+
+}
+</style>
+
+<head>
+
+<body>
+
+<canvas class="gl"></canvas>
+
+
+
+
+<script>
+
+const canvas=document.querySelector('.gl');
+const gl=canvas.getContext('webgl2');
+//
+const cvsSize=innerWidth;
+//
+canvas.width=cvsSize;
+canvas.height=cvsSize;
+
+
+
+//
+
+console.log(gl)
+
+const rc = ()=>{
+return Math.random();
+}
+
+//
+let verTexShaderSrc=`
+precision mediump float;
+
+attribute vec3 a_position;
+attribute vec3 a_color;
+
+varying vec3 v_Color;
+
+
+void main(){
+    v_Color = a_color;
+    gl_Position = vec4(a_position, 1.0);
+
+}
+
+`;
+
+
+//
+let fragmentShaderSrc=`
+precision mediump float;
+
+varying vec3 v_Color;
+
+
+
+void main(){
+    gl_FragColor = vec4(v_Color, 1.0);
+}
+
+`;
+
+//
+
+
+let myTriangle = [
+    // x y z              r g b
+    0.0 ,0.5, 0.0,       rc(),rc(),rc(),
+    -0.5 ,-0.5, 0.0,     rc(),rc(),rc(),
+    0.5 ,-0.5, 0.0,      rc(),rc(),rc(),
+];
+
+
+//
+let MyVerTexShader = gl.createShader(gl.VERTEX_SHADER);
+let MyFragMentShader = gl.createShader(gl.FRAGMENT_SHADER);
+
+//
+gl.shaderSource(MyVerTexShader, verTexShaderSrc);
+gl.shaderSource(MyFragMentShader, fragmentShaderSrc);
+
+
+//
+gl.compileShader(MyVerTexShader);
+if(!gl.getShaderParameter(MyVerTexShader, gl.COMPILE_STATUS)){
+console.error(`Shader compilation failed: ${gl.getShaderInfoLog(MyVerTexShader)}`);
+gl.deleteShader(MyVerTexShader);
+}
+
+
+
+//
+gl.compileShader(MyFragMentShader);
+if(!gl.getShaderParameter(MyFragMentShader, gl.COMPILE_STATUS)){
+console.error(`Shader compilation failed: ${gl.getShaderInfoLog(MyFragMentShader)}`);
+gl.deleteShader(MyFragMentShader);
+}
+
+//
+
+let myProgram = gl.createProgram();
+gl.attachShader(myProgram, MyVerTexShader);
+gl.attachShader(myProgram, MyFragMentShader);
+gl.linkProgram(myProgram);
+
+//
+
+
+
+//Check if successful
+if(!gl.getProgramParameter(myProgram, gl.LINK_STATUS)){
+console.error("Error creating shader program.",gl.getProgramInfoLog(myProgram));
+gl.deleteProgram(myProgram);
+}
+
+
+
+gl.validateProgram(myProgram);
+if(!gl.getProgramParameter(myProgram, gl.VALIDATE_STATUS)){
+console.error("Error Validating Program", gl.getProgramInfoLog(myProgram));
+}
+
+
+//
+
+
+//gl.useProgram(myProgram);
+
+let vao=gl.createVertexArray();
+
+gl.bindVertexArray(vao);
+
+
+let myTriangle_Buf = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, myTriangle_Buf);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(myTriangle), gl.STATIC_DRAW);
+
+//
+
+
+
+let my_GLSL_vel_a_position = gl.getAttribLocation(myProgram, 'a_position');
+
+let my_GLSL_vel_a_color = gl.getAttribLocation(myProgram, 'a_color');
+
+
+gl.vertexAttribPointer(
+    0,
+    3,
+    gl.FLOAT,
+    gl.FALSE,
+    6 * Float32Array.BYTE_PER_EMELENT,
+    0
+);
+gl.enableVertexAttribArray(0);
+
+gl.vertexAttribPointer(
+    1,
+    3,
+    gl.FLOAT,
+    gl.FALSE,
+    6 * Float32Array.BYTE_PER_EMELENT,
+    3 * Float32Array.BYTE_PER_EMELENT
+);
+gl.enableVertexAttribArray(1);
+
+
+
+
+
+gl.useProgram(myProgram);
+
+
+const gameLoop=()=>{
+requestAnimationFrame(gameLoop);
+
+
+gl.clearColor(0.75, 0.85, 0.8, 1.0);
+gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
+gl.viewport(0,0,gl.canvas.width,gl.canvas.height);
+
+
+gl.useProgram(myProgram);
+
+
+gl.bindVertexArray(vao);
+
+gl.bindBuffer(gl.ARRAY_BUFFER, myTriangle_Buf);
+
+gl.drawArrays(gl.TRIANGLES, 0, 3);
+//gl.drawArrays(gl.ELEMENTS, 0, 3);
+
+gl.useProgram(null);
+
+
+
+
+
+
+}
+
+gameLoop(0);
+
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,339 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>HTML CANVAS GAME BOI</title>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+#main{
+margin:0;
+padding:0;
+background-color:#03001A;
+}
+
+
+#btn_box{
+margin:0;
+padding:0;
+position:relative;
+top:20px;
+left:47px;
+width:300px;
+height:300px;
+background-color:transparent;
+}
+
+.btn{
+margin:0;
+padding:0;
+position:absolute;
+width:100px;
+height:100px;
+
+background-color:#0A00FF;
+
+box-shadow:0px 0px 8px 1px #0700B4;
+
+}
+
+.btn:active{
+background-color:#00B7FF;
+
+/*box-shadow:1px 1px 2px 1px #4FF7FF;*/
+
+}
+
+.up{
+top:0;
+left:100px;
+}
+
+.down{
+top:200px;
+left:100px;
+}
+
+.left{
+left:0;
+top:100px;
+}
+
+
+.right{
+left:200px;
+top:100px;
+}
+
+
+
+
+
+
+</style>
+</head>
+<body>
+
+
+<div id="main">
+
+
+<canvas class="cvs"></canvas>
+
+
+<div id="btn_box">
+
+<div class="btn up"></div>
+<div class="btn down"></div>
+<div class="btn left"></div>
+<div class="btn right"></div>
+
+</div>
+
+
+
+
+</div>
+
+<script>
+
+
+
+
+
+let body,main,play_area,btn_box;
+
+let mainheight,mainwidth;
+
+
+let cls,clk,ani,px,id;
+
+const cvsW=380;
+const cvsH=380;
+
+cls='class';
+clk='click';
+ani='animationend';
+px='px';
+id='id';
+
+
+
+let btn_up,btn_down,btn_left,btn_right;
+
+
+body=document.body;
+
+main=document.getElementById('main');
+
+
+
+const cvs=document.querySelector('.cvs');
+const ctx = cvs.getContext('2d');
+
+
+
+btn_up=document.querySelector('.up');
+btn_down=document.querySelector('.down')
+btn_left=document.querySelector('.left')
+btn_right=document.querySelector('.right');
+
+mainwidth = window.innerWidth;
+mainheight = window.innerHeight;
+
+main.style.width=mainwidth;
+main.style.height=mainheight;
+
+
+let plyW,plyH;
+plyW=38;
+plyH=38;
+
+cvs.width=cvsW;
+cvs.height=cvsH;
+cvs.style.margin='0 6.5px'
+
+let playerX,playerY;
+
+playerX=0;
+playerY=0;
+
+let plyVelocity={x: playerX, y: playerY}
+
+
+
+
+
+
+const gravity=0.5
+class Player{
+constructor(){
+this.position={x: 0, y: 0}
+this.velocity={x: 0, y: 0}
+this.width=38
+this.height=38
+}
+
+draw(){
+ctx.fillStyle='red'
+ctx.fillRect(this.position.x, this.position.y, this.width,this.height)
+}
+
+update(){
+this.draw()
+this.position.x += this.velocity.x
+this.position.y += this.velocity.y
+
+if(this.position.y + this.height + this.velocity.y <= cvsH ){
+this.velocity.y += gravity
+}
+else{this.velocity.y = 0}
+
+
+
+}
+
+}
+
+
+
+
+
+//platform
+
+
+
+class Platform{
+constructor(){
+this.position={x: 38*3, y: 38*5}
+this.width=200
+this.height=38
+}
+
+draw(){
+ctx.fillStyle='blue'
+ctx.fillRect(this.position.x, this.position.y, this.width,this.height)
+
+}
+
+update(){
+
+this.draw()
+
+
+}
+
+}
+
+
+
+
+
+
+
+
+let player = new Player()
+
+
+
+let platform = new Platform()
+
+
+
+
+
+
+function moveEnemys(){
+
+setInterval(()=>{
+
+
+//enemy1X+=10;
+
+//console.log('setTimeout')
+
+},1000)
+}
+
+moveEnemys()
+
+
+function platformFlot(){
+
+if(player.position.y + player.height <= platform.position.y && player.position.y + player.height + player.velocity.y >= platform.position.y ){
+player.velocity.y = 0
+}
+
+else if(player.position.x + player.width <= platform.position.x && player.position.x + player.width + player.velocity.x >= platform.position.x ){
+player.velocity.x = 0
+
+}
+
+}
+
+
+let PlayerStep=4;
+
+
+
+
+
+
+function gameLoop(){
+
+window.requestAnimationFrame(gameLoop);
+
+ctx.clearRect(0,0,cvsW,cvsH);
+
+player.update()
+platform.update()
+
+
+platformFlot()
+
+
+}
+
+//console.log(ctx)
+
+
+
+function keys(){
+
+btn_up.addEventListener(clk, () => {
+player.velocity.y -= PlayerStep*4
+})
+//player down ↓
+btn_down.addEventListener(clk, () => {
+player.velocity.y += PlayerStep
+})
+//player left ↓
+btn_left.addEventListener(clk, () => {
+player.velocity.x -= PlayerStep
+})
+//player right ↓
+btn_right.addEventListener(clk, () => {
+player.velocity.x += PlayerStep
+})
+
+}
+
+
+gameLoop()
+
+
+
+keys()
+
+
+</script>
+
+
+</body>
+</html>

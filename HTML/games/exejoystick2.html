@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>
+        Mousebot
+    </title>
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+
+
+
+</style>
+
+
+</head>
+<body
+style="position: fixed; font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif ;
+color:rgb(128, 128, 128);
+font-size: xx-large;">
+<h1 style="text-align:center">
+MOUSEBOT
+</h1>
+
+<p style="text-align: center;">
+        X: <span id="x_coordinate"> </span>
+        Y: <span id="y_coordinate"> </span>
+        Speed: <span id="speed"> </span> %
+        Angle: <span id="angle"> </span>
+</p>
+
+<canvas id="cvs" name="game"></canvas>
+
+<script>
+var connection = new WebSocket('ws://' + "192.168.4.1" + ':81/', ['arduino']);
+
+connection.onopen = function () {
+connection.send('Connect ' + new Date());
+};
+connection.onerror = function (error) {
+console.log('WebSocket Error ', error);
+alert('WebSocket Error ', error);
+};
+
+connection.onmessage = function (e) {
+console.log('Server: ', e.data);
+};
+
+function send(x,y,speed,angle){
+var data = {"x":x,"y":y,"speed":speed,"angle":angle};
+data = JSON.stringify(data);
+console.log(data);
+connection.send(data);
+}
+
+
+</script>
+
+<script>
+
+let
+XText=document.getElementById("x_coordinate"),
+
+YText=document.getElementById("y_coordinate"),
+SpeedText=document.getElementById("speed"),
+AngleText=document.getElementById("angle");
+
+
+let canvas, ctx
+
+window.addEventListener('load', () => {
+
+
+canvas = document.getElementById('cvs')
+ctx = canvas.getContext('2d');          
+resize(); 
+
+document.addEventListener('mousedown', startDrawing);
+
+document.addEventListener('mouseup', stopDrawing);
+
+document.addEventListener('mousemove', Draw);
+
+document.addEventListener('touchstart', startDrawing);
+
+document.addEventListener('touchend', stopDrawing);
+
+document.addEventListener('touchcancel', stopDrawing);
+
+document.addEventListener('touchmove', Draw);
+
+window.addEventListener('resize', resize);
+
+XText.innerText = 0;
+
+YText.innerText = 0;
+
+SpeedText.innerText = 0;
+
+AngleText.innerText = 0;
+
+});
+
+      
+
+let width, height, radius,
+orig={x:0,y:0};
+function resize() {
+width = window.innerWidth;
+radius = 60;
+height = radius * 6.5;
+canvas.width = width;
+canvas.height = height;
+background();
+joystick(width / 2, height / 3);
+
+//console.log(ctx.canvas.width)
+}
+
+function background() {
+orig.x = width / 2;
+orig.y = height / 3;
+
+ctx.beginPath();
+ctx.arc(orig.x,orig.y, radius + 20, 0, Math.PI * 2, true);
+ctx.fillStyle = '#ECE5E5';
+ctx.fill();
+}
+
+function joystick(width, height) {
+ctx.beginPath();
+ctx.arc(width, height, radius, 0, Math.PI * 2, true);
+ctx.fillStyle = '#F08080';
+ctx.fill();
+ctx.strokeStyle = '#F6ABAB';
+ctx.lineWidth = 8;
+ctx.stroke();
+}
+
+let coord = { x: 0, y: 0 };
+let paint = false;
+
+function getPosition(event) {
+let mouse={
+x:0,
+y:0
+}
+mouse.x = event.clientX || event.touches[0].clientX;
+
+mouse.y = event.clientY || event.touches[0].clientY;
+
+coord.x = mouse.x - canvas.offsetLeft;
+
+coord.y = mouse.y - canvas.offsetTop;
+}
+
+
+
+function is_it_in_the_circle() {
+
+var current_radius = Math.sqrt(Math.pow(coord.x - orig.x, 2) + Math.pow(coord.y - orig.y, 2));
+
+
+if (radius >= current_radius) return true
+else return false
+
+
+}
+
+
+function startDrawing(event) {
+paint = true;
+getPosition(event);
+if (is_it_in_the_circle()) {
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+background();
+joystick(coord.x, coord.y);
+Draw();
+}
+}
+
+
+
+function stopDrawing() {
+paint = false;
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+background();
+joystick(width / 2, height / 3);
+
+
+XText.innerText = 0;
+
+YText.innerText = 0;
+
+SpeedText.innerText = 0;
+
+AngleText.innerText = 0;
+
+}
+
+
+
+function Draw(event) {
+
+if (paint) {
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+background();
+var angle_in_degrees,x, y, speed;
+
+var angle = Math.atan2((coord.y - orig.y), (coord.x - orig.x));
+
+if (Math.sign(angle) == -1) {
+
+angle_in_degrees = Math.round(-angle * 180 / Math.PI);
+}
+else {
+angle_in_degrees =Math.round( 360 - angle * 180 / Math.PI);
+}
+
+
+if (is_it_in_the_circle()) {
+joystick(coord.x, coord.y);
+x = coord.x;
+y = coord.y;
+}
+else {
+x = radius * Math.cos(angle) + orig.x;
+y = radius * Math.sin(angle) + orig.y;
+joystick(x, y);
+}
+
+
+getPosition(event);
+
+let relative={x:0,y:0}
+
+var speed =  Math.round(100 * Math.sqrt(Math.pow(x - orig.x, 2) + Math.pow(y - orig.y, 2)) / radius);
+
+
+relative.x = Math.round(x - orig.y);
+
+relative.y = Math.round(y - orig.y);
+
+
+
+XText.innerText = relative.x;
+
+YText.innerText = relative.y;
+
+SpeedText.innerText = speed;
+
+AngleText.innerText = angle_in_degrees;
+
+
+send( relative.x,relative.y,speed,angle_in_degrees);
+}
+}
+
+
+
+
+function gameLoop(){
+//window.requestAnimationFrame(gameLoop)
+//ctx.fillStyle='black'
+//ctx.fillRect(0,0,cvs.width,cvs.height)
+//ctx.fillRect(60,80,40,40)
+
+
+
+
+}gameLoop()
+
+</script>
+</body>
+</html>

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=10.0 user-scalable=no" />
+
+<title>stupid patten maker project html5 and css3 and javaScript</title>
+
+<style>
+
+*{
+margin:0; padding:0; box-sizing:border-box;
+/* border:0.1px dashed red; */
+}
+
+
+:root{}
+
+
+
+
+html{
+font-size:10px;
+color-scheme: light;
+}
+
+
+
+body{
+}
+
+main{
+width:100%; height:100%;
+background: #EFEFEF;
+}
+
+canvas{
+box-shadow: 2px 2px 2px white;
+}
+
+.wrapper{
+display: flex;
+justify-content: space-around;
+align-items: center;
+}
+
+.images{
+padding: 2rem;
+overflow: auto;
+}
+/* 
+.images{
+display: grid;
+grid-template-rows: repeat(auto-fit, minmax(1fr, 10rem));
+grid-template-columns: repeat(auto-fit, minmax(1fr, 10rem));
+} */
+
+.images > img{
+width:10%;
+}
+
+button{
+padding: 1rem;
+background: #6700FF;
+color: #00FFFD;
+font-size: 2rem;
+border: 0;
+border-radius: 50rem;
+}
+
+
+.points-mapper
+
+
+
+{
+width: 100vw;
+height: 100vw;
+
+
+backgroUnd: OrangeRed;
+}
+</style>
+
+</head>
+<body>
+
+
+<main id=mainE>
+<h1> a simple patten app</h1>
+
+<canvas id="canvas"></canvas>
+
+<div class="wrapper">
+<button id=downloadBtn> download image</button>
+<button id=reArenge> point re arange</button>
+<button id=rePatten>Repatten</button>
+
+</div>
+
+<div class="wrapper images">
+
+
+
+</div>
+
+<div class="points-mapper">
+
+
+
+</div>
+
+
+
+</main>
+
+
+
+<script src="/storage/emulated/0/g_js_libs/dat.gui.js"></script>
+
+
+<script>
+
+
+const canvas=document.querySelector("canvas")
+const ctx=canvas.getContext("2d");
+
+ctx.lineWidth = 10
+const gui= new dat.GUI();
+
+//console.log(gui)
+
+let custom= gui.addFolder("min-max");
+
+let data={
+min_point:1,
+cur_point:5,
+max_point:100,
+}
+
+
+
+custom.add(data, "min_point")
+custom.add(data, "cur_point", data.min_point, data.max_point, 1)
+custom.add(data, "max_point")
+
+
+
+
+
+
+
+ctx.fillStyle = "#ffffff";
+ctx.strokeStyle = "#ffffff";
+
+
+class Rand{
+
+static Float(min=1,max=2){
+return (Math.random() * (1+max-min) + min);
+}
+
+static Int(min=10,max=20){
+return Math.floor(Rand.Float(min, max));
+}
+
+static Choice(...args){
+return args[Rand.Int(0, args.length - 1)];
+}
+
+}
+
+
+
+
+class Point{
+constructor(x=0, y=0, radius=8, color="red"){
+this.x=x;
+this.y=y;
+this.radius=radius;
+this.color=color;
+this.index=1;
+}
+
+draw(c){
+c.beginPath()
+c.fillStyle = this.color;
+c.arc(this.x, this.y, this.radius, 0, Math.PI*2);
+c.fill()
+c.fillStyle="yellow"
+c.fillText(this.index, this.x, this.y)
+
+}
+
+}
+
+class Line{
+constructor(x=0, y=0){
+this.x=x;
+this.y=y;
+}
+draw(c){
+
+}
+}
+
+
+
+const line_draw_start=(x=0, y=0)=>{
+ctx.beginPath()
+ctx.moveTo(x, y);
+//ctx.stroke()
+}
+
+const line_draw_end=(x=0, y=0)=>{
+
+ctx.strokeStyle="white"
+ctx.lineTo(x, y);
+ctx.stroke()
+//ctx.closePath();
+}
+
+
+
+const INIT=()=>{
+
+let points=[];
+
+gen_points(points, data.cur_point);
+
+
+let lines_pos=[];
+
+
+lines_pos = suffle_arr(points);
+
+
+//console.log(points)
+
+app(ctx, points, lines_pos);
+
+
+rePatten.addEventListener("click",()=>{
+
+lines_pos = suffle_arr(points);
+
+app(ctx, points, lines_pos);
+
+})
+
+
+downloadBtn.addEventListener("click",()=>{
+
+//const imd = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height)
+const _url = ctx.canvas.toDataURL()//.replace("image/png", "image/octet-stream")
+//ctx.createImageData(imd)
+let imgE=new Image()
+imgE.src=_url
+imgE.title="a1"
+document.querySelector(".images").appendChild(imgE)
+//console.log(imd)
+//console.log(_url)
+
+})
+
+
+reArenge.addEventListener("click",()=>{
+
+gen_points(points, data.cur_point);
+lines_pos = suffle_arr(points);
+
+app(ctx, points, lines_pos);
+
+})
+
+
+}
+
+//splice 
+//slice
+
+
+const suffle_arr=(a_arr)=>{
+
+let arr=[];
+
+let breaks=true;
+
+while (breaks){
+
+
+let ii= Rand.Int(0, a_arr.length - 1)
+
+arr.push(a_arr[ii])
+
+
+
+arr = [...new Set(arr)]
+
+if ( arr.length == a_arr.length) breaks = false;
+
+}
+
+return arr
+}
+
+
+const gen_points=(arr, lenOfPoint=0)=>{
+
+//arr=[]
+
+for(let i=0;i<lenOfPoint;i++){
+
+let r = Rand.Int(2, 8);
+let x = Rand.Int(0 + r, ctx.canvas.width - r)
+let y = Rand.Int(0 + r, ctx.canvas.height - r)
+
+arr[i] = new Point(x, y, r)
+arr[i].index=i+1;
+
+//lines_pos.push({x, y})
+}
+arr.splice(lenOfPoint, arr.length);
+
+}
+
+
+
+
+// 
+
+const app=(ctx, Point_Nodes, lines)=>{
+
+
+
+const csize = (innerWidth>innerHeight)?innerHeight:innerWidth;
+ctx.canvas.width=csize;
+ctx.canvas.height=csize;
+
+
+//const 
+
+
+let loop=()=>{
+ctx.fillStyle = "#424242";
+ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+
+//line_draw_start(lines_pos[0].x, lines_pos[0].y)
+
+Point_Nodes.forEach((point)=>{
+
+point.draw(ctx)
+
+})
+
+
+
+line_draw_start(lines[0].x, lines[0].y)
+
+
+lines.forEach((line)=>{
+line_draw_end(line.x, line.y)
+});
+
+
+
+}
+
+
+
+
+loop()
+//setInterval(loop, 1000/32)
+
+
+}
+
+
+
+
+
+window.addEventListener("load", ()=>{
+
+try{
+INIT()
+console.log(ctx)
+}catch(e){
+console.log(e)
+}
+
+
+})
+
+</script>
+
+</body>
+</html>

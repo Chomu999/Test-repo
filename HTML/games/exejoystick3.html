@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Mousebot</title>
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+#cvs{
+position:fixed;
+top:50%;left:50%;
+transform:translate(-50%,-50%);
+border:2px solid blue;
+}
+
+
+
+
+</style>
+
+
+</head>
+<body>
+
+<canvas id="cvs" name="game"></canvas>
+
+
+
+
+<script>
+/*
+let XText=document.getElementById("x_coordinate"),
+
+YText=document.getElementById("y_coordinate"),
+SpeedText=document.getElementById("speed"),
+AngleText=document.getElementById("angle");
+*/
+
+let canvas, ctx
+
+let x, y, speed,angle,current_radius;
+
+
+let coord = { x: 0, y: 0 };
+let paint = false;
+let mouse={x:0,y:0}
+
+
+let relative={x:0,y:0}
+
+let angle_in_degrees;
+
+
+
+
+
+
+canvas = document.getElementById('cvs')
+ctx = canvas.getContext('2d');
+
+
+
+canvas.width = innerWidth;
+canvas.height=innerHeight;
+
+
+function CTXtext(c,t,x,y){
+ctx.fillStyle=c;
+ctx.fillText(`${t}`,x,y);
+}
+
+
+
+canvas.addEventListener('touchstart', startDrawing);
+
+canvas.addEventListener('touchend', stopDrawing);
+
+canvas.addEventListener('touchmove', Draw);
+
+
+
+
+
+
+let width, height, radius,
+orig={x:0,y:0};
+
+width = canvas.width;
+radius = 80;
+height = canvas.width;
+//ctx.canvas.width = width;
+//ctx.canvas.height = height;
+background();
+joystick(width / 2, height / 2);
+
+//console.log(ctx.canvas.width)
+
+
+function background() {
+orig.x = width / 2;
+orig.y = height / 2;
+
+ctx.beginPath();
+ctx.arc(orig.x,orig.y, radius + 20, 0, Math.PI * 2, true);
+ctx.fillStyle = '#ECE5E5';
+ctx.fill();
+}
+
+
+
+function getPosition(event) {
+
+mouse.x = event.clientX || event.touches[0].clientX;
+
+mouse.y = event.clientY || event.touches[0].clientY;
+
+coord.x = mouse.x - canvas.offsetWidth
+
+coord.y = mouse.y - canvas.offsetHeight
+}
+
+
+function joystick(x,y) {
+ctx.beginPath();
+ctx.arc(x,y, radius, 0, Math.PI * 2);
+ctx.fillStyle = '#F08080';
+ctx.fill();
+ctx.strokeStyle = '#F6ABAB';
+ctx.lineWidth = 8;
+ctx.stroke();
+}
+
+
+
+
+function is_it_in_the_circle() {
+
+current_radius = Math.sqrt(Math.pow(coord.x - orig.x, 2) + Math.pow(coord.y - orig.y, 2));
+
+
+if (radius >= current_radius) return true
+else return false
+
+
+}
+
+
+function startDrawing(event) {
+paint = true;
+getPosition(event);
+if (is_it_in_the_circle()) {
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+//background();
+joystick(coord.x, coord.y);
+Draw();
+}
+}
+
+
+
+
+
+function Draw(event) {
+
+if (paint) {
+
+
+
+angle = Math.atan2((coord.y - orig.y), (coord.x - orig.x));
+
+if (Math.sign(angle) == -1) {
+
+angle_in_degrees = Math.round(-angle * 180 / Math.PI);
+}
+else {
+angle_in_degrees =Math.round( 360 - angle * 180 / Math.PI);
+}
+
+
+getPosition(event);
+
+
+
+
+var speed =  Math.round(100 * Math.sqrt(Math.pow(x - orig.x, 2) + Math.pow(y - orig.y, 2)) / radius);
+
+
+relative.x = Math.round(x - orig.y);
+
+relative.y = Math.round(y - orig.y);
+
+
+if (is_it_in_the_circle()) {
+joystick(coord.x, coord.y);
+x = coord.x;
+y = coord.y;
+}
+
+else {
+x = radius * Math.cos(angle) + orig.x;
+y = radius * Math.sin(angle) + orig.y;
+joystick(x, y);
+}
+
+
+
+//AngleText.innerText = angle_in_degrees;
+
+
+}
+
+
+}
+
+
+
+
+
+
+
+function stopDrawing() {
+paint = false;
+//ctx.clearRect(0, 0, canvas.width, canvas.height);
+//background();
+
+
+Draw()
+}
+
+
+
+
+
+
+
+function gameLoop(){
+window.requestAnimationFrame(gameLoop)
+
+ctx.clearRect(0,0,canvas.width, canvas.height);
+
+
+
+background();
+joystick(coord.x, coord.y)
+
+
+
+//ctx.fillStyle='black'
+//ctx.fillRect(0,0,cvs.width,cvs.height)
+//ctx.fillRect(60,80,40,40)
+
+ctx.fillStyle='#049900'
+ctx.fillRect(0,canvas.height/2,canvas.width,1)
+ctx.fillRect(canvas.width/2,0,1,canvas.height)
+
+CTXtext('red',`X-Axis : ${coord.x} : Y-Axis :${coord.y}`,20,20)
+
+}gameLoop()
+
+</script>
+</body>
+</html>

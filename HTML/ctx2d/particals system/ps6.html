@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+:root{
+
+
+}
+
+
+html{
+font-size:10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style: none;
+}
+
+
+body{
+color-scheme: default;
+background: #D3FFDE;
+
+}
+
+
+main{
+margin: 2rem 0;
+height: min(80rem, 100% - 5rem);
+background: var(--color9) ;
+overflow: auto;
+}
+
+
+.wrapper{
+margin:1rem;
+padding:1rem;
+width: min(39rem, 100% - 2rem);
+background: #9400FF23;
+border-radius:2rem;
+}
+
+.appTitle{
+margin: 1rem;
+padding: 1rem;
+color:#00CAFF;
+background: #170061;
+font-size: 2rem;
+text-align: center;
+text-transform: capitalize;
+border-radius:9rem;
+}
+
+
+
+canvas{
+width: 100%;
+background:#EA8F93;
+}
+
+
+
+/* error box code section*/
+
+
+.error_box{
+aspect-ratio: 2;
+overflow:hidden;
+}
+
+.error_box .errorTitle{
+/* display:block; */
+padding: .8rem;
+text-align: center;
+font-size: 2rem;
+color: #CEF7FF;
+background: linear-gradient(45deg,red, blue);
+text-decoration: underline;
+border-radius: 4em;
+}
+
+.error_box .errorContainer{
+margin:0.2rem 0;
+padding: 1rem;
+aspect-ratio: 3;
+background: #ededed;
+
+overflow: auto;
+border-radius: 1rem;
+
+
+
+}
+
+.error_box  p{
+margin:0.2rem 1rem;
+padding: 1rem ;
+font-weight: bold;
+background: #C6C6C6;
+color: #424242;
+border-radius: 1rem;
+}
+
+
+
+
+
+</style>
+
+<title>particle system 6</title>
+
+
+</head>
+<body>
+
+<main>
+
+
+<div class="wrapper">
+
+
+<h2 class="appTitle">simple particle system 5</h2>
+
+</div>
+
+
+
+<div class="wrapper">
+
+<canvas id="canvas"></canvas>
+
+</div>
+
+
+<div class="wrapper error_box">
+<h2 class="errorTitle">error and warning</h2>
+<div class="errorContainer"></div>
+</div>
+
+</main>
+
+
+
+<script>
+
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+
+ctx.canvas.width = 330;
+ctx.canvas.height = 330;
+
+
+const showError=(msg)=>{
+console.log(msg);
+const errorContainer=document.querySelector(".error_box > .errorContainer")
+if(!errorContainer) return -1;
+errorContainer.innerHTML+=`<p>${msg}</p>`;
+}
+
+
+
+
+class Rand{
+
+static Float(min=0, max=1){
+return Math.random() * (max - min) + min;
+}
+
+static Int(min=1, max=2){
+return Math.floor(Rand.Float(min, max));
+}
+
+static Choice(...args){
+return args[Rand.Int(0, args.length)];
+}
+
+static Color(){
+let out = "#";
+for(let i = 0;i<8;i++){
+out += Rand.Choice(..."0123456789abcdef".split(""));
+}
+return out;
+}
+
+}
+
+
+
+
+class Particle{
+
+constructor({parent, pos={x: 0, y: 0}, speed=2, angle=9, color="red", lifeTime=9}){
+this.parent=parent
+this.pos=pos;
+
+this.velocity={
+x:speed * Math.cos(angle),
+y:speed * Math.sin(angle)
+};
+
+this.color = color;
+this.radius=20;
+this.lifeTime=lifeTime;
+
+this.free=false;
+}
+
+draw(c){
+
+if(this.free) return;
+
+c.beginPath();
+c.fillStyle=this.color;
+c.arc(this.pos.x, this.pos.y, this.radius, 0, 2*Math.PI, false);
+c.fill();
+c.closePath();
+}
+
+update(dt){
+
+if(this.free) return;
+
+
+this.pos.x += this.velocity.x * dt;
+this.pos.y += this.velocity.y * dt;
+
+
+if(this.lifeTime < 0.001){
+this.start()
+}else{
+
+this.lifeTime -= dt;
+}
+
+
+}
+
+
+start(){
+this.free=true;
+
+}
+
+restart(){
+this.pos = this.parent.emiter;
+this.lifeTime = this.parent.lifeTime;
+this.color="blue"
+
+}
+
+
+}
+
+
+
+
+
+class ParticleSystem{
+
+constructor({pos}){
+this.emiter=pos;
+this.particles=[];
+this.lifeTime=3.0;
+this.speed=2.0;
+this.spread=90;
+this.numberOfParticle=5;
+this.init();
+}
+
+init(){
+const parent = this;
+const posX = this.emiter.x;
+const posY = this.emiter.y;
+
+const pos = {
+x: posX,
+y: posY
+};
+
+const lifeTime = this.lifeTime;
+const speed =Math.random() * this.speed;
+const angle =Math.random() * this.spread - this.spread / 2;
+
+for(let i=0;i<this.numberOfParticle;i++){
+
+this.particles.push(new Particle({
+  parent,
+  pos,
+  speed,
+  angle,
+  color:"red",
+  lifeTime,
+}));
+
+
+}
+
+}
+
+render(c, dt){
+if(this.particles.length === 0) return;
+
+this.getElement();
+
+this.particles.forEach((p)=>{
+p.draw(c);
+p.update(dt);
+
+
+});
+
+
+}
+
+getElement(){
+
+for(let i=0;i<this.particles.length;++i){
+const particle = this.particles[i];
+return (particle)?particle:null;
+}
+
+}
+
+}
+
+
+const INITIAL = (ctx)=>{
+
+
+const ps = new ParticleSystem({
+  pos:{
+    x:.5*ctx.canvas.width,
+    y:.5*ctx.canvas.height,
+  },
+});
+
+
+function render(ctx, dt) {
+  
+  ctx.fillStyle = "#E8FBA3";
+  ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  ps.render(ctx, dt);
+  
+  //showError(dt)
+
+}
+
+// Main loop
+let lastTime=performance.now();
+
+function mainLoop(ts) {
+  const currentTime = performance.now();  
+  const dt = (currentTime - lastTime) / 1000;
+  lastTime = currentTime;
+  render(ctx, dt);
+  //requestAnimationFrame(mainLoop);
+}
+
+setInterval(mainLoop, 1000);
+
+
+
+
+ctx.canvas.addEventListener("dblclick", (e)=>{
+
+showError(ps);
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+window.addEventListener("load", ()=>{
+
+try{
+
+showError("JS is Awesome");
+INITIAL(ctx);
+
+}catch(err){
+showError(`javascript uncatch error : ${err.stack}`);
+}
+
+
+})
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=10.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+<style>
+
+*:after,*,*:before{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+:root{
+
+}
+
+*::selection{
+color: red;
+background: tan;
+}
+
+html{
+font-size: 10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style-type: none;
+}
+
+
+
+
+
+.wrapper{
+margin: 1rem auto;
+padding: 1rem;
+width: min(38rem, 100% - 2rem);
+background: #0e00FF11;
+border-radius: 1rem;
+}
+
+
+
+
+.clock{
+padding:0;
+width: 20rem;
+position: relative;
+aspect-ratio: 1;
+
+display: flex;
+justify-content: center;
+align-items: center;
+box-shadow:
+3rem 3rem 3rem -1rem #000,
+inset -1rem -1rem 1.5rem #fff,
+-1.5rem -1.5rem 3rem  #fff,
+inset -.1rem -.1rem 1rem  #000
+
+;
+
+}
+
+.clock .numbers{
+width: 90%;
+aspect-ratio: 1;
+background: #f008;
+border-radius: 50%;
+}
+
+.clock .numbers span{
+position: absolute;
+font-weight: 600;
+font-size: 2rem;
+
+transform: rotate(calc(90deg - var(--i)));
+}
+
+
+.clock .numbers:before{
+content: '';
+position: absolute;
+width:90%;
+background: #004DFF;
+border-radius: 50%;
+aspect-ratio: 1;
+}
+
+
+</style>
+
+<title>Clock App</title>
+
+</head>
+<body>
+
+
+<main class="wrapper">
+<div class="wrapper">
+  <h1>Simple Clock App</h1>
+</div>
+
+
+
+<div class="wrapper clock">
+
+<div class="numbers">
+
+<span style="--i:0;"> <b>12</b></span>
+<span style="--i:1;"> <b>3</b></span>
+<span style="--i:2;"> <b>6</b></span>
+<span style="--i:3;"> <b>9</b></span>
+
+</div>
+
+</div>
+
+
+
+</main>
+
+
+
+<script>
+"use strict";
+
+
+//querySelector
+
+const INITIAL=async()=>{
+
+
+const dateObj =new Date()
+
+
+console.log(dateObj);
+
+console.log(dateObj.getHours())
+console.log(dateObj.getMinutes())
+console.log(dateObj.getSeconds())
+
+}
+
+
+
+try{
+console.log("JavaScript is Awesome ");
+
+INITIAL()
+
+}catch(err){
+console.log(`javascript uncatch error: ${err} `);
+}
+
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,158 @@
+<html lang="en" onload="loooad()">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>HTML</title>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+#main{
+width:100%;
+background-color:#11FF7B;
+}
+
+#page{
+margin:auto;
+padding:0;
+width:auto;
+height:auto;
+}
+
+p{
+color:#4452EC;
+font-size:16px;
+}
+
+#btns{
+margin:0;
+padding:15px 0;
+width:100%;
+height:145px;
+background-color:red;
+}
+
+#stop{
+margin:auto;
+padding:0;
+display:block;
+width:380px;
+height:115px;
+font-size:80px;
+background-color:#11FF7B;
+color:#08331B;
+text-align:center;
+}
+</style>
+</head>
+<body>
+
+<div id="main">
+
+
+<div id="btns"><a id="stop">stop</a></div>
+
+
+<pre id="page">
+<p></p>
+</pre>
+
+
+
+</div>
+
+
+<script>
+
+
+var clk='click';
+
+
+
+
+
+var main=document.getElementById('main');
+var page=document.getElementById('page');
+
+var p = document.querySelector('p');
+
+var btns=document.getElementById('btns');
+
+
+var all_latter=[' ','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
+
+
+
+
+var fainle = '';
+
+
+function starts(){
+
+let latterC = Math.floor(Math.random() * 20 + 1);
+
+
+for(let i=0;i<latterC;i++){
+
+
+let latterInt = Math.floor(Math.random() * 26 + 1);
+
+
+fainle += all_latter[latterInt];
+
+
+}
+
+fainle += '\n';
+p.innerHTML=fainle
+
+}
+
+var stops;
+
+var sorce=0;
+
+
+main.addEventListener(clk, () => {
+
+sorce++
+
+
+});
+
+
+
+
+
+if(sorce >= 19){
+document.write('Won')
+}
+
+
+stops = setInterval( () => {
+
+
+
+starts()
+
+main.clicked;
+
+},100);
+
+
+
+
+btns.addEventListener(clk, () => {
+
+clearInterval(stops);
+console.log('latter spam stop');
+});
+
+</script>
+</body>
+</html>

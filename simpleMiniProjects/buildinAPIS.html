@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+#myTable{
+color: #02004F;
+background: #00A4FF;
+position: absolute;
+top: 25%;
+left: 25%;
+/* inset: 50%; */
+transform: translate(-50% -50%);
+border-collapse:separate ;
+border-spacing: 12px 4px;
+
+empty-cells: hide;
+/*
+border-collapse collapse | separate 
+border-spacing length length 
+caption-side top | bottom | left | right 
+empty-cells show | hide 
+table-layout auto | fixed
+
+
+*/
+
+}
+
+th, td{
+border: 1px solid red;
+}
+
+
+</style>
+
+<title>build in apis</title>
+
+</head>
+<body>
+
+<table id="myTable" border="2">
+  <thead>
+    <th>a</th>
+    <th>b</th>
+    <th>c</th>
+    <th>d</th>
+  </thead>
+  <tbody>
+  
+    <tr>
+      <td>a</td>
+      <td>a</td>
+      <td>a</td>
+      <td>a</td>
+    </tr>
+    <tr>
+      <td>b</td>
+      <td>b</td>
+      <td>b</td>
+      <td>b</td>
+    </tr>
+    <tr>
+      <td>c</td>
+      <td>c</td>
+      <td>c</td>
+      <td>c</td>
+    </tr>
+    
+    <tr>
+      <td>d</td>
+      <td>d</td>
+      <td>d</td>
+      <td>d</td>
+    </tr>
+    <tr>
+      <td>e</td>
+      <td></td>
+      <td>e</td>
+      <td>e</td>
+    </tr>
+  </tbody>
+</table>
+
+
+<!-- <script  src="/storage/emulated/0/g_js_libs/eruda.min.js"></script> -->
+
+
+<script type="module">
+
+
+//var a = new XSLTProcessor();
+//console.log(a);
+//console.log(a.getParameter("hi", 9));
+
+
+//let b = XMLDocument;
+//console.log(b.parseHTMLUnsafe("<h1>hi hello gu khalo</h1>"));
+
+//let c =new XMLSerializer();
+//console.log(c);
+//console.log(c.serializeToString(document.body));
+
+
+/*
+Audio: ƒ Audio()
+AudioBuffer: ƒ AudioBuffer()
+AudioBufferSourceNode: ƒ AudioBufferSourceNode()
+AudioContext: ƒ AudioContext()
+AudioData: ƒ AudioData()
+AudioDecoder: ƒ AudioDecoder()
+AudioDestinationNode: ƒ AudioDestinationNode()
+AudioEncoder: ƒ AudioEncoder()
+AudioListener: ƒ AudioListener()
+AudioNode: ƒ AudioNode()
+AudioParam: ƒ AudioParam()
+AudioParamMap: ƒ AudioParamMap()
+AudioProcessingEvent: ƒ AudioProcessingEvent()
+AudioScheduledSourceNode: ƒ AudioScheduledSourceNode()
+AudioSinkInfo: ƒ AudioSinkInfo()
+AudioWorklet: ƒ AudioWorklet()
+AudioWorkletNode: ƒ AudioWorkletNode()
+
+
+*/
+let rootDirName="/storage/emulated/0/"
+let dirName="Download/"
+let AudioName="y2mate.com - Imagine Dragons  Believer Official Music Video.mp3"
+let AudioSRC=`${rootDirName+dirName+AudioName}`;
+
+let a0 =new Audio(AudioSRC);
+console.log(a0);
+
+document.addEventListener("click", () =>{
+
+
+if(0){
+a0.play();
+}
+
+
+});
+
+
+
+
+
+
+console.log(window)
+
+
+
+</script>
+
+</body>
+</html>

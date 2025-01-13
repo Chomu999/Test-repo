@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+
+<style>
+
+*:before, *, *:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+:root{
+
+
+}
+
+
+html{
+font-size:10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style: none;
+}
+
+
+body{
+color-scheme: default;
+
+}
+
+
+main{
+margin: 2rem 0;
+height: min(80rem, 100% - 5rem);
+overflow: auto;
+}
+
+
+.wrapper{
+margin:1rem;
+padding:1rem;
+width: min(39rem, 100% - 2rem);
+background: #0008;
+border-radius:2rem;
+}
+
+.appTitle{
+margin: 1rem;
+padding: 1rem;
+color:#FF0400;
+background: #170061;
+font-size: 2rem;
+text-align: center;
+text-transform: capitalize;
+border-radius:9rem;
+}
+
+
+
+
+
+
+
+/* inputContainer box code section*/
+
+
+
+
+.inputContainer{
+aspect-ratio: 3;
+background: #CFCFCF;
+}
+
+.inputContainer .inputs{
+margin:1rem auto;
+padding: 2rem;
+display: block;
+outline: none;
+border: none;
+border-radius: 2rem;
+background: #3E00FF;
+color: #FF0071;
+letter-spacing: .2rem;
+text-align: center;
+}
+
+
+
+</style>
+
+
+<title> alu </title>
+
+
+
+
+
+</head>
+<body>
+
+
+
+
+
+<div class="wrapper inputContainer">
+
+<form id="formEl" action="http://localhost:3000/sub" method="get" accept-charset="utf-8">
+
+
+<input class="inputs" type="text" name="username" id="username"  />
+<input class="inputs" type="date" name="dob" id="dob"  />
+<input class="inputs" type="submit" id="subBtn"  />
+
+</form>
+
+
+
+</div>
+
+<script>
+
+console.log([formEl]);
+formEl.addEventListener("change", (e)=>{
+e.preventDefault()
+//console.log(e);
+
+});
+
+formEl.addEventListener("submit", (e)=>{
+//e.preventDefault()
+console.log(e)
+
+//alert("submit")
+
+})
+
+</script>
+
+</body>
+</html>

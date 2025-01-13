@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<meta name="author" content="billbyte"/>
+<title> webgl shader testing part 1</title>
+
+<style>
+
+
+
+*{
+margin: 0;
+padding: 0;
+box-sizing:border-box;
+}
+
+
+
+html{
+font-size: 10px;
+}
+
+a{
+text-decoration: none;
+}
+
+li{
+list-style:none;
+}
+
+
+
+
+main{
+width:100%;
+height:70vh;
+height:100svh;
+display:grid;
+grid-template-rows: 1fr;
+grid-template-columns: repeat(2, 1fr) 20rem;
+/* place-items:center; */
+/* gap: 1rem; */
+background: #3e3e3e;
+
+}
+
+canvas{
+/* width: 100%; height: 100%; */ 
+ /* background: orange; */
+}
+
+.error_box{
+background:#e3e3e3;
+overflow:hidden auto;
+}
+
+.error_box > p{
+margin:0.2rem 1rem;
+padding: 1rem ;
+font-size:2rem;
+
+background: #0009;
+color: #FF374E;
+
+}
+
+.controlBox{
+/* width: 100%; */
+background: red;
+}
+
+.hidden{
+display: none;
+}
+
+</style>
+
+</head>
+<body>
+
+
+<main>
+
+<canvas id="canvas"></canvas>
+
+<div class="error_box">
+<p>JavaScript is Awesome</p>
+</div>
+
+<div class="controlBox">
+
+<input type="range"  id="minSize" min="0.1" step="0.1", max="1.0" />
+
+<label for="maxSize">maxSize</label>
+<input type="range"  id="maxSize" min="0.1" step="0.1", max="1.0" />
+
+</div>
+
+</main>
+
+<div class="hidden">
+<img src="/storage/emulated/0/Download/images (7).jpeg" id="img1" />
+<img src="/storage/emulated/0/Download/Zelda2.png" id="img2" />
+<img src="/storage/emulated/0/Download/images (9).jpeg" id="img3" />
+<img src="/storage/emulated/0/Download/images (10).jpeg" id="img4" />
+</div>
+
+<script>
+
+
+
+
+const SPWAN_RATE =0.008;
+const MIN_SPWAN_TIME = 0.25;
+const MAX_SPWAN_TIME = 5;
+
+const MIN_SPEED = 3/20;
+const MAX_SPEED = 5/20;
+
+const MIN_SIZE = 0.1;
+const MAX_SIZE = 0.5;
+
+const MAX_SPWAN_COUNT = 215;
+
+
+const canvas=document.querySelector("canvas");
+const gl=canvas.getContext("webgl2");
+
+//gl.canvas.width=360;
+//gl.canvas.height=360;
+
+
+// show_Error for mobile device becuse phone's dos not have inspecter aka console.log()
+const show_Error=(msg)=>{
+console.log(msg)
+let elmt=document.querySelector(".error_box")
+elmt.innerHTML+=`<p>${msg}</p>`
+}
+
+
+
+
+//Random utils functions
+class Rand{
+
+static Float(min=1, max=2){
+return Math.random() * (max-min+1) + min;
+}
+static Int(min=10, max=20){
+return Math.floor(Rand.Float(min, max));
+}
+
+static Choice(...args){
+return args[Rand.Int(0, args.length - 1)]
+}
+}
+
+
+
+// this Program class helps to make shader Programs
+class Program{
+constructor(VSS, FSS){
+this.ID=this.#Make_Program(VSS, FSS);
+}
+
+Bind(){
+gl.useProgram(this.ID)
+}
+
+Unbind(){
+gl.useProgram(null)
+}
+Delete(){
+gl.deleteProgram(this.ID)
+}
+
+
+#Make_Shader(Type, Source){
+const vof = Type==gl.VERTEX_SHADER?"vertex":"fragment";
+const Shader=gl.createShader(Type)
+gl.shaderSource(Shader, Source)
+gl.compileShader(Shader)
+if(!gl.getShaderParameter(Shader, gl.COMPILE_STATUS))
+{
+show_Error(`${vof} shader error : ${gl.getShaderInfoLog(Shader)}`)
+show_Error(`${vof} shader source : ${gl.getShaderSource(Shader)}`)
+}
+return Shader;
+}
+
+#Make_Program(VertexShaderSource, FragmentShaderSource){
+const VertexShader=this.#Make_Shader(gl.VERTEX_SHADER, VertexShaderSource);
+const FragmentShader=this.#Make_Shader(gl.FRAGMENT_SHADER, FragmentShaderSource);
+
+const ShaderProgram=gl.createProgram();
+
+gl.attachShader(ShaderProgram, VertexShader)
+gl.attachShader(ShaderProgram, FragmentShader)
+
+gl.linkProgram(ShaderProgram)
+if(!gl.getProgramParameter(ShaderProgram, gl.LINK_STATUS))
+{
+show_Error(`link error : ${gl.getProgramInfoLog(ShaderProgram)}`)
+}
+gl.useProgram(ShaderProgram)
+gl.validateProgram(ShaderProgram)
+if(!gl.getProgramParameter(ShaderProgram, gl.VALIDATE_STATUS))
+{
+show_Error(`validate error : ${gl.getProgramInfoLog(ShaderProgram)}`)
+}
+return ShaderProgram;
+}
+
+
+}
+
+
+class Texture2D{
+constructor( imgData){
+
+this.ID=gl.createTexture();
+
+//gl.activeTexture(gl.TEXTURE0+slot)
+
+gl.bindTexture(gl.TEXTURE_2D, this.ID);
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, !0);
+//gl.uniform1i(loc, slot);
+
+gl.texImage2D(gl.TEXTURE_2D, 0,
+gl.RGBA, gl.RGBA,
+gl.UNSIGNED_BYTE, imgData);
+
+gl.generateMipmap(gl.TEXTURE_2D);
+
+//gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+//gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+
+//gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+//gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+
+gl.bindTexture(gl.TEXTURE_2D, null);
+
+
+}
+
+Bind(texUnit=0){
+gl.activeTexture(gl.TEXTURE0+texUnit);
+gl.bindTexture(gl.TEXTURE_2D, this.ID)
+}
+
+Unbind(){
+gl.bindTexture(gl.TEXTURE_2D, null)
+}
+
+Delete(){
+gl.deleteTexture(this.ID)
+}
+}
+
+
+
+//VA class helps to make VertexArrays easy
+class VA{
+constructor(){
+this.ID=gl.createVertexArray()
+}
+
+Bind(){
+gl.bindVertexArray(this.ID)
+}
+
+Unbind(){
+gl.bindVertexArray(null)
+}
+
+Delete(){
+gl.deleteVertexArray(this.ID)
+}
+
+LinkAttrib(vbo, layoutLocation, numberOfComponents, type, normalize, stride, offset){
+
+VA.LinkAttrib(vbo, layoutLocation, numberOfComponents, type, normalize, stride, offset);
+
+}
+
+static LinkAttrib(vbo=!1, layoutLocation, numberOfComponents, type, normalize, stride, offset){
+
+
+if (vbo instanceof VB){
+vbo.Bind();
+//show_Error("va hai")
+}
+gl.enableVertexAttribArray(layoutLocation)
+gl.vertexAttribPointer(layoutLocation, numberOfComponents,
+type, normalize,
+stride, offset);
+
+
+
+}
+
+}
+
+//VB class helps to make VertexBuffer easy
+class VB{
+constructor(vertexData){
+this.ID=gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, this.ID);
+gl.bufferData(gl.ARRAY_BUFFER, vertexData, gl.STATIC_DRAW);
+}
+
+
+Bind(){
+gl.bindBuffer(gl.ARRAY_BUFFER, this.ID);
+}
+
+Unbind(){
+gl.bindBuffer(gl.ARRAY_BUFFER, null);
+}
+
+Delete(){
+gl.deleteBuffer(gl.ARRAY_BUFFER, this.ID);
+}
+
+}
+
+//EB class helps to make ElementBuffer easy
+class EB{
+constructor(indexData){
+this.ID=gl.createBuffer();
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ID);
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexData, gl.STATIC_DRAW);
+}
+
+
+Bind(){
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ID);
+}
+Unbind(){
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+}
+Delete(){
+gl.deleteBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ID);
+}
+
+}
+
+
+//this loop class helps to make loops easy
+class Loop{
+
+static animate;
+
+static lastTimePass=performance.now();
+static startLoop(){
+
+let currentTimePass =performance.now();
+
+let dt = (currentTimePass - Loop.lastTimePass) / 1000;
+
+Loop.lastTimePass = currentTimePass;
+//show_Error(dt)
+
+Loop.animate(dt);
+requestAnimationFrame(Loop.startLoop);
+
+}
+
+}
+
+
+class Object2D{
+constructor(pos, vel, vao, size){
+this.Position=pos?pos:[];
+this.Velocity=vel?vel:[];
+this.Size=size?size:0;
+this.TimeRemaning=Rand.Float(MIN_SPWAN_TIME, MAX_SPWAN_TIME);
+this.Vao=vao;
+}
+
+update(dt=0){
+this.Position[0] += this.Velocity[0] * dt;
+this.Position[1] += this.Velocity[1] * dt;
+this.TimeRemaning -= dt;
+}
+
+IsAlive(){
+return this.TimeRemaning > 0;
+}
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const App=(gl)=>{
+
+const VertexShaderSource=`#version 300 es
+precision mediump float;
+
+in vec2 aPos;
+in vec4 aColor;
+in vec2 aUV;
+
+
+
+uniform float uScale;
+uniform vec2 uOffset;
+
+out vec4 vColor;
+out vec2 vUV;
+
+void main()
+{
+
+vColor = aColor;
+vUV = aUV;
+
+gl_Position = vec4(aPos * uScale + uOffset, 0.0, 1.0);
+
+}
+`;
+
+
+const FragmentShaderSource=`#version 300 es
+precision mediump float;
+
+out vec4 FragColor;
+
+in vec4 vColor;
+in vec2 vUV;
+
+uniform sampler2D[2] uTex;
+
+void main()
+{
+
+//if( bool(vUV)) FragColor = mix(texture(uTex[0], vUV), texture(uTex[1], vUV), 0.5);
+//else FragColor = vec4(1.0);
+
+
+if (bool(vUV) && bool(vColor)) FragColor = mix(texture(uTex[0], vUV), texture(uTex[1], vUV), 0.5) * vColor;
+else if (bool(vUV)) FragColor = mix(texture(uTex[0], vUV), texture(uTex[1], vUV), 0.5);
+else FragColor = vColor;
+}
+`;
+
+const objs=[];
+
+const PositionVertexData1=new Float32Array([
+//		x	y
+	 0.0,  0.5,
+	-0.5, -0.5,
+	 0.5, -0.5,
+])
+
+const PositionVertexData2=new Float32Array([
+// x 	y
+	 0.5,  0.5,
+	-0.5,  0.5,
+	-0.5, -0.5,
+	 0.5, -0.5,
+])
+
+
+const ColorVertexData1=new Uint8Array([
+//	  r 	g    b    a
+	 255,  0, 255, 255,
+	 255,  255, 0, 255,
+	 0,  255, 255, 255,
+])
+
+
+const ColorVertexData2=new Uint8Array([
+//	  r    g    b     a
+	 255, 0,  255,  255,
+	 255, 0,  0,  255,
+	 255,  0,  0,  255,
+]);
+
+const ColorVertexData3=new Uint8Array([
+//	  r    g    b     a
+	 255,  165,  0, 255,
+	 255,  255,  0,  255,
+	 255,  255,  0,  255,
+])
+
+const UVVertexData1=new Float32Array([
+//	  u    v
+	 0.0,  1.0, 
+	 0.0,  0.0,
+	 1.0,  0.0,
+]);
+
+const UVVertexData2=new Float32Array([
+//	  u    v
+	1,  1, 
+	0,  1,
+
+	0, 0,
+	1, 0,
+]);
+
+
+const imgData=new Uint8Array([
+//	  r    g    b     a
+	 255,  0,  0,
+	 255,  0,  0,
+	 255,  0,  0,
+	 255,  0,  0,
+])
+
+const indicesData1=new Uint8Array([
+0, 1, 2,
+2, 3, 0,
+])
+
+const img1=document.getElementById("img1");
+const img2=document.getElementById("img2");
+const img3=document.getElementById("img3");
+const img4=document.getElementById("img4");
+
+const Prog=new Program(VertexShaderSource, FragmentShaderSource);
+
+const aPosLoc = gl.getAttribLocation(Prog.ID, "aPos");
+const aColorLoc = gl.getAttribLocation(Prog.ID, "aColor");
+const aUVLoc = gl.getAttribLocation(Prog.ID, "aUV");
+if(aPosLoc < 0 || aColorLoc < 0 || aUVLoc < 0)
+{
+show_Error("location is not found");
+}
+
+const uScaleLoc=gl.getUniformLocation(Prog.ID, "uScale");
+const uOffsetLoc=gl.getUniformLocation(Prog.ID, "uOffset");
+const uTexLoc=[
+gl.getUniformLocation(Prog.ID, "uTex[0]"),
+gl.getUniformLocation(Prog.ID, "uTex[1]")
+]
+
+// global Textures
+const texSlot1=0;
+const _tex1=new Texture2D( img1)
+gl.uniform1i(uTexLoc[0], texSlot1)
+
+
+
+
+const texSlot2=1;
+const _tex2= new Texture2D(img2)
+gl.uniform1i(uTexLoc[1], texSlot2);
+
+
+//show_Error(_tex1)
+//show_Error(_tex2)
+
+// global vbos
+const ColorVBO1=new VB(ColorVertexData1);
+
+const UV2VBO=new VB(UVVertexData2);
+
+const Position1VBO=new VB(PositionVertexData1);
+const Position2VBO=new VB(PositionVertexData2);
+
+// global ebos
+const indicesEBO=new EB(indicesData1);
+
+//global vaos
+const Vao1=new VA()
+const Vao2=new VA()
+const Vao3=new VA()
+
+
+//
+Vao1.Bind()
+
+Vao1.LinkAttrib(Position1VBO, aPosLoc, 2, gl.FLOAT, !1, 2 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT);
+Vao1.LinkAttrib(ColorVBO1, aColorLoc, 4, gl.UNSIGNED_BYTE, !0, 4 * Uint8Array.BYTES_PER_ELEMENT, 0 * Uint8Array.BYTES_PER_ELEMENT);
+
+//Vao1.Unbind()
+
+//
+Vao2.Bind()
+
+Vao2.LinkAttrib(Position2VBO, aPosLoc, 2, gl.FLOAT, !1, 2 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT);
+//Vao2.LinkAttrib(ColorVBO2, aColorLoc, 4, gl.UNSIGNED_BYTE, !0, 4 * Uint8Array.BYTES_PER_ELEMENT, 0 * Uint8Array.BYTES_PER_ELEMENT);
+Vao2.LinkAttrib(UV2VBO, aUVLoc, 2, gl.FLOAT, !0, 2 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT);
+indicesEBO.Bind()
+//Vao2.Unbind()
+
+//
+Vao3.Bind()
+
+Vao3.LinkAttrib(Position2VBO, aPosLoc, 2, gl.FLOAT, !1, 2 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT);
+Vao3.LinkAttrib(ColorVBO1, aColorLoc, 4, gl.UNSIGNED_BYTE, !0, 4 * Uint8Array.BYTES_PER_ELEMENT, 0 * Uint8Array.BYTES_PER_ELEMENT);
+Vao3.LinkAttrib(UV2VBO, aUVLoc, 2, gl.FLOAT, !0, 2 * Float32Array.BYTES_PER_ELEMENT, 0 * Float32Array.BYTES_PER_ELEMENT);
+indicesEBO.Bind()
+//Vao2.Unbind()
+
+
+//
+
+
+
+let time_To_Next_Spwan=SPWAN_RATE;
+
+
+
+//show_Error(gl.getParameter(gl.VERTEX_ARRAY_BINDING))
+
+//let lastTimePass=performance.now()
+const Main_Loop=(dt)=>{
+
+gl.viewport(0,0, gl.canvas.width, gl.canvas.height);
+gl.clearColor(0.1, 0.1, 0.1, 1.0);
+gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+
+
+
+
+
+// SPWAN system
+time_To_Next_Spwan -= dt;
+
+while(time_To_Next_Spwan < 0){
+time_To_Next_Spwan += MIN_SPWAN_TIME; //SPWAN_RATE;
+
+let vao=Rand.Choice(Vao1, Vao2, Vao3)
+
+let _angle=Rand.Float(0, Math.PI*2);
+let _movement=Rand.Float(MIN_SPEED, MAX_SPEED);
+
+let pos=[0, 0];
+let vel=[
+Math.sin(_angle) * _movement,
+Math.cos(_angle) * _movement
+];
+
+const obj=new Object2D(
+//pos
+pos,
+//vel
+vel,
+//vao
+vao,
+//size
+Rand.Float(MIN_SIZE, MAX_SIZE))
+objs.push(obj)
+
+}
+
+
+
+
+
+// update and draw system
+Prog.Bind()
+
+
+
+//gl.activeTexture(gl.TEXTURE0+texSlot1);
+//gl.bindTexture(gl.TEXTURE_2D, _tex1);
+
+//gl.activeTexture(gl.TEXTURE0+texSlot2);
+//gl.bindTexture(gl.TEXTURE_2D, _tex2);
+
+_tex1.Bind(texSlot1);
+_tex2.Bind(texSlot2);
+
+
+
+for(let i=0;i<objs.length;i++){
+
+
+
+
+
+let obj=objs[i];
+
+obj.update(dt);
+obj.Vao.Bind()
+gl.uniform1f(uScaleLoc, obj.Size);
+gl.uniform2f(uOffsetLoc, obj.Position[0], obj.Position[1]);
+
+let currentVAO=gl.getParameter(gl.VERTEX_ARRAY_BINDING);
+if(currentVAO == Vao1.ID){
+
+gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+}
+else{
+
+gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_BYTE, 0);
+
+
+}
+
+}
+
+//removing the death objs
+//objs = objs.filter(obj => obj.IsAlive())
+objs.forEach((obj, objIndex) => {
+
+if(!obj.IsAlive()){
+objs.splice(objIndex, 1);
+}
+
+})
+
+
+
+//show_Error("loop runing")
+
+
+
+
+
+}
+
+
+
+
+
+
+//Main_Loop(0)
+
+Loop.animate=Main_Loop;
+Loop.startLoop(0);
+
+document.addEventListener("dblclick", ()=>{
+console.log(objs)
+});
+
+
+}
+
+
+
+window.addEventListener("load", ()=>{
+
+try{
+
+const cSize= innerWidth>innerHeight?innerHeight:innerWidth;
+gl.canvas.width = cSize;
+gl.canvas.height =cSize;
+App(gl);
+console.log(gl);
+
+}catch(e){
+show_Error(e);
+}
+
+});
+
+
+
+console.log("js is awesome");
+
+</script>
+
+</body>
+</html>

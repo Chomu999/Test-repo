@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Snake Game</title>
+    <style>
+        /* Your CSS styles will go here */
+#gameCanvas {
+    border: 1px solid black;
+}
+
+
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="300" height="300"></canvas>
+    <script>
+// Get the canvas element and its context
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+// Set the game board dimensions and snake initial position
+const boardWidth = 300;
+const boardHeight = 300;
+const snakeX = boardWidth / 2;
+const snakeY = boardHeight / 2;
+const snakeSize = 10;
+const snakeBody = [];
+
+// Set the initial direction and food position
+let direction = 'right';
+let foodX = Math.floor(Math.random() * (boardWidth / snakeSize)) * snakeSize;
+let foodY = Math.floor(Math.random() * (boardHeight / snakeSize)) * snakeSize;
+
+// Game loop
+function draw() {
+    // Clear the canvas
+    ctx.clearRect(0, 0, boardWidth, boardHeight);
+
+    // Draw the snake
+    ctx.fillStyle = 'green';
+    for (let i = 0; i < snakeBody.length; i++) {
+        ctx.fillRect(snakeBody[i].x, snakeBody[i].y, snakeSize, snakeSize);
+    }
+
+    // Draw the food
+    ctx.fillStyle = 'red';
+    ctx.fillRect(foodX, foodY, snakeSize, snakeSize);
+
+    // Update the snake's position based on the direction
+    let newX = snakeX;
+    let newY = snakeY;
+    switch (direction) {
+        case 'left':
+            newX -= snakeSize;
+            break;
+        case 'right':
+            newX += snakeSize;
+            break;
+        case 'up':
+            newY -= snakeSize;
+            break;
+        case 'down':
+            newY += snakeSize;
+            break;
+    }
+
+    // Check for collisions with the walls or itself
+    if (newX < 0 || newX >= boardWidth || newY < 0 || newY >= boardHeight || isColliding(newX, newY, snakeBody)) {
+        // Game over
+        alert('Game Over');
+        return;
+    }
+
+    // Check if the snake has eaten the food
+    if (newX === foodX && newY === foodY) {
+        // Increase the snake's length and generate new food
+        snakeBody.push({ x: newX, y: newY });
+        foodX = Math.floor(Math.random() * (boardWidth / snakeSize)) * snakeSize;
+        foodY = Math.floor(Math.random() * (boardHeight / snakeSize)) * snakeSize;
+    }
+
+    // Add the new head to the snake's body
+    snakeBody.unshift({ x: newX, y: newY });
+
+    // Remove the tail if the snake has grown longer
+    if (snakeBody.length > snakeBody.length - 1) {
+        snakeBody.pop();
+    }
+
+    // Request the next frame
+    window.requestAnimationFrame(draw);
+}
+
+// Function to check if the snake is colliding with itself
+function isColliding(x, y, body) {
+    for (let i = 1; i < body.length; i++) {
+        if (x === body[i].x && y === body[i].y) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Start the game loop
+draw();
+
+
+</script>
+</body>
+</html>

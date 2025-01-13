@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html charset=utf-8" />
+<meta name="author" content="biswajit bhowmick"/>
+
+<title>
+js 2d physic engine  1 idk
+</title>
+
+
+<meta name="viewport"
+content="width=device-width, user-scalable=no,           initial-scale=1.0, maximum-scale=10.0">
+
+
+<style>
+
+:root{
+--border1:2px solid white;
+}
+
+
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+html{
+font-size:10px;
+}
+
+body{
+width:100vw; height:100vh;
+background:#000829;
+}
+
+main{
+width:100%; height:100%;
+}
+
+.canvas{
+width:100%; height:50%;
+}
+
+.control{
+padding:1rem;
+width:100%; height:50%;
+display:grid;
+grid-template-rows:repeat(3,1fr);
+grid-template-columns:repeat(3,1fr);
+grid-gap:1rem;
+}
+
+.btns{
+background:rgba(244, 20, 230, 0.5);
+}
+
+.up{
+grid-row:1/2;
+grid-column:2/3;
+}
+
+.left{
+grid-row:2/3;
+grid-column:1/2;
+}
+
+.right{
+grid-row:2/3;
+grid-column:3/4;
+}
+
+.down{
+grid-row:3/4;
+grid-column:2/3;
+}
+
+</style>
+
+
+
+
+
+<script>
+
+
+
+class rand{
+ 
+static float(min=1,max=10){
+return Math.random() * (max-min) + min;
+}
+
+static int(min=1,max=10){
+return Math.floor(rand.float(min,max));
+}
+
+static choice(arr){
+return arr[rand.int(0,arr.length)];
+}
+
+static color(){
+let hex="#",str="0123456789abcdef";
+for(let i=0;i<6;++i){
+hex+=str[rand.int(0,str.length)];
+}
+return hex;
+}
+
+
+}
+
+
+//vector xyzw
+class vec4{
+
+static create(x=0,y=0,z=0,w=1){
+return {x,y,z,w};
+}
+
+static add(out,a,b){
+for(let i in a){
+out[i]=a[i] + b[i];
+}
+}
+
+static sub(out,a,b){
+for(let i in a){
+out[i]=a[i] - b[i];
+}
+}
+
+static mul(out,a,b){
+for(let i in a){
+out[i]=a[i] * b[i];
+}
+}
+
+static div(out,a,b){
+for(let i in a){
+out[i]=a[i] / b[i];
+}
+
+}
+
+
+}
+
+
+
+//vector xy
+class vec2{
+
+static create(x=0,y=0){
+return {x,y};
+}
+
+static add(out,a,b){
+for(let i in a) out[i]=a[i] + b[i];
+}
+
+static sub(out,a,b){
+for(let i in a) out[i]=a[i] - b[i];
+}
+
+static mul(out,a,b){
+for(let i in a) out[i]=a[i] * b[i];
+}
+
+static div(out,a,b){
+for(let i in a) out[i]=a[i] / b[i];
+}
+
+
+}
+
+
+//matrix 4x4
+class mat4{
+
+static create(){
+return new Float32Array(4*4);
+}
+
+static identity(mat){
+for(let i=0;i<4;i++){
+mat[i+i*4]=1;
+}
+return mat;
+}
+
+static getUnion(mat){
+if(!mat) return;
+
+let Union=[[],[],[],[]];
+for(let r=0;r<4;r++){
+for(let c=0;c<4;c++){
+Union[c].push(mat[c+r*4]);
+}
+}
+return Union;
+}
+
+}
+
+
+</script>
+
+
+
+</head>
+<body>
+
+<main id="main">
+
+
+
+<canvas id="canvas"></canvas>
+
+<div class="control" id="controlBox">
+ <div class="btns up"></div>
+ <div class="btns left"></div>
+ <div class="btns right"></div>
+ <div class="btns down"></div>
+</div>
+
+
+</main>
+
+<script>
+
+
+
+const app=(ctx)=>{
+
+
+class Ball{
+constructor(x,y,radius, color){
+this.x=x;
+this.y=y;
+this.radius=radius;
+this.color=color;
+}
+draw(c){
+c.beginPath();
+c.strokeStyle=this.color;
+c.arc(this.x, this.y, this.radius, 0, Math.PI*2);
+c.stroke();
+c.closePath();
+}
+
+}
+
+
+let action={
+up:0,
+left:0,
+right:0,
+down:0,
+}
+
+let x=4, y=3;
+
+
+
+const balls=[new Ball(200, 200, 20, "blue")];
+
+for(let i=0;i<10;++i){
+balls.push(new Ball(
+ rand.int(0,300),rand.int(0,300), rand.int(5,50),
+ rand.color())
+ )
+}
+
+balls[0].player=1;
+
+setInterval(()=>{
+ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+
+
+
+
+balls.forEach((b)=>{
+
+b.draw(ctx);
+
+if(b.player){
+if(action.up) b.y-=5;
+if(action.left) b.x-=5;
+if(action.right) b.x+=5;
+if(action.down) b.y+=5;
+}
+
+
+})
+
+//if(!action.up && !action.down) y=0;
+//if(!action.left && !action.right) x=0;
+
+
+
+},1000/30);
+
+
+
+controlBox.addEventListener("pointerrawupdate", (event)=>{
+
+if(!event.target.classList[1]) return;
+
+let condition=event.target.classList[1];
+
+
+if(condition=="up") action.up=1;
+if(condition=="left") action.left=1;
+if(condition=="right") action.right=1;
+if(condition=="down") action.down=1;
+
+let elmt=event.target;
+
+elmt.addEventListener("touchend", (e)=>{
+//console.log(condition)
+
+
+if(condition=="up") action.up=0;
+if(condition=="left") action.left=0;
+if(condition=="right") action.right=0;
+if(condition=="down") action.down=0;
+
+//action[condition]=0
+
+
+})
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+window.addEventListener("load",(event)=>{
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight*0.5;
+console.log(ctx);
+app(ctx)
+
+
+
+
+
+});
+
+</script>
+
+</body>
+</html>

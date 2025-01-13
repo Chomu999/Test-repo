@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>cross the road game v1.0.3</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+width:100%; height:100%;
+background:black;
+}
+
+main{
+width:100%; height:100%;
+position:relative;
+display:grid;
+}
+
+.control{
+padding:1rem;
+width:100%; height:50%;
+position:absolute;
+bottom:0; left:0;
+display:grid;
+
+grid-auto-columns:repeat(3,1fr);
+grid-auto-rows:repeat(3,1fr);
+grid-gap:1rem;
+}
+
+
+
+.control .btns{
+background:rgba(120,50,20,0.25);
+}
+
+.top{
+grid-row:1/2;
+grid-column:2/3;
+}
+
+.left{
+grid-row:2/3;
+grid-column:1/2;
+}
+
+.right{
+grid-row:2/3;
+grid-column:3/4;
+}
+
+
+.down{
+grid-row:2/3;
+grid-column:2/3;
+}
+
+</style>
+
+
+<script>
+
+class Rand{
+
+static float(){
+return Math.random();
+}
+
+static int(min=1,max=10){
+return Math.floor(Rand.float() * (max-min) + min);
+}
+
+static choice(arr){
+return arr[Rand.int(0,arr.length)];
+}
+
+static color(){
+let hex="#";
+let str="0123456789abcdef";
+for(let i=0;i<6;i++) hex+=str[Rand.int(0,str.length)];
+return hex;
+}
+}
+
+const arrR=(len)=>{
+let arr=[];
+for(let i=0;i<len;i++)
+ arr[i]=i
+return arr;
+}
+
+
+function cText(){
+let args=arguments[0];
+args.c.beginPath();
+args.c.fillStyle=args.color;
+args.c.fillText(args.text, args.pos.x, args.pos.y);
+args.c.font=args.fs+"rem sans-serif";
+args.c.closePath();
+}
+
+const CheckCollision=(ObjectA,ObjectB)=>{
+return (ObjectA.pos.x + ObjectA.width >= ObjectB.pos.x &&
+ObjectA.pos.x <= ObjectB.pos.x + ObjectB.width &&
+ObjectA.pos.y + ObjectA.height >= ObjectB.pos.y &&
+ObjectA.pos.y <= ObjectB.pos.y + ObjectB.height)
+}
+
+
+class PAS2{
+constructor({
+ color="red",
+ pos={x:0,y:0},
+ width=20,
+ height=20,
+}){
+this.pos=pos;
+this.width=width;
+this.height=height;
+this.velocity={x:0, y:0};
+this.color=color;
+}
+
+update(dt){
+}
+
+draw(c){
+}
+
+}
+
+
+
+class Box{
+
+constructor({pos={x:0, y:0},color="red",width=20,height=20}){
+this.pos=pos;
+this.color=color;
+this.width=width;
+this.height=height;
+this.velocity={x:0, y:0};
+}
+update(dt){
+
+
+this.pos.x += this.velocity.x;
+this.pos.y += this.velocity.y;
+
+
+
+}
+
+draw(c){
+
+
+c.fillStyle=this.color;
+c.fillRect(this.pos.x,this.pos.y,this.width,this.height);
+
+
+}
+
+
+}
+
+
+
+</script>
+
+
+</head>
+<body>
+
+<main id="main">
+
+
+<canvas id=canvas></canvas>
+
+<div class="control">
+ <div class="btns top"></div>
+ <div class="btns left"></div>
+ <div class="btns right"></div>
+ <div class="btns down"></div>
+</div>
+
+</main>
+
+
+
+
+
+
+
+<script>
+
+//const player=(c,x,y)=>{
+//c.fillStyle="#FF0076";
+//c.fillRect(10*x, 10*y, 10, 10);
+//}
+
+
+const action={
+top:false,
+left:false,
+right:false,
+down:false,
+speed:2.5,
+}
+
+const App=(parent)=>{
+const canvas=parent.querySelector("canvas");
+const ctx=canvas.getContext("2d");
+
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+const control=parent.querySelector(".control");
+
+let [loop,isWon,gameText]=[true,false,"game"]
+
+
+
+const Pos={
+x:9, y:660,
+}
+
+const MapOffSet={
+x:0, y:0,
+}
+
+
+//console.log(window)
+
+//console.log(canvas.offsetTop)
+
+
+
+let enemies=[];
+
+
+
+let enemiesRoadMap=[];
+
+for(let i=0;i<20;i++){
+enemiesRoadMap.push({
+y:i*20
+})
+}
+
+let player=new Box({pos:Pos,width:20,height:20,color:"#9900FF" });
+
+
+player.loseHealth=false;
+player.health=10;
+
+
+
+//let NumberOfTrack=Rand.int(6,5),xl=canvas.width
+
+for(let i=0;i<enemiesRoadMap.length;i++){
+// let gap=Rand.int(1,10) * 20;
+
+enemies.push(new Box({
+pos:{x:0, y:enemiesRoadMap[i].y},color:"tan",
+width:20, height:20
+}));
+
+enemies[i].velocity.x=Rand.choice([-action.speed,action.speed]);
+}
+
+
+setInterval(()=>{
+
+if(enemies.length != 0) return;
+
+for(let i=0;i<enemiesRoadMap.length;i++){
+// let gap=Rand.int(1,10) * 20;
+
+enemies.push(new Box({
+pos:{
+ x:Rand.choice([0, canvas.width+20,canvas.width]),
+ y:Rand.int(0,20)*20
+},
+color:Rand.color(),
+width:20, height:20
+}));
+
+enemies[i].velocity.x=Rand.choice([-action.speed,action.speed]);
+}
+
+
+},1999)
+
+
+const Animate=(dt, c)=>{
+c.fillStyle="black";
+c.fillRect(0, 0, c.canvas.width, c.canvas.height);
+
+
+
+//draw and update
+enemies.forEach((e)=>{
+e.update(dt);
+e.draw(c);
+})
+
+
+player.update(dt);
+player.draw(c);
+
+
+
+enemies.forEach((e,i)=>{
+
+if(e.pos.x <= -40){
+enemies.splice(i,1);
+//e.pos.y= enemiesRoadMap[Rand.int(0,enemiesRoadMap.length)].y
+//e.pos.x=390;
+//e.color=Rand.color()
+}
+
+if(e.pos.x >= 400){
+enemies.splice(i,1);
+//e.pos.y= enemiesRoadMap[Rand.int(0,enemiesRoadMap.length)].y
+//e.pos.x=-20;
+//e.color=Rand.color();
+}
+
+
+
+})
+
+enemies.forEach((e,i)=>{
+
+
+//Checking Collision
+if(CheckCollision(player, e)){
+enemies.splice(i,1);
+player.health -= 1;
+}
+
+})
+
+
+
+
+if(player.pos.y <= -50){
+isWon=true;
+gameText=`u won the game \n sucker`;
+}
+
+
+if(player.health <= 0){
+loop=false
+gameText=`u lose the game \n sucker`;
+}
+
+
+// movment
+player.velocity.x=0;
+player.velocity.y=0;
+//forward
+if(action.top) player.velocity.y=-action.speed;
+//left//
+if(action.left) player.velocity.x=-action.speed;
+////////
+
+//right//
+if(action.right) player.velocity.x=action.speed;
+//backward//
+if(action.down) player.velocity.y=action.speed;
+////////////
+
+
+
+
+
+
+
+
+
+
+
+//some text kido
+
+cText({
+pos:{x:10, y:30}, color:"#FF005D",c,
+text:`health ${parseInt(player.health)}`,fs:2.4,
+})
+
+
+
+
+if(isWon || !loop){
+cText({
+pos:{x:c.canvas.width*0.10,y:c.canvas.height*0.5},
+color:"white",c,
+text:`${gameText}`,fs:2.0,
+});
+}
+
+
+}
+
+
+////
+
+let lt=1;
+const GameLoop=(ts)=>{
+
+let dt=ts-lt; lt+=ts;
+
+Animate(dt, ctx);
+
+if(loop && !isWon) requestAnimationFrame(GameLoop)
+
+}
+
+
+//console.log(ctx)
+
+GameLoop(0);
+
+//controles
+
+//start
+control.addEventListener("touchstart",(e)=>{
+
+
+if("top".indexOf(e.target.classList[1]) > -1){
+action.top=true;
+//--playerPos.y;
+}
+
+if("left".indexOf(e.target.classList[1]) > -1){
+action.left=true;
+//playerPos.x--;
+}
+
+if("right".indexOf(e.target.classList[1]) > -1){
+action.right=true;
+//playerPos.x++;
+}
+
+if("down".indexOf(e.target.classList[1]) > -1){
+action.down=true;
+//++playerPos.y;
+}
+
+
+});
+
+
+//end
+control.addEventListener("touchend",(e)=>{
+
+
+if("top".indexOf(e.target.classList[1]) > -1){
+action.top=false;
+//--playerPos.y;
+}
+
+if("left".indexOf(e.target.classList[1]) > -1){
+action.left=false;
+//playerPos.x--;
+}
+
+if("right".indexOf(e.target.classList[1]) > -1){
+action.right=false;
+//playerPos.x++;
+}
+
+if("down".indexOf(e.target.classList[1]) > -1){
+action.down=false;
+//++playerPos.y;
+}
+
+
+});
+
+
+
+
+}
+
+
+
+////
+const INIT=()=>{
+
+const main=document.querySelector("#main");
+
+App(main);
+
+}
+
+
+
+window.addEventListener("load",(e)=>{
+
+
+
+
+INIT();
+
+
+})
+
+</script>
+</body>
+</html>

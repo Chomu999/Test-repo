@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no">
+
+<title>webGL practice part 4</title>
+
+<style>
+
+*{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+html{
+font-size: 10px;
+}
+
+body{
+background: #00021B;
+}
+
+
+.appTitle{
+margin: 1rem ;
+padding: 1rem;
+text-align: center;
+background: #234500;
+color: #D2FFD6;
+border-radius: 1rem;
+}
+
+.canvasCont{
+width:100vmin;
+aspect-ratio: 1;
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+}
+
+canvas{
+margin: auto;
+width: 98%;
+display: block;
+background: salmon;
+}
+
+
+.assets{
+display: none;
+}
+
+</style>
+
+</head>
+
+<body>
+
+
+<h1 class="appTitle">webGL practice part 4</h1>
+
+<div class="wrapper canvasCont">
+<canvas id="canvas"></canvas>
+
+</div>
+
+
+
+
+
+
+<div class="assets">
+<img src="/storage/emulated/0/Download/Zelda2.png" id="img1" alt="img1" />
+<img src="/storage/emulated/0/Download/Medusa1.jpg" id="img2" alt="img2" />
+<img src="/storage/emulated/0/Download/cat.jpg" id="img3" alt="img3" />
+</div>
+
+
+
+<script>
+
+
+const INITIAL=()=>{
+
+
+
+const canvas = document.getElementById("canvas");
+const gl = canvas.getContext("webgl2");
+
+//width or height
+
+const maxSize = (innerWidth>innerHeight)?innerHeight:innerWidth;
+canvas.width=maxSize;
+canvas.height=maxSize;
+
+
+console.log(gl);
+
+const img1 = document.getElementById("img1");
+console.log("image ", img1);
+
+const img2 = document.getElementById("img2");
+console.log("image ", img2);
+
+
+const img3 = document.getElementById("img3");
+console.log("image ", img3);
+
+
+const vertexShaderSource=`#version 300 es
+layout (location=0) in vec4 aPos;
+layout (location=1) in vec2 aUv;
+
+layout (location=2) in vec2 aOffset;
+
+out vec2 vUv;
+
+void main(){
+vUv = aUv;
+gl_Position = vec4(aPos.xy + aOffset, aPos.zw);
+}
+`;
+
+const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+gl.shaderSource(vertexShader, vertexShaderSource);
+gl.compileShader(vertexShader);
+if(!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)){
+console.log(`vertexShader error ${gl.getShaderInfoLog(vertexShader)} \n  ${gl.getShaderSource(vertexShader)}`);
+}
+
+
+const fragmentShaderSource=`#version 300 es
+precision mediump float;
+layout (location=0) out vec4 FragColor;
+
+uniform sampler2D uTex0;
+uniform sampler2D uTex1;
+
+in vec2 vUv;
+
+void main(){
+FragColor = mix( texture(uTex0, vUv), texture(uTex1, vUv), 0.5);
+}
+`;
+
+const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+gl.shaderSource(fragmentShader, fragmentShaderSource);
+gl.compileShader(fragmentShader);
+if(!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)){
+console.log(`fragmentShader error ${gl.getShaderInfoLog(fragmentShader)} \n  ${gl.getShaderSource(fragmentShader)}`);
+}
+
+const shaderProgram = gl.createProgram();
+gl.attachShader(shaderProgram, vertexShader)
+gl.attachShader(shaderProgram, fragmentShader)
+
+gl.linkProgram(shaderProgram);
+if(!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)){
+console.log(`link not sucsses ${gl.getProgramInfoLog(shaderProgram)}`);
+}
+gl.validateProgram(shaderProgram);
+if(!gl.getProgramParameter(shaderProgram, gl.VALIDATE_STATUS)){
+console.log(`invalide shaderProgram ${gl.getProgramInfoLog(shaderProgram)}`);
+}
+gl.useProgram(shaderProgram);
+
+
+
+
+
+const aPosLoc = gl.getAttribLocation(shaderProgram, "aPos");
+console.log("pos loc", aPosLoc)
+
+const aUvLoc = gl.getAttribLocation(shaderProgram, "aUv");
+console.log("uv loc", aUvLoc)
+
+
+const aOffsetLoc = gl.getAttribLocation(shaderProgram, "aOffset");
+console.log("aOffset loc", aOffsetLoc)
+
+
+const uTex0Loc = gl.getUniformLocation(shaderProgram, "uTex0");
+console.log("texture 0 loc", uTex0Loc)
+
+
+const uTex1Loc = gl.getUniformLocation(shaderProgram, "uTex0");
+console.log("texture 1 loc", uTex1Loc)
+
+
+
+
+
+const imageInfo = [2, 2, 0];
+
+const imageColorValues=new Uint8Array([
+255, 0, 0, 255,
+0, 255, 0, 255,
+0, 0, 255, 255,
+255, 255, 0, 255,
+
+]);
+
+
+const texSlot0 = 0, texSlot1 = 1;
+
+gl.uniform1i(uTex0Loc, texSlot0);
+const tex1 = gl.createTexture();
+gl.activeTexture(gl.TEXTURE0+texSlot0)
+gl.bindTexture(gl.TEXTURE_2D, tex1);
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, ...imageInfo ,  gl.RGBA, gl.UNSIGNED_BYTE, imageColorValues);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+gl.generateMipmap(gl.TEXTURE_2D);
+gl.bindTexture(gl.TEXTURE_2D, null);
+
+gl.uniform1i(uTex1Loc, texSlot1);
+const tex2 = gl.createTexture();
+gl.activeTexture(gl.TEXTURE0+texSlot1);
+gl.bindTexture(gl.TEXTURE_2D, tex2);
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA ,  gl.RGBA, gl.UNSIGNED_BYTE, img1);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+gl.generateMipmap(gl.TEXTURE_2D);
+gl.bindTexture(gl.TEXTURE_2D, null)
+
+
+gl.uniform1i(uTex1Loc, texSlot1);
+const tex3 = gl.createTexture();
+gl.activeTexture(gl.TEXTURE0+texSlot1);
+gl.bindTexture(gl.TEXTURE_2D, tex3);
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA ,  gl.RGBA, gl.UNSIGNED_BYTE, img2);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+gl.generateMipmap(gl.TEXTURE_2D);
+gl.bindTexture(gl.TEXTURE_2D, null)
+
+
+
+
+const vertices = new Float32Array([
+   0.0,  0.5,   0.5,  1.0,
+  -0.5, -0.5,   0.0,  0.0,
+   0.5, -0.5,   1.0,  0.0,
+]);
+
+const vbo = gl.createBuffer();
+
+gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
+
+
+
+
+gl.vertexAttribPointer(aPosLoc, 2, gl.FLOAT, gl.FALSE, 4 * 4, 0 * 4);
+gl.enableVertexAttribArray(aPosLoc);
+
+gl.vertexAttribPointer(aUvLoc, 2, gl.FLOAT, gl.FALSE, 4 * 4, 2 * 4);
+gl.enableVertexAttribArray(aUvLoc);
+
+
+
+gl.useProgram(null);
+
+
+function update(dt){
+gl.viewport(0, 0, canvas.width, canvas.height);
+gl.clearColor(0.2, 0.2, 0.2, 1.0);
+gl.clear(gl.COLOR_BUFFER_BIT);
+
+gl.useProgram(shaderProgram);
+gl.vertexAttrib2fv(aOffsetLoc, [0.5, -0.5]);
+gl.bindTexture(gl.TEXTURE_2D, tex1);
+gl.activeTexture(gl.TEXTURE0+texSlot0);
+gl.drawArrays(gl.TRIANGLES, 0, 3);
+gl.useProgram(null);
+
+gl.useProgram(shaderProgram);
+
+gl.vertexAttrib2fv(aOffsetLoc, [-0.5, 0.5]);
+
+gl.bindTexture(gl.TEXTURE_2D, tex1);
+gl.activeTexture(gl.TEXTURE0+texSlot1);
+
+gl.bindTexture(gl.TEXTURE_2D, tex2);
+gl.activeTexture(gl.TEXTURE0+texSlot0);
+
+
+gl.drawArrays(gl.TRIANGLES, 0, 3);
+gl.useProgram(null);
+
+
+gl.useProgram(shaderProgram);
+
+gl.vertexAttrib2fv(aOffsetLoc, [0.0, 0.0]);
+
+gl.activeTexture(gl.TEXTURE0+texSlot0);
+gl.bindTexture(gl.TEXTURE_2D, tex1);
+
+gl.activeTexture(gl.TEXTURE0+texSlot1);
+gl.bindTexture(gl.TEXTURE_2D, tex3);
+
+
+gl.drawArrays(gl.TRIANGLES, 0, 3);
+gl.useProgram(null);
+
+
+}
+
+
+
+let lastTime=0;
+function animate(timeStamp) {
+const dt = timeStamp - lastTime;
+lastTime = timeStamp;
+update(dt);
+webkitRequestAnimationFrame(animate);
+}
+webkitRequestAnimationFrame(animate);
+
+
+}
+
+
+
+try{
+	INITIAL();
+}catch(err){
+	console.log(err);
+}
+
+</script>
+
+</body>
+</html>

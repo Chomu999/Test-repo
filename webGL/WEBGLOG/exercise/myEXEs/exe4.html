@@ -1,0 +1,223 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<!-- 
+<meta name="viewport" content="width=device-width, initial-scale=5.0 maximum-scale=5.0 user-scalable=0">
+ -->
+ 
+ <meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=1.0">
+<title>HTML 3d Element</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+body{
+background: gray;
+}
+
+canvas{
+position:absolute;
+top:50%;
+left:50%;
+transform: translate(-50%,-50%);
+}
+img{
+display: none;
+}
+
+
+
+</style>
+
+</head>
+<script src="ShaderUtil.js"></script>
+
+<body>
+
+<canvas class="gl"></canvas>
+
+<img id="img" src="../img/crate.png" alt="png" />
+
+<script>
+
+const canvas=document.querySelector('.gl');
+const gl=canvas.getContext('webgl2');
+const imgScr = document.getElementById('img');
+const cvsSize=innerWidth;
+
+canvas.width=cvsSize;
+canvas.height=cvsSize;
+
+
+const r = ()=>{
+return Math.random();
+}
+
+
+
+//VERTEX_SHADER lol
+let vShaderSrc=`
+precision mediump float;
+
+attribute vec4 aPos;
+
+varying vec2 uv;
+
+void main(){
+    uv = (aPos.xy + 1.0) / 2.0;
+    gl_Position = aPos;
+}
+`;
+
+//FRAGMENT_SHADER lol
+
+let fShaderSrc=`
+precision mediump float;
+
+
+varying vec2 uv;
+
+uniform sampler2D uTex;
+
+void main(){
+    float wh = 0.5;
+    float b = 0.2;
+    
+    vec4 colour = texture2D(uTex, uv);
+    
+    //colour.r += sin(wh);
+    colour.b += cos(wh) * 10.0;
+    //colour.rgb += b;
+    
+    gl_FragColor = colour;
+    //gl_FragColor = vec4(fragColor, 1.0);
+    //gl_FragColor = vec4(0.0, 0.3, 0.2, 1.0);
+}
+`;
+
+
+let MyProgram = ShaderUtil.createGLProgram(gl,vShaderSrc, fShaderSrc);
+
+const isloaded = ()=>{
+
+//gl.enable(gl.DEPTH_TEST)
+//gl.depthFunc(gl.LEQUAL)
+//gl.clearColor(0, 20, 6, 1)
+//gl.clearDepth(1.0)
+
+gl.enable(gl.DEPTH_TEST)
+
+gl.viewport(0, 0, canvas.width, canvas.height);
+gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+
+//gl.clearColor(5, 0, 9,1);
+
+//console.log(gl)
+
+
+
+
+
+
+//gl.fClear();
+
+
+
+//let MyTriangle=[
+//    //x y         //r g b
+//    0.0, 0.5,    1.0, 0.0, 0.0,
+//    -0.5,-0.5,    0.0, 0.0, 1.0,
+//    0.5,-0.5,    0.8, 1.0, 2.0,
+//];
+
+
+let MyTriangle= new Float32Array([
+    //x   y      //r   g   b
+    -1.0, 1.0,   //r(),r(),r(),
+    -1.0,-1.0,   //r(),r(),r(),
+    1.0,-1.0,    //r(),r(),r(),
+
+    1.0, -1.0,   //r(),r(),r(),
+    1.0,1.0,     //r(),r(),r(),
+    -1.0,1.0     //r(),r(),r(),
+]);
+
+
+let posBuffer = ShaderUtil.createGLBuffer(gl,MyTriangle);
+
+
+
+let aPosLoc = ShaderUtil.getGLAtrbLoc(gl ,MyProgram, `aPos`);
+
+//let my_GLSL_a_vColor = ShaderUtil.getGLAtrbLoc(gl ,MyProgram, `a_vColor`);
+
+gl.vertexAttribPointer(aPosLoc, 2, gl.FLOAT, false,0, 0);
+
+
+gl.enableVertexAttribArray(aPosLoc);
+
+
+
+let boxTexture = gl.createTexture();
+
+//gl.activeTexture(gl.TEXTURE0);
+
+gl.bindTexture(gl.TEXTURE_2D, boxTexture);
+
+
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, imgScr);
+gl.bindTexture(gl.TEXTURE_2D, null);
+
+
+
+gl.useProgram(MyProgram);
+
+
+
+const gameLoop=()=>{
+requestAnimationFrame(gameLoop);
+
+
+gl.clearColor(3.75, 0.85, 8.8, 1.0);
+gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
+
+
+gl.bindTexture(gl.TEXTURE_2D, boxTexture);
+gl.activeTexture(gl.TEXTURE0);
+
+
+gl.drawArrays(gl.TRIANGLES, 0, 6);
+//gl.drawArrays(gl.ELEMENTS, 0, 3);
+
+
+
+
+
+}
+
+gameLoop();
+
+
+}
+
+
+window.addEventListener("load",(e)=>{
+isloaded()
+})
+
+
+</script>
+</body>
+</html>

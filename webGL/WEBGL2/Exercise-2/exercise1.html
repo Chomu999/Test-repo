@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title> webgl2 exersice 1</title>
+
+<meta name="author" content="BhowmickByte">
+
+<meta name="viewport"
+content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=10.0">
+
+
+
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+
+html{
+font-size:10px;
+}
+
+
+body{
+width:100vw; height:100vh;
+}
+
+
+main{
+padding:4rem 0;
+width:100%; height:100%;
+background:#000;
+}
+
+canvas{
+
+background:transparent;
+}
+
+
+.btns{
+margin:8rem auto;
+width:80%; height:8rem;
+background:#020020;
+display:flex;
+justify-content:space-around;
+align-items:center;
+}
+
+.btn{
+padding:2rem 4rem;
+background:#FF0081;
+color:#0050FF;
+font-size:2rem;
+}
+
+
+.res{
+display:none!important;
+}
+
+</style>
+
+
+
+<!-- <script src="../Example/js/lib/gl-matrix.js"></script> -->
+
+</head>
+<body>
+
+<main id="main">
+
+<canvas id="canvas"></canvas>
+
+<div class="btns">
+ <div class="btn left">-1</div>
+ <div class="btn right">+1</div>
+</div>
+
+<div class="res">
+<!-- <img src="/storage/emulated/0/pictures/red.png" alt="red" id=img1 /> -->
+<!-- <img src="/storage/emulated/0/pictures/red.png" alt="red" id=img1 /> -->
+</div>
+
+
+
+</main>
+
+
+
+
+<script type="module">
+
+
+
+
+const GLReSizer=(gl)=>{
+let cs=innerWidth>innerHeight?innerHeight:innerWidth;
+gl.canvas.width=cs;
+gl.canvas.height=cs;
+}
+
+//const _url="/storage/emulated/0/Download/Zelda2.png";
+
+const LoadImage = async (name) => new Promise((resolve, reject)=>{
+let img=new Image();
+img.src=`/storage/emulated/0/${name}`;
+img.addEventListener("load", () => resolve(img));
+});
+
+
+
+const app=async(gl)=>{
+
+
+
+//let now=Date.now();
+
+
+gl.clearColor(0.3, 0.3, 0.3, 1.0);
+gl.clear(gl.COLOR_BUFFER_BIT);
+gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+
+
+
+let vsC=`#version 300 es
+//precision mediump float;
+
+layout (location=0)in vec4 aPos;//xy,  uv=zw
+layout (location=1)in float aDepth;
+
+
+out vec2 vUv;
+out float vDepth;
+
+void main(){
+
+gl_Position = vec4(aPos.xy, 0.0, 1.0);
+
+vUv=aPos.zw;
+vDepth=aDepth;
+
+}
+`;
+
+
+let fsC=`#version 300 es
+precision mediump float;
+
+out vec4 FragColor;
+
+uniform mediump sampler2DArray uTex;
+
+in vec2 vUv;
+in float vDepth;
+
+void main(){
+FragColor += texture(uTex, vec3(vUv, vDepth));
+//FragColor += vec4(1.0, 0.0, 0.0, 1.0);
+}
+`;
+
+
+let prog=gl.createProgram();
+let vs=gl.createShader(gl.VERTEX_SHADER);
+let fs=gl.createShader(gl.FRAGMENT_SHADER);
+
+gl.shaderSource(vs, vsC);
+gl.shaderSource(fs, fsC);
+
+gl.compileShader(vs);
+if(!gl.getShaderParameter(vs, gl.COMPILE_STATUS))
+{
+console.log(`
+vertex shader error : ${gl.getShaderInfoLog(vs)}
+vertex shader source : ${gl.getShaderSource(vs)}`);
+}
+
+
+gl.compileShader(fs);
+if(!gl.getShaderParameter(fs, gl.COMPILE_STATUS))
+{
+console.log(`
+fragment shader error : ${gl.getShaderInfoLog(fs)}
+fragment shader source : ${gl.getShaderSource(fs)}`);
+}
+
+
+
+gl.attachShader(prog, vs);
+gl.attachShader(prog, fs);
+
+//gl.deleteShader(vs)
+//gl.deleteShader(fs)
+
+
+gl.linkProgram(prog);
+if(!gl.getProgramParameter(prog, gl.LINK_STATUS))
+{
+console.log("shader program link error  : "+ gl.getProgramInfoLog(prog));
+}
+
+gl.useProgram(prog);
+gl.validateProgram(prog);
+if(!gl.getProgramParameter(prog, gl.VALIDATE_STATUS))
+{
+console.log("shader program Validate error  : "+ gl.getProgramInfoLog(prog));
+}
+
+
+
+
+let aPosLoc=0//gl.getAttribLocation(prog, "aPos");
+
+let aDepthLoc=1//gl.getAttribLocation(prog, "aColor");
+
+
+let uTexLoc=gl.getUniformLocation(prog, "uTex");
+
+let vertexData=new Float32Array([
+
+// x     y     u  v
+ -0.5,  0.5,   0, 1,
+  0.5,  0.5,   1, 1,
+ -0.5, -0.5,   0, 0,
+  0.5, -0.5,   1, 0,
+
+])
+
+let indicesData=new Uint8Array([
+
+0,1,2,
+1,2,3,
+
+])
+
+
+let img2Data= new Uint8Array([
+
+255.0, 0.0, 0.0, 1.0,
+0.0, 255.0, 0.0, 1.0,
+0.0, 0.0, 255.0, 1.0,
+
+255.0, 0.0, 255.0, 1.0,
+255.0, 255.0, 255.0, 1.0,
+255.0, 255.0, 0.0, 1.0,
+
+255.0, 255.0, 0.0, 1.0,
+255.0, 255.0, 255.0, 1.0,
+0.0,   255.0, 255.0, 1.0,
+
+]);
+
+
+
+
+
+let tbo=gl.createTexture();
+
+gl.bindTexture(gl.TEXTURE_2D_ARRAY, tbo);
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+
+//NEAREST MIPMAP LINEAR
+
+//gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img1);
+let now=Date.now();
+//let img=await LoadImage("Download/Zelda2.png");
+let img=await LoadImage("pictures/tileset2.png");
+
+
+//console.log(img1)
+
+//gl.texImage3D(gl.TEXTURE_2D_ARRAY, 0, gl.RGBA,61,64,7, 0, gl.RGBA, gl.UNSIGNED_BYTE, img);
+
+
+gl.texStorage3D(gl.TEXTURE_2D_ARRAY, 1, gl.RGBA8, 61,64, 77);
+for(let i=0;i<77;i++){
+
+let row= Math.floor(i/7) * 61;
+let col= (i % 11) * 64;
+gl.pixelStorei(gl.UNPACK_SKIP_PIXELS, col);
+gl.pixelStorei(gl.UNPACK_SKIP_ROWS, row);
+
+gl.texSubImage3D(gl.TEXTURE_2D_ARRAY, 0,0 ,0, i, 61,64,1, gl.RGBA8, gl.UNSIGNED_BYTE, img);
+
+}
+gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+
+gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+
+
+
+gl.uniform1i(uTexLoc, 0);
+
+console.log(Date.now() - now);
+
+
+let vao = gl.createVertexArray();
+
+gl.bindVertexArray(vao);
+
+
+
+let vbo=gl.createBuffer()
+gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+gl.bufferData(gl.ARRAY_BUFFER, vertexData, gl.STA8mTIC_DRAW);
+
+let ibo=gl.createBuffer();
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indicesData, gl.STATIC_DRAW);
+
+gl.enableVertexAttribArray(aPosLoc);
+gl.vertexAttribPointer(aPosLoc, 4, gl.FLOAT, gl.FALSE, 0, 0);
+
+let DepthValue=0;
+
+gl.vertexAttrib1f(aDepthLoc, DepthValue);
+
+
+
+
+
+
+gl.bindBuffer(gl.ARRAY_BUFFER, null);
+gl.useProgram(null);
+gl.bindTexture(gl.TEXTURE_2D_ARRAY, null);
+gl.bindVertexArray(null);
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+
+gl.enable(gl.DEPTH);
+gl.enable(gl.BLEND);
+gl.blendFunc(gl.BLEND_SRC_RGB, gl.ONE_MINUS_SRC_ALPHA);
+
+
+const MainLoop=()=>{
+
+gl.clearColor(0.3, 0.3, 0.3, 1.0);
+gl.clear(gl.COLOR_BUFFER_BIT);
+//gl.clear(gl.DEPTH_BUFFER_BIT);
+gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+// device-width
+gl.useProgram(prog);
+
+gl.bindVertexArray(vao);
+
+//gl.activeTexture(gl.TEXTURE0+0);
+//gl.bindTexture(gl.TEXTURE_2D_ARRAY, tbo);
+
+
+
+gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_BYTE, 0);
+
+
+
+
+}
+
+//MainLoop();
+
+setInterval( MainLoop, 500/4 );
+
+//const locs=gl.getUniformLocation(prog, "uTex");
+
+
+
+
+const btns=document.querySelector(".btns");
+
+
+btns.addEventListener("click",(e)=>{
+
+if(!e.target) return;
+
+let c=e.target.classList[1];
+
+if(c=="left" && DepthValue > 0) DepthValue-=1;
+if(c=="right" && DepthValue != 9) DepthValue+=1;
+
+
+gl.vertexAttrib1f(aDepthLoc, DepthValue);
+
+
+
+
+});
+
+
+
+
+
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+window.addEventListener("load", (event) =>{
+
+const canvas=document.querySelector("canvas");
+const gl=canvas.getContext("webgl2");
+
+GLReSizer(gl);
+console.log(gl);
+
+app(gl);
+
+//console.log(678/11, 452/7)
+
+
+});
+
+
+
+window.addEventListener("resize", ()=>{
+
+//GLReSizer(gl);
+})
+
+</script>
+
+</body>
+</html>

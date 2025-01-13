@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+:root{
+
+
+}
+
+
+html{
+font-size:10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style: none;
+}
+
+
+body{
+color-scheme: default;
+background: #180044;
+
+}
+
+
+main{
+margin: 2rem 0;
+height: min(80rem, 100% - 5rem);
+overflow: auto;
+}
+
+
+.wrapper{
+margin:1rem;
+padding:1rem;
+width: min(39rem, 100% - 2rem);
+background: #9400FF23;
+border-radius:2rem;
+}
+
+.appTitle{
+margin: 1rem;
+padding: 1rem;
+color:#00CAFF;
+background: #170061;
+font-size: 2rem;
+text-align: center;
+text-transform: capitalize;
+border-radius:9rem;
+}
+
+
+
+canvas{
+/* width: 100%; */
+background:#EA8F93;
+}
+
+
+
+/* image container code section*/
+
+.imageContainer{
+aspect-ratio: 3;
+background: #0060FF;
+overflow: auto;
+image-rendering: pixelated;
+}
+
+
+
+
+
+
+/* error box code section*/
+
+
+
+.error_box{
+aspect-ratio: 2;
+overflow:hidden;
+}
+
+.error_box .errorTitle{
+/* display:block; */
+padding: .8rem;
+text-align: center;
+font-size: 2rem;
+color: #CEF7FF;
+background: linear-gradient(45deg,red, blue);
+text-decoration: underline;
+border-radius: 4em;
+}
+
+.error_box .errorContainer{
+margin:0.2rem 0;
+padding: 1rem;
+aspect-ratio: 3;
+background: #ededed;
+
+overflow: auto;
+border-radius: 1rem;
+
+
+
+}
+
+.error_box  p{
+margin:0.2rem 1rem;
+padding: 1rem ;
+font-weight: bold;
+background: #C6C6C6;
+color: #424242;
+border-radius: 1rem;
+}
+
+
+
+
+
+</style>
+
+<title>gan model 3</title>
+
+
+
+<script  src="/storage/emulated/0/g_js_libs/tf.min.js"></script>
+<!-- <script  src="/storage/emulated/0/g_js_libs/tfjs-core.js"></script> -->
+
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/tensorflow/4.20.0/tf.min.js" integrity="sha512-p8IRHL1NJ9vHblBMhRwNP1YGLgrbn1QQjcDblL+38ZFtL2GvJHmxxMsAov3q6ujQWKBstrOnprtb+W3hvJPwQw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
+
+
+</head>
+<body>
+
+<main>
+
+
+<div class="wrapper">
+
+
+<h2 class="appTitle">simple gan model 3</h2>
+
+</div>
+
+
+
+<div class="wrapper">
+
+<canvas id="canvas"></canvas>
+
+</div>
+
+<div class="wrapper imageContainer">
+<!-- <img width="28" id="img1" src="/storage/emulated/0/Download/Zelda2.png" alt="Zelda2" /> -->
+</div>
+
+<div class="wrapper btnContainer">
+<button class="btns genImage">gen Image</button>
+<button class="btns trainGan">train Gan</button>
+</div>
+
+
+
+<div class="wrapper error_box">
+<h2 class="errorTitle">error and warning</h2>
+<div class="errorContainer"></div>
+</div>
+
+</main>
+
+
+<script>
+"use strict";
+
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+
+ctx.canvas.width = 330;
+ctx.canvas.height = 330;
+
+
+const showError=(msg)=>{
+console.log(msg);
+const errorContainer=document.querySelector(".error_box > .errorContainer")
+if(!errorContainer) return -1;
+errorContainer.innerHTML+=`<p>${msg}</p>`;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+const INITIAL = async()=>{
+
+const genImageBtn = document.querySelector(".genImage");
+const trainModelBtn = document.querySelector(".trainGan");
+const imageContainer = document.querySelector(".imageContainer");
+
+
+
+
+
+//*Generator*
+
+const generator = tf.sequential();
+generator.add(tf.layers.dense({ units: 128, activation: 'relu', inputShape: [100] }));
+generator.add(tf.layers.dense({ units: 256, activation: 'relu' }));
+generator.add(tf.layers.dense({ units: 64*64*3, activation: 'tanh' }));
+generator.add(tf.layers.reshape({ targetShape: [64, 64, 3] }));
+
+
+//*Discriminator*
+
+const discriminator = tf.sequential();
+discriminator.add(tf.layers.conv2d({ filters: 64, kernelSize: 5, strides: 2, activation: 'relu', inputShape: [64, 64, 3] }));
+discriminator.add(tf.layers.conv2d({ filters: 128, kernelSize: 5, strides: 2, activation: 'relu' }));
+discriminator.add(tf.layers.flatten());
+discriminator.add(tf.layers.dense({ units: 1, activation: 'sigmoid' }));
+
+
+//*GAN*
+
+const gan = tf.sequential();
+gan.add(generator);
+gan.add(discriminator);
+
+
+generator.compile({ optimizer: 'adam', loss: 'meanSquaredError' });
+discriminator.compile({ optimizer: 'adam', loss: 'binaryCrossentropy' });
+gan.compile({ optimizer: 'adam', loss: 'binaryCrossentropy' });
+
+
+
+
+
+async function train() {
+  for (let i = 0; i < 10; i++) {
+    const noise = tf.randomNormal([1, 100]);
+    const generatedImage = generator.predict(noise);
+    const realImage = tf.randomNormal([1, 64, 64, 3]);
+    const fakeImage = generatedImage;
+    const dLossReal = discriminator.trainOnBatch(realImage, tf.ones([1, 1]));
+    const dLossFake = discriminator.trainOnBatch(fakeImage, tf.zeros([1, 1]));
+    const gLoss = gan.trainOnBatch(noise, tf.ones([1, 1]));
+    console.log(`Iteration ${i+1}, D Loss Real: ${dLossReal}, D Loss Fake: ${dLossFake}, G Loss: ${gLoss}`);
+  }
+}
+
+
+
+
+// Define the generator function
+async function generateImage() {
+  const noise = tf.randomNormal([1, 100]);
+  const image = generator.predict(noise);
+  return image.dataSync();
+}
+
+// Generate and display images
+async function displayImage() {
+  
+// Create a canvas element
+const TempCanvas = document.createElement('canvas');
+TempCanvas.width = 256;
+TempCanvas.height = 256;
+const TempCtx = TempCanvas.getContext('2d');
+
+  const imageData = await generateImage();
+console.log(imageData.length)
+return;
+  const imgData = new ImageData(new Uint8ClampedArray(imageData), 256, 256);
+  TempCtx.putImageData(imgData, 0, 0);
+  imageContainer.appendChild(TempCanvas);
+}
+
+
+
+//generate image
+genImageBtn.addEventListener("click",async ()=>{
+
+displayImage();
+
+
+});
+
+
+//train gan
+trainModelBtn.addEventListener("click", async ()=>{
+console.log("train start")
+await train();
+console.log("train end")
+
+});
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+try{
+
+
+console.log(tf);
+console.log(tf.layers);
+
+showError("JS is Awesome");
+
+INITIAL()
+
+
+
+
+}catch(err){
+showError(`javascript uncatch error : ${err.stack}`);
+}
+
+
+
+
+</script>
+</body>
+</html>

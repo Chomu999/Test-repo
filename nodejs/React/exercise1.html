@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=10.0" />
+<title>my react app test 1</title>
+
+<style>
+
+</style>
+
+
+<script>
+
+</script>
+
+
+<!-- <script src="/storage/emulated/0/g_js_libs/react.production.min.js"></script> -->
+
+<script  src="/storage/emulated/0/g_js_libs/react.development.js"></script>
+<script src="/storage/emulated/0/g_js_libs/react-dom.development.js"></script>
+
+
+<script src="/storage/emulated/0/g_js_libs/babel.min.js"></script>
+
+</head>
+<body>
+
+
+<div class="rootElement" id="rootElement"></div>
+
+
+
+
+
+
+
+
+<!-- <script type="texr/babel" src="./test.js"></script> -->
+
+
+<script type="/text/babel" src="./js/myReact.js"></script>
+
+
+<!-- <script type="text/babel" src="./app.js"></script> -->
+<!-- <script src="./app.js"></script> -->
+
+
+<script type="text/babel">
+
+
+function Link(){
+return <a href="https://google.com">google</a>;
+}
+
+function HelloWorld(){
+return (
+<h1>bye world</h1>
+);
+}
+
+
+function App(){
+return (
+<div>
+  <Link/>
+	<HelloWorld/>
+	<h1>hiii</h1>
+</div>
+);
+}
+
+
+
+
+
+const root = ReactDOM.createRoot(document.getElementById('rootElement'));
+
+root.render(
+<App/>
+);
+
+
+
+
+</script>
+
+</body>
+</html>

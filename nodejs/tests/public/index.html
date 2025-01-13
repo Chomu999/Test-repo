@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="viewpot" content="width=device-width, initial-scale=1.0">
+<title>h1 bye app</title>
+
+<style>
+
+*{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+html{
+font-size: 10px;
+}
+
+body{
+background: #00021B;
+}
+
+canvas{
+margin: auto;
+width: 98%;
+display: block;
+background: salmon;
+}
+
+.assets{
+display: none;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1 id="h1">h1 element</h1>
+<h2>h2 element</h2>
+<h3>h3 element</h3>
+
+
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laboriosam quidem, fugit. Explicabo dolorem neque odit consequuntur quisquam ducimus similique, vitae quae a vel maiores quas nostrum porro fugit voluptatem obcaecati minus ex, quo veniam, recusandae doloribus. Voluptatibus molestias, cupiditate id quibusdam alias distinctio laboriosam at, impedit, porro dolor doloremque quidem.</p>
+
+
+<div class="assets">
+
+<img src="/storage/emulated/0/Download/Zelda2.png" id="img1" alt="img1" />
+</div>
+
+
+
+
+
+
+<!-- <script src="./main.js"></script> -->
+
+
+
+
+<script type="text/javascript" charset="utf-8">
+
+
+const loadFile=async(p,t="text")=>{
+	const f =await fetch(p);
+	return await f[t]();
+}
+
+const init=async()=>{
+const fd = await loadFile("./main.js");
+eval(fd);
+
+//console.log(fd);
+
+h1.innerText = "hi bye app lol \n js"
+
+
+//h1.innerText += fd;
+
+
+}
+
+
+
+try{
+	init()
+}catch(err){
+	h1.innerText = `error js uncatch at ${ err}`
+}
+
+</script>
+
+</body>
+</html>

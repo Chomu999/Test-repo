@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title> webgl exersice 11 texture Array</title>
+
+<meta name="author" content="BBhowmick">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+
+html{
+font-size:10px;
+}
+
+
+body{
+width:100vw; height:100vh;
+}
+
+
+main{
+width:100%; height:100%;
+background:#000;
+display:grid;
+place-items:center;
+}
+
+canvas{
+background:transparent;
+}
+
+.res{
+display:none!important;
+}
+</style>
+
+</head>
+<body>
+
+<main id="main">
+
+<canvas id="canvas"></canvas>
+
+
+<div class="res">
+ 
+<!-- <img src="/storage/emulated/0/Download/Zelda2.png" alt="link" id="img1"> -->
+
+<img src="/storage/emulated/0/Download/town_tiles.png" alt="sprite" id="img1">
+
+<img src="/storage/emulated/0/pictures/red.png" alt="red sprite" id="redImg">
+
+</div>
+
+</main>
+
+
+
+
+<script>
+
+
+
+
+
+const GLReSizer=(gl)=>{
+let cs;
+innerWidth>innerHeight?cs=innerHeight:cs=innerWidth;
+gl.canvas.width=cs;
+gl.canvas.height=cs;
+}
+
+
+
+
+const app=(gl)=>{
+
+
+
+
+let vsC=`#version 300 es
+precision mediump float;
+
+layout (location =0 ) in vec2 aPos;
+layout (location =1 ) in vec2 aUV;
+layout (location =2 ) in float aDepth;
+
+
+out vec2 vUV;
+out float vDepth;
+
+
+
+void main(){
+gl_Position = vec4(aPos, 0.0, 1.0);
+vUV = aUV;
+vDepth = aDepth;
+
+}
+`;
+
+
+let fsC=`#version 300 es
+precision mediump float;
+
+out vec4 FragColor;
+
+uniform mediump sampler2DArray tex;
+
+in vec2 vUV;
+in float vDepth;
+
+
+void main(){
+
+FragColor =  texture(tex, vec3(vUV, vDepth));
+
+}
+`;
+
+
+let prog=gl.createProgram();
+let vs=gl.createShader(gl.VERTEX_SHADER);
+let fs=gl.createShader(gl.FRAGMENT_SHADER);
+
+
+gl.shaderSource(vs, vsC);
+gl.shaderSource(fs, fsC);
+
+gl.compileShader(vs);
+if(!gl.getShaderParameter(vs, gl.COMPILE_STATUS))
+{
+console.log(`
+vertex shader error : ${gl.getShaderInfoLog(vs)}
+vertex shader source : ${gl.getShaderSource(vs)}`);
+}
+
+
+gl.compileShader(fs);
+if(!gl.getShaderParameter(fs, gl.COMPILE_STATUS))
+{
+console.log(`
+fragment shader error : ${gl.getShaderInfoLog(fs)}
+fragment shader source : ${gl.getShaderSource(fs)}`);
+}
+
+gl.attachShader(prog, vs);
+gl.attachShader(prog, fs);
+
+
+gl.deleteShader(vs);
+gl.deleteShader(fs);
+delete vs;
+delete fs;
+
+gl.linkProgram(prog);
+if(!gl.getProgramParameter(prog, gl.LINK_STATUS))
+{
+console.log("shader program link error  : "+ gl.getProgramInfoLog(prog));
+}
+
+gl.useProgram(prog);
+gl.validateProgram(prog);
+if(!gl.getProgramParameter(prog, gl.VALIDATE_STATUS))
+{
+console.log("shader program Validate error  : "+ gl.getProgramInfoLog(prog));
+}
+
+gl.useProgram(null);
+
+
+
+gl.useProgram(prog);
+
+
+
+let loc={
+
+a:{
+pos:gl.getAttribLocation(prog, "aPos"),
+ps:gl.getAttribLocation(prog, "aPS"),
+color:gl.getAttribLocation(prog, "aColor"),
+},
+
+u:{
+tex0:gl.getUniformLocation(prog, "tex0"),
+tex1:gl.getUniformLocation(prog, "tex1"),
+index:gl.getUniformLocation(prog, "uIndex"),
+color:gl.getUniformLocation(prog, "uColor"),
+},
+
+};
+
+//console.log(loc)
+//gl.useProgram(null);
+
+
+
+let UniData1=new Float32Array([
+//  coord       u   v
+  -0.5,  0.5,   0,  1,
+   0.5,  0.5,   1,  1,
+   0.5, -0.5,   1,  0,
+  -0.5, -0.5,   0,  0,
+   
+]);
+
+
+let indices=new Uint8Array([
+0,1,2,
+3,2,0
+]);
+
+let vao=gl.createVertexArray();
+gl.bindVertexArray(vao)
+
+let vbo1=gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, vbo1);
+gl.bufferData(gl.ARRAY_BUFFER, UniData1, gl.STATIC_DRAW)
+
+
+let ibo=gl.createBuffer();
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+
+
+//gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+gl.enableVertexAttribArray(0);
+gl.vertexAttribPointer(0, 2,
+gl.FLOAT, gl.FALSE, 4*4, 0*4);
+
+gl.enableVertexAttribArray(1);
+gl.vertexAttribPointer(1, 2,
+gl.FLOAT, gl.FALSE, 4*4, 2*4);
+
+//gl.enableVertexAttribArray(2);
+
+
+
+let _tex=gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D_ARRAY, _tex);
+gl.pixelStorei (gl.UNPACK_FLIP_Y_WEBGL, true);
+
+//gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img1);
+
+//technique 1
+/*
+gl.texImage3D(gl.TEXTURE_2D_ARRAY, 0, gl.RGBA, 160, 48, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, img1);
+
+gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+
+gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+*/
+
+
+//gl.texImage3D(gl.TEXTURE_2D_ARRAY, 0, gl.RGBA, 64, 64, 2, 0, gl.RGBA, gl.UNSIGNED_BYTE, redImg);
+
+
+gl.texStorage3D(gl.TEXTURE_2D_ARRAY, 1, gl.RGBA8, 16, 16, 16);
+
+let imgNames=[redImg, img1], now=Date.now();
+for(let i=0;i<2;i++){
+
+
+gl.texSubImage3D(gl.TEXTURE_2D_ARRAY, 0,0,0, i,  16, 16, 1,  gl.RGBA, gl.UNSIGNED_BYTE, imgNames[i]);
+
+}
+console.log(Date.now() - now)
+gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+
+gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+
+
+
+//NEAREST
+//TEXTURE_MIN_FILTER
+//gl.generateMipmap(gl.TEXTURE_2D);
+
+
+
+
+gl.vertexAttrib1f(2, 1);
+
+//gl.useProgram(prog);
+
+gl.bindBuffer(gl.ARRAY_BUFFER, null);
+gl.bindVertexArray(null)
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+//gl.useProgram(null);
+
+
+
+//
+setInterval(()=>{
+
+gl.clearColor(0.2, 0.3, 0.7, 1.0);
+gl.clear(gl.COLOR_BUFFER_BIT);
+
+gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+
+
+
+//gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
+//gl.bindBuffer(gl.ARRAY_BUFFER, vbo1);
+
+gl.bindVertexArray(vao);
+
+gl.bindTexture(gl.TEXTURE_2D_ARRAY, _tex);
+gl.activeTexture(gl.TEXTURE0);
+
+gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_BYTE, null);
+
+
+
+//console.log("loop")
+
+}, 1000/30);
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+addEventListener("load", (event) => {
+
+const canvas=document.querySelector("canvas");
+const gl=canvas.getContext("webgl2");
+
+GLReSizer(gl);
+console.log(gl);
+app(gl);
+
+
+
+});
+
+
+
+
+
+
+
+window.addEventListener("resize", () => {
+GLReSizer(gl);
+});
+
+
+
+
+
+
+
+
+
+
+</script>
+
+</body>
+</html>

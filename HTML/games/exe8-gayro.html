@@ -1,0 +1,384 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>HTML canvas bird game</title>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+#mainBox{
+margin:0;padding:0;
+width:100vw;height:100vh;
+background-color:#CBCBCB;
+}
+p{
+padding:20px 20px;
+position:absolute;
+top:50%;left:50%;
+transform:translate(-50%,-50%);
+border:2px solid blue;
+text-transform:capitalize;
+color:purple;
+font-size:20px;
+}
+</style>
+</head>
+<body>
+
+<div id="mainBox">
+<p class="startGame">tap to play</p>
+
+<div id="miniBox">
+<canvas id="cvs"></canvas>
+</div>
+
+</div>
+<script>
+
+
+//here the gol
+
+let sorce=0;
+let hue=0;
+let trans=0;
+var gameSpeed=2;
+var gameStart=false;
+let frame=0;
+let movin=false;
+let angle=0;
+let gravity=2;
+let frection=0.69;
+let g={
+x:0,
+y:0,
+z:0
+}
+
+
+let screen={
+rotate:{
+x:0,
+y:0,
+z:0
+},
+speed:0.98
+}
+
+// console.log();
+function see(see){
+console.log(see);
+}
+
+
+
+function randint(min,max){
+return Math.floor(Math.random() * (1+max-min) + min);
+}
+
+
+
+function ISButtonEvent(traget,condion,fun){
+traget.addEventListener(condion,fun);
+}
+
+
+function CTXtext(c,t,x=cvs.width/1.76,y=15){
+ctx.fillStyle=c;
+ctx.fillText(`${t}`,x,y);
+}
+
+
+
+let miniBox=document.getElementById('miniBox')
+let startBtn=document.querySelector('p');
+const cvs=document.getElementById('cvs')
+const ctx = cvs.getContext('2d');
+
+cvs.width=innerWidth
+cvs.height=innerHeight
+
+
+
+
+class Player{
+constructor(){
+
+
+this.width=15
+this.height=15
+this.x=cvs.width/2 - this.width/2
+this.y=cvs.height/2 - this.height/2
+this.weight=0.66
+this.speed={x:0,y:0}
+}
+
+draw(){
+ctx.fillStyle='red'
+ctx.fillRect(this.x,this.y,this.width,this.height)
+}
+
+update(){
+this.draw()
+
+
+
+}
+
+}
+
+const player=new Player()
+
+class Parlicle{
+constructor(){
+this.x=player.x+player.width/2
+this.y=player.y+player.height
+this.size=randint(1,4)
+this.color=`hsl(${hue},100%,50%,${Math.random()})`
+this.weight=0.06
+this.speed={x:0,y:0}
+}
+draw(){
+ctx.fillStyle=this.color
+ctx.beginPath()
+ctx.arc(this.x,this.y,this.size,0,Math.PI * 2)
+ctx.fill()
+}
+update(){
+this.draw()
+this.y += gameSpeed
+//this.speed.y -= this.weight
+this.y += this.speed.y
+
+
+
+if(this.size >= 0.3){
+this.size += 0.14;
+}
+
+
+
+}
+}
+
+
+
+class Enemy{
+constructor(){
+
+this.x=player.x+player.width/2
+this.y=player.y+player.height
+this.size=randint(1,4)
+this.color=`hsl(${hue},100%,50%,${Math.random()})`
+this.weight=0.06
+this.speed={x:0,y:0}
+}
+draw(){
+ctx.fillStyle=this.color
+ctx.beginPath()
+ctx.arc(this.x,this.y,this.size,0,Math.PI * 2)
+ctx.fill()
+}
+update(){
+this.draw()
+this.y += this.speed.y
+this.x += this.speed.x
+
+
+
+
+
+}
+}
+
+let parlicles=[]
+
+function handleParlicles(){
+parlicles.unshift(new Parlicle())
+
+parlicles.forEach((parlicle)=>{
+parlicle.update()
+})
+
+if(parlicles.length>969)parlicles.pop()
+
+}
+
+
+
+
+
+
+
+
+// swpan new ground every 1 sacend
+let grounds=[]
+
+
+ISButtonEvent(startBtn,'click',startGame)
+
+function startGame(){
+
+startBtn.style.display='none'
+
+miniBox.requestFullscreen()
+
+function gameLoop(){
+window.requestAnimationFrame(gameLoop)
+//ctx.clearRect(0,0,cvs.width,cvs.height)
+ctx.fillStyle='rgba(0,0,0,1)'
+ctx.fillRect(0,0,cvs.width,cvs.height)
+
+player.update()
+
+
+
+handleParlicles()
+//land.pos.x= -land.w/2
+//}
+
+
+
+//flot()
+
+
+hue+=0.9
+
+
+player.x += screen.rotate.x
+
+
+//CTXtext('black',`Time : ${0}`,2,30)
+ctx.letterSpacing= "2px"
+CTXtext('purple',`X-Axis: ${g.x} :Y-Axis: ${g.y} :Z-Axis: ${g.z} :`,1,40)
+
+ctx.fillStyle='#0022FF'
+ctx.fillRect(cvs.width/2,0,1,cvs.height)
+ctx.fillRect(0,cvs.height/2,cvs.width,1)
+
+}
+gameLoop()
+}
+
+//gameLoop()
+
+//ontouchend
+
+
+/*
+
+ISButtonEvent(cvs,'touchstart',(e)=>{
+player.x=e.changedTouches[0].clientX
+player.y=e.changedTouches[0].clientY
+
+
+})
+
+ISButtonEvent(cvs,'touchmove',(e)=>{
+player.x=e.changedTouches[0].clientX
+player.y=e.changedTouches[0].clientY
+
+
+})
+
+
+ISButtonEvent(cvs,'touchend',(e)=>{
+player.x=e.changedTouches[0].clientX
+player.y=e.changedTouches[0].clientY
+
+
+})
+
+
+
+
+*/
+
+
+addEventListener('deviceorientation',(e)=>{
+
+
+let pos={
+x:Math.round(e.beta),
+y:Math.round(e.gamma),
+z:Math.round(e.alpha),
+}
+
+
+if(pos.x >= 5){
+//see(1)
+screen.rotate.x= screen.speed
+}
+
+else if(pos.x <= -5){
+//see(-1)
+screen.rotate.x= - screen.speed
+}
+
+else{
+//see(0)
+screen.rotate.x= 0
+}
+
+
+g.x=pos.x
+g.y=pos.y
+g.z=pos.z
+
+/*
+
+if(pos.y >= 10){
+//see(1)
+screen.rotate.y = screen.speed
+}
+
+else if(pos.y <= -10){
+//see(-1)
+screen.rotate.y= - screen.speed
+}
+
+else{
+//see(0)
+screen.rotate.y= 0
+}
+*/
+
+
+
+
+
+
+
+// camera.rotation.x = pos.x
+// camera.rotation.y = pos.y
+// camera.rotation.z = pos.z
+
+
+
+})
+
+
+
+let msg=prompt('enter a num')
+if(msg <= -10){
+console.log(true);
+
+}else{
+
+console.log(false);
+}
+
+
+
+
+
+
+//see(ctx)
+</script>
+</body>
+</html>

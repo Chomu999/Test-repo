@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat Bot</title>
+
+
+<style>
+
+*{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+html{
+font-size: 10px;
+}
+
+body{
+background: #4C4C4C;
+}
+
+
+
+.wrapper{
+margin: auto;
+padding: 0.8rem;
+display: block;
+width: min(100% - 4rem, 38rem, 100vw - 2rem);
+background: #00006f22;
+border-radius: 2rem;
+}
+
+
+.appContainer{
+height: max(1rem, min(80rem, 100% - 2rem));
+
+}
+
+.titleContainer{
+text-align: center;
+}
+
+.appTitle{
+margin: 0.6rem 1.4rem;
+padding: 1.2rem 1.4rem;
+color: lime;
+background: #1F3D00;
+font-size: 4rem;
+font-weight: 800;
+font-family: Tahoma;
+text-transform: capitalize;
+}
+
+.chatContainer{
+margin: 1rem auto 0;
+height: max(1rem, min(40rem, 100% - 2rem));
+}
+
+.chatContainer .chat{
+
+
+
+}
+
+.buttonContainer{
+margin: 1rem auto 0;
+height: max(1rem, min(10rem, 100% - 2rem));
+text-align: center;
+}
+
+.buttonContainer .btn{
+margin: 0.4rem 0.6rem;
+padding: 0.6rem 2.4rem;
+color: lime;
+background: gray;
+font-size: 2rem;
+font-weight: 400;
+border: 0.2rem solid ;
+border-radius: 3rem;
+}
+
+
+
+</style>
+
+</head>
+<body>
+
+
+<main class="wrapper appContainer">
+
+<div class="wrapper titleContainer">
+	<h1 class="appTitle">simple Chat Bot application</h1>
+</div>
+
+
+<div class=" wrapper chatContainer">
+
+</div>
+
+
+<div class="wrapper buttonContainer">
+
+<button class="btn micStartBtn">mic start</button>
+<button class="btn micStopBtn">mic stop</button>
+
+<button class="btn speakBtn">speak </button>
+
+</div>
+
+</main>
+
+
+
+
+
+<script>
+
+
+
+
+const INITIAL=()=>{
+
+//console.log(window)
+//querySelector
+
+const micStartBtn = document.querySelector(".micStartBtn")
+const speakBtn = document.querySelector(".speakBtn")
+
+const mySpeechRecognition = window?.SpeechRecognition ?? window?.webkitSpeechRecognition;
+
+const a0= new mySpeechRecognition();
+
+
+
+micStartBtn.addEventListener("click", (event)=>{
+micStartBtn.style.background="lightgray";
+a0.start();
+});
+
+
+micStopBtn.addEventListener("click", (event)=>{
+a0.stop();
+});
+
+
+
+speakBtn.addEventListener("click", (event)=>{
+let utterance = new SpeechSynthesisUtterance();
+let voice =  window?.SpeechSynthesisVoice;
+utterance.text = "this is test message";
+console.log(utterance);
+console.log(speechSynthesis);
+console.log(voice);
+speechSynthesis.speak(utterance);
+//speechSynthesis
+});
+
+
+
+
+
+
+a0.addEventListener("result", (e)=>{
+
+const resultIdx = e.resultIndex;
+const transcript = e.results[resultIdx][0].transcript;
+console.log(e);
+console.log(transcript);
+
+
+});
+
+
+a0.addEventListener("end", (e)=>{
+micStartBtn.style.background="gray";
+
+});
+
+
+
+
+}
+
+
+
+try{
+console.log(window)
+INITIAL();
+}catch(err){
+console.log(`javascript uncatch error ${err}`);
+}
+
+
+</script>
+
+</body>
+</html>

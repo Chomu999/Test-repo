@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+:root{
+
+
+}
+
+
+html{
+font-size:10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style: none;
+}
+
+
+body{
+color-scheme: default;
+background: #D3FFDE;
+
+}
+
+
+main{
+margin: 2rem 0;
+height: min(80rem, 100% - 5rem);
+background: var(--color9) ;
+overflow: auto;
+}
+
+
+.wrapper{
+margin:1rem;
+padding:1rem;
+width: min(39rem, 100% - 2rem);
+background: #9400FF23;
+border-radius:2rem;
+}
+
+.appTitle{
+margin: 1rem;
+padding: 1rem;
+color:#00CAFF;
+background: #170061;
+font-size: 2rem;
+text-align: center;
+text-transform: capitalize;
+border-radius:9rem;
+}
+
+
+
+canvas{
+width: 100%;
+background:#EA8F93;
+}
+
+
+
+/* error box code section*/
+
+
+.error_box{
+aspect-ratio: 2;
+overflow:hidden;
+}
+
+.error_box .errorTitle{
+/* display:block; */
+padding: .8rem;
+text-align: center;
+font-size: 2rem;
+color: #CEF7FF;
+background: linear-gradient(45deg,red, blue);
+text-decoration: underline;
+border-radius: 4em;
+}
+
+.error_box .errorContainer{
+margin:0.2rem 0;
+padding: 1rem;
+aspect-ratio: 3;
+background: #ededed;
+
+overflow: auto;
+border-radius: 1rem;
+
+
+
+}
+
+.error_box  p{
+margin:0.2rem 1rem;
+padding: 1rem ;
+font-weight: bold;
+background: #C6C6C6;
+color: #424242;
+border-radius: 1rem;
+}
+
+
+
+
+
+</style>
+
+<title>particle system 6</title>
+
+
+</head>
+<body>
+
+<main>
+
+
+<div class="wrapper">
+
+
+<h2 class="appTitle">simple particle system 5</h2>
+
+</div>
+
+
+
+<div class="wrapper">
+
+<canvas id="canvas"></canvas>
+
+</div>
+
+
+<div class="wrapper error_box">
+<h2 class="errorTitle">error and warning</h2>
+<div class="errorContainer"></div>
+</div>
+
+</main>
+
+
+<script  src="/storage/emulated/0/g_js_libs/tf2.min.js"></script>
+
+
+<script>
+
+
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+
+ctx.canvas.width = 330;
+ctx.canvas.height = 330;
+
+
+const showError=(msg)=>{
+console.log(msg);
+const errorContainer=document.querySelector(".error_box > .errorContainer")
+if(!errorContainer) return -1;
+errorContainer.innerHTML+=`<p>${msg}</p>`;
+}
+
+
+
+
+class Rand{
+
+static Float(min=0, max=1){
+return Math.random() * (max - min) + min;
+}
+
+static Int(min=1, max=2){
+return Math.floor(Rand.Float(min, max));
+}
+
+static Choice(...args){
+return args[Rand.Int(0, args.length)];
+}
+
+static Color(){
+let out = "#";
+for(let i = 0;i<8;i++){
+out += Rand.Choice(..."0123456789abcdef".split(""));
+}
+return out;
+}
+
+}
+
+
+
+
+
+
+function tensorToImage(tensor) {
+  const imageArray = tensor.squeeze().clipByValue(0, 1).mul(255).cast('int32').dataSync();
+  const imageData = new ImageData(new Uint8ClampedArray(imageArray), tensor.shape[1], tensor.shape[0]);
+  return imageData;
+}
+
+
+
+const latentDim = 100;
+const imgShape = [28, 28, 1]; // For MNIST-like data
+
+// Generator model
+function buildGenerator() {
+  const model = tf.sequential();
+  model.add(tf.layers.dense({ units: 7 * 7 * 256, useBias: false, inputShape: [latentDim] }));
+  model.add(tf.layers.batchNormalization());
+  model.add(tf.layers.reshape({ targetShape: [7, 7, 256] }));
+  model.add(tf.layers.conv2dTranspose({ filters: 128, kernelSize: 5, strides: 2, padding: 'same', useBias: false }));
+  model.add(tf.layers.batchNormalization());
+  model.add(tf.layers.conv2dTranspose({ filters: 64, kernelSize: 5, strides: 2, padding: 'same', useBias: false }));
+  model.add(tf.layers.batchNormalization());
+  model.add(tf.layers.conv2d({ filters: 1, kernelSize: 5, padding: 'same', activation: 'tanh' }));
+  return model;
+}
+
+
+// Discriminator model
+function buildDiscriminator() {
+  const model = tf.sequential();
+  model.add(tf.layers.conv2d({ filters: 64, kernelSize: 5, strides: 2, padding: 'same', inputShape: imgShape }));
+  model.add(tf.layers.leakyReLU(0.2));
+  model.add(tf.layers.conv2d({ filters: 128, kernelSize: 5, strides: 2, padding: 'same' }));
+  model.add(tf.layers.leakyReLU(0.2));
+  model.add(tf.layers.flatten());
+  model.add(tf.layers.dense({ units: 1, activation: 'sigmoid' }));
+  return model;
+}
+
+
+// Training function
+async function train(dataset, epochs, batchSize) {
+  const generator = buildGenerator();
+  const discriminator = buildDiscriminator();
+
+  const optimizer = tf.train.adam(0.0002, 0.5);
+
+  for (let epoch = 0; epoch < epochs; epoch++) {
+    let batchIndex = 0;
+    while (batchIndex < dataset.xs.shape[0]) {
+      const batchImages = dataset.xs.slice([batchIndex, 0], [batchSize, dataset.xs.shape[1], dataset.xs.shape[2], dataset.xs.shape[3]]);
+      const batchLabels = dataset.ys.slice([batchIndex, 0], [batchSize, dataset.ys.shape[1]]);
+
+      // ... training logic (discriminator updates, generator updates)
+
+      batchIndex += batchSize;
+    }
+  }
+}
+
+// Example usage
+// Assuming you have a dataset object with xs and ys tensors
+
+
+
+const INITIAL = async()=>{
+
+
+
+const imageTensor = tf.randomNormal([1, 1, 10])
+
+showError(imageTensor);
+
+//const imageData = tensorToImage(imageTensor);
+//ctx.putImageData(imageData, 0, 0);
+
+
+
+
+
+train(dataset, 100, 64);
+
+
+ctx.canvas.addEventListener("dblclick", (e)=>{
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+window.addEventListener("load", ()=>{
+
+try{
+
+showError("JS is Awesome");
+
+showError(tf);
+
+INITIAL();
+
+}catch(err){
+showError(`javascript uncatch error : ${err.stack}`);
+}
+
+
+})
+
+
+</script>
+</body>
+</html>

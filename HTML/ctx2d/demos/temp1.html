@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=10.0 user-scalable=no" />
+
+<title>ctx template 1 </title>
+
+<style>
+
+*{
+margin:0; padding:0; box-sizing:border-box;
+/* border:0.1px dashed red; */
+}
+
+
+
+
+
+
+html{
+font-size:10px;
+}
+
+
+
+body{
+width:100vw; height:100vh;
+}
+
+main{
+width:100%; height:100%;
+background: #484848;
+display: grid;
+place-items:center;
+overflow:auto;
+}
+
+
+
+</style>
+
+</head>
+<body>
+
+
+<main>
+
+<canvas></canvas>
+
+
+</main>
+
+<script>
+
+const canvas=document.querySelector("canvas")
+const ctx = canvas.getContext("2d")
+
+canvas.width=innerWidth;
+canvas.height=innerHeight;
+
+ctx.strokeStyle="#fff";
+
+
+
+
+
+class Rand{
+
+static Float(min=0,max=1){
+return Math.random() * (max-min) + min;
+}
+
+static Int(min=0,max=1){
+return Math.floor(Rand.Float(min, max+1));
+}
+
+static Choice(...args){
+return args[Rand.Int(0,args.length-1)];
+}
+
+}
+
+
+class Line{
+constructor(){
+this.x=Rand.Int(0,canvas.width);
+this.y=Rand.Int(0,canvas.height);
+
+this.color=`hsl(${Rand.Int(0,360)}, 100%, 50%)`;
+this.lineWidth=Rand.Int(1,11);
+
+this.pos=[{
+	x:this.x,
+	y:this.y,
+}];
+
+
+this.speed={ x:Rand.Int(-3,3), y:6 }
+
+this.maxLength=Rand.Int(5,30);
+
+this.lifeSpam = this.maxLength * 10;
+this.lifeTimer = 0;
+}
+
+draw(c){
+c.beginPath();
+c.strokeStyle=this.color;
+c.lineWidth=this.lineWidth;
+c.moveTo(this.pos[0].x, this.pos[0].y);
+
+
+
+for(let i in this.pos){
+c.lineTo(this.pos[i].x, this.pos[i].y);
+}
+
+c.stroke();
+
+c.closePath();
+}
+
+update(){
+
+this.lifeTimer++;
+if(this.lifeSpam > this.lifeTimer){
+
+this.x += this.speed.x * Rand.Float(-5, 5);
+this.y += this.speed.y * Rand.Float(-5, 5);
+
+this.pos.push({ x:this.x, y:this.y })
+
+if(this.maxLength < this.pos.length){
+this.pos.shift();
+}
+
+}
+else if(this.pos.length <= 1){
+this.reset();
+}
+else{
+this.pos.shift();
+}
+
+
+}
+
+
+reset(){
+
+this.x=Rand.Int(0,canvas.width);
+this.y=Rand.Int(0,canvas.height);
+
+this.color=`hsl(${Rand.Int(0,360)}, 100%, 50%)`;
+this.lineWidth=Rand.Int(1,11);
+
+this.pos=[{
+	x:this.x,
+	y:this.y,
+}];
+
+
+this.maxLength=Rand.Int(15,150);
+
+this.lifeSpam = this.maxLength * 3;
+
+this.lifeTimer = 0;
+}
+
+}
+
+
+const Lines=[];
+const maxOfLines=20;
+
+for(let i=0;i<maxOfLines;i++){
+Lines.push(new Line())
+}
+
+const Animate=()=>{
+ctx.fillStyle="black"
+ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+Lines.forEach((line)=>{
+line.update()
+line.draw(ctx)
+})
+
+
+
+requestAnimationFrame(Animate)
+}
+Animate()
+
+
+
+
+
+
+
+
+
+console.log("JS is Awesome")
+console.log(ctx)
+//console.log(window)
+
+
+
+
+
+</script>
+
+</body>
+</html>

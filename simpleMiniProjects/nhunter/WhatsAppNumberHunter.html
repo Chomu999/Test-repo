@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=0, initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bhowmickbyte"/>
+
+
+
+<link rel="stylesheet" 
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+crossorigin="anonymous"
+referrerpolicy="no-referrer" />
+
+
+
+<link rel="stylesheet" href="/storage/emulated/0/g_js_libs/font-awesome/css/font-awesome.min.css" />
+
+<link rel="apple-touch-icon" href="./nh.png" />
+<link rel="alternate" href="./nh,png" title="RSS" type="application/atom+xml" />
+<link rel="apple-touch-icon" href="./nh.png" />
+<link rel="shortcut icon" href="./nh.png" type="image/x-icon" />
+
+
+<style>
+
+
+
+*:after,*,*:before{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+:root{
+
+--col1:#FF7FE8;
+--col0:#80FF8F;
+--neon-bg:transparent;
+--neon-col0:#1200ff;
+--neon-col1:var(--col0);
+--neon-col2:var(--col1);
+--neon-border:.2rem solid var(--neon-col2);
+
+
+--neon-text-shadow:0 0 0.8rem var(--neon-col1);
+
+--neon-shadow:
+0 0 .4rem var(--neon-col2),
+0 0 0.4rem  var(--neon-col2) inset;
+
+}
+
+::selection{
+color: #373737;
+background: #004CFF;
+}
+
+html{
+font-size: 10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style-type: none;
+}
+
+body{
+background: #110017;
+
+}
+
+
+
+
+.wrapper{
+margin: 1rem auto;
+padding: 1rem;
+width: min(38rem, 100% - 2rem);
+border-radius: 1rem;
+box-shadow: var(--neon-shadow);
+}
+
+
+
+
+.titleContainer{
+
+
+box-shadow: var(--neon-shadow);
+border: var(--neon-border);
+
+text-align: center;
+border-radius: 2rem;
+}
+
+
+
+.appTitle{
+margin: 0.6rem 0.4rem;
+padding: 0.4rem 0.4rem;
+
+color: var(--neon-col1);
+
+box-shadow: var(--neon-shadow);
+border: var(--neon-border);
+text-shadow: var(--neon-text-shadow);
+
+font-size: 3.4rem;
+font-weight: 800;
+font-family: Tahoma;
+text-transform: capitalize;
+border-radius: 1.2rem;
+}
+
+
+
+
+.appContainer{
+height: min(60rem, 100% - 4rem);
+background: var(--neon-bg);
+border: var(--neon-border);
+box-shadow: var(--neon-shadow);
+}
+
+
+.inputContainer{
+
+box-shadow: var(--neon-shadow);
+border: var(--neon-border);
+
+}
+
+
+.inputLabel{
+margin:.8rem 0.6rem;
+padding: 0.4rem 0.2rem;
+font-size: 1.8rem;
+
+
+color: var(--neon-col1);
+box-shadow: var(--neon-shadow);
+border: var(--neon-border);
+text-shadow: var(--neon-text-shadow);
+
+text-align: center;
+border-radius: 1rem;
+}
+
+
+.genMaxNum{
+/* margin: 0.6rem 0.4rem; */
+/* padding: 0.4rem 2rem; */
+width: min(8rem, 40%, 60%);
+border-radius:1rem;
+text-align: center;
+background: var(--neon-bg);
+
+color: var(--neon-col1);
+
+border: var(--neon-border);
+outline: none;
+}
+
+
+.numberContainer{
+height:40rem;
+/* aspect-ratio: 1; */
+overflow: hidden auto;
+text-align: center;
+
+
+box-shadow: var(--neon-shadow);
+border: var(--neon-border);
+
+
+}
+
+.numberContainer .huntNumber{
+margin:0.8rem auto;
+padding: 0.4rem;
+border: 2px solid ;
+width: min(24rem, 100% - 4rem);
+display: flex;
+justify-content: center;
+justify-content: space-around;
+align-items: center;
+
+box-shadow: var(--neon-shadow);
+border: var(--neon-border);
+
+border-radius: 0.6rem;
+font-size: 2rem;
+cursor: text;
+}
+
+
+
+
+.number{
+text-shadow: var(--neon-text-shadow);
+color: var(--neon-col1);
+font-size: 1.4rem;
+/* margin-top: 1rem; */
+}
+
+
+
+.add_whatsapp_Btn{
+color: var(--neon-col1);
+filter: drop-shadow( var(--neon-shadow) );
+
+/* border: var(--neon-border); */
+/* box-shadow: var(--neon-shadow); */
+} 
+
+.add_telegram_Btn{
+
+color: var(--neon-col1);
+filter: drop-shadow( var(--neon-shadow) );
+
+}
+
+
+.btnContainer{
+
+background: var(--neon-bg);
+box-shadow: var(--neon-shadow);
+border: var(--neon-border);
+text-align: center;
+}
+
+.btnContainer .btn{
+margin: 0.4rem;
+padding: 0.6rem 1.4rem;
+
+color: var(--neon-col1);
+background: var(--neon-bg);
+box-shadow: var(--neon-shadow);
+text-shadow: var(--neon-text-shadow);
+border: var(--neon-border);
+
+border-radius: 2rem;
+font-size: 2rem;
+
+font-weight: 600;
+}
+
+
+
+.aniB:hover{
+animation: hoverAni 0.33s ease 0s 1;
+}
+
+
+@keyframes hoverAni{
+
+25%{
+transform:  rotate(-6deg);
+}
+
+75%{
+transform:  rotate(6deg);
+}
+
+
+}
+
+
+
+
+  .huntNumber > span{
+color: red!important;
+}
+
+
+.aniA{
+animation: number-in 0.75s linear;
+}
+
+
+@keyframes number-in{
+
+0%{
+opacity: 0.0;
+filter: blur(8rem);
+ transform: scale(5.0);
+}
+
+25%{
+opacity: .5;
+filter:blur(4rem);
+transform: scale(2.5);
+}
+
+
+100%{
+opacity: 1.0;
+filter:blur(0);
+ transform: scale(1.0);
+}
+
+}
+
+
+
+.number-out{
+animation: number-out 0.65s linear;
+}
+
+@keyframes number-out{
+
+100%{
+opacity: 0.0;
+filter: blur(4rem);
+ transform: scale(5.0);
+}
+
+
+0%{
+opacity: 1.0;
+filter:blur(0);
+ transform: scale(1.0);
+}
+
+}
+
+
+</style>
+
+
+<title>WA-NH</title>
+
+
+</head>
+<body>
+
+<header class="wrapper titleContainer">
+
+  <h1 class="appTitle">WA-NH</h1>
+
+</header>
+
+
+
+<main class="wrapper appContainer">
+
+
+<div class="wrapper inputContainer">
+<p title="max number to generate random phone number" class="inputLabel">
+maximum number : 
+<input type="number" pattern="$[0-1]" class="genMaxNum" value="4" />
+</p>
+
+</div>
+
+<div class="wrapper numberContainer"></div>
+
+
+
+<div class="wrapper btnContainer">
+
+<button class="btn genNumBtn">Generate Numuber</button>
+
+</div>
+
+</main>
+
+
+
+
+
+
+
+
+
+
+
+
+<script type="module">
+"use strict";
+
+//some utils
+class Rand{
+
+static Float(min=0, max=1){
+return Math.random() * (max - min+1) + min;
+}
+
+static Int(min=6, max=9){
+return Math.floor( Rand.Float(min, max));
+}
+
+static Choice(...args){
+return args[Rand.Int(0, args.length - 1)];
+}
+
+static Color(len=3){
+let outColor="#";
+for(let i=0;i<len;++i){
+outColor+=Rand.Choice(..."0123456789abcdef".split(""));
+}
+return outColor;
+}
+
+
+static RandomPhoneNumber(){
+let out=[];
+for(let i=0;i<10;i++){
+out.push(Rand.Int(0, 9) );
+}
+out[0]=(out[0]===0)?9:out[0];
+out=out.join().split(",").join("");
+return out;
+}
+
+}
+
+
+
+
+const getRandomNumberElementChild=()=>{
+
+const randomNumber = Rand.RandomPhoneNumber();
+const _S= document.createElement("span");
+
+
+_S.innerHTML = `
+	<i class="add_whatsapp_Btn fa fa-solid fa-1x fa-whatsapp"></i>
+	
+	<span class="number wa">${randomNumber}</span>
+	
+	<i class="add_telegram_Btn fa fa-solid fa-1x fa-telegram"></i>
+`;
+
+_S.classList.add("huntNumber");
+_S.classList.add("aniA");
+
+return _S;
+}
+
+
+
+
+
+//sleep function helps to hold up workflow
+const sleep=async (t=1) => new Promise( res => setTimeout( () => res(true), t*1000) );
+
+
+
+
+//saving number from clipboard
+const saveNumber = (number)=>{
+let save = `+91${number}`;
+navigator.clipboard.writeText(save);
+}
+
+
+// number redirect to browser to wa
+const redirectNumber = (number, type=true)=>{
+let platform = (type===true)?"wa.me":"t.me";
+let redirect = `https://${platform}/91${number}`;
+window.location.assign(redirect);
+}
+
+
+
+
+
+//querySelector
+
+const INITIAL=async()=>{
+
+
+const numberContainer = document.querySelector(".numberContainer");
+
+const genNumBtn=document.querySelector('.genNumBtn');
+const genMaxNum=document.querySelector('.genMaxNum');
+
+
+
+
+// generate random phone number and appending at parent container
+const generateNumber= async()=>{
+
+
+
+for(let i=numberContainer.childElementCount; i>0;i--){
+
+const prevSpan = numberContainer.querySelector(`span.huntNumber:last-child`);
+prevSpan.classList.add("number-out")
+await sleep(0.65);
+prevSpan.remove();
+}
+
+
+
+let maxNumber=parseInt(genMaxNum.value)||1;
+
+for(let i=0;i<maxNumber;i++){
+const chlid = getRandomNumberElementChild();
+numberContainer.append(chlid);
+await sleep(0.75);
+chlid.classList.remove("aniA");
+}
+
+}
+
+generateNumber();
+
+
+//console.log([numberContainer])
+
+
+
+
+// copying number  clipboard
+const getNumber = (e)=>{
+
+const element = e?.srcElement;
+
+const condition = element.classList[0];
+
+
+if(condition === "huntNumber"){
+element.classList.toggle("aniB");
+element.onanimationend = () =>{
+element.classList.toggle("aniB");
+}
+return false;
+}
+
+
+else if(condition === "add_whatsapp_Btn"){
+const textNumber = element.nextElementSibling.innerText;
+element.parentElement.classList.toggle("aniB");
+element.parentElement.onanimationend = () =>{
+element.parentElement.classList.toggle("aniB");
+}
+saveNumber(textNumber);
+redirectNumber(textNumber, true);
+}
+
+else if (condition === "number"){
+const textNumber = element.innerText;
+element.parentElement.classList.toggle("aniB");
+element.parentElement.onanimationend = () =>{
+element.parentElement.classList.toggle("aniB");
+}
+saveNumber(textNumber);
+}
+
+else if(condition === "add_telegram_Btn"){
+const textNumber = element.previousElementSibling.innerText;
+element.parentElement.classList.toggle("aniB");
+element.parentElement.onanimationend = () =>{
+element.parentElement.classList.toggle("aniB");
+}
+saveNumber(textNumber);
+redirectNumber(textNumber, false);
+}
+
+else return false;
+
+
+}
+
+
+
+
+
+
+//control
+
+numberContainer.addEventListener("click", getNumber);
+
+
+
+genNumBtn.addEventListener("click", generateNumber);
+
+
+
+
+
+
+
+}
+
+
+
+
+window.addEventListener("load", ()=>{
+
+try{
+console.log("JavaScript is Awesome ");
+INITIAL();
+}catch(err){
+console.log(`javascript uncatch error: ${err} `);
+}
+
+});
+
+
+</script>
+
+</body>
+</html>

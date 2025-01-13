@@ -1,0 +1,100 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>filereads</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+.show_read{
+font-size:16px;
+color:;
+}
+
+</style>
+</head>
+<body>
+<div id="reader_box">
+
+<input type="file" name="input" class="fr">
+
+<br>
+
+<pre class="show_read"></pre>
+
+</div>
+
+
+<script>
+var frm,sr;
+frm=document.querySelector('.fr');
+
+sr=document.querySelector('.show_read');
+
+frm.addEventListener('change', () =>{ 
+let fr = new FileReader(); 
+
+fr.onload=()=>{ 
+sr.textContent=fr.result; 
+            } 
+
+              
+
+            fr.readAsText(this.files[0]); 
+
+        }) 
+
+</script>
+
+<!--
+<script>
+
+var fr = document.querySelector('.file_reader');
+
+
+
+var sr = document.querySelector('.show_read');
+
+
+
+fr.addEventListener('change', () => {
+
+let files = fr.files;
+
+if(files.length == 0) return;
+
+const file = files[0];
+
+let reader = new FileReader();
+
+reader.onload = (e) => {
+
+const file = e.traget.result;
+
+const lines = file.spilt(/\r\n|\n/);
+sr.value = lines.join('\n');
+
+}
+
+reader.onerror = (e) => alert(e.traget.error.name);
+
+reader.readAsText(file);
+
+
+});
+
+
+
+</script>
+-->
+
+</body>
+</html>

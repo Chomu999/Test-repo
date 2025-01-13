@@ -1,0 +1,339 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>HTML CANVAS GAME BOI</title>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+
+</style>
+</head>
+<body>
+
+
+
+<canvas class="cvs"></canvas>
+
+
+<script>
+
+let cvs=document.querySelector('.cvs');
+let ctx = cvs.getContext('2d');
+
+
+
+
+
+
+cvs.width=window.innerWidth;
+cvs.height=window.innerHeight;
+
+
+
+
+
+
+function randint(min,max){
+return Math.floor(Math.random() * (max-min) + min)
+}
+
+
+
+const rotate = (speed,angle) => {
+
+const rotatedVelocities={
+x: speed.x * Math.cos(angle) - speed.y * Math.sin(angle),
+y: speed.y * Math.sin(angle) + speed.y * Math.cos(angle)
+};
+return rotatedVelocities;
+}
+
+
+
+
+
+
+const Destance=(x1,y1,x2,y2)=>{
+const dx = x2 - x1;
+const dy = y2 - y1;
+return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+}
+
+
+
+function resolveCollision(ObjectA,ObjectB){
+
+const xSpeedDiff = ObjectA.speed.x - ObjectB.speed.x;
+
+const ySpeedDiff = ObjectA.speed.y - ObjectB.speed.y;
+
+
+const xDist = ObjectB.x - ObjectA.x;
+const yDist = ObjectB.y - ObjectA.y;
+
+
+if(xSpeedDiff * xDist + ySpeedDiff * yDist >= 0){
+
+const angle = -Math.atan2(ObjectB.y - ObjectA.y,ObjectB.x - ObjectA.x);
+
+const m1 = ObjectA.mass;
+const m2 = ObjectB.mass;
+
+
+
+const u1 = rotate(ObjectA.speed,angle);
+const u2 = rotate(ObjectB.speed,angle);
+
+
+
+const v1 = {x: u1.x * (m1 - m2) / (m1 + m2) + u2.x * 2 * m2 / (m1 + m2), y: u1.y};
+const v2 = {x: u2.x * (m1 - m2) / (m1 + m2) + u1.x * 2 * m2 / (m1 + m2), y: u2.y};
+
+
+
+const vF1 = rotate(v1, -angle);
+const vF2 = rotate(v2, -angle);
+
+ObjectA.speed.x = vF1.x;
+ObjectA.speed.y = vF1.y;
+
+ObjectB.speed.x = vF2.x;
+ObjectB.speed.y = vF2.y;
+}
+
+
+
+}
+
+
+
+
+const ISCircleCollision = (ObjectA,ObjectB) => {
+
+let dist=Math.hypot(ObjectA.x - ObjectB.x, ObjectA.y - ObjectB.y)
+
+return (dist - ObjectB.radius - ObjectA.radius < 0.5)
+}
+
+
+
+
+
+
+class NewMob{
+constructor({x,y,radius,color}){
+this.x=x;
+this.y=y;
+this.radius=radius;
+this.color=color;
+this.mass=Math.random() * 1;
+this.speed={
+    x:(Math.random() - 0.5) * 4,
+    y:(Math.random() - 0.5) * 4
+};
+
+}
+draw(ctx){
+
+
+
+ctx.beginPath()
+ctx.strokeStyle=this.color;
+ctx.arc(this.x,this.y,this.radius,0,Math.PI*2);
+//ctx.fill();
+ctx.stroke();
+ctx.closePath()
+
+
+}
+
+update(Boxs){
+
+
+for(let i = 0;i < Boxs.length;i++){
+
+if(this === Boxs[i]){ continue;}
+
+if(Destance(this.x, this.y, Boxs[i].x, Boxs[i].y)  - this.radius * 2 < 0){
+
+resolveCollision(this, Boxs[i]);
+
+}
+
+
+
+}
+
+
+if(this.x + this.radius > cvs.width || this.x - this.radius < 0){
+ this.speed.x = -this.speed.x;
+}
+if(this.y + this.radius > cvs.height || this.y - this.radius < 0){
+this.speed.y = -this.speed.y
+}
+
+
+
+
+this.x += this.speed.x * 1.4;
+this.y += this.speed.y * 1.2;
+
+}
+
+
+
+}
+
+
+
+
+/*
+
+function dramin(x,y,dx,dy){
+this.x=x;
+this.y=y;
+this.dx=dx;
+this.dy=dy;
+this.draw = function(){
+
+ctx.beginPath();
+ctx.arc(x,y,r,0,Math.PI * 2,false);
+ctx.strokeStyle='blue';
+ctx.stroke();
+}
+
+this.update = function(){
+
+if(x + r > cvs.width || x - r < 0){
+dx = -dx
+}
+if(y + r > cvs.height || y - r < 0){
+dy = -dy
+}
+x += dx * 1.4
+y += dy * 1.2
+}
+}
+*/
+
+
+let allBoxs=[]
+
+
+
+for(let i=0;i < 80;i++){
+
+
+//let x1,y1,dx,dy,r;
+
+const r=20;
+
+let x1 = randint(r*2,cvs.width - r)
+let y1 = randint(r*2,cvs.height - r)
+
+//Math.floor(Math.random() * );
+
+//const dx= (Math.random() - 0.5) * 1;
+//const dy= (Math.random() - 0.5) * 1;
+
+if(i !== 0){
+
+
+    for(let j=0;j < allBoxs.length;j++){
+
+
+        if(Destance(x1,y1,allBoxs[j].x,allBoxs[j].y)  - r * 2 < 0){
+
+
+            x1 = randint(r*2,cvs.width - r);
+            y1 = randint(r*2,cvs.height - r);
+
+            j = -1;
+
+        }
+
+}
+
+
+}
+
+allBoxs.unshift(new NewMob(
+{x: x1, y: y1,radius: r,color:'red'}
+));
+
+}
+
+
+
+
+function gameLoop(){
+
+window.requestAnimationFrame(gameLoop);
+
+ctx.fillStyle='rgba(255,255,255,0.28)';
+ctx.fillRect(0,0,cvs.width,cvs.height);
+/*
+
+ctx.beginPath();
+ctx.arc(x,y,r,0,Math.PI * 2,false);
+ctx.strokeStyle='blue';
+ctx.stroke();
+
+*/
+
+
+
+allBoxs.forEach((box)=>{
+box.draw(ctx)
+box.update(allBoxs)
+})
+
+
+/*
+if(x + r > cvs.width || x - r < 0){
+dx = -dx
+}
+
+
+
+if(y + r > cvs.height|| y - r < 0){
+dy = -dy
+}
+
+
+x += dx
+y += dy
+
+*/
+
+}
+
+gameLoop()
+
+
+
+
+
+/*
+cvs.addEventListener(touch[1],(e)=>{
+if(its_Drawin == true){
+
+}
+
+})
+
+*/
+
+
+</script>
+</body>
+</html>

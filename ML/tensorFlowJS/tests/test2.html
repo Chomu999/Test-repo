@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="hi-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+:root{
+
+
+}
+
+
+html{
+font-size:10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style: none;
+}
+
+
+body{
+color-scheme: default;
+background: #353535;
+}
+
+
+
+
+
+
+.wrapper{
+margin:1rem auto;
+padding:1rem;
+width: min(39rem, 100% - 1rem);
+background: #9400FF23;
+border: .3rem solid #DADDDD;
+border-radius:2rem;
+box-shadow:
+1rem 1rem 2.2rem #0004,
+inset .5rem .6rem 2.2rem #fff4,
+inset -.5rem -.6rem 2.2rem #0004,
+-1rem -1rem 2.2rem #fff4
+;
+
+}
+
+
+.appContainer{
+aspect-ratio: 1;
+background: #E1FFF1;
+}
+
+.appTitle{
+padding: 1rem;
+color: red;
+background: tan;
+text-align: center;
+text-transform: capitalize;
+}
+
+
+.outputContainer{
+aspect-ratio: 1;
+}
+
+
+.outputContainer canvas{
+background: salmon;
+image-rendering: pixelated;
+}
+
+
+
+.btnContainer{
+aspect-ratio: 3;
+background: #7641AD;
+/* text-align: center; */
+}
+.btnContainer .btn{
+margin: 1rem;
+padding: 1rem 2rem;
+display: inline-block;
+color: #00FF35;
+background: #060066;
+font-size: 2rem;
+border: 1px solid ;
+border-radius: 2rem;
+}
+
+
+
+.trainBtn{
+/* opacity: 0.6; */
+}
+
+</style>
+
+<title>image classifier app prototype</title>
+
+
+
+<script  src="/storage/emulated/0/g_js_libs/tf.min.js"></script>
+
+
+
+</head>
+
+<body>
+
+
+
+<div class="wrapper appContainer">
+
+<div class="wrapper titleContainer">
+  <h1 class="appTitle">
+    image classifier app prototype
+  </h1>
+</div>
+
+<div class="wrapper outputContainer">
+  <canvas class="canvas"></canvas>
+</div>
+
+<div class="wrapper btnContainer">
+
+  <span class="btn stopLoopBtn">stopLoop</span>
+  <span class="btn startLoopBtn">startLoop</span>
+  
+  <span class="btn aloBtn">alo</span>
+
+  <span class="btn trainBtn">train</span>
+  <span class="btn predictBtn">predict</span>
+
+  <span class="btn downloadBtn">download</span>
+
+</div>
+
+</div>
+
+
+
+
+
+
+
+
+
+<script >
+// "use strict";
+
+
+
+//
+const {floor, random, abs, sin, cos, tan, PI} = Math;
+
+//
+const strToHtml=(html)=>{
+const element = document.createElement("div");
+element.innerHTML = html;
+return  element.firstElementChild??undefined;
+}
+
+//sleep function helps to hold up workflow
+const sleep=async (t=1) => new Promise( res => setTimeout( () => res(true), t*1000) );
+
+
+
+
+
+
+
+//normalize
+
+const normalize=(value, min, max)=>{
+
+const out = (value - min) / (max - min);
+
+return out;
+
+}
+
+
+//normalize with scaler
+const normalizeScale=(value, min, max, d, e)=>{
+
+const out = normalize(value, min, max);
+
+return d + out * (e - d);
+
+}
+
+
+// Loading Model
+const LoadModel = async()=>{
+const modelUrl = "../models/own/mymodel1/model.json";
+const model = await tf.loadLayersModel(modelUrl);
+
+model.compile({
+  loss:"meanSquaredError",
+  optimizer: tf.train.adam(0.2)
+});
+
+return model;
+}
+
+
+
+// Make new Model
+const MakeModel = async()=>{
+
+
+const model = tf.sequential();
+
+model.add(tf.layers.dense({
+units:2,
+inputShape:[2],
+activation:"sigmoid",
+}));
+
+model.add(tf.layers.dense({
+units:1,
+activation:"sigmoid",
+}));
+
+model.compile({
+  loss:"meanSquaredError",
+  optimizer: tf.train.adam(0.2)
+});
+
+return model;
+}
+
+
+// INITIAL point aka starting point
+const INITIAL = async ()=>{
+
+//querySelectorAll
+
+const canvas = document.querySelector("canvas");
+const ctx = canvas.getContext("2d");
+
+const aloBtn = document.querySelector(".aloBtn");
+
+const stopLoopBtn = document.querySelector(".stopLoopBtn");
+const startLoopBtn = document.querySelector(".startLoopBtn");
+
+const trainBtn = document.querySelector(".trainBtn");
+const predictBtn = document.querySelector(".predictBtn");
+
+const downloadBtn = document.querySelector(".downloadBtn");
+
+console.log(ctx)
+
+//default setting
+ctx.canvas.width=320;
+ctx.canvas.height=320;
+ctx.fillStyle = "gray";
+ctx.strokeStyle = "drakgray";
+ctx.imageSmoothingEnabled=false;
+
+const clearColor = "#00FDFF";
+
+
+const positions = [];
+
+
+
+let predictions = [];
+
+
+let loop;
+
+
+
+const {width , height} = canvas;
+const res=10;
+const padX=0.2, padY=0.2;
+
+const rows = width / res, cols = height / res;
+
+
+// init pos -1 to 1
+for(let i=0;i<rows;i++){
+for(let j=0;j<cols;j++){
+
+let x = normalizeScale(i * res, 0, width, -1, 1);
+let y = normalizeScale(j * res, 0, height, -1 , 1);
+positions.push([x , y ]);
+
+}
+}
+
+// init pos 0 to canvas width,height
+const deNormalizePositons= positions.map(p=>{
+
+return {
+  x:normalizeScale(p[0], -1, 1, 0, width),
+  y:normalizeScale(p[1], -1, 1, 0, height),
+};
+
+});
+
+
+
+
+const dataSet = [
+{x:[0, 0], y:0},
+{x:[0, 1], y:1},
+{x:[1, 0], y:1},
+{x:[1, 1], y:0},
+];
+
+
+const train_x_Tensor =  tf.tidy( () =>  tf.tensor(dataSet.map( d => d.x )) );
+
+const train_y_Tensor = tf.tidy(()=> tf.tensor(dataSet.map( d => d.y )) );
+
+
+
+const model = (true) ? await LoadModel():await MakeModel();
+
+
+
+
+
+
+//model training
+const trainModel=async()=>{
+
+await model.fit(train_x_Tensor, train_y_Tensor, {
+  epochs: 10,
+  batchSize: 4,
+  shuffle: true,
+  callbacks: {
+    onTrainBegin:()=>{
+      console.log( "train begin");
+    },
+    onTrainEnd:()=>{
+      console.log( "train End");
+    },
+    onBatchBegin:(a, b)=>{
+      console.log(a, b, "bb ");
+    },
+    onBatchEnd:tf.nextFrame,
+
+    onEpochEnd: (epoch, log)=>{
+      console.log(epoch, log.loss);
+    },
+    
+  },
+});
+
+
+}
+
+
+
+//
+const animate=async(dt=0)=>{
+
+ctx.fillStyle=clearColor;
+ctx.fillRect(0, 0, width, height);
+
+
+//if(!predictions.length) return 0;
+
+//console.log("loop")
+
+
+
+deNormalizePositons.forEach((p, i)=>{
+
+
+
+const {x,y} = p;
+const PredictHueValue =  predictions[i]??0//()*i;
+
+//const hue = (x*y+i) / (x+y+i) / 0.2 + i;
+//let x = width/2 + cos(p.x) * dt;
+//let y = height/2 + sin(p.y) * dt;
+
+//const fillColor = `hsl(${PredictHueValue}, 100%, 50%)`;
+const fillColor = `rgb(${PredictHueValue}, ${PredictHueValue}, ${PredictHueValue})`;
+ctx.fillStyle = fillColor;
+ctx.fillRect(x, y, res - padX, res - padY);
+
+//ctx.font= `.${rows+cols/2}px sans-serif`;
+//ctx.fillStyle="red";
+//ctx.fillText(`${(PredictHueValue / 255).toFixed(2)}`, p.x + res/5, p.y + res/2);
+
+
+});
+
+
+
+
+
+}
+
+
+// lastTime val
+let lt=0;
+
+const mainLoop=(ts)=>{
+
+//calc delta time
+const dt = ts - lt;
+lt = ts;
+
+//looping
+animate(dt);
+
+
+loop = webkitRequestAnimationFrame(mainLoop);
+
+};
+
+mainLoop(0);
+
+
+aloBtn.addEventListener("click", () =>{
+
+
+
+const memory = tf.memory();
+
+for(const i in memory){
+console.log(i, memory[i])
+}
+
+
+model.weights.forEach(w => {
+
+tf.tidy( ()=>{
+  const newVals = tf.randomNormal(w.shape);
+  w.val.assign(newVals);
+});
+});
+
+
+});
+
+
+stopLoopBtn.addEventListener("click", ()=>{
+console.log("stop Loop")
+webkitCancelAnimationFrame(loop);
+});
+
+startLoopBtn.addEventListener("click", ()=>{
+console.log("start Loop")
+webkitRequestAnimationFrame(mainLoop);
+});
+
+
+//
+trainBtn.addEventListener("click", async()=>{
+
+trainBtn.style.opacity=0.2;
+await trainModel();
+trainBtn.style.opacity=1.0;
+
+});
+
+
+
+//predictions one time
+predictBtn.addEventListener("click", async ()=>{
+
+tf.tidy(()=>{
+const inputTensor = tf.tensor(positions);
+const out = model.predict(inputTensor).mul(255).dataSync();
+predictions=[...out];
+});
+
+});
+
+
+
+
+//download model
+downloadBtn.addEventListener("click",async (e)=>{
+// console.log(e.repeat)
+//const sm = await model.save("downloads://mymodel2");
+
+//console.log(sm)
+console.log(model)
+
+});
+
+
+
+
+}
+
+
+
+
+
+
+try{
+
+console.log("JS is Awesome")
+
+console.log(tf);
+
+//console.log((900n).__proto__);
+//console.log((900.000).toFixed(2));
+
+
+INITIAL();
+
+
+
+}catch(e){
+console.log(`JavaScript uncatch error : ${e.stack}`);
+}
+
+
+</script>
+
+</body>
+</html>

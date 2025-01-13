@@ -1,0 +1,226 @@
+<html lang="en" onload="loooad()">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>HTML</title>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+#main{
+width:100%;
+height:100%;
+background-color:#11FF7B;
+}
+
+
+.p{
+color:#4452EC;
+font-size:16px;
+}
+.pre{
+margin:auto;
+padding:0;
+width:auto;
+height:auto;
+}
+
+
+</style>
+</head>
+<body>
+
+<div id="main">
+
+<pre class="pre">
+
+<p class="p"></p>
+
+</pre>
+
+<input type="password" name="password" id="password22" value="" />
+
+
+
+<input type="submit" name="submit" id="submit" value="" />
+
+</div>
+
+
+<script>
+
+
+var clk='click';
+
+
+
+
+
+var main=document.getElementById('main');
+//var page=document.getElementById('page');
+
+
+var p = document.querySelector('.p');
+
+
+var pre = document.querySelector('.pre');
+
+
+
+var paise = document.querySelector('#password22');
+
+
+//var btns=document.getElementById('btns');
+
+
+var all_latter=[' ','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
+
+
+
+let C_latter=
+{
+id: 'id',
+lpass: 'latter_password',
+npass: 'number_password'
+};
+
+
+//var cc = JSON.parse(C_latter);
+
+
+//console.log(C_latter.name);
+
+//console.log(cc.name);
+
+
+
+var fainle = '';
+
+let cc;
+
+function starts(){
+
+
+
+//var cc = JSON.stringify(C_latter);
+
+
+
+let latterC = Math.floor(Math.random() * 20 + 1);
+
+
+for(let i=0;i<latterC;i++){
+
+
+let latterInt = Math.floor(Math.random() * 26 + 1);
+
+
+fainle += all_latter[latterInt];
+
+
+
+}
+
+//fainle += '\n';
+
+
+//var p,t;
+
+//p=document.createElement('p');
+//p.setAttribute('class','p');
+
+//var lol = toString(fainle);
+
+
+
+cc=fainle;
+
+//sucks= JSON.parse(cc);
+
+//p.innerHTML=sucks.lpass+'\n';
+
+
+//t=document.createTextNode(cc);
+
+
+fainle += '\n';
+
+p.innerHTML=fainle;
+
+
+//p.innerHTML=cc;
+
+
+//p.appendChild(t);
+
+//pre.appendChild(p);
+
+
+
+
+
+
+//var cc1 = sucks.replace(sucks.lpass, 'latter_password');
+
+
+
+//cc = JSON.stringify(sucks);
+
+//p.inner='clear';
+
+
+
+
+//cc = JSON.stringify(sucks);
+
+
+
+
+console.log(p)
+}
+
+
+
+
+
+main.addEventListener(clk, () => {
+
+
+
+
+});
+
+paise.addEventListener(clk, () => {
+
+
+starts()
+
+
+
+});
+
+
+stops = setInterval( () => {
+
+
+paise.click();
+
+},1000);
+
+
+
+main.addEventListener('dblclick', () => {
+
+clearInterval(stops);
+console.log('latter spam stop');
+});
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,355 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+
+<!-- <meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=5.0 user-scalable=0"> -->
+ 
+ <!--<meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=1.0"> -->
+<title>Three-js test 1</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+html{
+font-size:10px;
+}
+
+body{
+width:100vw;  height:100vh;
+background: gray;
+
+}
+
+
+main{
+width:100%; height:100%;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+.resource{
+display:block;
+}
+
+
+</style>
+
+<!-- <script src="/storage/emulated/0/g_js_libs/three.min.js"></script> -->
+<!-- <script src="/storage/emulated/0/g_js_libs/OrbitControls.js"></script> -->
+
+
+</head>
+<body>
+
+<main>
+
+<canvas id="canvas"></canvas>
+
+</main>
+
+
+
+
+
+
+
+
+
+<script>
+
+const canvas=document.getElementById("canvas")
+const gl=canvas.getContext("webgl2");
+
+
+class Rand{
+
+static Float(min=0,max=1){
+return Math.random() * (max-min) + min;
+}
+
+static Int(min=0,max=1){
+return Math.floor(Rand.Float(min, max+1));
+}
+
+static Choice(...args){
+return args[Rand.Int(0,args.length-1)];
+}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const app= (gl) =>{
+
+console.log(gl)
+
+const LoopRun=1;
+
+const vss=
+`#version 300 es
+precision mediump float;
+
+//layout (location = 0) in vec4 aPos;
+//layout (location = 1) in vec4 aColor;
+
+
+//uniform float uPointSize;
+
+//out vec4 vColor;
+
+
+void main(){
+gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
+gl_PointSize = 140.0f;
+
+// vColor = aColor;
+
+}
+`
+
+
+const fss=
+`#version 300 es
+precision mediump float;
+
+out vec4 FragColor;
+
+
+// in vec4 vColor;
+
+
+void main(){
+FragColor = vec4(1.0);
+
+// FragColor = vColor;
+}
+`
+
+
+const vs=gl.createShader(gl.VERTEX_SHADER)
+gl.shaderSource(vs, vss)
+gl.compileShader(vs)
+
+if(!gl.getShaderParameter(vs, gl.COMPILE_STATUS)){
+const msg=
+` error ${gl.getShaderInfoLog(vs)}
+
+ source ${gl.getShaderSource(vs)}
+
+`;
+
+console.log(msg)
+}
+
+
+const fs=gl.createShader(gl.FRAGMENT_SHADER)
+gl.shaderSource(fs, fss)
+gl.compileShader(fs)
+
+if(!gl.getShaderParameter(fs, gl.COMPILE_STATUS)){
+const msg=
+` error ${gl.getShaderInfoLog(fs)}
+
+ source ${gl.getShaderSource(fs)}
+
+`;
+
+console.log(msg);
+}
+
+
+
+const prog=gl.createProgram();
+
+gl.attachShader(prog, vs);
+gl.attachShader(prog, fs);
+
+gl.linkProgram(prog);
+
+
+if(!gl.getProgramParameter(prog, gl.LINK_STATUS)){
+const msg=` link ${gl.getProgramInfoLog(prog)}`;
+console.log(msg)
+}
+
+gl.useProgram(prog);
+gl.validateProgram(prog);
+
+if(!gl.getProgramParameter(prog, gl.VALIDATE_STATUS)){
+const msg=` validate ${gl.getProgramInfoLog(prog)}`;
+console.log(msg);
+}
+
+const loc={
+a:{
+pos:0,
+color:1,
+},
+
+u:{
+pos:gl.getUniformLocation(prog, "uPos"),
+pointSize:gl.getUniformLocation(prog, "uPointSize"),
+color:gl.getUniformLocation(prog, "uColor"),
+},
+
+}
+
+console.log(loc);
+
+const verData=new Float32Array([
+
+  0.0,  0.5,//	1.0, 0.0, 0.0,
+ -0.5, -0.5,//	0.0, 1.0, 0.0,
+  0.5, -0.5,//	0.0, 0.0, 1.0,
+
+]);
+
+
+
+//const vbo=gl.createBuffer();
+//gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+//gl.bufferData(gl.ARRAY_BUFFER, verData, gl.STATIC_DRAW);
+//gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+//console.log(vbo);
+
+//gl.vertexAttribPointer(0, 2, gl.FLOAT, gl.FALSE, 0, 0);
+//gl.enableVertexAttribArray(0);
+
+
+//gl.vertexAttribPointer(1, 3, gl.FLOAT, gl.FALSE, 5*4, 2*4);
+//gl.enableVertexAttribArray(1);
+
+
+
+
+
+//gl.enable(gl.BLEND);
+//gl.blendFunc(gl.ONE_MINUS_SRC_ALPHA, gl.SRC_ALPHA);
+
+
+//CONSTANT_ALPHA:
+//CONSTANT_COLOR:
+
+//DST_ALPHA:
+//DST_COLOR:
+
+//SRC_ALPHA:
+//SRC_ALPHA_SATURATE:
+//SRC_COLOR:
+
+
+//BLEND_COLOR:
+//BLEND_DST_ALPHA:
+//BLEND_DST_RGB:
+//BLEND_EQUATION:
+//BLEND_EQUATION_ALPHA:
+//BLEND_EQUATION_RGB:
+//BLEND_SRC_ALPHA:
+//BLEND_SRC_RGB:
+
+
+//ONE_MINUS_CONSTANT_ALPHA:
+//ONE_MINUS_CONSTANT_COLOR:
+//ONE_MINUS_DST_ALPHA:
+//ONE_MINUS_DST_COLOR:
+//ONE_MINUS_SRC_ALPHA:
+//ONE_MINUS_SRC_COLOR:
+
+
+const animate=(delta)=>{
+
+
+gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
+gl.clear(gl.COLOR_BUFFER_BIT)
+gl.clearColor(0.4, 0.2, 0.2, 1.0)
+
+
+//gl.drawArrays(gl.TRIANGLES, 0, 3)
+
+
+gl.drawArrays(gl.POINTS, 0, 1)
+//console.log("ani")
+
+}
+
+
+
+
+
+
+
+
+let lt=0, dt=0;
+const Loop=(ts)=>{
+dt = ts - lt; lt = ts;
+
+animate(dt)
+
+//setInterval(_d => animate(_d), 1000, dt);
+
+if (LoopRun) window.requestAnimationFrame(Loop);
+}
+
+Loop(0)
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+window.addEventListener("load", ()=>{
+
+console.log("JS is Awesome")
+
+canvas.width=innerWidth;
+canvas.height=innerHeight;
+
+app(gl)
+
+
+
+})
+
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+:root{
+
+--angle:45deg;
+
+--color1:#ff000044;
+--color2:#ff000088;
+
+--color3:#00000024;
+--color4:#00000088;
+
+--color5:#00CCFF44;
+--color6:#00CCFF88;
+
+--color7:#9500FF99;
+--color8:#FF008080;
+
+--color9:#ffffff22;
+
+--gradient_bg_color1: linear-gradient(var(--angle), #FF8A00, #8D00FF);
+--gradient_bg_color2: linear-gradient(var(--angle),
+brown, lime, chocolate);
+--gradient_bg_color3: linear-gradient( 45deg, #FF6E00, #005EFF, #6BFF88, #FF00B5);
+
+--tex_color1:#DEDFDD;
+--tex_color2:#E6E6E6;
+
+--title_color1:#fCfCfC;
+--title_color2:#2C2C2C;
+--title_bg_color1:var(--color3);
+--title_bg_color2:#1200FF;
+--title_font_size:2rem;
+
+--repeat_x:33%;
+--repeat_y:15rem;
+
+--TextColor1:#454B40;
+--TextColor2:#C9C9C9;
+--TextColor3:#62FFFE;
+
+--predictResultColor:var(--TextColor3, tan);
+
+}
+
+
+html{
+font-size:10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style: none;
+}
+
+
+body{
+
+/* background:  var(--gradient_bg_color3); */
+background: #000000;
+}
+
+
+main{
+/* margin: 0; */
+/* height: min(80rem, 100dvh - 5rem); */
+background: #f008 ;
+/* overflow: hidden auto; */
+}
+
+
+
+.wrapper{
+margin:2rem auto;
+padding: 1.1rem;
+/* margin-inline: auto; */
+width:min(39rem, 100% - 1.2rem);
+background: var(--color3);
+border-radius:2rem;
+}
+
+
+.title{
+color:var(--title_color1);
+background: var(--title_bg_color1);
+font-size: var(--title_font_size);
+text-align: center;
+text-transform: capitalize;
+border-radius:9rem;
+}
+
+
+
+
+/* drawing  box code section*/
+
+.drawContainer{
+
+aspect-ratio: 1;
+}
+
+
+
+canvas{
+width: 100%;
+height: 100vw;
+background:#EA8F93;
+}
+
+
+/* tools section code*/
+
+.drawingToolContainer{
+padding: 1rem;
+
+}
+
+
+.tools{
+display: inline-block;
+}
+
+.btns{
+padding: 1rem;
+margin: 1rem;
+color: #FF5E00;
+background: purple;
+text-transform: capitalize;
+font-size: 1rem;
+border-radius: 1rem;
+}
+
+
+
+</style>
+
+<title>simple drawing app prototype</title>
+
+</head>
+<body>
+
+<main>
+
+
+<div class="wrapper">
+<h2 class="title">
+simple drawing app prototype
+</h2>
+</div>
+
+
+
+<div class="wrapper drawContainer">
+<canvas id="canvas"></canvas>
+
+<div class="wrapper drawingToolContainer">
+<input data-tool="brushSize" type="range"  class="tools toolBrushSize" />
+<input data-tool="brushColor" type="color"  class="tools toolBrushColor" />
+<br>
+
+<span data-tool="clearCanvas" class="tools toolClearBtn btns">clear</span>
+<span data-tool="quitApp" class="tools toolQuitBtn btns">Quit</span>
+
+<br>
+
+<span data-tool="enterFullScreen" class="tools toolEnterFullScreenBtn btns">Enter Full Screen</span>
+<span data-tool="exitFullScreen" class="tools toolExitFullScreenBtn btns">Exit Full Screen</span>
+
+<span data-tool="loadOldDrawing" class="tools toolOldDrawing btns">load old drawing</span>
+<span data-tool="saveNewDrawing" class="tools toolNewDrawing btns">save new drawing</span>
+
+
+</div>
+
+</div>
+
+
+
+
+
+
+
+</main>
+
+
+
+
+
+
+<script>
+
+"use strict";
+
+//location.assign("https://youtube.com/c/@Nothing-bhai")
+
+// storage location adderss
+const storageURL="drawAppData";
+
+const canvas=document.querySelector("canvas");
+const ctx=canvas.getContext("2d");
+
+//const daigramEl= document.querySelector(".daigram");
+
+const toolContainerEl= document.querySelector(".drawingToolContainer");
+
+//const saveBtnEl= document.querySelector(".saveBtn");
+//const loadBtnEl= document.querySelector(".loadBtn");
+
+
+
+// full screen helper
+const enterFullScreen=element=> element.requestFullscreen();
+
+
+
+
+const getCanvasImage=(ctx)=> ctx.canvas.toDataURL();
+
+
+const createImage=(src)=>{
+const imgElement = new Image();
+imgElement.src = src;
+return imgElement;
+}
+
+const setCanvasImage=(ctx, img)=>{
+//console.log(img)
+ctx.drawImage(img, 0, 0);
+}
+
+
+
+const getDataToStorage= dataName => JSON.parse(localStorage.getItem(dataName))??null;
+
+const setDataToStorage=(dataName, data)=>{
+localStorage.setItem(dataName, JSON.stringify(data));
+}
+
+const updateDataToStorage=(dataName, data)=>{
+return setDataToStorage(dataName, data)??-1;
+}
+
+
+// entry point aka starting point
+const INITIAL = async(ctx)=>{
+
+
+
+const defaultSetting={
+size:10,
+color:"#ffffff",
+shape:"round",
+position:{x:0, y:0},
+isDrawing:false,
+lastDrawing:""
+};
+
+let toolsData=getDataToStorage(storageURL);
+if(!toolsData){
+setDataToStorage(storageURL, defaultSetting);
+toolsData=getDataToStorage(storageURL);
+}
+
+
+//console.log(toolsData)
+
+ctx.canvas.width = ctx.canvas.clientWidth;
+ctx.canvas.height = ctx.canvas.clientHeight;
+
+
+
+if(!toolsData.lastDrawing){
+ctx.fillStyle="#000";
+ctx.fillRect(0,0, ctx.canvas.width, ctx.canvas.height);
+}else{
+//console.log(toolsData.lastDrawing)
+const img = await createImage(toolsData.lastDrawing);
+setCanvasImage(ctx, img)
+}
+
+
+
+
+const toolControl = (e) => {
+const element = e.srcElement ?? e.target ?? 0;
+const c = element.dataset?.tool??0;
+switch (c) {
+  case 'brushColor':
+    toolsData.color = element.value;
+    break;
+  case 'brushSize':
+    toolsData.size = element.value;
+    break;
+  case 'clearCanvas':
+    ctx.fillStyle="#000";
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    break;
+  case 'quitApp':
+    toolsData.lastDrawing = getCanvasImage(ctx);
+    updateDataToStorage(storageURL, toolsData);
+    close()
+    //ctx.fillStyle="#000";
+    //ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    break;
+  case 'enterFullScreen':
+    enterFullScreen( document.body);
+    //enterFullScreen( document.querySelector(".drawContainer"));
+    break;
+  case 'exitFullScreen':
+    if (document.fullscreen) document.exitFullscreen();
+    //document.body.cancelFullScreen();
+    break;
+  case 'loadOldDrawing':
+    setCanvasImage(ctx, createImage(toolsData.lastDrawing))
+    break;
+  case 'saveNewDrawing':
+    toolsData.lastDrawing = getCanvasImage(ctx);
+    break;
+}
+
+}
+
+
+const draw=(pos={x:0, y:0})=>{
+if (!toolsData.isDrawing) return -1;
+ctx.beginPath();
+ctx.fillStyle = toolsData.color;
+if (toolsData.shape === "squared"){
+ctx.fillRect(pos.x-(brushSize*0.5),pos.y-(brushSize*0.5), brushSize, brushSize);
+}
+else if (toolsData.shape === "round"){
+ctx.arc(pos.x, pos.y, toolsData.size,0, 2*Math.PI, false);
+ctx.fill();
+}
+ctx.closePath();
+
+}
+
+
+const drawStart=(e)=>{
+toolsData.isDrawing = true;
+const x = e.changedTouches[0].clientX - ctx.canvas.offsetLeft;
+const y = e.changedTouches[0].clientY - ctx.canvas.offsetTop;
+toolsData.position = {x, y};
+draw(toolsData.position);
+}
+
+const drawMove=(e)=>{
+const x = e.changedTouches[0].clientX - ctx.canvas.offsetLeft;
+const y = e.changedTouches[0].clientY - ctx.canvas.offsetTop;
+toolsData.position = {x, y};
+draw(toolsData.position);
+}
+
+const drawEnd=(e)=>{
+const x = e.changedTouches[0].clientX - ctx.canvas.offsetLeft;
+const y = e.changedTouches[0].clientY - ctx.canvas.offsetTop;
+toolsData.position = {x, y};
+draw(toolsData.position);
+toolsData.isDrawing = false;
+}
+
+
+
+ctx.canvas.addEventListener("touchstart", drawStart, false);
+
+ctx.canvas.addEventListener("touchmove", drawMove, false);
+
+ctx.canvas.addEventListener("touchend", drawEnd, false);
+
+
+
+
+toolContainerEl.addEventListener("click", toolControl, false);
+toolContainerEl.addEventListener("change", toolControl, false);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+window.addEventListener("load", ()=>{
+
+
+console.log(window);
+
+console.log("JS is Awesome")
+
+try{
+INITIAL(ctx);
+}catch(e){
+console.log(e.stack)
+}
+
+
+});
+
+
+</script>
+</body>
+</html>

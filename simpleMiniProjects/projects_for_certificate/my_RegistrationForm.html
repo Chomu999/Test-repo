@@ -1,0 +1,280 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+
+
+
+*{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+
+
+html{
+font-size: 10px;
+}
+
+body{
+background: #000A3F;
+}
+
+main{
+width: 80vw;
+max-width: 60rem;
+min-width: 20rem;
+
+height: 100vmin;
+
+overflow: hidden auto;
+
+background: linear-gradient(-45deg, purple, tan, pink, hotpink);
+position: absolute;
+top: 50%; left: 50%;
+transform: translate(-50%, -50%);
+border-radius: 1rem;
+box-shadow:
+2px 2px 5px 2px black,
+-2px -2px 5px white inset,
+2px 2px 5px black inset,
+-2px -2px 5px white 
+;
+}
+
+
+h1{
+font-size: 4rem;
+}
+
+h2{
+font-size: 2rem;
+}
+
+p{
+font-weight: 600;
+color: #292929;
+font-size: 1.8rem;
+}
+
+h1, h2, p, legend{
+text-align: center;
+}
+
+
+form{
+padding: 1rem .4rem;
+margin: 1rem auto;
+width: 80%;
+background: #f0f0f034;
+border-radius: 1rem;
+}
+
+
+fieldset{
+margin: 2px auto;
+padding: 1rem;
+width: 80%;
+background: inherit;
+border: none;
+border-bottom: 2px double red;
+border-radius: 1rem;
+}
+
+
+label{
+padding: .5rem 0.3rem;
+margin: 2px auto;
+display: inline-block;
+color: #222222;
+background: #31313132;
+border-radius: 2px;
+}
+
+label, input, textarea{
+font-size: 2rem;
+text-align: center;
+}
+
+input{
+border: none;
+background: #000A3F;
+color: #E1E1E1;
+}
+
+
+textarea{
+background: #000A3F;
+height: 6rem;
+color: #E1E1E1;
+}
+
+
+select{
+width: 100%;
+text-align: center;
+}
+
+
+
+input[type="submit"]{
+margin: 1rem auto;
+padding: 1rem 3rem;
+display: block;
+border-radius: 1rem;
+}
+
+
+a{
+color: #1F1F1F;
+}
+
+
+</style>
+
+<title>my survey form</title>
+
+</head>
+
+<body>
+
+<main>
+
+
+<h1 id="title">programimg form</h1>
+<p id="description">please fill the form</p>
+<!--
+<form id="survey-form" action="https://chomu999.github.io/form" method="post">
+-->
+<form id="survey-form" >
+
+
+
+<h2> personal infomation</h2>
+
+<label id="name-label" for="name">Enter Your First Name
+<input required type="text" name="name" id="name"  placeholder="Bill" value="Bill Bhowmick" />
+</label>
+
+<label id="number-label" for="number">Enter Your Number
+<input width="100%" required min="10" max="10" placeholder="8632699099" value="8632699099" type="number" name="number" id="number" />
+</label>
+
+
+<label id="email-label" for="email">Enter your Email
+<input required placeholder="bb96@exmaple.com" value="bb96@exmaple.com" type="email" name="email" id="email" />
+</label>
+
+
+
+<label for="dropdown">Enter Your gender
+<select  name="gender" id="dropdown">
+<option value="male">male</option>
+<option value="female">female</option>
+<option value="other">other</option>
+</select>
+</label>
+
+
+
+
+<h2>favourite IDE</h2>
+
+<label for="vscode">
+VS code
+<input value="vscode" checked type="radio" name="ide" id="vscode" />
+</label>
+
+<label for="sublime">
+Sublime
+<input value="sublime" type="radio" name="ide" id="sublime" />
+</label>
+
+<label  for="vim">
+Vim
+<input value="vim" type="radio" name="ide" id="vim" />
+</label>
+
+<label for="nano">
+Nano
+<input value="nano" type="radio" name="ide" id="nano" />
+</label>
+
+<label for="other">
+Other
+<input value="other" type="radio" name="ide" id="other" />
+</label>
+
+
+
+
+
+
+<h2>favourite frameworks</h2>
+<label for="reactjs">
+ReactJS
+<input value="reactjs" checked type="radio" name="framework" id="reactjs" />
+</label>
+
+<label for="threejs">
+THREEJS
+<input value="threejs" type="radio" name="framework" id="threejs" />
+</label>
+
+<label for="nextjs">
+NextJS
+<input value="nextjs" type="radio" name="framework" id="nextjs" />
+</label>
+
+<label for="angularjs">
+AngularJS
+<input value="angularjs" type="radio" name="framework" id="angularjs" />
+</label>
+
+
+
+
+
+<h2>choose primary language</h2>
+
+
+<input type="checkbox"   value="checkbox" />
+
+<input type="checkbox"  value="checkbox" />
+
+<input type="checkbox"  value="checkbox" />
+
+
+
+
+
+<h2>profile bio</h2>
+
+<label for="bio">wrote a bio
+<textarea name="bio" id="bio"></textarea>
+</label>
+
+
+
+
+
+<label for="terms">
+<input type="checkbox" name="terms" id="terms" value="" />
+I accept all the
+<a href="#">
+terms and conditions
+</a>
+</label>
+<input required value="submit" type="submit" id="submit" value="" />
+
+</form>
+
+</main>
+
+</body>
+</html>

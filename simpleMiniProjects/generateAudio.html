@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+
+
+<title>JS Audio</title>
+
+<style>
+
+*:after,*,*:before{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+:root{
+
+--box-shadow:
+4px 4px 8px  #0008 inset,
+-4px -4px 8px #fff8 inset;
+
+--box-shadow2:
+4px 4px 8px  #0008,
+-4px -4px 8px #fff8,
+-4px -4px 8px #0008 inset,
+4px 4px 8px #fff8 inset
+;
+
+}
+
+*::selection{
+color: red;
+background: tan;
+}
+
+
+@property col{
+syntax:"<color>";
+initial:red;
+
+}
+
+html{
+font-size: 10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style-type: none;
+}
+
+body{
+background: #f0f0f0;
+}
+
+
+
+
+.wrapper{
+margin: 1rem auto;
+padding: 1rem;
+width: min(38rem, 100% - 2rem);
+border-radius: 1rem;
+
+box-shadow: var(--box-shadow);
+}
+
+.appContainer{
+height: clamp(70rem, 200vh, 100dvh - 3rem);
+background: #c0c0c0;
+}
+
+.titleContainer{
+background: #cacaca;
+text-align: center;
+border-radius: 2rem;
+}
+
+.appTitle{
+margin: 0.6rem 0.4rem;
+padding: 0.4rem 0.8rem;
+/* color: #424242; */
+
+background: transparent;
+
+background: linear-gradient(45deg,gray 20%, white, gray);
+text-shadow: 2px 2px 2px #7772;
+background-clip: text;
+color: transparent;
+
+
+font-size: 3rem;
+font-weight: 800;
+font-family: Tahoma;
+text-transform: capitalize;
+border-radius: 1rem;
+box-shadow: var(--box-shadow);
+}
+
+
+
+
+.audioContainer{
+aspect-ratio: 1;
+overflow: hidden auto;
+background: #cacaca;
+text-align: center;
+box-shadow: var(--box-shadow);
+}
+
+
+
+audio{
+/* width: 9rem; */
+height: 3rem;
+color: red;
+background:chocolate ;
+/* box-shadow: 2px 2px 2rem red inset; */
+}
+
+
+
+.btnContainer{
+aspect-ratio: 3;
+display: flex;
+justify-content: space-around;
+align-items: center;
+}
+
+
+
+.btn{
+padding:0.2rem 0.4rem 0.6rem;
+background:#FFA5CF;
+color: white;
+font-size: 5rem;
+border: none;
+/* border: 2px solid  */;
+font-weight: 900;
+border-radius: 1rem;
+box-shadow: var(--box-shadow2);
+}
+
+
+.kk{
+place-items: center;
+display: grid;
+width: 200px;
+height: 200px;
+background: #00A3FF;
+}
+
+.kk h1{
+	text-transform: capitalize;
+	letter-spacing: 2px;
+	font-size: 40px;
+color: white;
+text-shadow: 4px 4px 0px #777;
+}
+
+
+</style>
+
+
+
+
+
+</head>
+<body>
+
+
+<main class="wrapper appContainer">
+<div class="wrapper titleContainer">
+  <h1 class="appTitle">JS Audio</h1>
+</div>
+
+
+<div class="wrapper audioContainer">
+
+<audio id="testAudio" loop autoplay controls src="/sdcard/Music/at ieg.mp3"></audio>
+
+</div>
+
+
+
+<div class="wrapper btnContainer">
+
+</div>
+
+
+<div class="kk">
+<h1>no smoking</h1>
+</div>
+
+
+
+</main>
+
+
+<!-- <script src="/storage/emulated/0/g_js_libs/eruda.min.js"></script> -->
+
+<script src="/sdcard/g_js_libs/dat.gui.min.js"></script>
+
+<script type="module">
+"use strict";
+
+
+
+
+//querySelector
+
+const INITIAL=()=>{
+
+
+
+let testAudio = document.querySelector("#testAudio");
+
+
+
+
+//let adEncoder = new AudioEncoder();
+//console.log(adEncoder)
+
+//let adDecoder = new AudioDecoder();
+//console.log(adDecoder)
+
+
+let gui = new dat.GUI();
+//console.log(gui)
+
+let analF = gui.addFolder("anal");
+let panF = gui.addFolder("pan");
+let wsF = gui.addFolder("ws");
+
+
+let obj = {x :2, y:3, z:4};
+
+let adCTX = new AudioContext();
+console.log(adCTX)
+
+let a00 = adCTX.createAnalyser();
+console.log(a00)
+
+let a01 = adCTX.createPanner();
+console.log(a01)
+
+let a02 = adCTX.createWaveShaper();
+console.log(a02)
+
+
+wsF.add(obj.x, 10, 1, 0.2)
+
+
+
+
+}
+
+
+
+
+
+
+
+try{
+console.log("JavaScript is Awesome ");
+
+console.log(window);
+INITIAL()
+
+}catch(err){
+console.log(`javascript uncatch error: ${err} `);
+}
+
+
+</script>
+
+</body>
+</html>

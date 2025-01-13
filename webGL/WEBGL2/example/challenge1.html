@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en-in">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>challenge myself</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+html{
+font-size:10px;
+}
+
+body{
+width:100%; height:100%;
+background:#000;
+color:#fff;
+}
+
+canvas#canvas{
+position: absolute; top: 50%; left: 50%;
+transform: translate(-50%,-50%);
+}
+
+img{
+display:none;
+}
+
+
+</style>
+<script src="./js/lib/gl-matrix.js" defer></script>
+
+<script>
+
+
+</script>
+
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<img id="dipperImg" src="/storage/emulated/0/Pictures/Telegram/DipperSelfie.png" alt="dipper selfie" />
+
+<img id="linkImg" src="/storage/emulated/0/Pictures/Telegram/Untitled178_20220930153140.png" alt="link sit on bed" />
+
+<img id="normalImg" src="/storage/emulated/0/Pictures/.thumbnails/164133.jpg" alt="normal" />
+
+
+<script>
+
+
+
+const ReSizeGL=(gl)=>{
+let cs;
+innerWidth>innerHeight?cs=innerHeight:cs=innerWidth;
+gl.canvas.width=cs;
+gl.canvas.height=cs;
+
+}
+
+let vsCode=`#version 300 es
+precision mediump float;
+
+in vec3 a_Pos;
+in vec2 a_TexCoord;
+
+
+uniform mat4 modelM;
+uniform mat4 viewM;
+uniform mat4 projM;
+
+out vec2 v_TexCoord;
+
+
+void main()
+{
+gl_Position = projM * viewM * modelM * vec4( a_Pos , 1.0);
+
+v_TexCoord=a_TexCoord;
+
+}
+`;
+
+let fsCode=`#version 300 es
+precision mediump float;
+
+out vec4 FragColor;
+
+
+uniform vec4 u_Color;
+uniform sampler2D u_Tex[2];
+
+in vec2 v_TexCoord;
+
+void main()
+{
+
+//FragColor += texture(u_Tex[2], v_TexCoord);
+
+
+FragColor += mix(
+texture(u_Tex[1], v_TexCoord),
+texture(u_Tex[0], v_TexCoord), 0.5);
+
+//FragColor += mix(texture(u_Tex[2], v_TexCoord), u_Color, 0.5);
+
+
+}
+`;
+
+
+
+
+
+let vertices = 
+	[ // X, Y, Z           U, V
+		// Top
+		-1.0, 1.0, -1.0,   0, 0,
+		-1.0, 1.0, 1.0,    0, 1,
+		1.0, 1.0, 1.0,     1, 1,
+		1.0, 1.0, -1.0,    1, 0,
+
+		// Left
+		-1.0, 1.0, 1.0,    0, 0,
+		-1.0, -1.0, 1.0,   1, 0,
+		-1.0, -1.0, -1.0,  1, 1,
+		-1.0, 1.0, -1.0,   0, 1,
+
+		// Right
+		1.0, 1.0, 1.0,    1, 1,
+		1.0, -1.0, 1.0,   0, 1,
+		1.0, -1.0, -1.0,  0, 0,
+		1.0, 1.0, -1.0,   1, 0,
+
+		// Front
+		1.0, 1.0, 1.0,    1, 1,
+		1.0, -1.0, 1.0,    1, 0,
+		-1.0, -1.0, 1.0,    0, 0,
+		-1.0, 1.0, 1.0,    0, 1,
+
+		// Back
+		1.0, 1.0, -1.0,    0, 0,
+		1.0, -1.0, -1.0,    0, 1,
+		-1.0, -1.0, -1.0,    1, 1,
+		-1.0, 1.0, -1.0,    1, 0,
+
+		// Bottom
+		-1.0, -1.0, -1.0,   1, 1,
+		-1.0, -1.0, 1.0,    1, 0,
+		1.0, -1.0, 1.0,     0, 0,
+		1.0, -1.0, -1.0,    0, 1,
+	];
+
+let indices =
+	[
+		// Top
+		0, 1, 2,
+		0, 2, 3,
+
+		// Left
+		5, 4, 6,
+		6, 4, 7,
+
+		// Right
+		8, 9, 10,
+		8, 10, 11,
+
+		// Front
+		13, 12, 14,
+		15, 14, 12,
+
+		// Back
+		16, 17, 18,
+		16, 18, 19,
+
+		// Bottom
+		21, 20, 22,
+		22, 20, 23
+	];
+
+const app=(gl)=>{
+
+
+
+
+let vs=gl.createShader(gl.VERTEX_SHADER);
+let fs=gl.createShader(gl.FRAGMENT_SHADER);
+{
+gl.shaderSource(vs, vsCode);
+gl.shaderSource(fs, fsCode);
+
+gl.compileShader(vs);
+gl.compileShader(fs);
+}
+
+let prog=gl.createProgram();
+{
+gl.attachShader(prog, vs);
+gl.attachShader(prog, fs);
+
+gl.linkProgram(prog);
+
+gl.useProgram(prog);
+gl.validateProgram(prog);
+gl.useProgram(null);
+}
+
+
+//gl.useProgram(prog);
+
+let vao=gl.createVertexArray();
+{
+gl.bindVertexArray(vao);
+}
+let vbo=gl.createBuffer();
+{
+gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+}
+let ibo=gl.createBuffer();
+{
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+}
+
+
+
+let tbo = gl.createTexture();
+{
+gl.bindTexture(gl.TEXTURE_2D, tbo);
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+
+
+gl.texParameteri(gl.TEXTURE_2D,
+gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+
+gl.texParameteri(gl.TEXTURE_2D,
+gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+gl.texParameteri(gl.TEXTURE_2D,
+gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+
+gl.texParameteri(gl.TEXTURE_2D,
+gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+
+
+//gl.activeTexture(gl.TEXTURE0);
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
+gl.UNSIGNED_BYTE,
+dipperImg);
+
+//gl.bindTexture(gl.TEXTURE_2D, null);
+}
+
+
+let tbo2 = gl.createTexture();
+{
+gl.bindTexture(gl.TEXTURE_2D, tbo2);
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+
+
+gl.texParameteri(gl.TEXTURE_2D,
+gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+
+gl.texParameteri(gl.TEXTURE_2D,
+gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+gl.texParameteri(gl.TEXTURE_2D,
+gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+
+gl.texParameteri(gl.TEXTURE_2D,
+gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+
+
+//gl.activeTexture(gl.TEXTURE1);
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
+gl.UNSIGNED_BYTE, linkImg );
+//gl.bindTexture(gl.TEXTURE_2D, null);
+}
+
+
+let tbo3 = gl.createTexture();
+{
+gl.bindTexture(gl.TEXTURE_2D, tbo3);
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+
+
+gl.texParameteri(gl.TEXTURE_2D,
+gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+
+gl.texParameteri(gl.TEXTURE_2D,
+gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+gl.texParameteri(gl.TEXTURE_2D,
+gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+
+gl.texParameteri(gl.TEXTURE_2D,
+gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+
+
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
+gl.UNSIGNED_BYTE, normalImg );
+}
+
+
+
+///
+{
+gl.enableVertexAttribArray(0);
+gl.vertexAttribPointer( 0 , 3,
+gl.FLOAT,gl.FALSE, 5*4 , 0*4 );
+
+gl.enableVertexAttribArray(1);
+gl.vertexAttribPointer( 1 , 2,
+gl.FLOAT,gl.FALSE, 5*4 , 3*4 );
+
+}
+
+//
+
+let identityMatrix=mat4.create();
+
+let modelMatrix=mat4.create();
+
+let viewMatrix=mat4.create();
+
+let projMatrix=mat4.create();
+
+
+
+//mat4.translate(modelMatrix,modelMatrix,
+//[-1.0, 1.0, 0.0]);
+
+
+mat4.lookAt(viewMatrix,
+[0,  2, 5],
+[0,  0,  0],
+[0,  1,  0]);
+
+
+mat4.perspective(projMatrix, glMatrix.toRadian(45),
+gl.canvas.width / gl.canvas.height,
+0.5, 100.0);
+
+{
+gl.useProgram(prog);
+gl.uniform4fv(gl.getUniformLocation(prog, "u_Color"), [1.0, 0.0, 0.0, 1.0]);
+
+
+gl.uniform1i(gl.getUniformLocation(prog, "u_Tex[0]"), 0);
+
+gl.uniform1i(gl.getUniformLocation(prog, "u_Tex[1]"), 1);
+
+gl.uniform1i(gl.getUniformLocation(prog, "u_Tex[2]"), 2);
+
+
+
+
+gl.uniformMatrix4fv(gl.getUniformLocation(prog, "modelM"), gl.FALSE, modelMatrix);
+gl.uniformMatrix4fv(gl.getUniformLocation(prog, "viewM"), gl.FALSE, viewMatrix);
+gl.uniformMatrix4fv(gl.getUniformLocation(prog, "projM"), gl.FALSE, projMatrix);
+}
+
+
+
+
+
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+gl.bindBuffer(gl.ARRAY_BUFFER, null);
+//gl.bindTexture(gl.TEXTURE_2D, null);
+gl.useProgram(null);
+
+///
+
+gl.enable(gl.BLEND);
+gl.enable(gl.DEPTH_TEST);
+//
+gl.blendFunc(
+gl.BLEND_SRC_ALPHA,
+//gl.BLEND_SRC_RGB,
+gl.ONE_MINUS_SRC_ALPHA);
+
+
+
+gl.stencilMask(0xFFF);
+gl.stencilMask(0x000);
+
+
+let angle=0//800/1000/6*2*Math.PI/180;
+
+
+let rotMatrix={
+x:mat4.create(),
+y:mat4.create(),
+//y:identityMatrix,
+}
+
+const animate=(dt)=>{
+
+gl.clearColor(0.3, 0.1, 0.5, 1.0);
+
+gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
+gl.viewport(0,0,gl.canvas.width,gl.canvas.height);
+
+angle=performance.now() / 1000 / 6 * 2 * Math.PI;
+//=parseInt(Date().substr(22,3)) / 10;
+// Math.round(dt/1000);
+
+gl.useProgram(prog);
+
+
+
+mat4.rotate(rotMatrix.x, identityMatrix, angle,
+[0.05, 0.0, 0.0]);
+
+mat4.rotate(rotMatrix.y, identityMatrix, angle/4,
+[0.0, 0.5, 0.0]);
+
+mat4.mul(modelMatrix, rotMatrix.x, rotMatrix.y);
+
+
+
+gl.uniformMatrix4fv(gl.getUniformLocation(prog, "modelM"), gl.FALSE, modelMatrix);
+gl.uniformMatrix4fv(gl.getUniformLocation(prog, "viewM"), gl.FALSE, viewMatrix);
+gl.uniformMatrix4fv(gl.getUniformLocation(prog, "projM"), gl.FALSE, projMatrix);
+
+
+
+
+//gl.vertexAttribPointer(0,3,gl.FLOAT,gl.FALSE,0,0);
+
+gl.bindVertexArray(vao);
+//gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
+
+
+gl.activeTexture(gl.TEXTURE0+0);
+gl.bindTexture(gl.TEXTURE_2D, tbo);
+
+gl.activeTexture(gl.TEXTURE0+1);
+gl.bindTexture(gl.TEXTURE_2D, tbo2);
+
+gl.activeTexture(gl.TEXTURE0+2);
+gl.bindTexture(gl.TEXTURE_2D, tbo3);
+
+
+gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+//gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+
+}
+
+
+
+
+
+
+
+let lt=0;
+const GameLoop=(ts)=>{
+let DT=ts-lt; lt=ts;
+animate(DT);
+//cancelAnimationFrame(GameLoop)
+requestAnimationFrame(GameLoop)
+}
+
+GameLoop(0);
+
+}
+
+
+window.addEventListener("load",()=>{
+
+const canvas=document.getElementById("canvas");
+const gl=canvas.getContext("webgl2");
+
+
+ReSizeGL(gl);
+app(gl);
+console.log(gl);
+
+//debug only
+window.canvas=canvas;
+window.gl=gl;
+
+}, false);
+
+
+
+window.addEventListener("resize",()=>{
+
+
+ReSizeGL(gl);
+
+}, false);
+
+
+
+
+
+//run();
+
+
+
+
+
+
+
+
+
+
+
+</script>
+</body>
+</html>

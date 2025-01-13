@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title> webgl exersice 4</title>
+
+<meta name="author" content="BBhowmick">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+
+html{
+font-size:10px;
+}
+
+
+body{
+width:100vw; height:100vh;
+}
+
+
+main{
+width:100%; height:100%;
+background:#000;
+display:grid;
+place-items:center;
+}
+
+canvas{
+background:transparent;
+}
+
+
+</style>
+
+</head>
+<body>
+
+<main id="main">
+
+<canvas id="canvas"></canvas>
+
+
+
+
+</main>
+
+
+
+
+<script>
+
+
+
+
+
+const GLReSizer=(gl)=>{
+let cs;
+innerWidth>innerHeight?cs=innerHeight:cs=innerWidth;
+gl.canvas.width=cs;
+gl.canvas.height=cs;
+}
+
+
+
+
+const app=(gl)=>{
+
+
+
+
+let vsC=`#version 300 es
+precision mediump float;
+
+layout (location =0 ) in vec2 aPos;
+layout (location =1 ) in float aPS;
+layout (location =2 ) in vec4 aColor;
+
+
+
+
+out vec4 vColor;
+
+
+void main(){
+gl_Position = vec4(aPos, 0.0, 1.0);
+gl_PointSize = aPS;
+
+vColor=aColor;
+}
+`;
+
+
+let fsC=`#version 300 es
+precision mediump float;
+
+out vec4 FragColor;
+
+
+in vec4 vColor;
+
+void main(){
+FragColor = vColor;
+}
+`;
+
+
+let prog=gl.createProgram();
+let vs=gl.createShader(gl.VERTEX_SHADER);
+let fs=gl.createShader(gl.FRAGMENT_SHADER);
+
+
+gl.shaderSource(vs, vsC);
+gl.shaderSource(fs, fsC);
+
+gl.compileShader(vs);
+if(!gl.getShaderParameter(vs, gl.COMPILE_STATUS))
+{
+console.log(`
+vertex shader error : ${gl.getShaderInfoLog(vs)}
+vertex shader source : ${gl.getShaderSource(vs)}`);
+}
+
+
+gl.compileShader(fs);
+if(!gl.getShaderParameter(fs, gl.COMPILE_STATUS))
+{
+console.log(`
+fragment shader error : ${gl.getShaderInfoLog(fs)}
+fragment shader source : ${gl.getShaderSource(fs)}`);
+}
+
+
+
+gl.attachShader(prog, vs);
+gl.attachShader(prog, fs);
+
+
+gl.deleteShader(vs);
+gl.deleteShader(fs);
+delete vs;
+delete fs;
+
+gl.linkProgram(prog);
+if(!gl.getProgramParameter(prog, gl.LINK_STATUS))
+{
+console.log("shader program link error  : "+ gl.getProgramInfoLog(prog));
+}
+
+gl.useProgram(prog);
+gl.validateProgram(prog);
+if(!gl.getProgramParameter(prog, gl.VALIDATE_STATUS))
+{
+console.log("shader program Validate error  : "+ gl.getProgramInfoLog(prog));
+}
+
+gl.useProgram(null);
+
+
+
+gl.useProgram(prog);
+
+
+let loc={
+
+a:{
+pos:gl.getAttribLocation(prog, "aPos"),
+ps:gl.getAttribLocation(prog, "aPS"),
+color:gl.getAttribLocation(prog, "aColor"),
+},
+
+u:{
+index:gl.getUniformLocation(prog, "uIndex"),
+color:gl.getUniformLocation(prog, "uColor"),
+},
+
+};
+
+
+
+
+gl.useProgram(null);
+
+let data=[
+//  coord        ps         colors
+  0.0,  0.5,    20.0,   1.0,0.0,0.0,1.0,
+ -0.5, -0.5,    40.0,   1.0,0.0,1.0,1.0,
+  0.5, -0.5,    40.0,   1.0,1.0,0.0,1.0,
+ -0.5,  0.5,    80.0,   0.0,1.0,1.0,1.0,
+  0.5,  0.5,    80.0,   0.0,1.0,0.0,1.0,
+];
+
+
+let CoordData=[
+//  coord     
+  0.0,  0.5,
+  0.0,  0.0,
+  0.0, -0.5,
+];
+
+let PointSizeData=[
+// ps      
+  50.0,
+  50.0,
+  50.0,
+];
+
+let ColorData=[
+//  coord       
+  1.0,0.5,0.0,1.0,
+  1.0,1.0,1.0,1.0,
+  0.0,1.0,0.0,1.0,
+];
+
+
+let crvbo=gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, crvbo);
+gl.bufferData(gl.ARRAY_BUFFER,
+new Float32Array(CoordData), gl.STATIC_DRAW)
+
+
+let psvbo=gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, psvbo);
+gl.bufferData(gl.ARRAY_BUFFER,
+new Float32Array(PointSizeData), gl.STATIC_DRAW)
+
+
+let cvbo=gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, cvbo);
+gl.bufferData(gl.ARRAY_BUFFER,
+new Float32Array(ColorData), gl.STATIC_DRAW)
+
+
+gl.bindBuffer(gl.ARRAY_BUFFER, crvbo);
+gl.vertexAttribPointer(0, 2,
+gl.FLOAT, gl.FALSE, 2*4,0);
+
+
+gl.bindBuffer(gl.ARRAY_BUFFER, psvbo);
+gl.vertexAttribPointer(1, 1,
+gl.FLOAT, gl.FALSE, 1*4,0);
+
+
+gl.bindBuffer(gl.ARRAY_BUFFER, cvbo);
+gl.vertexAttribPointer(2, 4,
+gl.FLOAT, gl.FALSE, 4*4,0);
+
+gl.useProgram(prog);
+
+gl.enableVertexAttribArray(0);
+gl.enableVertexAttribArray(1);
+gl.enableVertexAttribArray(2);
+
+//gl.enableVertexAttribArray(0);
+//gl.enableVertexAttribArray(1);
+//gl.enableVertexAttribArray(2);
+
+
+
+
+//gl.clearColor(0.2, 0.3, 0.7, 1.0);
+//gl.clear(gl.COLOR_BUFFER_BIT);
+
+gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+
+gl.drawArrays(gl.POINTS, 0, 3);
+
+//gl.drawArrays(gl.POINTS, 0, 3);
+
+//gl.drawArrays(gl.LINE_LOOP, 0, 3);
+
+//gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+
+
+//gl.vertexAttrib2fv(0, [0.5, 0.5]);
+//gl.vertexAttrib1f(1, 160.0);
+//gl.vertexAttrib4fv(2, [1.0, 0.0, 1.0, 1.0]);
+//gl.drawArrays(gl.POINTS, 0, 3);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+window.addEventListener("load", (event) =>{
+
+window.canvas=document.querySelector("canvas");
+window.gl=canvas.getContext("webgl2");
+
+GLReSizer(gl);
+app(gl);
+console.log(gl);
+
+
+
+
+
+});
+
+
+
+window.addEventListener("resize", ()=>{
+GLReSizer(gl);
+});
+
+</script>
+
+</body>
+</html>

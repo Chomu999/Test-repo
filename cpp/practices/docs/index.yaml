@@ -1,0 +1,13 @@
+---
+USR:             '0000000000000000000000000000000000000000'
+ChildFunctions:
+  - USR:             '3017D418E3EE725968AA296F0D948D0A30779148'
+    Name:            'main'
+    DefLocation:
+      LineNumber:      4
+      Filename:        'p1.cpp'
+    ReturnType:
+      Type:
+        Name:            'int'
+        QualName:        'int'
+...

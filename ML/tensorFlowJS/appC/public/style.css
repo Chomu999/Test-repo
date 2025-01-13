@@ -1,0 +1,92 @@
+*{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+html{
+font-size: 10px;
+}
+
+body{
+background: tan;
+}
+
+
+h1{
+margin: 0;
+padding: 1rem 2rem;
+color: brown;
+background: chocolate;
+border-radius: 2rem;
+text-align: center;
+font-size: 1.5rem;
+font-weight: 600;
+}
+
+#outp{
+color: red;
+background: blue;
+font-size: 3rem;
+
+text-align: center;
+}
+
+
+.wrapper{
+margin:1rem auto;
+padding: 1rem;
+width: min(38rem, 100% - 2rem);
+background:#0049FF66 ;
+border-radius: 1rem;
+}
+
+.hide{
+display: none;
+}
+
+.cont__Title{
+text-align: center;
+}
+
+.appTitle{
+margin:1rem 1.2rem;
+padding: 1rem 1.4rem;
+font-weight: 400;
+display: inline-block;
+color: #564747;
+background: #FF3100;
+font-size: 2rem;
+border-radius: 1rem;
+}
+
+
+.cont__Hero{
+background: #FF970022;
+aspect-ratio: 1;
+text-align: center;
+}
+
+.cont__Hero canvas{
+background: salmon;
+/* width: 100%; */
+}
+
+
+.cont__Btn{
+background: lime;
+aspect-ratio: 2;
+text-align: center;
+}
+
+.btn{
+margin:1rem 1.2rem;
+padding: 1rem 1.4rem;
+font-weight: 400;
+display: inline-block;
+color: #564747;
+background: #FF3100;
+font-size: 2rem;
+border-radius: 1rem;
+}
+

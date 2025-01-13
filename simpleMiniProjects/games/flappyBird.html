@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bhowmickbyte"/>
+
+<link rel="shortcut icon" href="/sdcard/Download/Zelda2.png" type="image/x-icon" />
+<link type="image/png" rel="apple-touch-icon" href="/sdcard/Download/Zelda2.png" />
+
+<!-- <link rel="stylesheet" href="/storage/emulated/0/g_js_libs/font-awesome/css/font-awesome.min.css" /> -->
+
+
+<style>
+
+
+
+*:after, *, *:before{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+:root{
+
+}
+
+::selection{
+color: #373737;
+background: #004CFF;
+}
+
+html{
+font-size: 10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style-type: none;
+}
+
+body{
+background: #f0f0f0;
+}
+
+
+
+
+.wrapper{
+margin: 1rem auto;
+padding: 0.8rem;
+width: clamp(36rem, 100dvw - 2rem, 100% - 2rem);
+border-radius: 1rem;
+box-shadow: 0px 2px 20px 2px black;
+}
+
+.appContainer{
+height: clamp(70rem,100dvh - 2rem, 100% - 4rem);
+background: gray;
+}
+
+.titleContainer{
+background: #424242;
+text-align: center;
+border-radius: 2rem;
+}
+
+.appTitle{
+margin: 0.6rem 0.4rem;
+padding: 0.4rem 0.4rem;
+color: #f0f0f0;
+background: gray;
+font-size: 3.4rem;
+font-weight: 800;
+font-family: Tahoma;
+text-transform: capitalize;
+border-radius: 1.2rem;
+}
+
+
+
+.gameContainer{
+background: gray;
+color: white;
+}
+canvas{
+background: salmon;
+}
+
+
+
+
+
+
+</style>
+
+
+<title>flappy bird clone</title>
+
+
+</head>
+<body>
+
+
+<main class="wrapper appContainer">
+<div class="wrapper titleContainer">
+  <h1 class="appTitle">flappy bird clone</h1>
+</div>
+
+
+
+<div class="wrapper gameContainer">
+
+<canvas id="canvas"></canvas>
+
+</div>
+
+</main>
+
+
+
+
+
+
+
+<script>
+
+
+"use strict";
+
+
+const {random, PI, abs, sin, cos, tan, min, max}=Math;
+
+
+//some utils
+class Rand{
+
+static Float(min=0, max=1){
+return Math.random() * (max - min+1) + min;
+}
+
+static Int(min=6, max=9){
+return Math.floor( Rand.Float(min, max));
+}
+
+static Choice(...args){
+return args[Rand.Int(0, args.length - 1)];
+}
+
+static Color(len=3){
+let outColor="#";
+for(let i=0;i<len;++i){
+outColor+=Rand.Choice(..."0123456789abcdef".split(""));
+}
+return outColor;
+}
+
+
+}
+
+
+
+//querySelector
+
+const INITIAL=()=>{
+
+
+const canvas = document.querySelector("canvas");
+const ctx = canvas.getContext("2d");
+
+
+const CANVAS_WIDTH = 300;
+const CANVAS_HEIGHT = 240;
+const CANVAS_CLEAR_COLOR = "#BBFFC7";
+
+ctx.canvas.width=CANVAS_WIDTH;
+ctx.canvas.height=CANVAS_HEIGHT;
+ctx.imageSmoothingEnabled=false;
+ctx.fillStyle="#fff";
+ctx.strokeStyle="#f00";
+
+
+
+
+
+
+let jumpForce = 4;
+let x=60, y=20;
+let w=20, h=20;
+
+let vy=0;
+
+
+let pipes=[];
+let pipe_gap = 30;
+
+for(let i=0;i<1;i++){
+
+let x =30; //CANVAS_WIDTH + (i * pipe_gap);
+let gap_h = Rand.Int(0, CANVAS_HEIGHT);
+let th = 30;
+let bh = Rand.Int(gap_h, CANVAS_HEIGHT + gap_h);
+
+pipes.push({
+	x,
+	w:30,
+	ty:0,
+	by:gap_h,
+	bh,
+	th,
+});
+
+}
+
+
+
+let gravity = 9.8;
+
+const update = dt => {
+
+pipes.forEach((pipe)=>{
+
+ctx.beginPath();
+ctx.fillStyle="#183";
+ctx.fillRect(pipe.x, pipe.ty, pipe.w, pipe.th);
+ctx.fillRect(pipe.x, pipe.by, pipe.w, pipe.bh);
+ctx.closePath();
+});
+
+vy += gravity * dt;
+
+y += vy;
+
+ctx.beginPath();
+ctx.fillStyle="#f0f";
+ctx.fillRect(x, y, w, h);
+ctx.closePath();
+
+
+}
+
+
+let lt=0;
+//animations
+const animate=(ts)=>{
+
+//ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
+const dt = (ts - lt) / 1000;
+lt = ts;
+
+ctx.beginPath();
+ctx.fillStyle=CANVAS_CLEAR_COLOR;
+ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
+ctx.closePath();
+update(dt);
+
+requestAnimationFrame(animate);
+}
+
+requestAnimationFrame(animate);
+
+
+//controls
+
+
+const gameAction=()=>{
+vy = -jumpForce;
+}
+
+
+canvas.addEventListener("click", gameAction);
+
+//canvas.addEventListener("touchstart", gameAction);
+
+
+
+
+
+
+
+
+}
+
+window.addEventListener("load", ()=>{
+
+try{
+
+console.log("JavaScript is Awesome ");
+INITIAL();
+
+}catch(err){
+console.log(`javascript uncatch error: ${err} `);
+}
+
+});
+</script>
+
+</body>
+</html>

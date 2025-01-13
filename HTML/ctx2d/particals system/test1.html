@@ -1,0 +1,402 @@
+<!doctype html>
+<html>
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"/>
+<meta name="author" content="billbyte">
+
+
+<style>
+
+*{
+margin: 0; padding: 0;
+box-sizing: border-box;
+}
+
+html{
+font-size:10px;
+}
+body{
+background:#212121;
+}
+main{
+width:100%;
+height: 80dvh;
+background: #424242;
+display: grid;
+place-items: center;
+}
+canvas{
+background: saddlebrown;
+}
+
+</style>
+
+<title>partical system testing 1</title>
+
+</head>
+<body>
+
+<main>
+
+<canvas id="canvas"></canvas>
+
+</main>
+
+
+<script>
+
+//querySelector
+//querySelectorAll
+
+// destructuring math obj for better mathamatical opations
+
+// some global var's
+
+const gravity=0.062;
+const frection=0.062;
+
+
+const { PI:pi, min, max, cos, abs, sin, tan, random, floor, ceil} = Math;
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas?.getContext("2d");
+
+
+const canvasResizer=(canvas)=>{
+let cSize = (innerWidth > innerHeight)?innerHeight:innerWidth;
+canvas.width=cSize;
+canvas.height=cSize;
+}
+
+
+
+
+class Rand{
+
+static Float(min=1, max=2){
+return random() * (max-min+1) + min;
+}
+
+static Int(min=10, max=20){
+return floor(Rand.Float(min, max));
+}
+
+static Choice(...args){
+return args[Rand.Int(0, args.length - 1)];
+}
+
+}
+
+
+class Vec2{
+constructor(x=0, y=0){
+
+}
+
+static create(x=0, y=0){
+
+return {x, y};
+
+}
+
+static add(a, b){
+let result = Vec2.create();
+for(const i in result){
+result[i] = a[i] + b[i];
+}
+return result;
+}
+
+static sub(a, b){
+let result = Vec2.create();
+for(const i in result){
+result[i] = a[i] - b[i];
+}
+return resultl
+}
+
+static mul(a, b){
+let result = Vec2.create();
+for(const i in result){
+result[i] = a[i] * b[i];
+}
+return result;
+}
+
+static div(a, b){
+let result = Vec2.create();
+for(const i in result){
+result[i] = a[i] / b[i];
+}
+return result;
+}
+
+static mul_s(a, scaler=1){
+let result = Vec2.create();
+for(const i in result){
+result[i] = a[i] * scaler;
+}
+return result;
+}
+
+static div_s(a, scaler=1){
+let result = Vec2.create();
+for(const i in result){
+result[i] = a[i] * scaler;
+}
+return result;
+}
+
+
+
+
+}
+
+
+
+
+
+
+
+class Circle{
+constructor(x=0, y=0, radius=20){
+
+//this.pos = Vec2.create(x, y);
+
+
+//this.acc = Vec2.create()
+
+
+//this.gravity = Vec2.create()
+
+this.radius = radius;
+this.color= "red";
+
+this.markForDelete=false;
+
+
+
+}
+
+draw(c){
+
+c.beginPath();
+
+c.fillStyle= this.color;
+
+c.arc(this.pos.x, this.pos.y, this.radius * this.scale, 0, pi*2);
+
+c.fill();
+c.closePath();
+
+}
+
+update(dt=1){
+
+//console.log("updating")
+
+//this.vel = Vec2.mul(this.vel, this.gravity);
+
+//this.vel = Vec2.mul_s(this.vel, 0.5);
+
+this.pos = Vec2.add(this.vel, this.pos);
+
+
+if(this.lifeProgress > this.lifeTime){
+
+console.log("delete")
+
+this.markForDelete = true
+
+}
+
+else {
+this.lifeProgress += 0.01;
+
+}
+
+
+
+}
+
+}
+
+
+
+class ParticalSystem{
+constructor(x=0, y=0){
+
+this.parameter = {
+
+
+gravity : Vec2.create(0, 0),
+
+pos : Vec2.create(x, y),
+
+vel : Vec2.create(-0.61, -0.8),
+
+lifeTime: 10.0,
+
+lifeProgress: 0.0,
+
+lifeStart: 0.0,
+
+
+scale : 1,
+
+OriginalScale : 1,
+
+//fileTime: 1.0,
+
+}
+
+
+this.numOfParticals=100;
+//this.partical = instance;
+this.particals=[];
+
+
+this.start= false;
+
+//this.emting = false;
+
+}
+
+render(c){
+if (!this.start){
+return;
+}
+
+this.particals.forEach((partical)=>{
+partical.draw(c);
+partical.update(1);
+});
+
+
+// filtering and deleting
+
+this.particals = this.particals.filter((p) => !p.markForDelete)
+
+
+}
+
+update(dt=0){}
+
+
+_auto_setup(){
+
+//if(!this.partical) return;
+
+for(let i=0;i<this.numOfParticals; i++){
+
+const partical = new Circle()
+//this.partical;
+
+for(const i in this.parameter){
+
+partical[i] = this.parameter[i];
+
+//console.log(i, partical[i])
+
+}
+
+this.particals.push(partical);
+}
+
+}
+
+}
+
+
+
+const INIT=(ctx)=>{
+
+// clearing Color or other word background color
+const clearColor = "#121111";
+
+console.log("init")
+
+
+
+//let test_partical = new Circle();
+
+const my_partical_system = new ParticalSystem(200, 200);
+
+//my_partical_system.parameter.vel = Vec2.create(-0.20, 0)
+
+
+
+my_partical_system._auto_setup()
+my_partical_system.start = true
+
+
+console.log(my_partical_system)
+
+
+// child loop
+
+
+
+const animate=(dt=1)=>{
+//console.log("loop");
+//ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+
+ctx.fillStyle = clearColor;
+ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+
+
+my_partical_system.render(ctx);
+
+
+}
+
+
+
+// parent Loop 
+const mainLoop=(ts=0)=>{
+
+//calc delta time
+let dt = ts * 0.001 ?? 0.5;
+//console.log("loop")
+animate(dt);
+//webkitRequestAnimationFrame(mainLoop);
+}
+
+setInterval(mainLoop , 10)
+
+
+
+
+
+// some control
+
+
+
+// resizing canvas
+window.addEventListener("resize", ()=>{
+canvasResizer(ctx.canvas);
+})
+
+
+
+
+}
+
+
+window.addEventListener("load", ()=>{
+try{
+canvasResizer(ctx.canvas)
+INIT(ctx)
+}catch(e){
+console.log(e.message, e.stack);
+}
+
+})
+
+</script>
+
+
+</body>
+</html>

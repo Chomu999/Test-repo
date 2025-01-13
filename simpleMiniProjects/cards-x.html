@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+
+<meta name="viewport" content="width=device-width, ,initial-scale=1.0, maximum-scale=9.0">
+<!-- <meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0"> -->
+
+<title>HTML and CSS Card</title>
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+:root{
+--myBlkShadow:-2px 2px 1rem 0 #685E3F;
+}
+
+body{
+width:100vw; height:100vh;
+}
+.peopleCard{
+width:100%; height:50%;
+display:grid;
+place-items:center;
+}
+
+.peopleCard .card{
+/* margin:25vh auto 0 auto; */
+width:90%; height:80%;
+background:tan;
+display:flex;
+justify-content:space-around;
+gap:1rem;
+align-items:center;
+border-radius:2rem;
+
+}
+
+.card > .avater{
+width:45%; height:45%;
+box-shadow:var(--myBlkShadow);
+}
+
+.card > .details{
+font-size:2rem;
+width:45%; height:45%;
+background:rgba(200,130,70,0.3);
+text-align:center;
+overflow:auto;
+box-shadow:var(--myBlkShadow);
+}
+
+
+.details > h2{
+margin:0.1rem 0;
+font-weight:bold;
+font-size:60%;
+text-transform:capitalize;
+}
+
+.details > ul{
+color:#1B1400;
+}
+
+.details > p{
+color:#090036;
+}
+
+.details > p, ul{
+font-size:40%;
+}
+.details > p >i, ul>i{
+color:#3F4439;
+font-weight:bold;
+}
+
+
+</style>
+</head>
+<body>
+
+<div class="peopleCard">
+<div class="card">
+  <div class="avater" data-name="kakashi"
+  style="
+  background:url('/storage/emulated/0/Download/2540777.jpg');
+  background-size:cover;"></div>
+  <div class="details">
+    <h2>kakashi hatake</h2>
+    <ul>
+      <li>nick name: <strong>copy ninja</strong></li>
+      <li>age: <i>45 y/o</strong></i>
+      <li>gender: <i>male</i></li>
+      <li>marrige: <i>no + vergin</i></li>
+    </ul>
+    <p>kakashi kill his frined on his <i>own hand</i></p>
+    <p>charater form <i>Naruto Serise</i></p>
+  </div>
+
+</div>
+
+</div>
+<div class="peopleCard">
+<div class="card">
+  <div class="avater" data-name="madara" style="
+  background:url('/storage/emulated/0/Download/Madara-Uchiha.png');
+  background-size:cover;"></div>
+  <div class="details">
+    <h2>madara uchiha</h2>
+    <ul>
+      <li>nick name: <strong>ghost of uchiha</strong></li>
+      <li>age: <i>unkown</strong></i>
+      <li>gender: <i>male</i></li>
+      <li>marrige: <i>unkown</i></li>
+    </ul>
+    <p>wake up to reality<i> reality</i></p>
+    <p>charater form <i>Naruto Serise</i></p>
+  </div>
+
+</div>
+
+</div>
+<div class="peopleCard">
+<div class="card">
+  <div class="avater" data-name="link" style="background:url('/storage/emulated/0/Download/drak-link.jpeg'); background-size:cover;"></div>
+  <div class="details">
+    <h2>link</h2>
+    <ul>
+      <li>nick name: <strong>legend of hyroll</strong></li>
+      <li>age: <i>118 y/o</strong></i>
+      <li>gender: <i>male</i></li>
+      <li>marrige: <i>unkown</i></li>
+    </ul>
+    <p>charater form <i>legend of zelda Serise</i></p>
+  </div>
+
+</div>
+
+</div>
+<div class="peopleCard">
+<div class="card">
+  <div class="avater" data-name="dipper" style="background:url('/storage/emulated/0/Download/140px-Dipper_Pines.png'); background-size:cover;"></div>
+  <div class="details">
+    <h2>dipper pine</h2>
+    <ul>
+      <li>nick name: <strong>pine tree</strong></li>
+      <li>age: <i>13 y/o</strong></i>
+      <li>gender: <i>male</i></li>
+      <li>marrige: <i>no + vergin</i></li>
+    </ul>
+    <p>trust <i>no one</i></p>
+    <p>charater form <i>Gravity Falls Serise</i></p>
+  </div>
+
+</div>
+
+</div>
+
+
+</body>
+</html>

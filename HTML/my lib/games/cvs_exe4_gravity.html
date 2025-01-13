@@ -1,0 +1,217 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>HTML CANVAS GAME BOI</title>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+#main-box{
+margin:0;
+padding:0;
+width:100%;
+height:100%;
+background-color:#9f9f9f;
+}
+
+.btn{
+width:300px;
+height:300px;
+position:absolute;
+left:46.5px;
+top:260px;
+color:red;
+outline:none;
+background-color:rgba(0,0,255,0.1);
+border:none;
+opacity:0.4;
+}
+.btn:active{
+
+background-color:rgba(0,0,255,1);
+}
+
+
+</style>
+</head>
+<body>
+
+
+
+<div id="main-box">
+<button class="btn">button</button>
+
+<div id="somebtns">
+
+</div>
+
+<canvas id="cvs"></canvas>
+
+</div>
+
+
+
+
+<script>
+
+
+
+let cvs=document.querySelector('#cvs');
+let ctx = cvs.getContext('2d');
+
+
+ctx.strokeStyle='#000'
+ctx.stroke()
+
+//const cvsW=390;
+//const cvsH=390;
+
+let boxMinSize=5;
+
+let mainW=window.innerWidth;
+let mainH=window.innerHeight;
+
+
+let cvsW = mainW;
+let cvsH = mainH;
+
+cvs.width=cvsW;
+cvs.height=cvsH;
+
+
+let colours=['#00BAFF','#FF8000','#FF0068','#E300FF','#3600FF'];
+let gravity = 2;
+let frection = 0.69;
+
+function randint(min,max){
+return Math.floor(Math.random() * (max-min) + min)
+}
+
+function randColor(color){
+return color[Math.floor(Math.random() * colours.length )]
+}
+
+
+
+
+function Box2(x,y,dx,dy,r,color){
+this.x=x;
+this.y=y;
+this.dx=dx;
+this.dy=dy;
+this.r=r;
+this.color=color;
+this.draw = function(){
+ctx.beginPath();
+ctx.arc(this.x,this.y,this.r,0,Math.PI * 2,false);
+ctx.fillStyle=this.color;
+//ctx.strokeStyle=this.color2;
+ctx.lineWidth=3;
+ctx.stroke();
+ctx.fill()
+ctx.closePath()
+}
+
+this.update = function(){
+
+if(this.y + this.r + this.dy > cvs.height){
+this.dy = -this.dy * frection
+}else{
+this.dy += gravity
+}
+
+
+if(this.x + this.r + this.dx > cvs.width || this.x - this.r <= 0 ){
+this.dx = -this.dx
+}
+
+
+
+this.x += this.dx
+this.y += this.dy
+
+this.draw()
+
+
+}
+
+
+}
+
+
+
+function load(){
+
+
+let boxs=[];
+
+
+let boxInt=randint(9 , 69)
+
+
+//let r,x,y,dx,dy,color;
+
+for(let i=0;i<boxInt;i++){
+
+
+r= randint(5 , 50);
+x= randint(r , cvs.width - r);
+y= randint(r , cvs.height - r);
+dx= randint(-1 , 3);
+dy= randint(-1 , 3);
+color= randColor(colours)
+boxs.push( new Box2(x,y,dx,dy,r,color));
+}
+
+
+
+
+
+
+
+
+
+
+
+
+function gameLoop(){
+window.requestAnimationFrame(gameLoop);
+ctx.clearRect(0,0,cvsW,cvsH);
+
+boxs.forEach((box)=>{
+box.update();
+})
+
+
+
+}
+
+gameLoop()
+
+
+}
+
+
+let btn = document.querySelector('.btn')
+
+btn.addEventListener('click',(e)=>{
+//alert('warrnig');
+btn.style.display='none'
+setTimeout(()=>{
+btn.style.display='block'
+},6000)
+load()
+})
+
+
+
+
+</script>
+</body>
+</html>

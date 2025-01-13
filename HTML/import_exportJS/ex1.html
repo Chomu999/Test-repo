@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+ 
+<head>
+<meta http-equiv="content-type" content="text/html charset=utf-8" />
+<title>import and export example 1</title>
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+html{
+font-size:10px;
+}
+
+body{
+width:100%; height:100%;
+background:#000;
+}
+
+main{
+width:100vw; height: 70vh;
+position: absolute; top: 50%; left:50%;
+transform: translate(-50%, -50%);
+}
+
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+<main id="main">
+
+<div class="box box1">
+ 
+
+</div>
+
+
+</main>
+
+
+<script type="module">
+
+//default export
+import add from "./js/add.js"
+//name export
+import {sub} from "./js/sub.js"
+//name export
+import {div} from "./js/div.js"
+//name export
+//import {val} from "./js/vals.js";
+
+// export everything in
+import * as engine from "./js/none.js";
+
+//const {val} = none.none;
+
+
+const app = () => {
+
+
+
+
+console.log(" add : ", add(13,8));
+console.log(" sub : ", sub(48,8));
+console.log(" div : ", div(12,3));
+
+console.log(engine.MathUtils.rand.int(20,30));
+//console.log(val);
+
+
+
+
+
+}
+
+
+const INIT=()=>{
+
+
+
+
+app();
+
+}
+
+window.addEventListener("load", (event) => {
+
+
+if (1) INIT();
+
+})
+
+
+</script>
+
+</body>
+
+</html>

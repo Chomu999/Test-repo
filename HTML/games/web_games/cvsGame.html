@@ -1,0 +1,350 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>HTML CANVAS GAME BOI</title>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+body{background:#000;}
+
+</style>
+</head>
+<body>
+
+
+
+
+<canvas class="cvs"></canvas>
+
+
+
+
+
+<script>
+
+
+
+//console.log(393-380)
+
+
+let body;
+
+let mainH,mainW;
+
+let cls,clk,px,id;
+
+cls='class';
+clk='click';
+px='px';
+id='id';
+
+
+body=document.body;
+
+
+
+
+
+const cvs=document.querySelector('.cvs');
+const ctx = cvs.getContext('2d');
+
+
+
+const randint=(min,max)=>{
+return Math.floor(Math.random() * (max-min) + min);
+}
+
+
+const CTXText = ({font='20px sans-serif',color='red',text='hello',pos={x:5,y:15}}) => {
+/*
+this.font=font;
+this.color=color;
+this.text=text;
+this.pos=pos;
+*/
+
+ctx.beginPath();
+ctx.font=font;
+ctx.fillStyle=color;
+ctx.fillText(text,pos.x,pos.y);
+ctx.closePath();
+
+
+}
+
+
+mainW=window.innerWidth;
+mainH=window.innerHeight;
+
+cvs.width=mainW
+cvs.height=mainH
+
+let cvsW=cvs.width;
+let cvsH=cvs.height;
+
+class Player{
+
+constructor(x, y, radius, color){
+this.x=x
+this.y=y
+
+this.position={x: 0, y: 0}
+this.health=20
+this.radius=radius
+this.color=color
+}
+
+draw(){
+ctx.beginPath()
+ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
+ctx.fillStyle=this.color
+ctx.fill()
+}
+
+}
+
+
+//console.log(body)
+
+const gravity=0.5;
+
+class Projectile{
+
+constructor(x, y, radius, color, velocity){
+this.x=x
+this.y=y
+this.radius=radius
+this.color=color
+this.velocity=velocity
+}
+
+draw(){
+ctx.beginPath()
+ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
+ctx.fillStyle=this.color
+ctx.fill()
+}
+
+update(){
+this.draw()
+
+this.x += this.velocity.x
+this.y += this.velocity.y
+
+//nothing but ↓ this condition
+/*
+if(this.y + this.height + this.velocity.y <= cvs.height ){
+
+this.velocity.y += gravity
+
+this.velocity.x += gravity
+
+}
+else{this.velocity.y = 0}
+*/
+
+}
+
+}
+
+
+
+
+class Enemy{
+constructor(x, y, radius, color, velocity){
+this.x=x
+this.y=y
+this.radius=radius
+this.color=color
+this.velocity=velocity
+}
+
+draw(){
+ctx.beginPath()
+
+ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
+ctx.arc(this.x, this.y, this.radius/2, 0, Math.PI * 2, false)
+
+ctx.strokeStyle=this.color
+ctx.stroke()
+
+ctx.closePath()
+//ctx.fillStyle=this.color
+//ctx.fill()
+}
+
+update(){
+this.draw()
+
+this.x += this.velocity.x
+this.y += this.velocity.y
+
+}
+
+}
+
+
+
+
+let plyX,plyY;
+
+
+plyX=cvs.width/2;
+plyY=cvs.height/2;
+
+
+
+const player = new Player(plyX, plyY, 30, 'red')
+
+let arrowX = plyX;
+let arrowY = plyY;
+
+
+let projectiles = []
+let enemies = []
+
+
+//console.log('lol')
+
+
+
+function spawnEnemies(){
+setInterval(() =>{
+
+let x,y;
+let radius=30;
+
+if(Math.random() < 0.5){
+x = Math.random() < 0.5 ? 0 - radius : cvs.width + radius;
+y = Math.random() * cvs.height;
+}
+
+else{
+x = Math.random() * cvs.width;
+y = Math.random() < 0.5 ? 0 - radius : cvs.height + radius;
+}
+
+
+
+
+radius=Math.floor(Math.random() * 50 + 5)
+
+let angle=Math.atan2(cvs.height / 2 - y, cvs.width / 2 - x)
+
+let velocity = {
+    x: Math.cos(angle),
+    y: Math.sin(angle)
+}
+//for enemies 
+
+enemies.push(new Enemy(
+    x,
+    y,
+    radius,
+    `hsl(${randint(1,1000)},100%,50%,1)`,
+    velocity
+    ))
+
+},1000)
+
+
+}
+
+
+
+
+
+const gameLoop=()=>{
+window.requestAnimationFrame(gameLoop);
+
+ctx.fillStyle='rgba(0,0,0,0.02)'
+ctx.fillRect(0,0,cvsW,cvsH);
+player.draw()
+
+enemies.forEach((enemy)=>{
+enemy.update()
+})
+
+projectiles.forEach((projectile)=>{
+projectile.update()
+})
+
+
+enemies.forEach((enemy, i)=>{
+
+
+projectiles.forEach((projectile, j)=>{
+
+//kill enemies
+
+let dist=Math.hypot(projectile.x - enemy.x, projectile.y - enemy.y)
+
+if(dist - enemy.radius - projectile.radius < 0.2){
+
+if(i > -1 && j > -1){
+setTimeout(()=>{
+
+if(i > -1){
+if(j > -1){
+
+enemies.splice(i, 1);
+projectiles.splice(j, 1);
+}
+}
+
+},0)
+
+}
+
+}
+
+})
+
+})
+
+
+//some text here
+CTXText({color:'red',text:'hi',pos:{x:150,y:40}})
+
+}
+
+
+
+window.addEventListener('click', (e) => {
+
+//console.log(e.x)
+
+
+let angle=Math.atan2(e.y - cvs.height / 2,e.x - cvs.width /2)
+
+let velocity = {
+    x: Math.cos(angle),
+    y: Math.sin(angle)
+};
+
+
+
+projectiles.push(new Projectile(
+    arrowX,
+    arrowY,
+    4,'blue',
+    velocity
+    ))
+
+});
+
+gameLoop()
+spawnEnemies()
+
+
+</script>
+
+
+</body>
+</html>

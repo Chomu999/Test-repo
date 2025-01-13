@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=4.0, user-scalable=0" />
+
+<style type="text/css" media="all">
+*{
+margin:0;
+padding:0;
+box-sizing: border-box;
+}
+
+html{
+font-size: 10px;
+
+}
+
+BoDy{
+BackgrouNd-CoLoR:whitE;
+display: grid;
+place-items:center;
+}
+
+.container{
+width: 68rem; height: 30rem;
+background: white;
+box-shadow: 2px 2px 2px #C7C0A9 inset, -2px -2px 2px #0E1110  inset;
+}
+
+canvas{
+margin:auto;
+display: block;
+}
+
+h1{
+font-size:1.4rem;
+word-spacing: 0.3rem;
+letter-spacing:0.2rem;
+color:#0F0038;
+text-transform: capitalize;
+text-align:center;
+text-shadow: 0px 2px 10px blue;
+}
+
+</style>
+
+<title>exercise 1</title>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>javaScript physics engine exercise 1</h1>
+<canvas id="canvas" tabindex="0"></canvas>
+</div>
+
+<script>
+const canvas=document.getElementById("canvas")
+const ctx=canvas.getContext("2d")
+
+//console.log([])
+
+canvas.width=640
+canvas.height=270
+
+const balls=[];
+const walls=[];
+const caps=[];
+
+const {min, PI, floor, random, cos, tan, sin, acos}=Math 
+const friction=0.02;
+
+const displayText=(c,text="hi", x=9, y=0, color="red")=>{
+c.beginPath()
+c.fillStyle=color;
+c.fillText(text, x, y);
+c.closePath()
+}
+
+const rot_mat=(angle)=>{
+let mat = new Mat(2,2);
+mat.data[0][0] = cos(angle);
+mat.data[0][1] = -sin(angle);
+mat.data[1][0] = sin(angle);
+mat.data[1][1] = cos(angle);
+return mat;
+}
+
+const closest_Point_BW=(b1, w1)=>{
+
+let ball_to_wall_start = w1.start.sub(b1.pos);
+if(Vec2.dot(w1.unit(), ball_to_wall_start) > 0) return w1.start;
+
+let wall_end_to_ball = b1.pos.sub(w1.end);
+if(Vec2.dot(w1.unit(), wall_end_to_ball) > 0) return w1.end;
+
+let closestDist = Vec2.dot(w1.unit(), ball_to_wall_start);
+let closestVec = w1.unit().mul(closestDist);
+
+return w1.start.sub(closestVec);
+
+
+}
+
+const coll_det_bb=(b1, b2)=>{
+if(b1.radius + b2.radius >= b2.pos.sub(b1.pos).mug()) return 1;
+else return 0;
+}
+
+const coll_det_bw=(b1, w1)=>{
+let ball_to_closest = closest_Point_BW(b1, w1).sub(b1.pos);
+if(ball_to_closest.mug() <= b1.radius) return 1;
+else return 0;
+}
+
+const pen_res_bb=(b1, b2)=>{
+let dist = b1.pos.sub(b2.pos);
+let pen_depth = b1.radius + b2.radius - dist.mug();
+let pen_res=dist.unit().mul(pen_depth / (b1.inv_mass + b2.inv_mass));
+
+b1.pos = b1.pos.add(pen_res.mul(b1.inv_mass));
+b2.pos = b2.pos.add(pen_res.mul(-b2.inv_mass));
+}
+
+const pen_res_bw=(b1, w1)=>{
+let penVec = b1.pos.sub(closest_Point_BW(b1, w1));
+b1.pos = b1.pos.add(penVec.unit().mul(b1.radius - penVec.mug()));
+}
+
+const coll_res_bb=(b1, b2)=>{
+let normal = b1.pos.sub(b2.pos).unit();
+let relVel = b1.v.sub(b2.v);
+let sepVel= Vec2.dot(relVel, normal);
+let new_sepVel = -sepVel * min(b1.elasticity, b2.elasticity);
+
+let vsep_diff = new_sepVel - sepVel;
+let impulse = vsep_diff / (b1.inv_mass + b2.inv_mass);
+
+let impulseVec = normal.mul(impulse);
+
+b1.v = b1.v.add(impulseVec.mul(b1.inv_mass));
+b2.v = b2.v.add(impulseVec.mul(-b2.inv_mass));
+}
+
+const coll_res_bw=(b1, w1)=>{
+let normal = b1.pos.sub(closest_Point_BW(b1, w1)).unit();
+let sepVel= Vec2.dot(b1.v, normal);
+let new_sepVel = -sepVel * b1.elasticity;
+let vsep_diff = sepVel - new_sepVel;
+
+
+b1.v = b1.v.add(normal.mul(-vsep_diff));
+}
+
+class Rand{
+static Float(min=1, max=10){return random() * (max-min) + min; }
+static Int(min=10, max=100){return floor(Rand.Float(min, max)); }
+}
+
+class Vec2{
+constructor(x=0, y=0){
+this.x=x
+this.y=y
+}
+
+add(v){ return new Vec2(this.x+v.x, this.y+v.y); }
+sub(v){ return new Vec2(this.x-v.x, this.y-v.y); }
+mug(){ return Math.sqrt(this.x**2 + this.y**2); }
+mul(n){ return new Vec2(this.x*n, this.y*n); }
+
+normal(){ return new Vec2(-this.y, this.x).unit(); }
+
+unit(){
+if(this.mug()===0) return new Vec2();
+else return new Vec2(this.x/this.mug(), this.y/this.mug());
+}
+
+
+static dot(v1, v2){ return v1.x*v2.x + v1.y*v2.y; }
+static cross(v1, v2){ return v1.x*v2.y - v1.y*v2.x; }
+
+
+drawVec(c, start_x=0, start_y=0, n=10, color="blue"){
+c.beginPath()
+c.moveTo(start_x, start_y)
+c.lineTo(start_x + this.x*n, start_y + this.y*n)
+c.strokeStyle=color
+c.stroke()
+
+c.closePath()
+}
+
+}
+
+
+class Mat{
+constructor(rows, cols){
+this.rows=rows;
+this.cols=cols;
+this.data=[]
+
+for(let i=0;i<this.rows;i++){
+this.data[i]=[];
+for(let j=0;j<this.cols;j++){
+this.data[i][j]=0;
+}
+}
+
+}
+
+mul(v){
+let result=new Vec2()
+result.x = this.data[0][0]*v.x + this.data[0][1]*v.y;
+result.y = this.data[1][0]*v.x + this.data[1][1]*v.y;
+return result;
+}
+
+}
+
+class Ball{
+constructor(x=1, y=1, radius=20, mass=0){
+this.pos=new Vec2(x, y);
+this.radius=radius;
+this.mass=mass;
+(this.mass==0)?this.inv_mass=0:this.inv_mass=1/this.mass;
+this.elasticity=1;
+this.v=new Vec2();
+this.acc=new Vec2();
+this.acceleration=1;
+}
+
+update(dt=1){
+
+this.acc = this.acc.unit().mul(this.acceleration);
+
+this.v = this.v.add(this.acc);
+
+this.v = this.v.mul(1-friction);
+
+this.pos = this.pos.add(this.v);
+
+}
+
+draw(c){
+c.beginPath()
+c.fillStyle="red"
+c.arc(this.pos.x, this.pos.y, this.radius, 0, PI*2)
+c.fill()
+c.closePath()
+}
+
+
+drawLine(c){
+this.v.drawVec(c, 500, 200, 20, "green")
+this.acc.unit().drawVec(c, 500, 200, 40, "blue")
+this.acc.normal().drawVec(c, 500, 200, 40, "#770045")
+c.beginPath()
+c.strokeStyle="#000"
+c.arc(500, 200, 40, 0, PI*2)
+c.stroke()
+c.closePath()
+}
+
+keyControl(action){
+
+//if(!this.player) return
+if(action.up) this.acc.y = -this.acceleration;
+if(action.left) this.acc.x = -this.acceleration;
+if(action.right) this.acc.x = this.acceleration;
+if(action.down) this.acc.y = this.acceleration;
+
+if(!action.up && !action.down) this.acc.y = 0;
+if(!action.left && !action.right) this.acc.x = 0;
+
+}
+
+}
+
+class Capsule{
+constructor(sx, sy, ex, ey, radius){
+this.start=new Vec2(sx, sy);
+this.end=new Vec2(ex, ey);
+this.radius=radius;
+
+this.acceleration=1;
+this.acc=new Vec2();
+this.v=new Vec2();
+this.pos=this.start.add(this.end).mul(0.5)
+
+this.angVel=0;
+this.angle=0;
+this.length=this.end.sub(this.start).mug();
+this.dir=this.end.sub(this.start).unit();
+this.refDir=this.end.sub(this.start).unit();
+this.refAngle  = acos(Vec2.dot( this.refDir, new Vec2(1, 0) ) );
+if(Vec2.cross(this.refDir, new Vec2(1, 0)) > 0) this.refAngle *= -1;
+
+
+
+}
+
+draw(c){
+c.beginPath()
+c.arc(this.start.x, this.start.y,this.radius, this.refAngle+this.angle+PI/2, this.refAngle+this.angle+3*PI/2)
+
+c.arc(this.end.x, this.end.y,this.radius, this.refAngle+this.angle-PI/2, this.refAngle+this.angle+PI/2)
+c.closePath()
+c.strokeStyle="#FFF100"
+c.fillStyle="#FF6C00"
+c.stroke()
+c.fill()
+}
+
+update(){
+
+this.acc = this.acc.unit().mul(this.acceleration);
+
+this.v = this.v.add(this.acc);
+
+this.v = this.v.mul(1-friction);
+
+this.pos = this.pos.add(this.v);
+let rotMat=rot_mat(this.angle)
+this.dir=rotMat.mul(this.refDir)
+
+this.start=this.pos.add(this.dir.mul(-this.length/2))
+this.end=this.pos.add(this.dir.mul(this.length/2))
+
+
+this.angle += this.angVel
+this.angVel *= 0.96;
+
+}
+
+keyControl(action){
+if(action.up) this.acc = this.dir.mul(-this.acceleration);
+if(action.left) this.angVel = -0.1;
+if(action.right) this.angVel = 0.1;
+if(action.down) this.acc = this.dir.mul(this.acceleration);
+
+if(!action.up && !action.down) this.acc=new Vec2();
+//if(!action.left && !action.right) this.acc.x = 0;
+}
+
+}
+
+class Wall{
+constructor(sx, sy, ex, ey){
+
+this.start=new Vec2(sx, sy)
+this.end=new Vec2(ex, ey)
+
+this.center=this.start.add(this.end).mul(0.5);
+this.length=this.end.sub(this.start).mug();
+
+this.refStart=new Vec2(sx, sy)
+this.refEnd=new Vec2(ex, ey)
+this.refUnit=this.end.sub(this.start).unit();
+
+this.angVel=0;
+this.angle=0;
+}
+
+draw(c){
+c.beginPath()
+c.moveTo(this.start.x, this.start.y)
+c.lineTo(this.end.x, this.end.y)
+//c.strokeStyle=color
+c.stroke()
+c.closePath()
+}
+
+update(){
+let rotMat=rot_mat(this.angle);
+let newDir=rotMat.mul(this.refUnit);
+this.start=this.center.add(newDir.mul(this.length/2))
+this.end=this.center.add(newDir.mul(-this.length/2))
+
+this.angle += this.angVel
+this.angVel *= 0.96;
+}
+
+unit(){ return this.end.sub(this.start).unit(); }
+
+keyControl(action){
+if(action.left) this.angVel = -0.1;
+if(action.right) this.angVel = 0.1;
+}
+
+}
+
+
+const action={
+up:0,
+left:0,
+right:0,
+down:0,
+}
+
+
+/*
+for(let i=0; i<5; ++i){
+
+let radius=Rand.Int(5, 30),
+x=Rand.Int(radius, canvas.width - radius*2),
+y=Rand.Int(radius, canvas.height - radius*2),
+mass=Rand.Int(1, 40),
+elasticity=Rand.Int(0,10) / 10;
+
+balls.push(new Ball(x,y,radius, mass));
+balls[i].elasticity = elasticity
+}
+
+balls[0].player=1
+*/
+caps[0] = new Capsule(100, 300, 300, 100, 30)
+//walls[0]=new Wall(100, 50, 300, 240)
+//balls[0].mass=2
+//balls[1].mass=0
+
+
+
+
+
+const Animate=(DeltaTime)=>{
+
+
+ctx.fillStyle="gray"
+ctx.fillRect(0,0, canvas.width, canvas.height)
+
+balls.forEach((ball, index)=>{
+
+if(!ball) return
+ball.update()
+ball.draw(ctx)
+
+
+walls.forEach((wall)=>{
+
+if(coll_det_bw(balls[index], wall)){
+pen_res_bw(balls[index], wall)
+coll_res_bw(balls[index], wall)
+}
+})
+
+for(let i=index+1; i<balls.length;i++){
+
+if(coll_det_bb(balls[index], balls[i])){
+pen_res_bb(balls[index], balls[i])
+coll_res_bb(balls[index], balls[i])
+}
+
+}
+
+//if(!ball.player) return
+//ball.keyControl(action)
+//ball.drawLine(ctx)
+
+});
+
+walls.forEach((wall)=>{
+if(!wall) return
+wall.draw(ctx)
+wall.update()
+wall.keyControl(action)
+})
+
+caps.forEach((c)=>{
+c.draw(ctx)
+c.update()
+c.keyControl(action)
+})
+
+
+}
+//.sub(balls[0].pos).drawVec(ctx, balls[0].pos.x, balls[0].pos.y, 1, "white")
+
+
+
+
+let LastTime=0, DeltaTime=0;
+const MainLoop=(TimeStamp=0) =>{
+
+DeltaTime= TimeStamp - LastTime;
+LastTime = TimeStamp;
+Animate(DeltaTime)
+requestAnimationFrame(MainLoop)
+}
+
+requestAnimationFrame(MainLoop)
+
+
+
+
+canvas.addEventListener("keydown", (e)=>{
+if(!e.key) return 
+if(e.key=="w") action.up=1
+if(e.key=="a") action.left=1
+if(e.key=="d") action.right=1
+if(e.key=="s") action.down=1
+})
+
+canvas.addEventListener("keyup", (e)=>{
+if(!e.key) return 
+if(e.key=="w") action.up=0
+if(e.key=="a") action.left=0
+if(e.key=="d") action.right=0
+if(e.key=="s") action.down=0
+})
+
+//let str="0123456789"
+//console.log(str.substr(0, 3))
+</script>
+
+</body>
+</html>

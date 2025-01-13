@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+:root{
+
+--angle:45deg;
+
+--color1:#ff000044;
+--color2:#ff000088;
+
+--color3:#00000024;
+--color4:#00000088;
+
+--color5:#00CCFF44;
+--color6:#00CCFF88;
+
+--color7:#9500FF99;
+--color8:#FF008080;
+
+--color9:#ffffff22;
+
+--gradient_bg_color1: linear-gradient(var(--angle), #FF8A00, #8D00FF);
+--gradient_bg_color2: linear-gradient(var(--angle),
+brown, lime, chocolate);
+--gradient_bg_color3: linear-gradient( 45deg, #FF6E00, #005EFF, #6BFF88, #FF00B5);
+
+--tex_color1:#DEDFDD;
+--tex_color2:#E6E6E6;
+
+--title_color1:#fCfCfC;
+--title_color2:#2C2C2C;
+--title_bg_color1:var(--color3);
+--title_bg_color2:#1200FF;
+--title_font_size:3rem;
+
+--repeat_x:33%;
+--repeat_y:15rem;
+
+--TextColor1:#454B40;
+--TextColor2:#C9C9C9;
+--TextColor3:#62FFFE;
+
+--predictResultColor:var(--TextColor3, tan);
+
+}
+
+
+html{
+font-size:10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style: none;
+}
+
+
+body{
+
+background:  var(--gradient_bg_color3);
+background-size: 40% 40%;
+/* background-size: var(--repeat_x) var(--repeat_y); */
+/* background-position: 20% 30%; */
+
+
+/* box-shadow: 2px 2px 60px 2px black inset; */
+
+/* animation: bg_ani 99s ease-in-out infinite alternate; */
+animation: bg_ani2 10s ease-in-out infinite alternate;
+
+}
+
+
+main{
+margin: 2rem 0;
+height: min(80rem, 100% - 5rem);
+background: var(--color9) ;
+overflow: auto;
+}
+
+
+
+.wrapper{
+margin:2rem auto;
+padding: 1.1rem;
+/* margin-inline: auto; */
+width:min(39rem, 100% - 1.2rem);
+background: var(--color3);
+border-radius:2rem;
+}
+
+
+.title{
+color:var(--title_color1);
+background: var(--title_bg_color1);
+font-size: var(--title_font_size);
+text-align: center;
+text-transform: capitalize;
+border-radius:9rem;
+}
+
+
+
+/* messgae screen/status code section */
+
+.msgContainer{
+aspect-ratio: 2;
+overflow-x: hidden;
+overflow-y: auto;
+background: #006EFF56;
+}
+
+.msgContainer > .message{
+margin: 1rem 0;
+padding: 1rem;
+display: inline-block;
+border-radius: 50rem;
+border: 0.5rem solid blue;
+background: #006EFF55;
+color: #00FFBA;
+font-size: 2rem;
+font-weight: 499;
+text-align: center;
+animation: messageAppers 1.2s linear 1;
+}
+
+
+
+
+/*output screen code section*/
+
+.output_screen{
+
+
+}
+
+
+
+
+/* predictContainer code section*/
+
+
+.predictContainer{
+padding: 1rem;
+aspect-ratio:2;
+color: #C2EFFF;
+font-size: 2rem;
+overflow: hidden auto;
+}
+
+.predictContainer > .predictOutputResult{
+margin: 0.5em;
+padding: 0.5em;
+display: inline-block;
+font-size: 1em;
+color: var(--predictResultColor);
+background: transparent;
+border: 0.1em solid currentColor;
+border-radius: 2em 1rem 2em 1em;
+text-shadow:2px 2px 20px currentColor;
+box-shadow:
+-2px -2px 2px currentColor inset,
+ -5px 5px 3px gray,
+ -5px 5px 4px black
+;
+}
+
+
+
+
+
+.output_screen> .daigramContainer{
+aspect-ratio: 1;
+overflow:auto;
+}
+
+
+
+.btnsContainer > .btns{
+margin:0.2rem 1rem;
+padding: 1rem ;
+font-size: 2rem;
+background: var(--color4);
+color: var(--tex_color1);
+border-radius: 1rem;
+text-align: center;
+
+display: inline-block;
+font-size: 2rem;
+text-transform: capitalize;
+
+
+overflow: auto;
+
+}
+
+
+
+
+
+
+/* drawing  box code section*/
+
+.drawContainer{
+aspect-ratio: 1;
+}
+
+
+
+canvas{
+width: 100%;
+background:#EA8F93;
+}
+
+
+/* error box code section*/
+
+
+.error_box{
+overflow:hidden auto;
+}
+
+.error_box .title{
+display:block;
+background: linear-gradient(45deg,red, blue);
+text-decoration: underline;
+border-radius: 4em;
+}
+
+.error_box  pre{
+margin:0.2rem 0;
+padding: 1rem;
+
+height: min(30rem, 100% - 3rem);
+
+background: var(--color3);
+
+
+overflow: auto;
+border-radius: 1rem;
+
+
+
+}
+
+.error_box  p{
+margin:0.2rem 1rem;
+padding: 1rem ;
+
+background: var(--color4);
+color: #FF374E;
+border-radius: 1rem;
+}
+
+
+
+
+/*keyFrame animation start here */
+
+@keyframes bg_ani{
+0%{background-position:400% 400%;}
+100%{background-position:100% 400%;}
+}
+
+@keyframes bg_ani2{
+0%{
+background-size: 100% 100%; 
+/* background-position:0% 0%; */
+}
+100%{
+background-size: 400% 200%;
+/* background-position:200% 100%; */
+}
+}
+
+
+@keyframes messageAppers{
+0%{
+/* background: red; */
+font-size: 0.001rem;
+}
+100%{
+/* background: blue; */
+font-size: 2rem;
+}
+}
+
+
+</style>
+
+<title>simple ai practice</title>
+
+</head>
+<body>
+
+<main>
+
+
+<div class="wrapper">
+
+
+<h2 class="title">
+simple AI
+</h2>
+
+</div>
+
+
+<div class="wrapper msgContainer">
+</div>
+
+<section id="resultScreen" class="wrapper output_screen">
+
+
+<h2 class="title">
+result will be print out here
+</h2>
+
+<div class="wrapper predictContainer">
+
+
+</div>
+
+
+
+<div class="wrapper inputs_parent">
+<input type="number" class="inputNumber" id="inputNumber" value="0" />
+<!-- <textarea name="" id= rows="8" cols="40"></textarea> -->
+</div>
+
+
+<div class="wrapper btnsContainer">
+<span class="btns trainBtn">train </span>
+<span class="btns predictBtn">predict</span>
+<br>
+<span class="btns saveBtn">save DataSet</span>
+<span class="btns loadBtn">load DataSet</span>
+</div>
+
+
+
+
+
+<div class="wrapper daigramContainer"></div>
+
+
+</section>
+
+
+
+
+<div class="wrapper drawContainer">
+<canvas id="canvas"></canvas>
+</div>
+
+
+
+
+
+<div class="wrapper error_box">
+<h2 class="title">error and warning</h2>
+<pre></pre>
+</div>
+
+</main>
+
+
+
+
+<script async src="/storage/emulated/0/g_js_libs/tf.min.js"></script>
+
+
+<script>
+
+"use strict";
+
+//output = input * weigth + bais;
+
+const canvas=document.querySelector("canvas");
+const ctx=canvas.getContext("2d");
+
+//const daigramEl= document.querySelector(".daigram");
+
+const trainBtnEl= document.querySelector(".trainBtn");
+const predictBtnEl= document.querySelector(".predictBtn");
+
+const saveBtnEl= document.querySelector(".saveBtn");
+const loadBtnEl= document.querySelector(".loadBtn");
+
+const  inputNumberEl = document.querySelector(".inputNumber");
+
+
+// help to show error and log for mobile device
+
+const showError=(msg)=>{
+console.log(msg)
+const errorContainer=document.querySelector(".error_box > pre")
+if(!errorContainer) return -1;
+errorContainer.innerHTML+=`<p>${msg}</p>`;
+}
+
+
+//
+const addPredictResult=(msg)=>{
+const predictContainer=document.querySelector(".predictContainer")
+if(!predictContainer) return -1;
+predictContainer.innerHTML +=` <b class="predictOutputResult">${msg}</b>`;
+}
+
+
+//
+const addMessage=(msg)=>{
+
+const msgContainer=document.querySelector(".msgContainer")
+if(!msgContainer ||  !msg) return -1;
+const iEl = document.createElement("i");
+iEl.classList.add("message");
+iEl.innerText = msg;
+msgContainer.appendChild(iEl);
+
+
+// timer to automaticly remove form the container 
+setTimeout(()=>{
+  msgContainer.removeChild(iEl);
+}, 10000);
+
+}
+
+
+
+
+
+
+// INITIAL point aka starting point
+const INITIAL = async ()=>{
+
+if (1) showError(tf);
+
+
+//const dataSet = Array.from({length:100}, (x, i)=>{
+//return{ "a":Number(`0.0${i}`)*Math.PI*100, "b":i};
+//});
+
+
+
+
+const model = tf.sequential();
+
+model.add(tf.layers.dense({units:1, inputShape:[1] }));
+
+model.compile({loss:"meanSquaredError", optimizer:"sgd"});
+
+
+
+const trainDataSet = [
+{x:0, y:0},
+{x:1, y:2},
+{x:2, y:4},
+{x:3, y:6},
+{x:4, y:8},
+{x:5, y:10},
+{x:6, y:12},
+];
+
+//showError(trainDataSet);
+
+const trainModel=async(modelP)=>{
+
+const parseDataX = trainDataSet.map(d => d.x);
+const parseDataY = trainDataSet.map(d => d.y);
+
+
+const xT2d = tf.tensor2d(parseDataX, [parseDataX.length, 1]);
+const yT2d = tf.tensor2d(parseDataY, [parseDataY.length, 1]);
+
+
+await modelP.fit(xT2d, yT2d, {epochs:100});
+
+//return modelP;
+
+}
+
+
+
+const predictNumer=(input=1)=>{
+
+
+const t = tf.tensor([input], [1, 1])
+
+const output = model.predict(t);
+
+
+return output.dataSync();
+
+}
+
+
+
+
+
+
+
+
+
+trainBtnEl.addEventListener("click", async()=>{
+addMessage("AI Model Training...");
+await trainModel(model);
+addMessage("AI Model Training completed!");
+});
+
+
+predictBtnEl.addEventListener("click", ()=>{
+
+const input = parseFloat(inputNumberEl.value);
+
+const finalPrediction = `Prediction is : ${predictNumer(input)}`;
+addPredictResult(finalPrediction);
+
+//for(let i=input;i<input*10;++i){
+//const finalPrediction = `itr ${i} : prediction is : ${Math.round(predictNumer(i))}`;
+//addPredictResult(finalPrediction)
+//}
+
+});
+
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+window.addEventListener("load", ()=>{
+
+showError("JS is Awesome")
+
+try{
+INITIAL();
+}catch(e){
+showError(e.stack)
+}
+
+
+})
+
+
+</script>
+</body>
+</html>

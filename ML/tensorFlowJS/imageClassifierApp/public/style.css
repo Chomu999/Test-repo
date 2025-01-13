@@ -1,0 +1,282 @@
+
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+:root{
+
+--border-width1:0.1rem;
+--border-width2:0.4rem;
+--border-width3:0.8rem;
+
+--border-radius1:2rem ;
+--border-radius2:5rem ;
+--border-radius2:10rem ;
+
+--border-style1:solid;
+--border-style2:double;
+--border-style3:dashed;
+
+--border-color1:white;
+--border-color2:gray;
+--border-color3:#454545;
+
+--border1:var(--border-width1) var(--border-style1) var(--border-color1);
+--border2:var(--border-width2) var(--border-style2) var(--border-color2);
+--border3:var(--border-width3) var(--border-style1) var(--border-color3);
+
+
+}
+
+
+
+
+html{
+font-size:10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style: none;
+}
+
+
+body{
+color-scheme: default;
+background: #353535;
+display: grid;
+place-items: center;
+}
+
+
+
+
+
+
+.wrapper{
+margin:1rem auto;
+padding:1rem;
+width: min(39rem, 100% - 1rem);
+background: #9400FF23;
+border-radius:2rem;
+border: var(--border1);
+box-shadow: 1rem 1rem 2rem #0008;
+}
+
+
+.appContainer{
+height: min( 100svh - 2rem, 100dvh - 2rem);
+position: relative;
+overflow: hidden;
+background: #50687533;
+color: #EEEEEE;
+}
+
+
+.appContainer:before, .appContainer:after{
+content: '';
+position: absolute;
+width: 26rem;
+aspect-ratio: 1;
+rotate: 160deg;
+border-radius: 50%;
+box-shadow: 
+inset 0 0 20rem 1rem,
+0 0 20rem 1rem ;
+animation: ani 99s ease-in-out infinite;
+z-index: -1;
+
+}
+
+.appContainer:before{
+--tragetY:60rem;
+bottom: 20rem;
+right: -9rem;
+background: linear-gradient(-45deg, #004FFF, orangered);
+}
+
+.appContainer:after{
+--tragetY:-60rem;
+top: 20rem;
+left: -9rem;
+background: linear-gradient(45deg, #A7FF4E, #FF005D);
+}
+
+
+
+
+.appMain{
+
+max-height: min(90dvh - 8rem, 90svh - 2rem);
+background: #0001;
+color: #D0D0D0;
+backdrop-filter: blur(.8rem);
+overflow: hidden auto;
+z-index: 1000;
+}
+
+
+
+/* expairement */
+.appMain *{
+backdrop-filter: inherit;
+background: inherit;
+}
+
+
+.titleContainer{
+backdrop-filter: blur(0.8rem);
+}
+.titleContainer *{
+  backdrop-filter: inherit;
+}
+
+.appTitle{
+margin: 1rem;
+padding: 1rem;
+font-size: 2rem;
+text-align: center;
+text-transform: capitalize;
+border-radius:9rem;
+}
+
+
+/* text container code section*/
+
+.cameraContainer{
+aspect-ratio: 1;
+overflow:hidden auto;
+font-size: 2rem;
+text-transform: capitalize;
+text-align: center;
+}
+/* 
+.cameraContainer video{
+margin: 0.3rem;
+padding: 0.2rem 0.6rem;
+width: 50%;
+
+display: inline-block;
+
+border: 0.1rem solid ;
+border-radius: 1rem;
+} */
+
+
+canvas{
+background: salmon;
+}
+
+/*any type of user Input container code section*/
+
+
+
+/* predict container code section*/
+
+.predictContainer{
+aspect-ratio: 3;
+min-height: max(30dvh, 30svh);
+overflow: hidden auto;
+text-align: center;
+align-items: space-around;
+}
+
+
+
+.predictContainer .predictionList{
+/* text-align: left; */
+border-radius: 2rem;
+}
+
+
+.predictionList .prediction{
+margin: 1rem ;
+padding: 1rem 2rem;
+display:inline-block;
+/* color: lime; */
+font-size: 2rem;
+text-transform: capitalize;
+/* border-radius: ; */
+}
+
+
+
+.probability{
+margin: 0.3rem;
+padding: 0.2rem 0.8rem;
+--col:red;
+font-size:2.4rem ;
+color: var(--col, tan);
+}
+
+.prediction > .probability_index{
+font-style: italic;
+}
+
+
+.prediction > .probability_value{
+font-weight: 600;
+font-family: Segoe UI, Trebuchet MS;
+--col:pink;
+}
+
+.prediction > .probability_name{
+--col:brown;
+
+}
+
+
+
+
+
+
+/* button container code section*/
+
+.btnContainer{
+aspect-ratio: 3;
+overflow: hidden;
+text-align: center;
+align-items: space-around;
+}
+
+
+.btnContainer .btns{
+/* margin: 0 1rem; */
+padding: 1rem 2rem;
+display:inline-block;
+/* color: lime; */
+font-size: 2rem;
+text-transform: capitalize;
+border-radius: 2rem;
+}
+
+
+
+
+
+
+
+
+/*animation keys*/
+
+@keyframes ani{
+
+0%,100%{
+transform: translate(0, 0);
+}
+
+50%{
+transform: translate(0, var(--tragetY) );
+}
+
+}
+
+

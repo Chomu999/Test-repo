@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html charset=utf-8" />
+<title>webgl2 example 1 index</title>
+
+
+<!-- <meta name="viewport" content="width=device-width ,initial-scale=1.0, maximum-scale=1.0"> -->
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+html{
+font-size:10px;
+}
+body{
+width:100%; height:100%;
+background:#000;
+}
+
+canvas{
+position: absolute; top: 50%; left:50%;
+transform: translate(-50%, -50%);
+}
+
+#data-shader{
+display:none;
+}
+
+img{
+display:none;
+}
+
+
+</style>
+
+
+
+<script defer src="./js/utils.js"></script>
+
+</head>
+<body>
+<main id="main">
+
+<canvas data-gl="gl"></canvas>
+
+
+<div id="data-shader" class="shaderss">
+
+<!-- vertex shader -->
+<p data-glsl-shader="vs">#version 300 es
+precision highp float;
+
+//attribute
+layout (location =0 ) in vec3 a_Pos;
+layout (location =1 ) in vec2 a_TexCoord;
+
+
+
+out vec2 v_TexCoord;
+
+void main(){
+gl_Position = vec4( a_Pos.xyz, 1.0 );
+gl_PointSize = 60.0;
+v_TexCoord = a_TexCoord;
+
+}
+
+</p>
+<!-- fragment shader -->
+<p data-glsl-shader="fs">#version 300 es
+precision highp float;
+
+layout (location=0) out vec4 FragColor;
+
+
+uniform sampler2D tex0;
+
+in vec2 v_TexCoord;
+
+void main(){
+
+FragColor += texture(tex0,v_TexCoord) * vec4(1.0, 1.0, 1.0, 1.0);
+
+}
+
+
+
+</p>
+
+
+</div>
+
+<img src="./res/imgs/link1.png" id=img1 alt="link" />
+
+</main>
+
+
+<script>
+
+
+
+
+
+
+//
+
+const glResize=(gl)=>{
+
+let cvsSize;
+innerWidth<innerHeight?cvsSize=innerWidth:cvsSize=innerHeight;
+gl.canvas.width=cvsSize;
+gl.canvas.height=cvsSize;
+
+}
+
+
+const app=(gl)=>{
+
+glResize(gl)
+
+const stobj=Shader.GetShaderText('.shaderss');
+
+
+
+let verties=[
+ //x   y   z     u  v
+  -0.5,-0.5,0.0, 0, 0,  //0
+   0.5,-0.5,0.0, 1, 0, //1
+   0.5,0.5,0.0,  1, 1, //2
+  -0.5,0.5,0.0,  0, 1, //3
+];
+
+let uv=[
+ // u  v   
+    0, 0,  //0
+    1, 0,  //1
+    
+    1, 1,  //2
+    0, 1,  //3
+];
+
+let indies=[
+
+0,1,2,
+2,3,0,
+
+];
+
+let myProg=new shaderUtils(
+ stobj.vs,
+ stobj.fs);
+
+
+let vao=new VA();
+let vbo1=new VB(new Float32Array(verties));
+//let vbo2=new VB(new Float32Array(uv));
+let ibo=new IB(new Uint16Array(indies));
+let tbo=new Texture("img1");
+
+vbo1.Bind();
+gl.enableVertexAttribArray(0);
+gl.vertexAttribPointer(
+  0, 3,
+  gl.FLOAT, gl.FALSE,
+  5 * 4, 0 );
+//vbo2.Bind();
+gl.enableVertexAttribArray(1);
+gl.vertexAttribPointer(
+  1, 2,
+  gl.FLOAT, gl.FALSE,
+  5 * 4, 3*4 );
+myProg.Bind();
+myProg.SetUniform1i("tex0",0);
+
+vbo1.Unbind()
+//vbo2.Unbind()
+ibo.Unbind()
+tbo.Unbind()
+myProg.Unbind()
+
+
+let _R=50,_G=50,_B=90;
+const animate=(dt,gl)=>{
+
+gl.clearColor(_R/255, _G/255, _B/255, 1.0);
+gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+gl.viewport(0,0,gl.canvas.width,gl.canvas.height)
+
+
+myProg.Bind();
+vao.Bind();
+//vbo1.Bind();
+//vbo2.Bind();
+ibo.Bind();
+tbo.Bind();
+gl.drawElements(gl.TRIANGLES, 6,gl.UNSIGNED_SHORT, null);
+
+
+
+}
+
+
+let lt=1;
+const GameLoop=(ts)=>{
+
+let dt=ts-lt; lt+=ts;
+
+animate(dt,gl);
+requestAnimationFrame(GameLoop);
+}
+GameLoop(0);
+
+}
+
+
+//
+window.addEventListener("load",(e)=>{
+
+setTimeout( context => app(context) ,1000, gl);
+
+})
+
+//
+window.addEventListener("resize",(e)=>{
+
+glResize(gl)
+
+})
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="hi-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+:root{
+
+
+}
+
+
+html{
+font-size:10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style: none;
+}
+
+
+body{
+color-scheme: default;
+background: #353535;
+}
+
+
+
+
+
+
+.wrapper{
+margin:1rem auto;
+padding:1rem;
+width: min(39rem, 100% - 1rem);
+background: #9400FF23;
+border: .3rem solid #DADDDD;
+border-radius:2rem;
+box-shadow:
+1rem 1rem 2.2rem #0004,
+inset .5rem .6rem 2.2rem #fff4,
+inset -.5rem -.6rem 2.2rem #0004,
+-1rem -1rem 2.2rem #fff4
+;
+
+}
+
+
+
+
+
+
+</style>
+
+<title>tfjs test 1</title>
+
+
+
+<script  src="/storage/emulated/0/g_js_libs/tf.min.js"></script>
+
+<script  src="/storage/emulated/0/g_js_libs/plotly.min.js"></script>
+
+
+</head>
+
+<body>
+
+
+
+<div class="wrapper idk">
+<div id="sgdCont"></div>
+
+
+<div id="reluCont"></div>
+
+<div id="reluCont"></div>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<script>
+"use strict";
+
+
+
+//
+const strToHtml=(html)=>{
+const element = document.createElement("div");
+element.innerHTML = html;
+return  element.firstElementChild??undefined;
+}
+
+//sleep function helps to hold up workflow
+const sleep=async (t=1) => new Promise( res => setTimeout( () => res(true), t*1000) );
+
+
+
+
+const ppNN = ({x, w, bais})=>{
+const out = tf.dot(x, w).dataSync()[0];
+return out+bais < 0?0:1;
+}
+
+const sigmoidNN = ({x, w, bais})=>{
+const out = tf.dot(x, w).dataSync()[0];
+return tf.sigmoid(out+bais).dataSync()[0];
+}
+
+
+//
+const RenderActivationFunction=(xs, ys, title, cont)=>{
+
+const data = [
+{
+  x:xs, y:ys,
+  line: { shape:"spline", color:"gold" },
+  mode: "lines",
+}
+];
+
+Plotly.newPlot(cont, data, {
+  title,
+});
+
+
+}
+
+//
+const RenderSigmoidFunction=()=>{
+
+const xs = [...Array(20).keys()].map( x => x - 10);
+const ys = tf.sigmoid(xs).dataSync();
+
+RenderActivationFunction(xs, ys, "sigmoid", "sgdCont");
+}
+
+//
+const RenderReluFunction=()=>{
+
+const xs = [...Array(20).keys()].map( x => x - 10);
+const ys = tf.relu(xs).dataSync();
+
+RenderActivationFunction(xs, ys, "relu", "reluCont");
+}
+
+
+// INITIAL point aka starting point
+const INITIAL = async ()=>{
+
+
+
+const out = ppNN({
+  x:[1, 0],
+  w:[0.5, 0.9],
+  bais:-.5,
+})
+
+console.log(out)
+
+
+const out2 = sigmoidNN({
+  x:[0.6, 0.9],
+  w:[0.5, 0.9],
+  bais:-.5,
+})
+
+console.log(out2);
+
+
+
+
+const t0001 = tf.tensor([1, 2, 3], [1, 3]);
+
+const t0002 = tf.tensor([4, 5, 6], [3, 1]);
+
+
+const t0003 = tf.add(t0001, t0002);
+
+console.log(t0001.shape)
+console.log(t0001.rank)
+t0001.print()
+
+console.log(t0002.shape)
+console.log(t0002.rank)
+t0002.print()
+
+console.log(t0003.shape)
+console.log(t0003.rank)
+t0003.print()
+
+
+
+
+RenderSigmoidFunction()
+RenderReluFunction()
+
+
+}
+
+
+
+
+
+
+try{
+
+console.log("JS is Awesome")
+
+console.log(tf);
+
+
+INITIAL();
+
+
+
+}catch(e){
+console.log(`JavaScript uncatch error : ${e.stack}`);
+}
+
+
+</script>
+
+</body>
+</html>

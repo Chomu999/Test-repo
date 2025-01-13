@@ -1,0 +1,627 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>HTML CANVAS GAME BOI</title>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+#main-box{
+margin:0;
+padding:0;
+background-color:#fefefe;
+width:100%;
+height:100%;
+background-color:#2D083F;
+}
+
+
+
+
+#screen-leyar{
+margin:0;
+padding:0;
+width:300px;
+height:300px;
+position:absolute;
+top:20px;
+left:46.545500000000004px;
+background-color:transparent;
+
+/* 
+background-image:url('./icon.png');
+background-position:0 32px;
+ */
+
+}
+
+.btns-leyar{
+
+width:390px;
+height:390px;
+position:fixed;
+top:360px;
+left:1.545500000000004px;
+display:grid;
+
+grid-template-columns: repeat(12, 30px);
+
+grid-template-rows: repeat(12, 30px);
+grid-gap:2px;
+
+}
+
+#pre1{
+
+grid-column:10/13;
+grid-row:12/10;
+
+background-color:#FF0018;
+}
+
+#pre2{
+
+grid-column:3/6;
+grid-row:1/3;
+
+background-color:#00FF15;
+}
+
+#pre3{
+
+grid-column:10/13;
+grid-row:2/4;
+
+background-color:#00FFF6;
+}
+
+#pre4{
+
+grid-column:1/3;
+grid-row:3/6;
+
+background-color:#009E00;
+}
+
+#pre5{
+
+grid-column:10/13;
+grid-row:4/7;
+
+background-color:#0F00FF;
+}
+
+#pre6{
+
+grid-column:6/8;
+grid-row:3/6;
+
+background-color:#B800FF;
+}
+
+#pre7{
+
+grid-column:3/4;
+grid-row:3/6;
+
+background-color:#FF00E5;
+}
+
+#pre8{
+
+grid-column:3/6;
+grid-row:6/8;
+
+background-color:#FF5F00;
+}
+
+#pre9{
+
+grid-column:4/5;
+grid-row:4/5;
+
+background-color:#FCFF00;
+}
+
+
+
+#pre10{
+grid-column:5/6;
+grid-row:3/6;
+
+background-color:#FF74CA;
+}
+
+
+/*
+.btn{
+background-color:red;
+}
+
+
+.btn:active{
+background-color:blue;
+}
+*/
+
+p{
+color:#efe00;
+}
+
+
+</style>
+
+</head>
+
+<body>
+
+
+
+
+
+<div id="main-box" >
+<!-- 
+<img src="icon.png"/>
+ -->
+<div id="screen-leyar">
+<canvas class="cvs"></canvas>
+</div>
+
+<div class="btns-leyar">
+
+<div id="pre1"></div>
+<div id="pre2"></div>
+<div id="pre3"></div>
+
+<div id="pre4"></div>
+<div id="pre5"></div>
+<div id="pre6"></div>
+
+<div id="pre7"></div>
+<div id="pre8"></div>
+<div id="pre9"></div>
+
+<div id="pre10"></div>
+<!-- 
+<div id="pre11"></div>
+ -->
+
+</div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script type="module">
+
+import * as bistor from "./lib/bistor.js";
+
+const cvs=bistor.cvs;
+
+const ctx=bistor.ctx;
+
+const body=document.body;
+
+
+
+
+
+function randint(min,max){
+return Math.floor(Math.random() * (1+max-min) + min)
+}
+
+
+
+const cvsW=300;
+const cvsH=300;
+
+
+cvs.width=cvsW;
+cvs.height=cvsH;
+
+
+let cls='class'
+
+let enemyW,enemyH,enemyC;
+
+enemyW=cvsW/10;
+enemyH=cvsH/10;
+enemyC='blue';
+
+
+let plyBC='#00E3FF';
+let plySize=30
+
+//let player=new bistor.Player3(plySize,plySize,plyBC,4);
+
+
+let player=new bistor.Player5(plySize,plySize,plyBC);
+
+//player.pos.x=80
+//player.pos.y=20
+
+let ball=new bistor.gvtBall1(160,60,8,20,'red');
+
+
+
+let boxs=[];
+
+
+let boxInt=randint(10 , 250)
+
+let rr=50;
+
+let colour=['#00BAFF','#FF8000','#FF0068','#E300FF','#3600FF'];
+
+let r,x,y,i1,dx,dy;
+
+
+
+
+
+r= randint(rr/10 , rr);
+x= randint(0 , cvs.width - r);
+y= randint(0 , cvs.height - r);
+i1= randint(0,colour.length)
+dx= randint(r , r*2);
+dy= randint(r , r*2);
+let item1=new bistor.flotItem1(x,y,dx,dy,r,colour[i1]);
+
+
+
+let pp2=new bistor.Player5(80,40,'orange');
+/*
+for(let i=0;i<boxInt;i++){
+
+
+r= randint(rr/10 , rr);
+x= randint(0 , cvs.width - r);
+y= randint(0 , cvs.height - r);
+i1= randint(0,colour.length)
+i2= randint(0,colour.length)
+dy= randint(r , r*2);
+boxs.push( new Box2(x,y,dy,r,colour[i1],colour[i2]));
+}
+*/
+
+//let player=new bistor.Mario(30,30,plyBC);
+
+//let enemy = new bistor.Enemy(enemyW,enemyH,enemyC);
+
+
+
+
+
+let pre1=document.querySelector('#pre1');
+let pre2=document.querySelector('#pre2');
+let pre3=document.querySelector('#pre3');
+
+let pre4=document.querySelector('#pre4');
+let pre5=document.querySelector('#pre5');
+let pre6=document.querySelector('#pre6');
+
+let pre7=document.querySelector('#pre7');
+let pre8=document.querySelector('#pre8');
+
+let pre9=document.querySelector('#pre9');
+let pre10=document.querySelector('#pre10');
+
+
+
+
+
+
+
+//buttonWork()
+
+const clk='click';
+
+
+
+
+let touch=['touchstart',
+'touchmove',
+'touchend']
+
+
+
+
+pre2.addEventListener(touch[0],plUp)
+
+pre4.addEventListener(touch[0],plLeft)
+pre6.addEventListener(touch[0],plRight)
+
+pre8.addEventListener(touch[0],plDown);
+
+
+
+
+
+
+pre2.addEventListener(touch[2],plUDEnd)
+
+pre4.addEventListener(touch[2],plRLEnd)
+pre6.addEventListener(touch[2],plRLEnd)
+
+pre8.addEventListener(touch[2],plUDEnd)
+
+
+
+
+
+
+pre7.addEventListener(clk,fireLeft);
+
+pre5.addEventListener(clk,PlayerBig);
+pre9.addEventListener(clk,PlayerSmoll);
+
+pre10.addEventListener(clk,fireRight);
+
+
+
+
+function PlayerBig(){
+player.width = plySize*1.5;
+player.height = plySize*1.5;
+
+pre5.style.display='none';
+setTimeout(()=>{
+pre5.style.display='block'
+
+player.width = plySize;
+player.height = plySize;
+
+},9000)
+}
+
+
+function PlayerSmoll(){
+player.width = plySize/2;
+player.height = plySize/2;
+
+pre9.style.display='none';
+setTimeout(()=>{
+pre9.style.display='block'
+
+player.width = plySize;
+player.height = plySize;
+
+},9000)
+}
+
+
+
+
+
+let arrows=[]
+let enemies=[]
+let step=3
+let playerGo1=false;
+let arrowX=1.90;
+
+//player arrow fireLeft ↓
+
+function fireLeft(){
+let velocity = {x: -arrowX,y: 0}
+arrows.push(new bistor.Arrow(
+    player.pos.x,
+    player.pos.y,
+    4,'blue',
+    velocity
+    ))
+}
+
+
+//player arrow fireRight ↓
+function fireRight(){
+let velocity = {x: arrowX,y: 0}
+arrows.push(new bistor.Arrow(
+    player.pos.x,
+    player.pos.y,
+    4,'blue',
+    velocity
+    ))
+//console.log(player.position.x)
+}
+
+
+
+
+//playerUp ↓
+function plUp(){
+player.speed.y += step*8
+
+}
+
+
+
+//playerLeft ↓
+function plLeft(){
+playerGo1 = true
+if (playerGo1 == true){
+player.speed.x -= step
+}
+}
+
+
+//playerRight ↓
+
+function plRight(){
+playerGo1 = true
+if (playerGo1 == true){
+player.speed.x += step
+}
+}
+
+//playerDown ↓
+function plDown(){
+playerGo1 = true
+if (playerGo1 == true){
+player.speed.y -= step
+}
+}
+
+
+function plUDEnd(){
+player.speed.y = 0
+
+playerGo1 = false
+}
+
+
+function plRLEnd(){
+
+player.speed.x = 0
+playerGo1 = false
+}
+
+
+
+
+
+function spawnEnemies(){
+setInterval(() =>{
+
+let speedX=0
+
+
+
+let r1=Math.floor(Math.random() * 399 + 1)
+
+
+let position={x:0,y:270};
+
+let r3=Math.floor(Math.random() * 2 + 1)
+if(1<r3){
+
+position.x = 330;
+
+speedX = -1
+}
+else{
+
+position.x = -30;
+speedX = 1
+
+}
+
+
+
+
+
+
+
+//for enemies 
+
+enemies.push(new bistor.NewEnemy(
+    position.x,
+    270,
+    20,
+    `hsl(${r1},100%,50%,1)`,speedX
+    ));
+    
+//console.log(r2)
+},1000)
+
+
+}
+
+spawnEnemies()
+
+
+
+
+
+
+
+
+
+const gameLoop=()=>{
+
+window.requestAnimationFrame(gameLoop);
+
+ctx.clearRect(0,0,cvs.width,cvs.height);
+
+player.update()
+
+ball.update()
+
+//item1.update()
+
+
+//pp2.update()
+
+
+
+arrows.forEach((arrow)=>{
+arrow.update()
+})
+
+enemies.forEach((enemy)=>{
+enemy.update()
+})
+
+enemies.forEach((enemy, i)=>{
+enemy.update()
+
+
+arrows.forEach((arrow, j)=>{
+
+//kill enemies
+
+let dist = Math.hypot(arrow.x - enemy.position.x, arrow.y - enemy.position.y);
+
+if(dist - enemy.radius - arrow.radius < 0.5){
+setTimeout(()=>{
+
+enemies.splice(i, 1);
+arrows.splice(j, 1);
+},0);
+
+}
+
+})
+
+})
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+gameLoop()
+
+
+
+</script>
+
+
+</body>
+</html>

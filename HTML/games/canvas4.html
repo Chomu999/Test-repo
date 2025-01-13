@@ -1,0 +1,203 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>HTML CANVAS GAME BOI</title>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+div#mainBox{
+margin:0;padding:0;
+width:100vw;height:100vh;
+background-color:#0D0C1E;
+
+}
+
+canvas{
+margin:0;padding:0;position:fixed;
+top:0;left:0;
+background:url('./img/stonebrick_cracked.png');
+background-size:50% 30%;
+/* 
+transform: perspective(400px) rotate3d(0,8,3,50deg);
+*/
+}
+
+
+</style>
+</head>
+<body>
+<div id="mainBox">
+<canvas></canvas>
+
+</div>
+<script>
+
+let cvs=document.querySelector('canvas');
+let ctx=cvs.getContext('2d');
+let screenSize=300;
+let mainW=330;
+
+cvs.width=innerWidth;
+cvs.height=innerHeight;
+let hue=0;
+let sorce=0;
+
+
+let touch=['touchstart','touchmove','touchend']
+
+
+// load images
+const images = {};
+images.player = new Image();
+images.player.src = './img/character2.png';
+const characterActions = ['up', 'top right', 'right', 'down right', 'down'];
+const numberOfCharacters = 25;
+const characters = [];
+
+class Character {
+constructor(){
+        this.width = 40;
+        this.height = 43.875;
+        this.frameX = 3;
+        this.x = Math.random() * cvs.width - this.width;
+        this.y = Math.random() * cvs.height - this.height;
+        this.speed = (Math.random() * 2) + 3;
+        this.minFrame = 0;
+        this.action = characterActions[Math.floor(Math.random() * characterActions.length)];
+        if (this.action === 'up') {
+            this.frameY = 0; 
+            this.minFrame = 4;
+            this.maxFrame = 15;
+        }
+        else if (this.action === 'top right') {
+            this.frameY = 1; 
+            this.minFrame = 4;
+            this.maxFrame = 14;
+        }
+        else if (this.action === 'right') {
+            this.frameY = 3; 
+            this.minFrame = 3;
+            this.maxFrame = 13;
+        }
+        else if (this.action === 'down right') {
+            this.frameY = 4;
+            this.minFrame = 4;
+            this.maxFrame = 15;
+        } 
+        else if (this.action === 'down') {
+            this.minFrame = 0;
+            this.frameY = 6;
+            this.maxFrame = 12;
+        }
+        else if (this.action === 'jump') {
+            this.minFrame = 0;
+            this.frameY = 7; 
+            this.maxFrame = 9;
+        }
+
+    }
+draw(){
+drawSprite(images.player, this.width * this.frameX, this.height * this.frameY, this.width, this.height, this.x, this.y, this.width * 1.5, this.height * 1.5);
+
+if (this.frameX < this.maxFrame) this.frameX++;
+else this.frameX = this.minFrame;
+}
+
+
+update(){
+if (this.action === 'up') {
+            if (this.y < 0 - (this.height * 5)) {
+                 this.y = cvs.height + this.height;
+                 this.x = Math.random() * cvs.width;
+                 this.speed = (Math.random() * 2) + 3;
+             } else {
+                 this.y -= this.speed;  
+             }
+         }
+
+else if (this.action === 'top right') {
+             if (this.y < 0 - this.height && this.x > cvs.width + this.width) {
+                 this.y = cvs.height + this.height
+                 this.x = Math.random() * cvs.width;
+                 this.speed = (Math.random() * 2) + 3;
+             } else {
+                 this.y -= this.speed; 
+                 this.x += this.speed; 
+             }
+         }
+        
+else if (this.action === 'right') {
+             if (this.x > cvs.width + (this.width * 5)) {
+                 this.x = 0 - this.width;
+                 this.y = Math.random() * cvs.height; 
+                 this.speed = (Math.random() * 2) + 3;
+             } else {
+                 this.x += this.speed; 
+             }
+         }
+
+else if (this.action === 'down right') {
+             if (this.y > cvs.height + this.height && this.x > cvs.width + this.width) {
+                 this.y = 0 - this.height
+                 this.x = Math.random() * cvs.width;
+                 this.speed = (Math.random() * 2) + 3;
+             } else {
+                 this.y += this.speed; 
+                 this.x += this.speed; 
+             }
+         } 
+
+else if (this.action === 'down') {
+             if (this.y > cvs.height + (this.height * 5)) {
+                 this.y = 0 - this.height;
+                 this.x = Math.random() * cvs.width;
+                 this.speed = (Math.random() * 2) + 3;
+             } else {
+                 this.y += this.speed;  
+             }
+         }
+
+else if (this.action === 'jump') {
+ 
+         }
+}
+
+
+}
+
+for (i = 0; i < numberOfCharacters; i++){
+    characters.push(new Character());
+}
+
+
+function drawSprite(img, sX, sY, sW, sH, dX, dY, dW, dH){
+    ctx.drawImage(img, sX, sY, sW, sH, dX, dY, dW, dH);
+}
+
+function animate(){
+    ctx.clearRect(0,0,cvs.width, cvs.height);
+    for (i = 0; i < characters.length; i++ ){
+        characters[i].draw();
+        characters[i].update();
+    }
+
+}
+
+window.onload = setInterval(animate, 1000/20);
+
+window.addEventListener('resize', function(){
+    cvs.height = window.innerHeight;
+    cvs.width = window.innerWidth;
+})
+
+</script>
+</body>
+</html>

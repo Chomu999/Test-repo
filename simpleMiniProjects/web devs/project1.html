@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=10.0 user-scalable=no" />
+
+<title>project 1 html5 and css3</title>
+
+<style>
+
+*{
+margin:0; padding:0; box-sizing:border-box;
+/* border:0.1px dashed red; */
+}
+
+
+:root{
+
+--ParagraphTextColor:#434343;
+
+--videoBGColor:#141414;
+--videoBGColorSub:#696969;
+--videoTitleColorSub:var(--videoBGColorSub);
+
+--downloadVideoBGColor:#141414;
+--downloadVideoThumbnailColor:#141414;
+--downloadVideoDetailBGColor:#141414;
+
+--downloadVideoTitleColor:white;
+--downloadChannelNameColor:gray;
+--downloadNumOfViewColor:gray;
+
+--downloadVideoTitleFontSize:1.3rem;
+--downloadChannelNameFontSize:1.2rem;
+--downloadNumOfViewFontSize:1rem;
+
+--notDownloadVideoBGColor:#1D1D1D;
+--notDownloadVideoThumbnailColor:var(--notDownloadVideoBGColor);
+--notDownloadVideoDetailColor:var(--notDownloadVideoBGColor);
+
+
+--notDownloadVideoTitleColor:white;
+--notDownloadChannelNameColor:#C1C1C1;
+
+--notDownloadVideoTitleFontSize:1.3rem;
+--notDownloadChannelNameFontSize:1rem;
+
+}
+
+
+
+
+html{
+font-size:10px;
+color-scheme: light;
+}
+
+
+
+body{
+}
+
+main{
+/* width:100%; height:100%; */
+background: black;
+overflow:hidden auto;
+
+
+}
+
+
+/* offline video sec */
+
+.offlineContainer{
+width:100%; height:30rem;
+background: var(--videoBGColor);
+}
+
+.offlineContainer > .videoThumbnail{
+width:100%; height:70%;
+background: var(--videoBGColorSub);
+}
+
+.offlineContainer > .videoDetail{
+width:100%; height:30%;
+background: var(--videoBGColor);
+display:flex;
+align-items:center;
+justify-content:space;
+
+}
+
+.offlineContainer > .videoDetail > .channelIcon{
+width:15%; height:100%;
+background:var(--videoBGColor);
+}
+
+.offlineContainer > .videoDetail > .channelIcon > .img{
+margin: 1rem auto;
+width:3.5rem; height:3.5rem;
+background:var(--videoBGColorSub);
+border-radius:50%;
+display:block;
+}
+
+
+.offlineContainer > .videoDetail > .videoTitle{
+width:85%; height:100%;
+}
+
+.offlineContainer > .videoDetail > .videoTitle > .titleTexts{
+margin:1rem;
+width:90%;
+height:1.4rem;
+background:var(--videoTitleColorSub);
+border-radius: 2rem;
+}
+
+.offlineContainer > .videoDetail > .videoTitle > .titleTexts.title2{
+width:60%;
+}
+
+.offlineContainer > .videoDetail > .videoTitle > .titleTexts.title3{
+width:40%;
+}
+
+
+
+
+
+
+/* downloaded videos sec */
+
+
+.downloadVideoContainer{
+padding:0 1rem;
+width:100%; height:10rem;
+background:var(--downloadVideoBGColor);
+display:flex;
+align-items:center;
+justify-content:space-around;
+}
+
+.downloadVideoContainer > .videoThumbnail{
+width:45%; height:96%;
+background: var(--downloadVideoThumbnailColor);
+border-radius:1.2rem;
+display:grid;
+place-items:center;
+}
+
+.downloadVideoContainer > .videoThumbnail > img{
+width:100%;
+}
+
+.downloadVideoContainer > .videoDetail{
+padding:0 1rem;
+width:50%; height:96%;
+background: var(--downloadVideoDetailBGColor);
+}
+
+
+.downloadVideoContainer > .videoDetail > .videoTitle{
+color:var(--downloadVideoTitleColor);
+font-size:var(--downloadVideoTitleFontSize);
+}
+
+
+.downloadVideoContainer > .videoDetail > .channelNameAndVideoIsDownload{
+/* padding:1rem 0.5rem; */
+width:100%; height:3rem;
+
+display:flex;
+align-items:center;
+/* justify-content:space; */
+}
+
+.downloadVideoContainer > .videoDetail > .channelNameAndVideoIsDownload > .videoIsDownload{
+width:1.5rem; height:1.5rem;
+display:grid;
+place-items:center;
+background:#ADADAD;
+border-radius:50%;
+}
+
+.downloadVideoContainer > .videoDetail > .channelNameAndVideoIsDownload > .channelName{
+margin: 0 1rem;
+color:var(--downloadChannelNameColor);
+font-size:var(--downloadChannelNameFontSize);
+}
+
+.downloadVideoContainer > .videoDetail > .numOfView{
+color:var(--downloadNumOfViewColor);
+font-size:var(--downloadNumOfViewFontSize);
+}
+
+.downloadVideoContainer > .deleteVideo{
+width:2%; height:96%;
+
+color:var(--downloadVideoTitleColor);
+text-align: center;
+
+font-size:1rem;
+font-weight:800;
+}
+
+
+/*  Download PlayList sec */
+
+
+.downloadPlayListContainer{
+padding: 0 1rem;
+width:100%; height:10rem;
+background:#272727;
+display:flex;
+align-items:center;
+justify-content:space-around;
+}
+
+.downloadPlayListContainer > .PlayListThumbnail{
+width:45%; height: 95%;
+overflow:auto;
+
+}
+
+.downloadPlayListContainer > .PlayListThumbnail > .littleDetail{
+width:45%; height: 95%;
+
+background: #FF0079;
+
+z-index: -10;
+
+
+}
+
+.downloadPlayListContainer > .PlayListThumbnail > img{
+width:100%;
+
+
+z-index: 20;
+}
+
+
+.downloadPlayListContainer > .PlayListDetail{
+padding:0 1rem;
+width:50%; height: 95%;
+background: inherit;
+}
+
+.downloadPlayListContainer > .PlayListDetail > .PlayListTitle{
+font-size:1.2rem;
+font-weight:800;
+color:#D3D3D3;
+}
+
+.downloadPlayListContainer > .PlayListDetail > .channelNameAndPlayListIsDownload{
+width:100%; height:3rem;
+display:flex;
+align-items:center;
+}
+
+
+.downloadPlayListContainer > .PlayListDetail > .channelNameAndPlayListIsDownload > .PlayListIsDownload{
+width:1.5rem; height:1.5rem;
+background:#DCDCDC;
+border-radius:50%;
+display:grid;
+place-items:center;
+}
+
+
+
+.downloadPlayListContainer > .PlayListDetail > .channelNameAndPlayListIsDownload > .channelName{
+margin:0 1rem;
+font-size:1.4rem;
+color:#E2E2E2;
+}
+
+.downloadPlayListContainer > .PlayListDetail > .amountOfVideos{
+font-size:1.2rem;
+color: #E8E8E8;
+}
+
+.downloadPlayListContainer > .deleteVideo{
+width:2%; height:96%;
+
+align-items:center;
+color:red;
+
+}
+
+/* not Download Video sec */
+
+
+
+.notDownloadVideoContainer{
+width:100%; height:13rem;
+background: var(--notDownloadVideoBGColor);
+display:flex;
+align-items:center;
+justify-content:space-around;
+
+}
+
+.notDownloadVideoContainer > .videoThumbnail{
+width:45%; height:90%;
+background: var(--notDownloadVideoBGColor);
+border-radius:2rem;
+
+display:grid;
+place-items:center;
+
+}
+
+
+
+
+.notDownloadVideoContainer > .videoThumbnail > img{
+width: 100%;
+}
+
+.notDownloadVideoContainer > .videoDetail{
+padding:1rem;
+width:45%; height:90%;
+background: var(--notDownloadVideoBGColor);
+}
+
+.notDownloadVideoContainer > .videoDetail > .videoTitle{
+color:var(--notDownloadVideoTitleColor);
+font-size:var(--notDownloadVideoTitleFontSize);
+}
+
+.notDownloadVideoContainer > .videoDetail > .channelName{
+color:var(--notDownloadChannelNameColor);
+font-size:var(--notDownloadChannelNameFontSize);
+}
+
+.notDownloadVideoContainer > .videoDownloadBTN{
+width:2.5rem; height:2.5rem;
+
+display:grid;
+place-items:center;
+
+background: #949790;
+color: var(--notDownloadVideoDetailColor);
+border-radius:50%;
+font-size:2rem;
+font-weight:2rem;
+}
+
+
+</style>
+
+</head>
+<body>
+
+
+<main>
+
+
+<!-- <div class="downloadPlayListContainer">
+
+
+<div class="PlayListThumbnail">
+
+<div class="littleDetail"> 15 &xi;</div>
+
+<img src="./images/playList-1.jpg" alt=" PlayList poster" />
+</div>
+
+<div class="PlayListDetail">
+
+<p class="PlayListTitle">KUNG FU PANDA 3 IN HUNDI FULL HD</p>
+
+<div class="channelNameAndPlayListIsDownload">
+<div class="PlayListIsDownload">&xi;</div>
+<p class="channelName">Satnam</p>
+</div>
+
+<p class="amountOfVideos">15 Videos</p>
+
+</div>
+
+<div class="deleteVideo">
+&Xi;
+</div>
+
+</div> -->
+
+
+
+
+<!--  -->
+
+
+</main>
+
+<script>
+
+
+
+
+
+const app=()=>{
+
+const NotDownloadVideoTemp=`
+
+
+<div class="notDownloadVideoContainer">
+
+
+<div class="videoThumbnail">
+<img src="./images/notDownload/videoThumbnail-1.png" alt="video poster" />
+</div>
+
+<div class="videoDetail">
+
+<p class="videoTitle">I Built a Real iPhone 15 Pro Max in Minecraft Hardcore</p>
+
+<p class="channelName">Sathxu</p>
+
+
+</div>
+
+<div class="videoDownloadBTN">&#x2193;</div>
+
+</div>
+
+
+
+`
+
+
+const DownloadVideoTemp=`
+
+<div class="downloadVideoContainer">
+
+
+<div class="videoThumbnail">
+<img src="./images/videoThumbnail-1.jpg" alt=" video poster" />
+</div>
+
+<div class="videoDetail">
+
+<p class="videoTitle">how this game render millions of blades grass</p>
+
+<div class="channelNameAndVideoIsDownload">
+<div class="videoIsDownload">&xi;</div>
+<p class="channelName">Stylized Statoin</p>
+</div>
+
+<p class="numOfView">3.4 lakh views * 7 months ago</p>
+
+</div>
+
+<div class="deleteVideo">
+&Xi;
+</div>
+
+</div>
+
+
+
+
+`
+
+const offlineVideoTemp=`
+
+<div class="offlineContainer">
+
+<div class="videoThumbnail">
+
+</div>
+
+<div class="videoDetail">
+
+<div class="channelIcon">
+<div class="img"></div>
+</div>
+
+<div class="videoTitle">
+
+<div class="titleTexts title1"></div>
+<div class="titleTexts title2"></div>
+<div class="titleTexts title3"></div>
+
+</div>
+
+</div>
+
+</div>
+`
+
+const rootElement=document.querySelector("main")
+
+
+for(let i=0;i<20;i++){
+rootElement.innerHTML += offlineVideoTemp;
+}
+
+
+}
+
+//querySelector
+//querySelectorAll
+
+window.addEventListener("load", ()=>{
+
+console.log("JS is Awesome")
+app()
+//alert("hello world")
+
+})
+
+</script>
+
+</body>
+</html>

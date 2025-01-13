@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html charset=utf-8" />
+<title>webgl2 example 8 rotate </title>
+
+
+<!-- <meta name="viewport" content="width=device-width ,initial-scale=1.0, maximum-scale=1.0"> -->
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+
+<style>
+
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+html{
+font-size:10px;
+}
+
+body{
+width:100%; height:100%;
+background:#000;
+}
+
+canvas {
+position:absolute;
+top:50%; left:50%;
+transform:translate(-50%,-50%);
+}
+
+.shader-data{
+display:none;
+}
+
+img{
+display:none!important;
+}
+
+
+</style>
+
+<script src="./js/utils.js" defer ></script>
+<script src="./js/lib/gl-matrix.js" defer ></script>
+
+<script src="/storage/emulated/0/g_js_libs/dat.gui.min.js"></script>
+
+<script>
+
+
+function glClearError(){
+//while (!gl.getError());
+
+gl.getError();
+}
+
+//let errNum=0;
+function glLogCall(fun=1){
+
+glClearError();
+fun;
+//let err;
+while(err = gl.getError()){
+//throw InternalError('hi');
+//throw RangeError("webgl Error"+err);
+throw new Error(`webgl Error  ${err} line on ${6+9}`);
+
+return false;
+}
+return true;
+
+}
+
+
+function glLayout( noc, offset) {
+
+let length = noc[noc.length-1];
+
+for(let i=0;i<noc.length-1; i++){
+
+gl.enableVertexAttribArray(i);
+gl.vertexAttribPointer(
+
+  i, noc[i],
+  
+  gl.FLOAT, false,
+  
+  length*4, offset[i]*4
+);
+
+}
+}
+
+
+</script>
+
+
+</head>
+<body>
+<main id="main">
+
+<canvas></canvas>
+
+
+<!-- <div class="shader-data" data-shader="shader">
+
+<p data-glsl-shader="vs">#version 300 es
+precision highp float;
+
+
+layout (location = 0) in vec3 a_Pos;
+layout (location = 1) in vec4 a_Color;
+//layout (location = 2) in vec3 a_offset;
+
+out vec4 v_Color;
+//out vec3 v_ColorOffset;
+
+void main(){
+
+gl_Position = vec4( a_Pos.xyz, 1.0f );
+v_Color = a_Color;
+//v_ColorOffset = a_offset;
+gl_PointSize = 10.0f;
+
+}
+
+</p>
+
+<p data-glsl-shader="fs">#version 300 es
+precision highp float;
+
+out vec4 FragColor;
+
+in vec4 v_Color;
+//in vec3 v_ColorOffset;
+
+
+
+void main(){
+//vec3 color=vec3(v_Color+v_ColorOffset);
+FragColor += v_Color.rgba;
+}
+
+</p>
+
+
+</div> -->
+
+<div class="shader-data" data-shader="shader">
+
+<p data-glsl-shader="vs">#version 300 es
+precision mediump float;
+
+
+layout (location = 0) in vec3 a_Pos;
+layout (location = 1) in vec4 a_Color;
+
+
+uniform mat4 WorldMat;
+uniform mat4 ViewMat;
+uniform mat4 ProjMat;
+
+
+out vec4 v_Color;
+
+void main(){
+
+v_Color = a_Color;
+
+gl_Position = ProjMat * ViewMat * WorldMat * vec4(a_Pos, 1.0f);
+
+}
+</p>
+
+<p data-glsl-shader="fs">#version 300 es
+precision mediump float;
+
+out vec4 FragColor;
+in vec4 v_Color;
+
+
+
+void main(){
+FragColor = v_Color;
+}
+
+</p>
+
+
+</div>
+
+
+</main>
+
+
+<script>
+
+
+
+
+
+
+
+
+//const imgURL =`/storage/emulated/0/Download/Zelda2.png`
+
+const app=(gl)=>{
+
+let gui = new dat.gui.GUI();
+
+//let verties=[
+// //x   y       
+//    0.0,0.5,   
+//    0.5,-0.5,  
+//   -0.5,-0.5,  
+//];
+
+const camera={
+pos:{ x:0 , y:0 , z:4 },
+rot:{ x:0 , y:1 , z:0 },
+}
+
+
+let verties=[
+ // X, Y, Z         R,  G,  B,  A
+		// Top
+		-1.0,1.0,-1.0,   0.9,0.9,0.9,1.0,
+		-1.0,1.0,1.0,    0.9,0.9,0.9,1.0,
+		1.0,1.0,1.0,     0.9,0.9,0.9,1.0,
+		1.0,1.0,-1.0,    0.9,0.9,0.9,1.0,
+
+		// Left
+		-1.0,1.0,1.0,    1.0,0.0,1.0,1.0,
+		-1.0,-1.0,1.0,   1.0,0.0,1.0,1.0,
+		-1.0,-1.0,-1.0,  1.0,0.0,1.0,1.0,
+		-1.0,1.0,-1.0,   1.0,0.0,1.0,1.0,
+
+		// Right
+		1.0,1.0,1.0,    1.0,1.0,0.0,1.0,
+		1.0,-1.0,1.0,   1.0,1.0,0.0,1.0,
+		1.0,-1.0,-1.0,  1.0,1.0,0.0,1.0,
+		1.0,1.0,-1.0,   1.0,1.0,0.0,1.0,
+
+		// Front
+		1.0,1.0,1.0,    0.0,0.5,1.0,1.0,
+		1.0,-1.0,1.0,   0.0,0.5,1.0,1.0,
+		-1.0,-1.0,1.0,  0.0,0.5,1.0,1.0,
+		-1.0,1.0,1.0,   0.0,0.5,1.0,1.0,
+
+		// Back
+		1.0,1.0,-1.0,    0.5,0.5,1.0,1.0,
+		1.0,-1.0,-1.0,   0.5,0.5,1.0,1.0,
+		-1.0,-1.0,-1.0,  0.5,0.5,1.0,1.0,
+		-1.0,1.0,-1.0,   0.5,0.5,1.0,1.0,
+
+		// Bottom
+		-1.0,-1.0,-1.0,   0.0,0.5,0.6,1.0,
+		-1.0,-1.0,1.0,    0.0,0.5,0.6,1.0,
+		1.0,-1.0,1.0,     0.0,0.5,0.6,1.0,
+		1.0,-1.0,-1.0,    0.0,0.5,0.6,1.0,
+
+];
+
+
+//
+//let verties=[
+// //  x   y   z      r   g   b   a
+//    0.0,0.5, 1.0,  1.0,0.5,0.5,0.5,
+//    0.5,-0.5,0.5,  1.0,0.0,1.0,0.5,
+//   -0.5,-0.5,-0.5,  1.0,0.0,0.0,0.5,
+//];
+
+
+//let verties=[
+//   x   y     r   g   b  Coffset x   y   z
+//    0.0,0.5,   0.5,0.0,0.0,      0.5,0.0,0.0,
+//    0.5,-0.5,  0.0,0.0,0.5,      0.0,0.0,0.5,
+//   -0.5,-0.5,  0.5,0.5,0.0,      0.5,0.5,0.0,
+//];
+
+
+let indies=[
+		// Top
+		0, 1, 2,
+		0, 2, 3,
+
+		// Left
+		5, 4, 6,
+		6, 4, 7,
+
+		// Right
+		8, 9, 10,
+		8, 10, 11,
+
+		// Front
+		13, 12, 14,
+		15, 14, 12,
+
+		// Back
+		16, 17, 18,
+		16, 18, 19,
+
+		// Bottom
+		21, 20, 22,
+		22, 20, 23,
+];
+
+
+//const renderer=new Renderer();
+let sto=Shader.GetShaderText(".shader-data")
+
+let Prog=new shaderUtils(sto.vs, sto.fs);
+
+let vao=new VA();
+let vbo=new VB(new Float32Array(verties));
+let ibo=new IB(new Uint16Array(indies));
+
+
+VertexBufferLayout.glLayout(
+[3/*elmt vec3 1*/,
+ 4/*elmt vec4 2*/,
+// gono
+ 7/*length of arr column*/],
+ [0, 1],
+/*offset*/
+ [0, 3] );
+
+
+Prog.Bind();
+let uloc={
+world:Prog.GetULoc("WorldMat"),
+view:Prog.GetULoc("ViewMat"),
+proj:Prog.GetULoc("ProjMat"),
+}
+
+
+let world_Matrix=new Float32Array(16);
+let view_Matrix=new Float32Array(16);
+let proj_Matrix=new Float32Array(16);
+
+mat4.identity(world_Matrix);
+
+mat4.identity(view_Matrix);
+mat4.lookAt(view_Matrix, [0, 0, 0], [0, 5, 0], [5, 5, 5]);
+
+mat4.identity(proj_Matrix);
+mat4.perspective(proj_Matrix,
+glMatrix.toRadian(45),
+gl.canvas.width / gl.canvas.height,
+1.0,
+1000.0);
+
+
+
+
+
+gl.uniformMatrix4fv(uloc.world, gl.FALSE, world_Matrix);
+gl.uniformMatrix4fv(uloc.view,  gl.FALSE, view_Matrix);
+gl.uniformMatrix4fv(uloc.proj,  gl.FALSE, proj_Matrix);
+
+
+vao.Unbind();
+vbo.Unbind();
+ibo.Unbind();
+Prog.Unbind();
+/////////
+
+
+let posF = gui.addFolder("pos");
+
+posF.add(camera.pos, "x", -100, 100, 1);
+posF.add(camera.pos, "y", -100, 100, 1);
+posF.add(camera.pos, "z", -100, 100, 1);
+
+
+let rotF = gui.addFolder("rot");
+
+rotF.add(camera.rot, "x", -100, 100, 1);
+rotF.add(camera.rot, "y", -100, 100, 1);
+rotF.add(camera.rot, "z", -100, 100, 1);
+
+///////////
+
+
+let rotate_matrix={
+x:new Float32Array(16),
+y:new Float32Array(16),
+z:new Float32Array(16),
+}
+
+mat4.identity(rotate_matrix.x);
+mat4.identity(rotate_matrix.y);
+mat4.identity(rotate_matrix.z);
+
+
+
+let Identity_Matrix= new Float32Array(16);
+mat4.identity(Identity_Matrix);
+let angle=1;
+
+
+//setting
+gl.enable(gl.BLEND);
+gl.enable(gl.DEPTH_TEST);
+gl.enable(gl.CULL_FACE);
+
+gl.frontFace(gl.CCW);
+gl.cullFace(gl.BACK);
+gl.blendFunc(gl.BLEND_SRC_ALPHA,
+gl.ONE_MINUS_SRC_ALPHA);
+
+///
+let _R=100, _G=100, _B=100;
+
+const animate=(dt,gl)=>{
+
+
+gl.clearColor(_R/255, _G/255, _B/255, 1.0);
+gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+gl.viewport(0,0,gl.canvas.width,gl.canvas.height);
+
+
+
+Prog.Bind();
+
+//mat4.identity(world_Matrix);
+
+
+
+
+
+
+angle=performance.now() / 1000 / 6 * 2 * Math.PI;
+
+
+
+
+
+
+
+
+
+mat4.rotate(world_Matrix, Identity_Matrix, angle, [0, 0, 5]);
+
+{
+
+
+mat4.rotate(rotate_matrix.y,
+Identity_Matrix, angle/2, [0, 1, 0]);
+
+mat4.rotate(rotate_matrix.x,
+Identity_Matrix, angle/2, [-1, 0, 0]);
+
+mat4.rotate(rotate_matrix.z,
+Identity_Matrix, angle/2, [0, 0, -1]);
+
+
+mat4.mul(world_Matrix,
+rotate_matrix.y, rotate_matrix.x);
+
+}
+
+mat4.lookAt(view_Matrix,
+[camera.pos.x, camera.pos.y, camera.pos.z],
+[0, 0, 0],
+[camera.rot.x, camera.rot.y, camera.rot.z]);
+
+
+//mat4.identity(proj_Matrix);
+mat4.perspective(proj_Matrix,
+glMatrix.toRadian(70),
+gl.canvas.width / gl.canvas.height,
+1,
+1000.0);
+
+
+
+
+
+gl.uniformMatrix4fv(uloc.world, gl.FALSE, world_Matrix);
+gl.uniformMatrix4fv(uloc.view, gl.FALSE, view_Matrix);
+gl.uniformMatrix4fv(uloc.proj, gl.FALSE, proj_Matrix);
+
+
+
+//glClearError();
+
+//renderer.Clear();
+//renderer.Draw(Shader,vao,ibo,vbo);
+
+
+
+vao.Bind();
+ibo.Bind();
+//vbo.Bind();
+
+gl.drawElements(gl.TRIANGLES, indies.length,gl.UNSIGNED_SHORT, null);
+
+//gl.drawElements(gl.POINTS, indies.length,gl.UNSIGNED_SHORT, null);
+
+//texture.Bind();
+
+
+
+
+
+}
+
+
+let lt=1;
+const GameLoop=(ts)=>{
+
+let dt=ts-lt; lt+=ts;
+
+animate(dt,gl);
+window.requestAnimationFrame(GameLoop);
+
+}
+
+
+GameLoop(0);
+
+
+
+}
+
+
+
+window.addEventListener("load",(e)=>{
+
+
+
+setTimeout((c)=>{
+
+console.log(c);
+app(c);
+
+}, 300, gl);
+
+
+});
+
+
+//resize code here !
+window.addEventListener("resize",(e)=>{
+
+//canvas.width=innerWidth;
+//canvas.height=innerHeight;
+
+});
+
+///
+
+</script>
+
+</body>
+</html>

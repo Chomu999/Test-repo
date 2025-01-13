@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title> webgl exersice 12 draw Instanced</title>
+
+<meta name="author" content="BBhowmick">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+
+html{
+font-size:10px;
+}
+
+
+body{
+width:100vw; height:100vh;
+}
+
+
+main{
+width:100%; height:100%;
+background:#000;
+display:grid;
+place-items:center;
+}
+
+canvas{
+background:transparent;
+}
+
+.res{
+display:none!important;
+}
+</style>
+
+</head>
+<body>
+
+<main id="main">
+
+<canvas id="canvas"></canvas>
+
+<div class="res">
+<img src="/storage/emulated/0/pictures/red.png" alt="red" id="img1" />
+</div>
+
+
+</main>
+
+
+
+
+<script>
+
+
+
+
+
+const GLReSizer=(gl)=>{
+let cs;
+innerWidth>innerHeight?cs=innerHeight:cs=innerWidth;
+gl.canvas.width=cs;
+gl.canvas.height=cs;
+}
+
+
+
+
+const app=(gl)=>{
+
+
+
+
+
+let vsC=`#version 300 es
+precision mediump float;
+
+layout (location =0 ) in vec2 aPos;
+layout (location =1 ) in vec2 aOffset;
+layout (location =2 ) in float aScale;
+layout (location =3 ) in vec3 aColor;
+layout (location =4 ) in vec2 aUv;
+layout (location =5 ) in float aDepth;
+
+
+out vec3 vColor;
+out vec2 vUv;
+out float vDepth;
+
+
+
+void main(){
+gl_Position = 
+vec4(aPos * aScale + aOffset, 0.0, 1.0);
+vColor = aColor;
+vUv = aUv;
+vDepth = aDepth;
+
+}
+`;
+
+
+let fsC=`#version 300 es
+precision mediump float;
+
+out vec4 FragColor;
+
+uniform mediump sampler2DArray tex;
+
+in vec3 vColor;
+in vec2 vUv;
+in float vDepth;
+
+
+void main(){
+
+FragColor = texture(tex, vec3(vUv, vDepth));
+//* vec4(vColor, 1.0);
+
+}
+`;
+
+
+let prog=gl.createProgram();
+let vs=gl.createShader(gl.VERTEX_SHADER);
+let fs=gl.createShader(gl.FRAGMENT_SHADER);
+
+
+gl.shaderSource(vs, vsC);
+gl.shaderSource(fs, fsC);
+
+gl.compileShader(vs);
+if(!gl.getShaderParameter(vs, gl.COMPILE_STATUS))
+{
+console.log(`
+vertex shader error : ${gl.getShaderInfoLog(vs)}
+vertex shader source : ${gl.getShaderSource(vs)}`);
+}
+
+
+gl.compileShader(fs);
+if(!gl.getShaderParameter(fs, gl.COMPILE_STATUS))
+{
+console.log(`
+fragment shader error : ${gl.getShaderInfoLog(fs)}
+fragment shader source : ${gl.getShaderSource(fs)}`);
+}
+
+gl.attachShader(prog, vs);
+gl.attachShader(prog, fs);
+
+
+gl.deleteShader(vs);
+gl.deleteShader(fs);
+delete vs;
+delete fs;
+
+gl.linkProgram(prog);
+if(!gl.getProgramParameter(prog, gl.LINK_STATUS))
+{
+console.log("shader program link error  : "+ gl.getProgramInfoLog(prog));
+}
+
+gl.useProgram(prog);
+gl.validateProgram(prog);
+if(!gl.getProgramParameter(prog, gl.VALIDATE_STATUS))
+{
+console.log("shader program Validate error  : "+ gl.getProgramInfoLog(prog));
+}
+
+gl.useProgram(null);
+
+
+
+gl.useProgram(prog);
+
+
+//console.log(loc)
+//gl.useProgram(null);
+
+
+
+let TriData=new Float32Array([
+//  coord       u   v
+
+ -1, -0.7,     0,   1,
+  0,  0.8,     0.5, 0,
+  1, -0.7,     1,   1,
+
+
+]);
+
+let tranData=new Float32Array([
+ -0.5, 0.7,   0.4,  1,0,0,   3.0,
+  0.3,-0.5,   0.4,  0,0,1,   2.0,
+ -0.5,-0.5,   0.3,  0,0,1,   0.0,
+  0.4, 0.6,   0.6,  0,0,1,   1.0,
+])
+
+
+let texture =gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D_ARRAY, texture);
+gl.texImage3D(gl.TEXTURE_2D_ARRAY, 0, gl.RGBA, 64,64,4, 0, gl.RGBA, gl.UNSIGNED_BYTE, img1);
+gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+
+let vbo1=gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, vbo1);
+gl.bufferData(gl.ARRAY_BUFFER, TriData, gl.STATIC_DRAW)
+
+
+
+
+gl.vertexAttribPointer(0, 2, gl.FLOAT, gl.FALSE, 4*4, 0);
+gl.vertexAttribPointer(4, 2, gl.FLOAT, gl.FALSE, 4*4, 2*4);
+
+gl.enableVertexAttribArray(0);
+gl.enableVertexAttribArray(4);
+
+
+let vbo2=gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, vbo2);
+gl.bufferData(gl.ARRAY_BUFFER, tranData, gl.STATIC_DRAW)
+
+
+
+gl.vertexAttribPointer(1, 2, gl.FLOAT, gl.FALSE, 7*4, 0);
+gl.vertexAttribPointer(2, 1, gl.FLOAT, gl.FALSE, 7*4, 2*4);
+gl.vertexAttribPointer(3, 3, gl.FLOAT, gl.FALSE, 7*4, 3*4);
+gl.vertexAttribPointer(5, 1, gl.FLOAT, gl.FALSE, 7*4, 6*4);
+
+
+gl.vertexAttribDivisor(1,1);
+gl.vertexAttribDivisor(2,1);
+gl.vertexAttribDivisor(3,1);
+gl.vertexAttribDivisor(5,1);
+
+
+gl.enableVertexAttribArray(1);
+gl.enableVertexAttribArray(2);
+gl.enableVertexAttribArray(3);
+gl.enableVertexAttribArray(5);
+
+
+
+
+
+gl.clearColor(0.7, 0.3, 0.7, 1.0);
+gl.clear(gl.COLOR_BUFFER_BIT);
+
+gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+//gl.drawArrays(gl.TRIANGLES, 0, 3);
+gl.drawArraysInstanced(gl.TRIANGLES, 0, 3, 4);
+//gl.drawArraysInstanced()
+
+
+//for(let i=0;i<12;i+=6){
+
+//gl.vertexAttrib2fv(1, TriData.slice(i+0, i+2) );
+//gl.vertexAttrib1fv(2, TriData.slice(i+2, i+3) );
+
+//gl.vertexAttrib3fv(3, TriData.slice(9, 12) );
+//gl.vertexAttrib3f(3, 1,0,0 );
+
+//gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+//}
+
+//gl.enableVertexAttribArray(2);
+
+
+
+
+
+//gl.vertexAttrib1f(2, 1);
+
+//gl.useProgram(prog);
+
+//gl.useProgram(null);
+
+
+
+//
+//setInterval(()=>{
+
+//gl.clearColor(0.2, 0.3, 0.7, 1.0);
+//gl.clear(gl.COLOR_BUFFER_BIT);
+
+//gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+
+
+
+//gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
+//gl.bindBuffer(gl.ARRAY_BUFFER, vbo1);
+
+
+
+
+
+//console.log("loop")
+
+//}, 1000/30);
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+addEventListener("load", (event) => {
+
+const canvas=document.querySelector("canvas");
+const gl=canvas.getContext("webgl2");
+
+GLReSizer(gl);
+console.log(gl);
+app(gl);
+
+
+});
+
+
+
+
+
+
+
+window.addEventListener("resize", () => {
+//GLReSizer(gl);
+});
+
+
+
+
+
+
+
+
+
+
+</script>
+
+</body>
+</html>

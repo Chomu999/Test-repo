@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, user-scalable=no" />
+<meta name="author" content="bhowmickbyte, " />
+
+<style>
+*{
+margin: 0; padding: 0; box-sizing: border-box;
+}
+
+html{
+font-size: 10px;
+}
+
+body{
+width:100vw; height:100vh;
+}
+
+main{
+width: 100%; height: 100%;
+display: grid;
+place-items: center;
+
+background:#101524;
+}
+
+div.resource{
+display: none;
+}
+
+</style>
+
+<title>webgl2 exercise 2</title>
+
+<script src="/storage/emulated/0/g_js_libs/gl-matrix.js" async ></script>
+
+</head>
+<body>
+
+<main id="main">
+<canvas id="canvas" tabindex="0"></canvas>
+
+<div class="resource">
+
+<div class="images">
+<img src="/storage/emulated/0/Download/Zelda2.png" alt="zelda" id="img1"/>
+</div>
+</div>
+
+</main>
+
+<script type="module">
+//'use strict';
+
+
+const canvas=document.getElementById("canvas")
+const gl=canvas.getContext("webgl2")
+
+
+const genNum =   function* (limit){
+let x=0;
+for(;x<limit;) yield x++;
+}
+
+
+
+
+const LoadFile=async(_url) => {
+const file=await fetch(_url);
+const FileData=await file.arrayBuffer()
+return FileData
+}
+
+//const LoadFile= async (_url)=> new Promise((resolve,reject) => {
+//const file=await fetch(_url);
+//const FileData=await file.text()
+//return resolve(FileData)
+//})
+
+
+const LoadImage=(_url)=> new Promise((resolve) => {
+const img=new Image()
+img.src=_url
+img.addEventListener("load", () => resolve(img))
+})
+
+
+
+class Rand{
+static Float(min=1,max=2){
+return Math.random() * (max-min+1) + min
+}
+
+static Int(min=10,max=20){
+return Math.floor(Rand.Float(min,max))
+}
+
+static Choice(...args){
+return args[Rand.Int(0,args.length-1)]
+}
+
+}
+
+
+class VA{
+constructor(){
+this.ID=gl.createVertexArray()
+}
+
+Bind(){
+gl.bindVertexArray(this.ID)
+}
+
+Unbind(){
+gl.bindVertexArray(null)
+
+}
+Delete(){
+gl.deleteVertexArray(this.ID)
+
+}
+
+LinkAttrib(layoutLocation, numOfComponent, stride, offset){
+
+gl.vertexAttribPointer(layoutLocation, numOfComponent, gl.FLOAT, gl.FALSE, stride, offset)
+gl.enableVertexAttribArray(layoutLocation)
+
+}
+
+}
+
+class VB{
+constructor(verData){
+this.ID=gl.createBuffer()
+gl.bindBuffer(gl.ARRAY_BUFFER, this.ID)
+gl.bufferData(gl.ARRAY_BUFFER, verData, gl.STATIC_DRAW)
+//this.Unbind()
+
+}
+
+Bind(){
+gl.bindBuffer(gl.ARRAY_BUFFER, this.ID)
+}
+
+Unbind(){
+gl.bindBuffer(gl.ARRAY_BUFFER, null)
+}
+
+Delete(){
+gl.deleteBuffer( this.ID)
+}
+
+}
+
+class EB{
+constructor(indData){
+this.ID=gl.createBuffer()
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ID)
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indData ,gl.STATIC_DRAW)
+//this.Unbind()
+}
+
+Bind(){
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ID)
+}
+
+Unbind(){
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null)
+}
+Delete(){
+gl.deleteBuffer( this.ID)
+}
+
+
+}
+
+const _TexSlotGen_ = genNum(100);
+
+class Texture{
+constructor(imgData){
+
+this.ID = gl.createTexture()
+this.ID.Slot= _TexSlotGen_.next().value
+gl.bindTexture(gl.TEXTURE_2D, this.ID)
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1)
+
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, imgData)
+
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+
+
+}
+
+Bind(){
+gl.bindTexture(gl.TEXTURE_2D, this.ID)
+gl.activeTexture(gl.TEXTURE0 + this.ID.Slot)
+}
+
+Unbind(){
+gl.bindTexture(gl.TEXTURE_2D, null)
+}
+Delete(){
+gl.deleteTexture( this.ID)
+}
+
+
+}
+
+
+class Program{
+constructor(VerShaderSource,FragShaderSource){
+
+this.ID=this.#MakeProgram(VerShaderSource, FragShaderSource)
+this.ID.Loc=this.#searchLocation()
+this.ID.Uni={}
+}
+
+Bind(){
+gl.useProgram( this.ID)
+}
+
+Unbind(){
+gl.useProgram( null)
+}
+Delete(){
+gl.deleteProgram( this.ID)
+}
+
+
+#MakeShader(type, shaderCode){
+const vof=type==gl.VERTEX_SHADER?"VERTEX":"FRAGMENT"
+const SHADER=gl.createShader(type)
+gl.shaderSource(SHADER, shaderCode)
+gl.compileShader(SHADER)
+if(!gl.getShaderParameter( SHADER, gl.COMPILE_STATUS))
+{
+console.log(vof, gl.getShaderInfoLog(SHADER))
+console.log(vof, gl.getShaderSource(SHADER))
+}
+
+return SHADER
+}
+
+#MakeProgram(vss, fss){
+const VERTEX=this.#MakeShader(gl.VERTEX_SHADER, vss)
+const FRAGMENT=this.#MakeShader(gl.FRAGMENT_SHADER, fss)
+
+const PROG=gl.createProgram()
+gl.attachShader(PROG, VERTEX)
+gl.attachShader(PROG, FRAGMENT)
+
+gl.linkProgram(PROG)
+if(!gl.getProgramParameter( PROG, gl.LINK_STATUS))
+{
+console.log(gl.getProgramInfoLog(PROG))
+}
+
+
+gl.deleteShader(VERTEX)
+gl.deleteShader(FRAGMENT)
+gl.detachShader(PROG, VERTEX)
+gl.detachShader(PROG, FRAGMENT)
+
+
+gl.useProgram(PROG)
+
+gl.validateProgram(PROG)
+if(!gl.getProgramParameter( PROG, gl.VALIDATE_STATUS))
+{
+console.log(gl.getProgramInfoLog(PROG))
+}
+return PROG
+}
+
+#searchLocation(){
+
+let Names=[]
+for(let i=0;i<gl.getProgramParameter(this.ID, gl.ACTIVE_ATTRIBUTES);i++){
+const name = gl.getActiveAttrib(this.ID, i).name
+Names[i]=name
+}
+
+const Loc={}
+for(const i of Names){
+Loc[i]=gl.getAttribLocation(this.ID, i)
+}
+return Loc
+}
+
+}
+
+
+class Camera{
+constructor(Position){
+
+this.Position=Position
+this.Orientation=[0, 0, -1]
+this.Up=[0, 1, 0]
+
+this.ViewMat=mat4.create()
+this.ProjMat=mat4.create()
+
+this.Speed=0.1
+this.Sensitivity=100.0
+
+
+}
+
+Control(Keys){
+const POS=this.Position
+const ORI=this.Orientation
+const UP=this.Up
+if(Keys.w) vec3.add(POS, POS, ORI)
+//+= this.Speed
+if(Keys.s) this.Position[2] -= this.Speed
+
+if(Keys.a) this.Position[0] += this.Speed
+if(Keys.d) this.Position[0] -= this.Speed
+
+if(Keys.control) this.Speed= 1.0;
+else this.Speed= 0.1;
+
+
+
+this.Position=POS
+this.Orientation=ORI
+this.Up=Up
+
+}
+
+Matrix(Fov=45, acsept=1.0, Near=1, Far=100, UniLos){
+
+//                           pos         rot       idk
+mat4.lookAt(this.ViewMat, this.Position, vec3.add(vec3.create(), this.Position, this.Orientation), this.Up)
+//mat4.lookAt(this.ViewMat, this.Position,   this.Orientation, this.Up)
+
+mat4.perspective(this.ProjMat, glMatrix.toRadian(Fov), acsept, Near, Far)
+
+const MulMat=mat4.mul(mat4.create(), this.ProjMat, this.ViewMat)
+
+gl.uniformMatrix4fv(UniLos, false, MulMat)
+
+
+}
+
+}
+
+
+class Game{
+constructor(gl){
+this.gl=gl
+this.LoopActive=false
+this.Init()
+
+}
+
+Init(){
+
+}
+
+MainLoop(){
+this.LoopActive ? requestAnimationFrame() : 0
+}
+
+
+
+
+}
+
+
+
+
+
+const app = async (gl) =>{
+
+const vss=`#version 300 es
+layout (location = 0) in vec4 aPos;
+layout (location = 1) in vec2 aUV;
+layout (location = 2) in vec3 aNormal;
+
+
+uniform mat4 uModelMat;
+uniform mat4 uCameraMat;
+
+out vec2 vUV;
+out vec4 vColor;
+
+
+uniform vec3 uLightDirection;
+uniform vec4 uLightColor;
+
+float Brightness;
+
+void main()
+{
+
+gl_Position = uCameraMat * uModelMat * aPos;
+
+Brightness = max( 0.0, dot( aNormal, uLightDirection));
+
+vUV = aUV;
+vColor = (uLightColor * 0.4) + (uLightColor * Brightness + 0.6);
+
+}
+`
+
+const fss=`#version 300 es
+precision mediump float;
+out vec4 FragColor;
+
+
+uniform sampler2D uTex[1];
+
+in vec4 vColor;
+in vec2 vUV;
+
+void main()
+{
+
+FragColor = texture(uTex[0], vUV) * vColor;
+
+}
+`
+const Lightvss=`#version 300 es
+layout (location = 0) in vec4 aPos;
+
+
+uniform mat4 uModelMat;
+uniform mat4 uCameraMat;
+
+void main()
+{
+
+gl_Position = uCameraMat * uModelMat * aPos;
+
+
+
+}
+`
+
+const Lightfss=`#version 300 es
+precision mediump float;
+out vec4 FragColor;
+
+
+uniform vec4 uLightColor;
+
+
+void main()
+{
+
+FragColor =vec4(1.0) * uLightColor;
+
+}
+`
+
+
+//const vertexData=await LoadFile("/storage/emulated/0/Download/vertex (2).bin")
+//const indexData=await LoadFile("/storage/emulated/0/Download/index.bin")
+
+
+
+
+const Keys={
+control:0, shift:0,
+a:0, d:0, w:0, s:0,
+
+}
+const Mouse={ pos: { x:0, y:0 }}
+
+
+const camera =new Camera([0, 0, -5])
+
+
+camera.Fov=90
+camera.Acsept=gl.canvas.width / gl.canvas.height
+camera.Near=0.1
+camera.Far=1000
+
+const _IdentityMat=mat4.create()
+
+const vertexData2=new Float32Array([
+
+
+  0.5,  0.5,  0.0,    1,  1,    -1.0,  0.5,  1.0,
+ -0.5,  0.5,  0.0,    0,  1,     1.0, -1.0,  1.0,
+ -0.5, -0.5,  0.0,    0,  0,     0.0,  0.0, -1.0,
+  0.5, -0.5,  0.0,    1,  0,    -1.0,  1.0, -1.0,
+
+])
+
+const indexData2=new Uint8Array([
+0,1,2,
+2,3,0,
+])
+
+
+// 3d cube vertices
+const vertexData3=new Float32Array([
+//      pos          u   v         normals
+
+  1.0,  1.0,  1.0,   1,  1,     1.0, -1.0,  1.0,
+ -1.0,  1.0,  1.0,   0,  1,     1.0,  0.0,  1.0,
+ -1.0,  1.0, -1.0,   0,  0,     1.0,  0.0, -1.0,
+  1.0,  1.0, -1.0,   1,  0,     1.0, -1.0, -1.0,
+
+ -1.0,  1.0,  1.0,   1,  1,     1.0, -1.0, -1.0,
+ -1.0, -1.0,  1.0,   0,  1,     1.0,  0.0, -1.0,
+ -1.0, -1.0, -1.0,   0,  0,     1.0,  0.0,  1.0,
+ -1.0,  1.0, -1.0,   1,  0,     1.0, -1.0,  1.0,
+
+  1.0,  1.0,  1.0,   1,  1,     0.0,  0.0, -1.0,
+  1.0, -1.0,  1.0,   0,  1,    -1.0,  1.0,  1.0,
+  1.0, -1.0, -1.0,   0,  0,    -1.0, -1.0,  1.0,
+  1.0,  1.0, -1.0,   1,  0,     0.0,  0.0, -1.0,
+
+  1.0, -1.0,  1.0,   1,  1,    -1.0,  0.0,  1.0,
+ -1.0, -1.0,  1.0,   0,  1,     1.0,  0.0, -1.0,
+ -1.0, -1.0, -1.0,   0,  0,     1.0,  0.0,  1.0,
+  1.0, -1.0, -1.0,   1,  0,    -1.0,  0.0,  0.0,
+
+  1.0,  1.0,  1.0,   1,  1,     1.0,  0.0, -1.0,
+ -1.0,  1.0,  1.0,   0,  1,     1.0, -1.0,  1.0,
+ -1.0, -1.0,  1.0,   0,  0,     1.0,  0.0,  1.0,
+  1.0, -1.0,  1.0,   1,  0,     1.0, -1.0, -1.0,
+
+  1.0,  1.0, -1.0,   1,  1,     1.0,  1.0, -1.0,
+ -1.0,  1.0, -1.0,   0,  1,    -1.0,  0.0,  1.0,
+ -1.0, -1.0, -1.0,   0,  0,     1.0,  1.0, -1.0,
+  1.0, -1.0, -1.0,   1,  0,    -1.0,  0.0,  1.0,
+
+
+]);
+
+
+
+// 3d cube indices
+const indexData3=new Uint8Array([
+
+0,1,2,
+0,2,3,
+
+4,5,6,
+6,4,7,
+
+8,9,10,
+8,10,11,
+
+12,13,14,
+12,14,15,
+
+16,17,18,
+16,18,19,
+
+20,21,22,
+20,22,23,
+
+]);
+
+
+const lightVerticesData=new Float32Array([
+
+  1.0,  1.0,  1.0, // r t f
+ -1.0,  1.0,  1.0, // l t f
+
+ -1.0, -1.0,  1.0, // l b f
+  1.0, -1.0,  1.0, // r b f
+
+  1.0,  1.0, -1.0, // r t b
+ -1.0,  1.0, -1.0, // l t b
+
+ -1.0, -1.0, -1.0, // l b b
+  1.0, -1.0, -1.0, // r b b
+
+])
+
+const lightIndicesData=new Uint8Array([
+
+// font
+0,1,2,
+0,2,3,
+
+// back
+4,5,6,
+4,6,7,
+
+// right
+0,4,7,
+0,3,7,
+
+// left
+1,5,6,
+1,2,6,
+
+// top
+0,1,5,
+0,4,5,
+
+// down
+2,3,6,
+3,7,6,
+
+])
+
+
+const Model={}
+Model.Prog=new Program(vss, fss)
+
+
+Model.Prog.ID.Uni.uModelMat=gl.getUniformLocation(Model.Prog.ID, "uModelMat")
+
+Model.Prog.ID.Uni.uCameraMat=gl.getUniformLocation(Model.Prog.ID, "uCameraMat")
+
+
+Model.Prog.ID.Uni.uLightColor=gl.getUniformLocation(Model.Prog.ID, "uLightColor")
+Model.Prog.ID.Uni.uLightDirection=gl.getUniformLocation(Model.Prog.ID, "uLightDirection")
+
+
+// img2 = await LoadImage("/storage/emulated/0/Download/Zelda minish cap.jpeg")
+//Model.uTex0=gl.getUniformLocation(Prog.ID, "uTex[0]")
+
+
+Model.modelMatValue=mat4.create()
+
+Model.Tex1=new Texture(img1)
+//gl.uniform1i(uTex0, Tex1.ID.Slot)
+
+
+
+//const img3 = await LoadImage("/storage/emulated/0/Download/images (10).jpeg")
+
+
+
+gl.uniformMatrix4fv(Model.Prog.ID.Uni.uModelMat, gl.FALSE, Model.modelMatValue)
+
+gl.uniform4fv(Model.Prog.ID.Uni.uLightColor, [1.0, 0.0, 0.0, 1.0])
+
+
+
+Model.vao=new VA()
+Model.vbo=new VB(vertexData3)
+Model.ebo=new EB(indexData3)
+
+Model.vao.Bind()
+Model.vbo.Bind()
+
+Model.vao.LinkAttrib(Model.Prog.ID.Loc.aPos, 3, 8*4, 0)
+Model.vao.LinkAttrib(Model.Prog.ID.Loc.aUV, 2, 8*4, 3*4)
+Model.vao.LinkAttrib(Model.Prog.ID.Loc.aNormal, 3, 8*4, 5*4)
+
+Model.ebo.Bind()
+
+
+Model.vbo.Unbind()
+Model.vao.Unbind()
+Model.ebo.Unbind()
+Model.Prog.Unbind()
+
+const Light={}
+Light.Prog=new Program(Lightvss, Lightfss)
+
+Light.Prog.ID.Uni.uModelMat=gl.getUniformLocation(Light.Prog.ID, "uModelMat")
+
+Light.Prog.ID.Uni.uCameraMat=gl.getUniformLocation(Light.Prog.ID, "uCameraMat")
+
+
+Light.Prog.ID.Uni.uLightColor=gl.getUniformLocation(Light.Prog.ID, "uLightColor")
+//const uLightDirectionLoc=gl.getUniformLocation(Prog.ID, "uLightDirection")
+
+//const uTex0=gl.getUniformLocation(Prog.ID, "uTex[0]")
+
+
+
+//const img2 = await LoadImage("/storage/emulated/0/Download/Zelda minish cap.jpeg")
+//const img3 = await LoadImage("/storage/emulated/0/Download/images (10).jpeg")
+
+
+//const Tex1=new Texture(img2)
+//gl.uniform1i(uTex0, Tex1.ID.Slot)
+
+
+
+
+Light.modelMatValue=mat4.create()
+
+Light.pos=[-9.5, 0.9, -10]
+
+
+//gl.uniformMatrix4fv(uModelMatLoc, gl.FALSE, modelMatValue)
+
+gl.uniform4fv(Light.Prog.ID.Uni.uLightColor, [1.0, 0.0, 0.0, 1.0])
+
+
+Light.vao=new VA()
+Light.vbo=new VB(lightVerticesData)
+Light.ebo=new EB(lightIndicesData)
+
+
+Light.vao.Bind()
+Light.vbo.Bind()
+
+Light.vao.LinkAttrib(Light.Prog.ID.Loc.aPos, 3, 0, 0)
+
+
+Light.ebo.Bind()
+
+//vbo.Unbind()
+
+Light.vao.Unbind()
+
+//ebo.Unbind()
+
+
+Light.Prog.Unbind()
+
+
+
+
+
+
+
+
+gl.enable(gl.DEPTH_TEST)
+gl.enable(gl.BLEND)
+
+gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+
+
+const animate=()=>{
+
+gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
+gl.clearColor(0.2, 0.2, 0.4, 1.0)
+gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+
+
+
+
+
+
+
+Light.Prog.Bind()
+
+//vec3.normalize(lightDir, lightDir)
+
+//gl.uniform3fv(uLightDirectionLoc, lightDir)
+
+
+vec3.rotateX(Light.pos, Light.pos, [1, -1, 1], 0.02)
+
+mat4.translate(Light.modelMatValue, _IdentityMat, Light.pos)
+//mat4.scale(Light.modelMatValue, 0.2, [1, 1, 1])
+mat4.rotate(Light.modelMatValue, Light.modelMatValue, 0.02, [-1, 1, 0])
+gl.uniformMatrix4fv(Light.Prog.ID.Uni.uModelMat, gl.FALSE, Light.modelMatValue)
+
+camera.Matrix(camera.Fov, camera.Acsept, camera.Near, camera.Far, Light.Prog.ID.Uni.uCameraMat)
+
+Light.vao.Bind()
+
+gl.drawElements(gl.TRIANGLES, lightIndicesData.byteLength , gl.UNSIGNED_BYTE, 0)
+
+
+Model.Prog.Bind()
+
+//vec3.normalize(lightDir, lightDir)
+
+//gl.uniform3fv(uLightDirectionLoc, lightDir)
+
+
+//vec3.rotateX(Light.pos, Light.pos, [1, -1, 0], 0.02)
+
+//mat4.translate(Light.modelMatValue, _IdentityMat, Light.pos)
+mat4.rotate(Model.modelMatValue, Model.modelMatValue, 0.02, [-1, 1, 0])
+gl.uniformMatrix4fv(Model.Prog.ID.Uni.uModelMat, gl.FALSE, Model.modelMatValue)
+
+gl.uniform3fv(Model.Prog.ID.Uni.uLightDirection, Light.pos)
+
+camera.Matrix(camera.Fov, camera.Acsept, camera.Near, camera.Far, Model.Prog.ID.Uni.uCameraMat)
+
+
+Model.Tex1.Bind()
+
+Model.vao.Bind()
+
+gl.drawElements(gl.TRIANGLES, indexData3.byteLength , gl.UNSIGNED_BYTE, 0)
+
+
+
+if (1) requestAnimationFrame(animate)
+}
+
+animate()
+
+
+//console.log(Model.Prog.ID.Uni.uCameraMat, Light.Prog.ID.Uni.uCameraMat )
+
+
+gl.canvas.addEventListener("keydown", (e)=>{
+
+
+if(!e.key) return
+
+const k=e.key.toLowerCase()
+
+if(k == "control" || k == "shift" || k == "w" || k == "s" || k == "a" || k == "d")
+{
+Keys[k]=1
+}
+camera.Control(Keys)
+
+})
+
+
+gl.canvas.addEventListener("keyup", (e)=>{
+
+
+if(!e.key) return
+
+const k=e.key.toLowerCase()
+
+if(k == "control" || k == "shift" || k == "w" || k == "s" || k == "a" || k == "d")
+{
+Keys[k]=0
+}
+camera.Control(Keys)
+
+})
+
+
+
+
+
+
+
+
+gl.canvas.addEventListener("mousedown", (e)=>{
+const Pos={
+ x: e.offsetX - gl.canvas.width/2
+}
+//console.log(e.x, e.offsetX, Pos.x + e.offsetX / gl.canvas.width)
+
+//if(e.offsetX < gl.canvas.width/2) Mouse.pos.x = Pos.x / e.offsetX// / gl.canvas.width/2
+//else  Mouse.pos.x =  Pos.x - e.offsetX// / //gl.canvas.width/2
+
+Mouse.pos.x = Pos.x / gl.canvas.width/2
+//console.log(e)
+console.log(Mouse.pos.x)
+
+
+})
+
+
+}
+
+
+const Init=()=>{
+
+//innerWidth
+//innerHeight
+gl.canvas.width=innerWidth;
+gl.canvas.height=innerHeight;
+console.log(gl)
+app(gl)
+
+
+}
+
+window.addEventListener("load", ()=>{
+
+Init()
+
+})
+
+
+
+
+</script>
+
+</body>
+</html>

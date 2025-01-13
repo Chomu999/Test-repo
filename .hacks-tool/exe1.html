@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=1.0 user-scalable=0">
+
+<title>tool 1</title>
+
+<meta name="author" content="BhowmickByte" />
+
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+html{
+font-size: 10px;
+}
+
+body{
+width: 100vw;
+height: 100vh;
+}
+
+
+main{
+width:100%; height: 100%;
+background: #000;
+display: grid;
+place-items: center;
+}
+
+.container{
+
+width:80%; height:90%;
+background: #e3e3e3;
+
+}
+.resultbox{
+width: 100%; height:80%;
+color:#83FF98 ;
+}
+
+
+.result{
+font-size: 2rem;
+}
+
+.btn{
+width: 70%; height: 10%;
+background:#FF0075;
+
+text-align: center;
+color:white;
+font-size: 3rem;
+
+}
+
+
+
+
+</style>
+
+
+
+</head>
+<body>
+
+<main>
+
+<div class="container">
+<div class="resultbox">
+
+
+<h1 id="result" class="result">hello</h1>
+<!-- <input type="text" name="pass" id="pass"  /> -->
+
+
+</div>
+<div id="btn" class="btn">refresh</div>
+
+</div>
+
+</main>
+
+<script>
+
+
+
+
+
+
+
+
+const _symbol="!@#$%&?";
+const _sstr="abcdefghijklmnopqrstuvwxyz";
+const _cstr="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const _number="01234556789";
+
+const chocie = arr => arr[Math.floor(Math.random() * arr.length)];
+
+
+const genPass= char => chocie(char);
+
+
+
+
+const farr=[_number, _symbol, _cstr, _sstr]
+
+
+
+
+
+
+const fainlPass=(str=farr,len=8)=>{
+let passText="";
+for (let i=0;i<10;i++){
+passText+=genPass(chocie(str));
+}
+return passText;
+}
+
+
+
+
+
+
+
+
+const init=()=>{
+let outText="";
+for(let i=0;i<10;++i){
+outText+=`pass : ${fainlPass()} \n`;
+}
+result.innerText=outText;
+}
+
+
+btn.addEventListener('click',()=>{
+init()
+
+})
+
+
+
+
+
+
+</script>
+</body>
+</html>

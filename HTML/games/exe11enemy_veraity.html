@@ -1,0 +1,551 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>HTML canvas bird game</title>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+#mainBox{
+margin:0;padding:0;
+width:100vw;height:100vh;
+background-color:#CBCBCB;
+}
+#cvs{
+/* 
+position:absolute;
+top:50%;left:50%;
+transform:translate(-50%,-50%);
+border:2px solid blue; */
+}
+
+img{
+display:none;
+}
+
+
+</style>
+</head>
+<body>
+
+
+<div id="mainBox">
+
+<img id="wormimg" src="./img/enemy_worm.png"/>
+<img id="ghostimg" src="./img/enemy_ghost.png"/>
+<img id="spiderimg" src="./img/enemy_spider.png"/>
+<img id="backgroundimg" src="./img/background_single.png"/>
+<img id="playerimg" src="./img/player.png"/>
+
+<canvas id="canvas"></canvas>
+<!-- 
+<p class="gamePlay">tap to play</p>
+ -->
+</div>
+
+
+<script>
+
+
+let canvas=document.getElementById('canvas');
+let ctx = canvas.getContext('2d')
+
+
+canvas.width= innerWidth;
+canvas.height= innerHeight;
+
+
+
+
+
+
+class InputHandler{
+constructor(game){
+this.game = game;
+
+this.keys=[];
+this.touchDesten=0;
+this.touchTime=100;
+//event start
+document.addEventListener('touchstart',e =>{
+this.touchDesten = e.changedTouches[0].clientY;
+})
+
+
+//event move
+
+document.addEventListener('touchmove',e =>{
+
+const ps = e.changedTouches[0].clientY;
+
+if(this.touchDesten > ps){
+if(this.keys.indexOf('up') === -1){
+this.keys.push('up');
+}
+}
+
+if(this.touchDesten < ps){
+if(this.keys.indexOf('down') === -1){
+this.keys.push('down');
+this.touchDesten=0;
+}
+}
+
+});
+
+//event end
+
+
+document.addEventListener('touchend',e =>{
+
+this.touchDesten=0;
+
+if(this.keys.indexOf('up') > -1){
+this.keys.splice(this.keys.indexOf('up'),1)
+}
+
+else if(this.keys.indexOf('down') > -1){
+this.keys.splice(this.keys.indexOf('down'),1)
+}
+
+
+});
+
+}
+
+
+
+}
+
+
+class Box{
+constructor(game){
+this.game = game;
+this.isDeath=false;
+this.nextAnimate=0;
+this.isJumping=false;
+this.x=0;
+this.y=0;
+this.width=100;
+this.height=100;
+this.weight=0.2;
+this.vel={x:0,y:0};
+}
+
+draw(ctx){
+ctx.fillStyle='tan';
+ctx.fillRect(this.x,this.y,this.width,this.height)
+}
+
+update(dt){
+
+//animation
+
+
+//for dailet
+if(this.x <= (0 - this.width*2)) this.isDeath=true;
+//for moving
+this.x += this.vel.x * dt;
+this.y += this.vel.y * dt;
+
+
+
+
+if(this.y + this.height + this.vel.y <= this.game.height){
+this.vel.y += this.weight;
+}else{
+this.vel.y = 0;
+
+if(this.isJumping) this.vel.y = -28; this.isJumping=false;
+
+}
+
+
+
+}
+
+}
+
+
+function CTXtext(c,t,x=100,y=150,s=20){
+ctx.font= `${s}px sans-serif`;
+ctx.fillStyle=c;
+ctx.fillText(`${t}`,x,y);
+}
+
+
+class Enemy{
+constructor(game,maxFrame){
+this.game = game;
+this.isDeath=false;
+this.frame={x:0,y:0};
+this.maxFrame=maxFrame;
+this.nextAnimate=0;
+this.animationInterval=100;
+
+}
+
+draw(ctx){
+
+ctx.drawImage(this.img, this.frame.x * this.sprite.width, this.frame.y * this.sprite.width, this.sprite.width, this.sprite.height, this.x - this.width/2, this.y - this.height/2, this.width, this.height);
+}
+
+update(dt){
+
+//animation
+if(this.animationInterval <= this.nextAnimate){
+
+    if(this.frame.x >= this.maxFrame - 1) this.frame.x=0;
+    else this.frame.x += 1;
+
+this.nextAnimate=0;
+}
+else this.nextAnimate += dt;
+
+//for dailet
+if(this.x <= (0 - this.width*2)) this.isDeath=true;
+//for moving
+this.x += this.vel.x * dt;
+this.y += this.vel.y * dt;
+
+
+}
+
+}
+
+//child Worm
+class Worm extends Enemy{
+constructor(game,maxFrame){
+super(game,maxFrame);
+this.sprite={width:229,height:171}
+this.width=this.sprite.width/2;
+this.height=this.sprite.height/2;
+this.img=wormimg;
+this.x=this.game.width + this.width;
+this.y=this.game.height - (this.height + 20);
+this.vel={x:Math.random() * 0.2 + 0.2,y:0};
+this.vel.x = -this.vel.x;
+}
+
+
+draw(ctx){
+ctx.save()
+//ctx.globalAlpha = 0.4;
+super.draw(ctx);
+ctx.restore()
+
+}
+
+
+update(dt){
+super.update(dt);
+
+//this.y += Math.sin(this.angle) * this.curve;
+//this.angle += 0.05;
+}
+
+}
+
+//child Ghost
+class Ghost extends Enemy{
+constructor(game,maxFrame){
+super(game,maxFrame);
+this.sprite={width:261,height:209}
+this.width=this.sprite.width/2;
+this.height=this.sprite.height/2;
+this.img=ghostimg;
+this.x=this.game.width + this.width;
+this.y=Math.random() * this.game.height/1.2;
+this.vel={x:Math.random() * 0.2 + 0.1,y:0};
+this.angle=1;
+this.curve=Math.random() * 3;
+this.vel.x = -this.vel.x;
+}
+
+
+draw(ctx){
+ctx.save()
+ctx.globalAlpha = 0.4;
+super.draw(ctx);
+ctx.restore()
+
+}
+
+update(dt){
+super.update(dt);
+
+this.y += Math.sin(this.angle) * this.curve;
+this.angle += 0.05;
+this.curve=Math.random() * 3;
+}
+
+}
+
+
+//child Player
+class Player extends Enemy{
+constructor(game,maxFrame){
+super(game,maxFrame);
+this.sprite={width:200,height:200}
+this.width=this.sprite.width;
+this.height=this.sprite.height;
+
+this.img=playerimg;
+
+this.x=this.width;
+this.y=this.game.height - this.height;
+this.vel={x:0,y:0};
+this.weight=0.79;
+this.isJumping=false;
+this.animationInterval=40;
+}
+
+
+draw(ctx){
+super.draw(ctx);
+
+}
+
+update(dt){
+
+super.update(dt);
+
+
+if(this.y + this.height + this.vel.y <= this.game.height){
+this.vel.y += this.weight;
+
+}else{
+
+this.vel.y = 0; 
+//this.y = this.game.height - this.height;
+if(this.isJumping){
+
+this.isJumping=false;
+this.vel.y = -28;
+}
+}
+
+
+
+}
+
+
+}
+
+
+
+
+
+class Background{
+constructor(game){
+this.game=game;
+this.x=0;
+this.y=0;
+this.width=2400;
+this.height=720;
+this.img=backgroundimg;
+}
+update(dt){
+if(this.x <= (0 - this.width)) this.x=0;
+
+else this.x -= this.game.speed;
+}
+
+draw(ctx){
+
+ctx.drawImage(this.img,this.x,this.y,this.width,this.height);
+ctx.drawImage(this.img,this.x + this.width,this.y,this.width,this.height);
+
+}
+
+
+}
+
+
+
+
+
+
+
+
+
+class Game{
+constructor(ctx,cw,ch){
+this.ctx=ctx;
+this.width=cw;
+this.height=ch;
+
+this.speed=1;
+
+this.box= new Box(this);
+this.inputHandler= new InputHandler(this);
+
+this.bg= new Background(this);
+this.player= new Player(this,9);
+
+this.enemies=[];
+
+
+this.EnemyInterval=100;
+this.EnemyTimer=0;
+this.EnemyType=['worm','ghost','spider'];
+
+}
+
+
+
+update(dt){
+
+
+
+
+
+
+this.enemies = this.enemies.filter(o => !o.isDeath);
+
+this.bg.update(dt)
+
+
+//swapn enemy in EnemyInterval
+if(this.EnemyInterval < this.EnemyTimer){
+this.#addEnemy();
+this.EnemyTimer=0;
+}else{ this.EnemyTimer += dt;}
+//
+
+// updating all Array usin [...]
+[...this.enemies].forEach((o) => o.update(dt));
+//
+this.box.update(dt);
+//this.player.update(dt)
+
+
+
+//
+
+
+
+if(this.inputHandler.keys.indexOf('up')){
+this.box.vel.y = -20;
+}
+
+else if(this.inputHandler.keys.indexOf('down')){
+this.box.vel.y = 0;
+}
+
+
+}
+
+
+draw(ctx){
+
+this.bg.draw(ctx);
+
+// drawing all Array usin [...]
+[...this.enemies].forEach((o) => o.draw(ctx));
+
+
+//this.player.draw(ctx)
+this.box.draw(ctx)
+
+CTXtext('red',this.inputHandler.keys,200,200,50);
+
+}
+
+
+#addEnemy(){
+
+//this.enemies.push(new Ghost(t));
+
+const randomEnemy = this.EnemyType[Math.floor(Math.random() * this.EnemyType.length)];
+
+if(randomEnemy == 'worm'){
+this.enemies.push(new Worm(this,6));
+}
+else if(randomEnemy == 'ghost'){
+this.enemies.push(new Ghost(this,6));
+}
+else if(randomEnemy == 'spider'){
+//this.enemies.push(new Spider(this));
+}
+this.enemies.sort((a,b)=>{ return a.y - b.y});
+
+}
+
+}
+
+
+
+
+
+
+
+
+const game = new Game(ctx,canvas.width,canvas.height);
+
+
+let lastTime=1;
+
+function gameLoop(ts){
+
+
+const dt = ts - lastTime;
+
+lastTime = ts;
+
+
+
+//ctx.fillStyle='black'
+//ctx.fillRect(0,0,this.width,this.height);
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+
+
+game.update(dt);
+game.draw(ctx);
+
+//console.log(game.enemies.length);
+
+
+
+window.requestAnimationFrame(gameLoop);
+}
+gameLoop(0);
+
+
+
+
+
+
+
+
+
+
+
+document.addEventListener('touchmove',(e)=>{
+
+
+game.box.x = e.changedTouches[0].clientX;
+game.box.y = e.changedTouches[0].clientY;
+
+
+//game.box.isJumping=true;
+//game.player.isJumping=true;
+//game.player.vel.y = -30// e.changedTouches[0].clientY;
+
+//console.log(game.player.x)
+//console.log(game.player.y)
+})
+
+
+console.log(ctx)
+
+</script>
+</body>
+</html>

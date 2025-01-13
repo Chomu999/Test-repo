@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=1.0 user-scalable=0">
+
+<title>HTML CANVAS GAME BOI</title>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+background:#000;
+}
+
+
+#canvasDiv{
+/* width:100vh;
+height:100vw; */
+/* display:inline; */
+position:relative;
+
+transition:1s;
+}
+
+
+#canvasDiv:hover{
+/* transform: rotateZ(90deg); */
+}
+
+#cvs2d,#btnBox{
+position:absolute;
+}
+
+#btnBox{
+
+display:grid;
+}
+
+#startingBTN{
+background:#0061FF;
+color:purple;
+width:100%;height:100%;
+text-align:center;
+font-size:49px;
+}
+
+</style>
+</head>
+<body onload="StartGame()">
+
+
+<div id="canvasDiv">
+
+<canvas id="cvs2d"></canvas>
+
+<div id="btnBox">
+<canvas id="cvsBtn1"></canvas>
+<canvas id="cvsBtn2"></canvas>
+</div>
+
+</div>
+<!-- 
+<p id="startingBTN">Start The game</p>
+ -->
+
+<script>
+
+const canvasDiv = document.getElementById('canvasDiv');
+
+
+let mainGameLoop;
+
+const canvas = document.getElementById('cvs2d');
+const ctx = canvas.getContext('2d');
+
+const btnBox = document.getElementById('btnBox');
+
+const cvsBtn1 = document.getElementById('cvsBtn1');
+const BtnCtx1 = cvsBtn1.getContext('2d');
+
+const cvsBtn2 = document.getElementById('cvsBtn2');
+const BtnCtx2 = cvsBtn2.getContext('2d');
+
+let gravity = 2;
+let frection = 0.69;
+
+let touch=['touchstart','touchmove','touchend']
+
+//canvas.width=canvasDiv.getBoundingClientRect().width;
+//canvas.height=canvasDiv.getBoundingClientRect().height;
+
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+
+cvsBtn1.width=window.innerWidth;
+cvsBtn1.height=window.innerHeight/2;
+
+cvsBtn2.width=window.innerWidth;
+cvsBtn2.height=window.innerHeight/2;
+
+
+
+//const startingBTN = document.getElementById('startingBTN');
+
+
+
+const ISRectCollision = (ObjectA,ObjectB) => {
+return (ObjectA.pos.x + ObjectA.size.width >= ObjectB.pos.x &&
+ObjectA.pos.x <= ObjectB.pos.x + ObjectB.size.width &&
+ObjectA.pos.y + ObjectA.size.height >= ObjectB.pos.y &&
+ObjectA.pos.y <= ObjectB.pos.y + ObjectB.size.height)
+}
+
+
+
+
+
+
+const ISCircleCollision = (ObjectA,ObjectB) => {
+let dist=Math.hypot(ObjectA.pos.x - ObjectB.pos.x, ObjectA.pos.y - ObjectB.pos.y)
+
+return (dist - ObjectB.size - ObjectA.size < 0.5)
+}
+
+
+
+//window.location="http://youtube.co/c/eusj";
+
+
+
+const gameOver = () => {
+
+
+cancelAnimationFrame(mainGameLoop)
+}
+//canvas.width=window.innerWidth;
+//canvas.height=window.innerHeight;
+
+
+const mouse={
+    x:0,
+    y:0
+};
+
+
+const movin={
+speed:3.5,
+top:false,
+jump:false,
+left:false,
+atteck:false,
+right:false,
+down:false,
+};
+
+
+
+//localStorage
+
+
+
+
+//console.log(localStorage)
+
+
+
+
+
+
+
+
+
+
+
+class NewBox{
+constructor({pos,size,color='orange'}){
+
+this.pos=pos;
+this.size=size;
+this.color=color;
+}
+draw(ctx){
+ctx.beginPath();
+ctx.fillStyle=this.color;
+ctx.fillRect(this.pos.x,this.pos.y,this.size.width,this.size.height);
+ctx.closePath();
+}
+
+}
+
+
+
+
+
+
+class NewHuman extends NewBox{
+constructor({pos,size,color}){
+
+super({pos,size,color});
+
+this.speed={x:0,y:0};
+this.isJumping=false
+
+}
+
+update(){
+
+
+
+this.pos.x += this.speed.x;
+this.pos.y += this.speed.y;
+
+
+
+if(this.pos.y + this.size.height + this.speed.y <= canvas.height){
+this.speed.y += gravity;
+}else{
+this.speed.y = 0;
+
+if(this.isJumping) this.speed.y = -28;
+this.isJumping=false;
+
+}
+
+
+}
+
+
+}
+
+
+class CBtn{
+constructor({pos,size,color,name='lol'}){
+this.pos=pos;
+this.size=size;
+this.color=color;
+this.name=name;
+}
+draw(ctx){
+ctx.beginPath();
+ctx.fillStyle=this.color;
+ctx.arc(this.pos.x,this.pos.y,this.size,0,Math.PI*2);
+ctx.fill();
+ctx.closePath();
+}
+
+}
+
+let allBtn=[];
+let CH= (cvsBtn1.height/2);
+
+let btnData=[
+{name:'top',color:'orange',x:60,y:CH/0.8},
+{name:'left',color:'orange',x:20,y:CH/0.7},
+{name:'right',color:'orange',x:100,y:CH/0.7},
+{name:'down',color:'orange',x:60,y:CH/0.6},
+];
+
+for(let d of btnData) {
+
+allBtn.push(new CBtn({pos:{x:d.x,y:d.y},name:d.name,color:d.color,size:20}))
+
+//console.log(d.name);
+}
+
+
+
+
+
+//console.log(CH/0.6)
+
+
+
+
+
+
+const orgMouse = new CBtn({pos:{x:0,y:0},color:'red',size:15});
+
+
+const player = new NewHuman({pos:{x:200,y:0},size:{width:40,height:40},color:"#FF00D3"});
+
+const LeftPiller = new NewBox({pos:{x:-80,y:0},size:{width:40,height:canvas.height},color:"#FF7800"});
+
+const RightPiller = new NewBox({pos:{x:canvas.width + 3*40,y:0},size:{width:40,height:canvas.height},color:"#FF7800"});
+
+
+
+player.color=`hsl(${Math.floor(Math.random() * 360)},100%,50%,1)`;
+
+
+//startingBTN.addEventListener('click',()=>{StartGame()});
+
+const StartGame = () =>{
+
+//document.body.removeChild(startingBTN);
+
+//canvasDiv.requestFullscreen();
+
+const gameLoop = () => {
+
+mainGameLoop = window.requestAnimationFrame(gameLoop);
+
+ctx.fillStyle='rgba(0,0,0,0.04)';
+ctx.fillRect(0,0,canvas.width,canvas.height);
+
+BtnCtx1.clearRect(0,0,cvsBtn1.width,cvsBtn1.height);
+BtnCtx2.clearRect(0,0,cvsBtn2.width,cvsBtn2.height);
+
+
+LeftPiller.draw(ctx);
+RightPiller.draw(ctx);
+
+player.draw(ctx);
+
+player.update();
+
+
+
+//if(movin.top){
+//player.speed.y = -movin.speed;
+
+//for(let i=0;i<9;i++){ player.speed.y -= 3.9;}
+
+//}
+
+
+//else if(movin.left){
+//player.speed.x = -movin.speed;
+//}
+
+
+//else if(movin.right){
+//player.speed.x = movin.speed;
+//}
+
+
+//else if(movin.down){
+//player.speed.y = movin.speed;
+//}
+
+if(movin.left) player.speed.x = -movin.speed;
+if(movin.right) player.speed.x = movin.speed;
+
+
+
+if(ISRectCollision(LeftPiller,player)){
+player.pos.x = canvas.width+player.size.width;
+}
+if(ISRectCollision(RightPiller,player)){
+player.pos.x = -player.size.width;
+}
+
+
+
+
+allBtn.forEach(b=>b.draw(BtnCtx1));
+
+orgMouse.draw(BtnCtx1)
+
+
+ctx.fillStyle="#00FF44";
+ctx.fillRect(canvas.width/2,0,1,canvas.height);
+ctx.fillRect(0,canvas.height/2,canvas.width,1);
+
+
+
+
+
+
+//controls(mouse);
+
+
+}
+
+
+gameLoop();
+
+}
+
+
+
+
+
+
+
+
+cvsBtn1.addEventListener(touch[0], (e)=>{
+
+mouse.x = e.touches[0].clientX;
+mouse.y = e.touches[0].clientY;
+
+
+controls(mouse);
+
+
+});
+
+cvsBtn1.addEventListener(touch[1], (e)=>{
+
+mouse.x = e.touches[0].clientX;
+mouse.y = e.touches[0].clientY;
+
+});
+
+
+
+cvsBtn1.addEventListener(touch[2], (e)=>{
+
+//mouse.x = e.touches[0].clientX;
+//mouse.y = e.touches[0].clientY;
+
+player.isJumping=false;
+movin.left = false;
+movin.right = false;
+movin.down=false;
+
+});
+
+
+
+
+/*
+btnBox.addEventListener(touch[0],(e)=>{
+
+if(e.target.classList[0] == "btns"){
+e.target.classList.add('btnsEffects');
+}
+
+if(e.target.classList[2] == "jump"){
+//if(player.speed.y == 0) 
+player.isJumping=true;
+}
+
+if(e.target.classList[2] == "left"){
+movin.left=true;
+}
+if(e.target.classList[1] == "btn5"){
+
+}
+
+if(e.target.classList[2] == "right"){
+movin.right=true;
+}
+
+if(e.target.classList[2] == "down"){
+//movin.down=true;
+}
+
+
+
+
+});
+
+
+btnBox.addEventListener(touch[2],(e)=>{
+
+
+
+
+e.target.classList.remove('btnsEffects');
+
+
+if(e.target.classList[2] == "jump"){
+
+player.isJumping=false;
+
+//player.speed.y=0;
+
+}
+
+if(e.target.classList[2] == "left"){
+movin.left=false;
+player.speed.x=0;
+}
+
+if(e.target.classList[1] == "btn5"){
+//player.isJumping=false;
+}
+
+if(e.target.classList[2] == "right"){
+movin.right=false;
+player.speed.x=0;
+}
+
+if(e.target.classList[2] == "down"){
+movin.down=false;
+}
+
+
+});
+
+*/
+
+
+
+//controls
+
+
+const controls = (mouse)=>{
+
+orgMouse.pos.x = mouse.x
+orgMouse.pos.y = mouse.y
+
+
+
+allBtn.forEach((btn)=>{
+
+if(ISCircleCollision(btn,orgMouse)){
+
+
+
+if(btn.name == 'top'){
+player.isJumping=true;
+}
+
+
+if(btn.name == 'left'){
+
+movin.left=true;
+//player.speed.x = -movin.speed;
+}
+
+if(btn.name == 'right'){
+
+movin.right=true;
+//player.speed.x = movin.speed;
+}
+
+if(btn.name == 'down'){
+
+movin.down=true;
+
+}
+
+else{
+/*
+player.isJumping=false;
+movin.left=false;
+movin.right=false;
+movin.down=false;
+*/
+}
+
+}
+
+});
+
+}
+
+
+
+
+</script>
+</body>
+</html>

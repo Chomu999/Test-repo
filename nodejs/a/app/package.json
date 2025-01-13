@@ -1,0 +1,23 @@
+{
+  "name": "ramhackapp",
+  "version": "1.0.0",
+  "private":true,
+  "main": "index.js",
+  "repository" : {
+    "type": "git",
+    "url": "git+https://github.com/chomu99/app.git"
+ },
+  "files": [
+  "index.js",
+  "src/a.js"
+  ],
+  "scripts": {
+    "start": "node index.js",
+    "run": "node --trace-deprecation",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["ramwrite", "ramread"],
+  "author": "bhowmickbhai <bbiswajitbhowmick@gmail.com>",
+  "license": "ISC",
+  "description": "this is a simple app work do like ram value updating"
+}

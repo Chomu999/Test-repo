@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=1.0 user-scalable=0">
+
+<meta name="author" content="BhowmickByte" />
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+html{
+font-size: 10px;
+}
+
+body{
+/* width:100vw; height:100dvh; */
+
+background:#f0f0f0;
+}
+
+main{
+}
+
+main div.res{
+display: none;
+}
+
+.wrapper{
+width:min(30rem, 100% - 4rem);
+margin-inline: auto;
+}
+
+.imgsContainer{
+background: #00FFD1;
+}
+
+img{
+width:2rem;
+}
+
+</style>
+
+
+<title>Image Downloader</title>
+
+
+
+</head>
+<body>
+
+<main>
+
+<div class="wrapper">
+<button id="DownloadBTN">Download Image</button>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<div class="wrapper imgsContainer"></div>
+
+
+</main>
+
+
+
+<script>
+
+
+const canvas=document.querySelector('canvas');
+const ctx=canvas.getContext('2d');
+
+const GLReSizer=(ctx)=>{
+const cs=innerWidth>innerHeight?innerHeight:innerWidth;
+ctx.canvas.width=cs;
+ctx.canvas.height=cs;
+}
+
+const {PI:pi, abs, cos, sin, tan} = Math;
+
+
+class Rand{
+
+static Float(min=1,max=2){
+return (Math.random() * (1+max-min) + min);
+}
+
+static Int(min=10,max=20){
+return Math.floor(Rand.Float(min, max));
+}
+
+static Choice(...args){
+return args[Rand.Int(0, args.length - 1)];
+}
+
+}
+
+
+
+
+
+const app=(ctx)=>{
+
+
+
+
+const {width, height} = ctx.canvas
+
+const radius = 50;
+let x = width*.5, y = height*.5;
+
+let color = "purple";
+let thikness = 30;
+let fill_thikness = thikness - 10;
+
+let angle={
+start:0.0,
+end: pi*2,
+}
+
+let H_bar={
+width:thikness, height:200,
+}
+
+
+const drawFun1=(c)=>{
+
+c.beginPath();
+c.strokeStyle = color;
+c.lineWidth = thikness;
+c.arc(x, y, radius , angle.start, angle.end, !false);
+c.stroke();
+c.closePath();
+
+c.beginPath();
+c.fillStyle = color;
+c.fillRect(x+thikness*0.5, y+10, H_bar.width, H_bar.height);
+c.closePath();
+
+
+if (!0){
+
+
+
+c.beginPath();
+c.strokeStyle = "red";
+c.lineWidth = thikness-10;
+c.arc(x, y, radius , angle.start, angle.end, !false);
+c.stroke();
+c.closePath();
+
+c.beginPath();
+c.fillStyle = "red";
+c.fillRect(x+thikness*0.75, y+10, H_bar.width-10, H_bar.height);
+c.closePath();
+}
+
+}
+
+const drawFun2=(c)=>{
+
+c.beginPath();
+c.strokeStyle = color;
+c.lineWidth = thikness;
+c.arc(x, y, radius , angle.start, angle.end, !false);
+c.stroke();
+c.closePath();
+
+
+if (!0){
+
+
+
+c.beginPath();
+c.strokeStyle = "red";
+c.lineWidth = fill_thikness;
+c.arc(x, y, radius , angle.start, angle.end, !false);
+c.stroke();
+c.closePath();
+
+}
+
+}
+
+const drawFun3=(c)=>{
+
+c.beginPath();
+c.strokeStyle = "black";
+c.lineWidth = thikness;
+c.lineCap = "round"
+c.moveTo(x, y+200);
+c.lineTo(x, y);
+c.stroke()
+
+//c.fillRect(x, y, 60 , 200)
+c.closePath();
+
+
+if (!0){
+
+
+
+c.beginPath();
+c.strokeStyle = "white";
+c.lineWidth = fill_thikness;
+c.lineCap = "round"
+c.moveTo(x, y+200);
+c.lineTo(x, y);
+c.stroke()
+c.closePath();
+
+
+}
+
+}
+
+const drawFun4=(c)=>{
+
+c.beginPath();
+c.strokeStyle = "black";
+c.lineWidth = thikness;
+c.lineCap = "round"
+c.arc(x, y, radius , 0, pi, !0);
+c.stroke()
+c.closePath();
+
+
+if (!0){
+
+
+
+c.beginPath();
+c.strokeStyle = "white";
+c.lineWidth = fill_thikness;
+c.lineCap = "round";
+c.arc(x, y, radius , 0, pi, !0);
+c.stroke()
+c.closePath();
+
+
+}
+
+}
+
+
+let draw_funs=[
+drawFun1,
+drawFun2,
+drawFun3,
+drawFun4,
+
+]
+
+
+const animate=(dt)=>{
+//cleaning screen
+ctx.fillStyle = "rgba(0, 0, 0, 0)";
+ctx.fillRect(0, 0, width, height);
+
+
+
+//console.log(/draw/.__proto__);
+//drawFun(ctx)
+draw_funs[2](ctx)
+}
+
+
+
+
+
+const MainLoop=(ts=0)=>{
+
+let dt = Date.now()
+animate(dt);
+
+//console.log("loop" + ts)
+//if(0)window.requestAnimationFrame(MainLoop);
+
+
+}
+
+// setInterval( () => 
+MainLoop()
+// ,1000);
+
+
+
+
+
+DownloadBTN.addEventListener("click", ()=>{
+
+
+const imgsContainer = document.querySelector(".imgsContainer")
+//let idk1= ctx.getImageData(0, 0, width, height);
+
+//console.log(ctx.createImageData(idk1))
+
+let _url = ctx.canvas.toDataURL()
+
+//console.log(_url.replace("image/png", "image/octet-stream"))
+
+
+const img =new Image();
+img.src = _url;
+imgsContainer.appendChild(img)
+
+});
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+const init=()=>{
+
+
+GLReSizer(ctx);
+app(ctx);
+console.log(ctx);
+
+}
+
+
+
+
+
+
+window.addEventListener("load", ()=>{
+try{
+init();
+}
+catch(e){
+console.log("something wrong ", e)
+}
+
+
+
+
+
+});
+
+
+</script>
+</body>
+</html>

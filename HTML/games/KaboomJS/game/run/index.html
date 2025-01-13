@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>kaboom bird game</title>
+<style >
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+html{
+font-size:10px;
+}
+
+
+body{
+width:100vw;
+height:100vh;
+background: transparent;
+display:grid;
+place-items:center;
+
+}
+
+main{
+width:100%;
+height:100%;
+background: #8C8C8C;
+box-shadow: 2px 2px 2rem 2px #0009;
+}
+
+
+
+</style>
+
+
+<script src="./kaboom.js"></script>
+ 
+
+ 
+
+</head>
+
+<body>
+
+<main>
+
+
+
+<canvas id="canvas"></canvas>
+
+
+
+</main>
+
+
+
+<script>
+
+
+
+const app=()=>{
+
+
+const canvas=document.getElementById("canvas")
+
+canvas.width=window.innerWidth
+canvas.height=window.innerHeight
+
+kaboom({canvas})
+
+loadSprite("bird", "./bird.png")
+loadSprite("pipe", "./pipe.png")
+loadSprite("bg", "./bg.png")
+
+
+
+let highScore=0;
+
+
+scene("game", ()=>{
+
+add([
+	sprite("bg", {width: width(), height: height() }),
+	// scale(0.5)
+])
+
+
+const player = add([
+	sprite("bird"),
+	pos(100, 300),
+	area(),
+	color([255, 0, 255]),
+	body()
+])
+
+
+
+
+
+const genPipes=()=>{
+
+
+const pipe_gap = randi(150, 300);
+const offset = randi(-100, 100);
+
+// top pipe
+add([
+	sprite("pipe"),
+	pos(width(), height()*0.5 + offset +	 pipe_gap/2),
+	area(),
+	"pipe",
+	{passed:!1}
+])
+
+
+// bot pipe
+add([
+	sprite("pipe", {flipY:true}),
+	pos(width(), height()*0.5 + offset - pipe_gap/2),
+	area(),
+	origin("botleft"),
+	"pipe"
+])
+
+
+}
+
+let score = 0;
+const scoreText = add([
+	text(score, {size: 50})
+]);
+
+
+onUpdate("pipe", (pipe) => {
+pipe.move(-160, 0);
+
+if (!pipe.passed && pipe.pos.x < player.pos.x) {
+ pipe.passed = !0;
+ score += 0.5;
+ scoreText.text = score;
+}
+
+});
+
+
+
+loop(2, ()=>{
+	genPipes()
+})
+
+player.collides("pipe", ()=>{
+	go("gameover", score)
+})
+
+
+// player.onCollide( (a, p) => {
+	// go("gameover", score);
+	// debug.log("collide")
+	// console.log(a, p)
+// });
+
+
+onTouchStart( ()=>{
+player.jump(400)
+})
+
+
+
+});
+
+
+
+
+scene("gameover", (score)=>{
+
+add([
+	sprite("bg", {width: width(), height: height() }),
+])
+
+
+let gameoverMSG=""
+if(highScore < score){
+highScore=score;
+
+gameoverMSG=`
+game over !
+noice try man \n
+here ur score: ${score}\n
+\tu beat the\n high score: ${highScore}
+`
+}else{
+
+gameoverMSG=`
+game over !
+noice try man \n
+here ur score: ${score}
+high score: ${highScore}
+`
+}
+
+add([
+	text( gameoverMSG, {size:30})
+])
+
+
+
+onTouchStart( ()=>{
+go("game")
+})
+
+})
+
+
+go("game")
+
+}
+
+
+
+
+
+
+
+window.addEventListener("load", ()=>{
+
+
+app()
+
+} )
+
+
+
+
+
+
+</script>
+
+
+</body>
+</html>
+

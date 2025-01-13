@@ -1,0 +1,107 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>HTML CANVAS GAME BOI</title>
+
+
+<style>
+*{
+
+margin:0;
+padding:0;
+box-sizing:border-box;
+
+}
+
+p{
+position:fixed;
+top:50%;left:50%;
+transform:translate(-50%,-50%);
+color:orangered;
+font-size:32px;
+}
+p::after{
+content:'is awesome';
+color:tan;
+position:fixed;
+bottom:80%;left:50%;
+font-size:16px;
+}
+
+</style>
+</head>
+<body>
+
+
+<canvas id="cvs"></canvas>
+
+<p id="p">Java Srcipt</p>
+
+
+<script>
+let p = document.getElementById('p');
+const cvs = document.getElementById('cvs')
+const ctx =cvs.getContext('2d')
+
+
+
+
+
+cvs.width = window.innerWidth;
+cvs.height = window.innerHeight;
+
+
+CTXBox=(c,x=50,y=60,width,height)=>{
+ctx.beginPath()
+ctx.fillStyle=c;
+ctx.fillRect(x,y,width,height);
+ctx.closePath();
+}
+
+
+CTXText=(c='tan',t='hello',x=50,y=60)=>{
+
+ctx.fillStyle=c
+ctx.fillText(t,x,y)
+ctx.closePath()
+}
+
+
+
+
+let P=p.getBoundingClientRect();
+
+
+ctx.beginPath();
+ctx.fillStyle='#FF7600';
+ctx.fillRect(P.x,P.y,P.width,P.height);
+ctx.closePath();
+
+
+CTXText('red','BISWAJIT',80,100);
+
+
+
+
+
+//console.log(g)
+
+
+/*
+
+(()=>{
+var script = document.createElement('script');
+
+script.src="./eruda.min.js";
+document.body.appendChild(script);
+script.onload = ()=>{ eruda.init() }
+})()
+*/
+
+
+</script>
+</body>
+</html>

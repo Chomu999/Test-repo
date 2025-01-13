@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=4.0, user-scalable=0" />
+
+<style type="text/css" media="all">
+*{
+margin:0;
+padding:0;
+box-sizing: border-box;
+}
+
+html{
+font-size: 10px;
+
+}
+
+BoDy{
+BackgrouNd-CoLoR:#424242;
+
+}
+
+
+
+canvas{
+background: #0065FF88;
+}
+
+
+.error_box{
+margin: 2rem 0;
+background:transparent;
+overflow:hidden auto;
+}
+
+.title{
+color:#222A3B;
+font-size: 3rem;
+display:block;
+text-align: center;
+text-transform: capitalize;
+background: linear-gradient(45deg,red, blue);
+text-decoration: underline;
+}
+
+.error_box  p{
+margin:0.2rem 1rem;
+padding: 1rem ;
+
+background: #0009;
+color: #FF374E;
+border-radius: 1rem;
+}
+
+</style>
+
+<title>webgpu simple triangle</title>
+
+</head>
+
+<body>
+
+<main>
+
+
+<canvas id="canvas" tabindex="0"></canvas>
+
+
+<div class="error_box">
+<span class="title">error and warning</span>
+<pre></pre>
+</div>
+
+</main>
+
+<script type="module">
+
+
+
+const showError=(msg)=>{
+console.log(msg)
+const errorContainer=document.querySelector(".error_box > pre")
+if(!errorContainer) return -1;
+errorContainer.innerHTML+=`<p>${msg}</p>`;
+}
+
+const App = async()=>{
+
+
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("webgpu");
+
+//console.log(ctx);
+const csize = innerWidth > innerHeight?innerHeight:innerWidth;
+
+canvas.width=csize;
+canvas.height=csize;
+
+
+
+//let l1 = new ResizeObserver(()=>{})// (entries
+//console.log(l1);
+
+const myGpu= navigator.gpu;// ?? 0
+
+
+const myAdapter = await myGpu?.requestAdapter();
+const myDevice = await myAdapter?.requestDevice();
+if (!myDevice) {
+showError('need a browser that supports WebGPU');
+return;
+}
+
+
+const presentationFormat = myGpu.getPreferredCanvasFormat();
+
+ctx.configure({
+device: myDevice,
+format: presentationFormat,
+});
+
+const module = myDevice.createShaderModule({
+label: 'our hardcoded red triangle shaders',
+code: `
+@vertex fn vs(
+@builtin(vertex_index) vertexIndex : u32
+) -> @builtin(position) vec4f {
+let pos = array(
+vec2f( -0.5, 0.5),
+vec2f(-0.5, -0.5),
+vec2f( 0.5, -0.5),
+
+
+vec2f( -0.5, 0.5),
+vec2f( 0.5, 0.5),
+vec2f( 0.5, -0.5),
+);
+return vec4f(pos[vertexIndex], 0.0, 1.0);
+}
+@fragment fn fs() -> @location(0) vec4f {
+
+let r = 0.5;
+
+//for(let i=0.0;i<10.0;i+=1.0){
+//r+=i;
+//}
+
+//let tup:(i32, f64, u8)  = (500, 6.4, 1);
+
+let a =55.0;
+
+return vec4f(r, 0.0, 0.0, 1.0);
+}
+`,
+});
+
+
+const pipeline = myDevice.createRenderPipeline({
+label: 'our hardcoded red triangle pipeline',
+layout: 'auto',
+vertex: {
+module,
+entryPoint: 'vs',
+},
+fragment: {
+module,
+entryPoint: 'fs',
+targets: [{ format: presentationFormat }],
+},
+});
+
+
+
+
+
+const renderPassDescriptor = {
+label: 'our basic canvas renderPass',
+colorAttachments: [
+{
+// view: <- to be filled out when we render
+clearValue: [0.3, 0.3, 0.3, 1],
+loadOp: 'clear',
+storeOp: 'store',
+},
+],
+};
+
+
+
+function render() {
+// Get the current texture from the canvas context and
+// set it as the texture to render to.
+renderPassDescriptor.colorAttachments[0].view =
+ctx.getCurrentTexture().createView();
+// make a command encoder to start encoding commands
+const encoder = myDevice.createCommandEncoder({ label: 'our encoder' });
+// make a render pass encoder to encode render specific commands
+const pass = encoder.beginRenderPass(renderPassDescriptor);
+pass.setPipeline(pipeline);
+pass.draw(6); // call our vertex shader 3 times
+pass.end();
+const commandBuffer = encoder.finish();
+
+myDevice.queue.submit([commandBuffer]);
+
+}
+
+render();
+
+//showError(myGpu)
+//showError(myAdapter)
+//showError(myDevice)
+
+
+
+
+/*
+myDevice.createCommandEncoder()
+
+// draw something
+pass = encoder.beginRenderPass(...)
+pass.setPipeline(...)
+pass.setVertexBuffer(0, …)
+pass.setVertexBuffer(1, …)
+pass.setIndexBuffer(...)
+pass.setBindGroup(0, …)
+pass.setBindGroup(1, …)
+pass.draw(...)
+pass.end()
+
+*/
+
+
+//console.log(window)
+
+
+
+//requestAnimationFrame(MainLoop)
+
+
+}
+
+
+
+
+
+
+
+
+
+window.addEventListener("load", (e)=>{
+try{
+App()
+}catch(e){
+showError(e)
+}
+
+})
+
+
+</script>
+
+</body>
+</html>

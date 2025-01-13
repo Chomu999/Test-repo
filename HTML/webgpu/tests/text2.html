@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=4.0, user-scalable=0" />
+
+<style type="text/css" media="all">
+*{
+margin:0;
+padding:0;
+box-sizing: border-box;
+}
+
+html{
+font-size: 10px;
+
+}
+
+BoDy{
+BackgrouNd-CoLoR:#424242;
+
+}
+
+
+
+canvas{
+background: #0065FF88;
+}
+
+
+.error_box{
+margin: 2rem 0;
+background:transparent;
+overflow:hidden auto;
+}
+
+.title{
+color:#222A3B;
+font-size: 3rem;
+display:block;
+text-align: center;
+text-transform: capitalize;
+background: linear-gradient(45deg,red, blue);
+text-decoration: underline;
+}
+
+.error_box  p{
+margin:0.2rem 1rem;
+padding: 1rem ;
+
+background: #0009;
+color: #FF374E;
+border-radius: 1rem;
+}
+
+</style>
+
+<title>webgpu testing 1 app</title>
+
+</head>
+
+<body>
+
+<main>
+
+
+<canvas id="canvas" tabindex="0"></canvas>
+
+
+<div class="error_box">
+<span class="title">error and warning</span>
+<pre></pre>
+</div>
+
+</main>
+
+<script type="module">
+
+
+
+const showError=(msg)=>{
+console.log(msg)
+const errorContainer=document.querySelector(".error_box > pre")
+if(!errorContainer) return -1;
+errorContainer.innerHTML+=`<p>${msg}</p>`;
+}
+
+const App = async()=>{
+
+
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("webgpu");
+
+//console.log(ctx);
+const csize = innerWidth > innerHeight?innerHeight:innerWidth;
+
+canvas.width=csize;
+canvas.height=csize;
+
+
+
+
+
+const myGpu= navigator.gpu;// ?? 0
+
+
+const myAdapter = await myGpu?.requestAdapter();
+const myDevice = await myAdapter?.requestDevice();
+if (!myDevice) {
+showError('need a browser that supports WebGPU');
+return;
+}
+
+
+const presentationFormat = myGpu.getPreferredCanvasFormat();
+
+ctx.configure({
+device: myDevice,
+format: presentationFormat,
+});
+
+const module = myDevice.createShaderModule({
+label: 'doubling compute module',
+code: `
+@group(0) @binding(0) var<storage, read_write> data: array<f32>;
+@compute @workgroup_size(1) fn computeSomething(
+@builtin(global_invocation_id) id: vec3<u32>
+) {
+let i = id.x;
+data[i] = data[i] * 20.0;
+}
+`,
+});
+
+const pipeline = myDevice.createComputePipeline({
+label: 'doubling compute pipeline',
+layout: 'auto',
+compute: {
+module,
+entryPoint: 'computeSomething',
+},
+});
+
+const input = new Float32Array([1, 3, 5]);
+
+
+// create a buffer on the GPU to hold our computation
+// input and output
+const workBuffer = myDevice.createBuffer({
+label: 'work buffer',
+size: input.byteLength,
+usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
+});
+
+// Copy our input data to that buffer
+myDevice.queue.writeBuffer(workBuffer, 0, input);
+
+
+
+// create a buffer on the GPU to get a copy of the results
+const resultBuffer = myDevice.createBuffer({
+label: 'result buffer',
+size: input.byteLength,
+usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST
+});
+
+
+// Setup a bindGroup to tell the shader which
+// buffer to use for the computation
+const bindGroup = myDevice.createBindGroup({
+label: 'bindGroup for work buffer',
+layout: pipeline.getBindGroupLayout(0),
+entries: [
+{ binding: 0, resource: { buffer: workBuffer } },
+],
+});
+
+
+// Encode commands to do the computation
+const encoder = myDevice.createCommandEncoder({
+label: 'doubling encoder',
+});
+
+const pass = encoder.beginComputePass({
+label: 'doubling compute pass',
+});
+
+pass.setPipeline(pipeline);
+pass.setBindGroup(0, bindGroup);
+pass.dispatchWorkgroups(input.length);
+pass.end();
+
+
+// Encode a command to copy the results to a mappable buffer.
+encoder.copyBufferToBuffer(workBuffer, 0, resultBuffer, 0, resultBuffer.size);
+
+
+// Finish encoding and submit the commands
+const commandBuffer = encoder.finish();
+myDevice.queue.submit([commandBuffer]);
+
+await resultBuffer.mapAsync(GPUMapMode.READ);
+const result = new Float32Array(resultBuffer.getMappedRange());
+console.log('input', input);
+console.log('result', result);
+
+//showError(myGpu)
+//showError(myAdapter)
+//showError(myDevice)
+
+
+
+
+/*
+myDevice.createCommandEncoder()
+
+// draw something
+pass = encoder.beginRenderPass(...)
+pass.setPipeline(...)
+pass.setVertexBuffer(0, …)
+pass.setVertexBuffer(1, …)
+pass.setIndexBuffer(...)
+pass.setBindGroup(0, …)
+pass.setBindGroup(1, …)
+pass.draw(...)
+pass.end()
+
+*/
+
+
+//console.log(window)
+
+
+
+//requestAnimationFrame(MainLoop)
+
+
+}
+
+
+
+
+
+
+
+
+
+window.addEventListener("load", (e)=>{
+try{
+App()
+}catch(e){
+showError(e)
+}
+
+})
+
+
+</script>
+
+</body>
+</html>

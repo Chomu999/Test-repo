@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta charset="utf-8" />
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no" />
+
+<style>
+*{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+:root{
+
+--textColor1:#B1B1B1;
+--textColor2:#C1C5FF;
+--textColor3:#DBFFB8;
+
+
+--textBGColor1:#414141;
+--textBGColor2:#000039;
+--textBGColor3:#2D402A;
+
+
+--textFontSize1: 1rem;
+--textFontSize2: 2rem;
+--textFontSize3: 3rem;
+
+--buttonColor1:#8100FF;
+--buttonColor2:#D5FFAB;
+--buttonColor3:#FF979C;
+
+--buttonBGColor1:#2E0F4D;
+--buttonBGColor2:#2A5400;
+--buttonBGColor3:#422025;
+
+--buttonRadius1:1rem;
+--buttonRadius2:2rem 1rem;
+--buttonRadius3:0 2rem 0 2rem;
+
+
+}
+
+html{
+font-size: 10px;
+}
+
+body{
+background: #FFCCA2;
+}
+
+
+.appTitle{
+margin: 2rem auto;
+padding: 9px;
+font-size: 4rem;
+font-weight: 700;
+color: #C7D1BD;
+background: #3A7300;
+border: none;
+border-radius: 1rem;
+text-align: center;
+}
+
+
+
+
+
+.output_cont{
+background: #FFA600;
+}
+
+
+.out{
+margin: 0.4rem 1rem;
+padding: 1rem;
+display: inline-block;
+font-size: 1.8rem;
+border-radius: 1rem;
+}
+
+.outA{
+color: #FF6200;
+background:#431B00;
+}
+
+.outB{
+color: #9BFFBA;
+background:#1E5E00;
+}
+
+.outC{
+color: #00D9FF;
+background:#1D0074;
+}
+
+.canvas_cont{
+background: #00AAFF;
+}
+
+
+canvas{
+margin: 2rem auto;
+width: 90%;
+display: block;
+background: salmon;
+image-rendering: pixelated;
+}
+
+
+.btn_cont{
+background: #8CFFED;
+}
+
+.btn{
+margin: 1rem;
+padding: 1rem 2rem;
+color: red;
+background: yellow;
+border: none;
+border-radius: 2rem;
+}
+
+
+
+</style>
+
+<title>tfjs test 4</title>
+
+<script src="/storage/emulated/0/g_js_libs/tf.min.js"></script>
+
+</head>
+
+<body>
+
+
+<h1 class="appTitle">tfjs test part 4</h1>
+<main>
+
+<div class="output_cont">
+
+<span class="out outC imgLabel"> Image Label is</span>
+<span class="out outA">hi</span> <span class="out outB">hello</span>
+
+<span class="out outC">gu</span>
+
+</div>
+
+<div class="canvas_cont">
+
+<canvas id="canvas"></canvas>
+</div>
+
+
+<div class="btn_cont">
+
+<button class="btn drawBtn">draw Image</button>
+
+<button class="btn nextBtn">next Image</button>
+<button class="btn prevBtn">previous Image</button>
+
+<button class="btn checkMemoryBtn">check Memory</button>
+
+
+
+</div>
+
+</main>
+
+
+
+
+
+
+
+
+<script>
+//"use strict";
+
+const loadFile=async(p,t="text")=>{
+	const f = await fetch(p);
+	return await f[t]();
+}
+
+
+//generator 
+const make_Gen=()=>{
+const model= tf.sequential();
+
+model.add(tf.layers.dense({
+	units: 7*7*256,
+	inputShape:[100],
+	useBias: false,
+}));
+
+model.add(tf.layers.batchNormalization())
+model.add(tf.layers.leakyReLU())
+model.add(tf.layers.reshape({
+targetShape:[7, 7, 256]
+}))
+
+//
+model.add(tf.layers.conv2dTranspose({
+	filters:128,
+	kernelSize:[5, 5],
+	strides:[1, 1],
+	padding: "same",
+	useBias:false,
+}));
+
+model.add(tf.layers.batchNormalization());
+model.add(tf.layers.leakyReLU());
+
+
+//
+model.add(tf.layers.conv2dTranspose({
+	filters:64,
+	kernelSize:[5, 5],
+	strides:[2, 2],
+	padding: "same",
+	useBias:false,
+}));
+
+model.add(tf.layers.batchNormalization());
+model.add(tf.layers.leakyReLU());
+
+//
+model.add(tf.layers.conv2dTranspose({
+	filters:1,
+	kernelSize:[5, 5],
+	strides:[2, 2],
+	padding: "same",
+	useBias:false,
+	activation:"tanh",
+}));
+
+
+
+return model;
+
+
+}
+
+
+// discriminator
+const make_Dis=()=>{
+
+const model= tf.sequential();
+
+model.add(tf.layers.conv2d({
+	filters:64,
+	kernelSize:[5, 5],
+	strides: [1, 1],
+	inputShape:[28, 28, 1],
+	padding:"same",
+}));
+model.add(tf.layers.leakyReLU());
+model.add(tf.layers.dropout(0.3));
+
+
+
+model.add(tf.layers.conv2d({
+	filters:128,
+	kernelSize:[5, 5],
+	strides: [1, 1],
+	padding:"same",
+}));
+model.add(tf.layers.leakyReLU());
+model.add(tf.layers.dropout(0.3));
+
+
+model.add(tf.layers.flatten());
+model.add(tf.layers.dense({units:1, activation:"sigmoid"}));
+
+
+return model;
+
+}
+
+
+
+//a loss function for other loss functions
+const crossEntropy =  tf.metrics.binaryCrossentropy;
+
+
+
+//discriminator loss function use crossEntropy loss function
+const loss_dis=(realOutput, fakeOutput)=>{
+const realLoss = crossEntropy(tf.onesLike(realOutput), realOutput);
+const fakeLoss = crossEntropy(tf.zerosLike(fakeOutput), fakeOutput);
+const totalLoss = tf.add(realLoss,fakeLoss);
+return totalLoss;
+}
+
+//generator loss function using crossEntropy loss function
+const loss_gen=(fake_out)=>{
+return crossEntropy(tf.onesLike(fake_out), fake_out);
+}
+
+
+
+
+//
+const trainStep=(gen, dis, image)=>{
+
+gen.applyGradients();
+dis.applyGradients();
+
+//trainOnBatch
+
+}
+
+
+//
+const trainModels=()=>{
+
+
+
+}
+
+
+
+const INITIAL=async()=>{
+//querySelector
+
+//btn
+const drawBtn = document.querySelector(".drawBtn");
+const nextBtn = document.querySelector(".nextBtn");
+const prevBtn = document.querySelector(".prevBtn");
+const checkMemoryBtn = document.querySelector(".checkMemoryBtn");
+
+//Label 
+const imgLabel = document.querySelector(".imgLabel");
+
+const canvas = document.querySelector("canvas");
+const ctx = canvas.getContext("2d");
+
+console.log(ctx);
+
+
+canvas.width=28;
+canvas.height=28;
+
+
+
+const imgDatasets=await loadFile("../datasets/mnist/mnist_small.json", "json");
+const imgDatas=[];
+
+for(let i=0;i<imgDatasets.length;i++){
+imgDatas[i] = imgDatasets[i][1];
+}
+
+
+let imgIdx = 0;
+const maxImgLength = imgDatasets.length;
+
+
+
+
+const gen = make_Gen();
+
+const dis = make_Dis();
+
+
+
+
+let latent_noise = tf.randomNormal([1, 100]);
+let generate_image = gen.predict(latent_noise);
+
+let b = dis.predict(generate_image);
+b.print(true);
+
+
+
+
+//learning rates
+const generatorLearningRate = 1e-4; //0.0001
+const discriminatorLearningRate = 1e-4; //0.0001
+
+
+//optimizer for g and d
+const generatorOptimizer = tf.train.adam(generatorLearningRate);
+const discriminatorOptimizer = tf.train.adam(discriminatorLearningRate);
+
+
+
+
+const Epochs = 10;
+
+const InputDim = 100;
+
+const NumExample = 16;
+
+const Seed = tf.randomNormal([NumExample, InputDim]);
+
+
+
+
+
+console.log(gen);
+
+console.log(generatorOptimizer);
+
+
+generatorOptimizer.applyGradients(
+
+)
+
+
+
+//with a as t:
+//	console.log(a)
+//	console.log(n)
+//console.log(a);
+
+
+//const a= tf.tensor(5);
+//a.print(true)
+
+
+
+
+
+
+//draw mnist dataset Number as a image
+const drawNumber=(didx=0)=>{
+const _w = 28, _h = 28;
+const _imgD = new ImageData(_w, _h);
+for(let i=0;i<_w*_h;++i){
+const col = imgDatasets[didx][1][i]*255;
+const idx=(i * 4+0);
+_imgD.data[idx + 0] = col;
+_imgD.data[idx + 1] = col;
+_imgD.data[idx + 2] = col;
+_imgD.data[idx + 3] = 255;
+}
+ctx.putImageData(_imgD, 0, 0);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+//
+drawBtn.addEventListener("click", async()=>{
+
+
+let noise = tf.randomNormal([1, 100]);
+let genImgData = gen.predict(noise).abs().dataSync();
+
+
+const _imgdata = new ImageData(28, 28);
+for(let i=0;i<genImgData.length;i++){
+let idx = (i * 4 + 0);
+let col = parseInt(genImgData[i] * 9000);
+
+_imgdata.data[idx + 0] = col;
+_imgdata.data[idx + 1] = col
+_imgdata.data[idx + 2] = col;
+_imgdata.data[idx + 3] = 255;
+}
+ctx.putImageData(_imgdata, 0, 0);
+
+});
+
+
+
+
+
+//
+nextBtn.addEventListener("click", ()=>{
+
+imgIdx = (imgIdx + 1) % maxImgLength;
+const Label = imgDatasets[imgIdx][0][0];
+drawNumber(imgIdx);
+imgLabel.innerText=`Image Label is > ${Label} <`;
+
+});
+
+
+//
+prevBtn.addEventListener("click", ()=>{
+
+imgIdx = (imgIdx - 1 + maxImgLength) % maxImgLength;
+const Label = imgDatasets[imgIdx][0][0];
+drawNumber(imgIdx);
+imgLabel.innerText=`Image Label is > ${Label} <`;
+
+});
+
+
+//
+checkMemoryBtn.addEventListener("click", ()=>{
+let a = tf.memory();
+for (let i in a){
+	console.log(`${i}  ${a[i]}`);
+}
+
+gen.weights.forEach(w => {
+const newVals = tf.randomNormal(w.shape);
+w.val.assign(newVals);
+});
+
+
+});
+
+
+
+
+
+
+
+
+
+
+}
+
+
+try{
+console.log(tf);
+
+tf.ready().then(INITIAL);
+
+}catch(err){
+throw new Error("js uncatch err", err)
+}
+
+</script>
+
+</body>
+</html>

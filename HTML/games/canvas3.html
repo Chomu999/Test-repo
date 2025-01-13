@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>HTML CANVAS GAME BOI</title>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+
+div#btnBox{
+margin:0;padding:0;position:fixed;
+background-color:#FF7049;
+width:330px;height:330px;
+top:389px;left:33.51px;
+display:grid;
+grid-template-columns: repeat(3, 1fr);
+grid-template-rows: repeat(3, 1fr);
+grid-gap:1px;
+opacity:70%;
+overflow:hidden;
+}
+
+
+.btn2{
+grid-column:2/3;
+grid-row:1/2;
+}
+
+.btn4{
+grid-column:1/2;
+grid-row:2/3;
+}
+
+.btn6{
+grid-column:3/4;
+grid-row:2/3;
+}
+
+
+.btn8{
+grid-column:2/3;
+grid-row:3/4;
+}
+
+
+
+.btns{
+background-color:rgba(0,0,0,0.06);
+border-radius:50%;
+box-shadow:0 0 4px inset black;
+}
+
+</style>
+</head>
+<body>
+<canvas></canvas>
+
+
+<div id="btnBox">
+
+<div class="btns btn2"></div>
+
+<div class="btns btn4"></div>
+<div class="btns btn6"></div>
+
+<div class="btns btn8"></div>
+
+
+</div>
+
+<script>
+
+let cvs=document.querySelector('canvas');
+let ctx=cvs.getContext('2d');
+cvs.width=window.innerWidth;
+cvs.height=window.innerHeight;
+let hue=0;
+let sorce=0;
+
+let CAction=['up','right','down','left']
+
+
+let touch=['touchstart','touchmove','touchend']
+
+
+let btn2=document.querySelector('.btn2'),
+btn4=document.querySelector('.btn4'),
+btn6=document.querySelector('.btn6'),
+btn8=document.querySelector('.btn8');
+
+
+let player={}
+player.Move=false
+player.Width=60
+player.Height=60
+player.frameX=8
+player.frameY=4
+player.X=0
+player.Y=0
+player.Speed=3
+
+
+player.img=new Image()
+player.img.src='./img/character.png';
+
+
+let gg=new Image();
+gg.src='./img/character.png';
+
+
+function randint(min,max){
+return Math.floor(Math.random() * (max-min) + min)
+}
+
+
+
+
+function DrawSpite(img,sX,sY,sW,sH,dX,dY,dW,dH){
+ctx.drawImage(img,sX,sY,sW,sH,dX,dY,dW,dH)
+}
+
+function IScollision(ObjectA,ObjectB){
+return (ObjectA.x + ObjectA.width >= ObjectB.x &&
+ObjectA.x <= ObjectB.x + ObjectB.width &&
+ObjectA.y + ObjectA.height >= ObjectB.y &&
+ObjectA.y <= ObjectB.y + ObjectB.height)
+}
+
+
+function CTXtext(text,x,y){
+ctx.fillStyle='#919191';
+ctx.fillText(`${text}`,x,y);
+}
+
+
+function ISButtonEvent(traget,condion,fun){
+traget.addEventListener(condion,fun);
+}
+
+
+
+function inf(fx,fy,tbw,tbh,x,y,CW,CH){
+return {
+    frameX:fx,frameY:fy,
+    tileBlockWidth:tbw,tileBlockHeight:tbh,
+    x:x,y:y,
+    speed:{x:0,y:0},
+    CWidth:CW,CHeight:CH
+}
+}
+
+let r2=randint(1,4)
+let r3=randint(1,4)
+let ss=[]
+
+
+
+ss.push(inf(0,0,60,60,200,140,60,60))
+
+
+
+
+
+
+
+
+
+
+
+ss.push(
+    {
+    frameX:0,frameY:0,
+    tileBlockWidth:60,tileBlockHeight:60,
+    x:0,y:0,
+    CWidth:60,CHeight:60
+})
+
+
+
+
+ss.push({
+    frameX:0,frameY:120,
+    tileBlockWidth:60,tileBlockHeight:60,
+    x:0,y:0,
+    CWidth:60,CHeight:60
+})
+
+
+ss.push({
+    frameX:0,frameY:0,
+    tileBlockWidth:60,tileBlockHeight:60,
+    x:0,y:0,
+    CWidth:60,CHeight:60
+})
+
+
+ss.push({
+    frameX:0,frameY:180,
+    tileBlockWidth:60,tileBlockHeight:60,
+    x:0,y:0,
+    CWidth:60,CHeight:60
+})
+
+
+
+
+
+
+
+class PLAYER{
+constructor(arr){
+this.main=arr
+
+//console.log(this.main[0].frameY)
+
+this.frameX=this.main[0].frameX
+this.frameY=this.main[0].frameY
+this.TColumn=8
+this.TRow=4
+this.tileBlockWidth=this.main[0].tileBlockWidth
+this.tileBlockHeight=this.main[0].tileBlockHeight
+this.x=this.main[0].x
+this.y=this.main[0].y
+this.speed={x:0,y:0}
+this.width=this.main[0].CWidth
+this.height=this.main[0].CHeight
+
+}
+draw(){
+
+
+
+ctx.strokeStyle='#000'
+ctx.stroke()
+ctx.fill()
+
+ctx.drawImage(gg,
+this.frameX*this.tileBlockWidth,
+this.frameY*this.tileBlockHeight,
+this.tileBlockWidth,
+this.tileBlockHeight,
+this.x,this.y,
+this.width,this.height
+)
+
+}
+update(){
+this.draw()
+
+this.x += this.speed.x
+this.y += this.speed.y
+
+
+
+
+
+if(this.frameX<this.TColumn-1){ this.frameX++}
+else{ this.frameX=0}
+}
+
+
+}
+
+
+
+
+
+
+
+class Box{
+constructor(x,y,width,height,color){
+
+this.x=x
+this.y=y
+this.color=color
+this.speed={x:Math.random() * 3 - 1.5,y:Math.random() * 3 - 1.5}
+this.width=width
+this.height=height
+}
+draw(){
+ctx.fillStyle=this.color
+ctx.fillRect(this.x,this.y,this.width,this.height)
+
+}
+update(){
+this.draw()
+
+this.x += this.speed.x
+this.y += this.speed.y
+
+
+hue+=0.5
+
+
+
+}
+
+
+}
+
+
+let hero=new PLAYER(ss)
+
+
+let boxs=[]
+function swapn(){
+boxs.push(new Box(randint(1,400),randint(1,400),randint(10,20),randint(10,29),`hsl(${hue},100%,50%,1)`))
+}
+setInterval(swapn,1000)
+
+
+
+//console.log(ss)
+
+
+
+//event start
+
+ISButtonEvent(btn2,touch[0],pStartUp)
+ISButtonEvent(btn6,touch[0],pStartRight)
+ISButtonEvent(btn8,touch[0],pStartDown)
+ISButtonEvent(btn4,touch[0],pStartLeft)
+
+//event end
+
+ISButtonEvent(btn2,touch[2],pEndUp)
+ISButtonEvent(btn6,touch[2],pEndRight)
+ISButtonEvent(btn8,touch[2],pEndDown)
+ISButtonEvent(btn4,touch[2],pEndLeft)
+
+
+
+
+//btn up fun
+function pStartUp(){
+hero.frameX=0
+hero.frameY=3
+hero.speed.y -= 7 
+}
+function pEndUp(){
+
+hero.frameX=0
+hero.frameY=0
+hero.speed.y = 0
+}
+//btn right fun
+function pStartRight(){
+
+hero.frameX=0
+hero.frameY=2
+hero.speed.x = 7
+}
+function pEndRight(){
+
+hero.frameX=0
+hero.frameY=0
+hero.speed.x = 0
+}
+
+
+
+//btn right fun
+function pStartDown(){
+
+hero.frameX=0
+hero.frameY=0
+hero.speed.y = 7 
+}
+function pEndDown(){
+
+hero.frameX=0
+hero.frameY=0
+hero.speed.y = 0
+}
+//btn left fun
+
+function pStartLeft(){
+hero.frameX=0
+hero.frameY=1
+hero.speed.x = -7 
+
+}
+function pEndLeft(){
+
+hero.frameX=0
+hero.frameY=0
+hero.speed.x=0
+}
+
+
+
+
+let x=0,fx=0;
+const gameLoop=()=>{
+ctx.clearRect(0,0,cvs.width,cvs.height)
+
+
+
+/*
+DrawSpite(player.img,
+player.frameX*player.Width,0,
+player.Width,player.Height,
+player.X,player.Y*6,
+player.Width,player.Height)
+
+// frame movin
+if(player.frameX<7){ player.frameX++}
+else{ player.frameX=0}
+// player movin
+if(player.Y<60){ player.Y++}
+else{ player.Y= 0 - 10}
+
+
+
+
+
+ss[0].x += ss[0].speed.x;
+ss[0].y += ss[0].speed.y;
+
+*/
+
+/*
+ctx.drawImage(gg,
+ss[0].frameX*ss[0].CWidth,
+ss[0].frameY*ss[0].CHeight,
+ss[0].tileBlockWidth,
+ss[0].tileBlockHeight,
+ss[0].x,ss[0].y,
+ss[0].CWidth,ss[0].CHeight
+)
+
+if(ss[0].frameX<7){ ss[0].frameX++}
+else{ ss[0].frameX=0}
+*/
+
+//if(IScollision())
+
+
+
+
+/*
+
+if(ss[0].x>0){ ss[0].x -= 7}
+else{ ss[0].x= 400}
+
+*/
+
+//if(ss[0].speed.x < 40){ ss[0].speed.x-- }
+
+
+
+
+boxs.forEach((box,index)=>{
+box.update()
+
+
+
+if(box.x + box.width + box.height > cvs.width || box.x - box.width - box.height < 0){
+box.speed.x = -box.speed.x
+}
+
+
+
+if(box.y + box.height + box.width > cvs.height || box.y - box.height - box.width < 0){
+box.speed.y = -box.speed.y
+}
+
+
+
+
+if(IScollision(hero,box)){
+sorce++
+boxs.splice(index, 1)
+}})
+
+
+
+
+
+
+
+
+hero.update()
+
+
+CTXtext(`SORCE : ${sorce}`,cvs.width/2.3,30)
+
+if(sorce >= 32){ document.write('U W0n')}
+
+}
+
+cvs.onload =setInterval(gameLoop,1000/10)
+
+
+//console.log(ss[0].speed.x)
+
+
+
+//ss[0].speed.x -= 7
+
+
+
+
+</script>
+</body>
+</html>

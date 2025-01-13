@@ -1,0 +1,323 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<!-- 
+<meta name="viewport" content="width=device-width, initial-scale=5.0 maximum-scale=5.0 user-scalable=0">
+ -->
+ 
+ <meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=1.0">
+<title>HTML 3d Element</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+body{
+background: gray;
+}
+
+canvas{
+
+position:absolute;
+top:50%;
+left:50%;
+transform: translate(-50%,-50%);
+
+}
+</style>
+
+<head>
+
+<body>
+
+<canvas class="gl"></canvas>
+
+
+
+<script>
+console.error(`it's worked poperly`);
+const canvas=document.querySelector('.gl');
+const gl=canvas.getContext('webgl');
+
+const cvsSize=innerWidth;
+
+canvas.width=cvsSize;
+canvas.height=cvsSize;
+
+
+const r = ()=>{
+return Math.random();
+}
+
+
+
+
+//VERTEX_SHADER lol
+let vShaderSrc=`
+precision mediump float;
+
+attribute vec3 a_vPos;
+attribute vec3 a_vColor;
+
+varying vec3 fragColor;
+
+void main(){
+    fragColor = a_vColor;
+//gl_PointSize = uPointSize;
+    gl_Position = vec4(a_vPos, 1.0);
+}
+`;
+
+//FRAGMENT_SHADER lol
+
+let fShaderSrc=`
+precision mediump float;
+
+
+varying vec3 fragColor;
+
+
+
+void main(void){
+    gl_FragColor = vec4(fragColor, 1.0);
+}
+`;
+
+
+
+/*
+
+class ShaderUtil{
+
+
+
+
+
+
+static createGLShader(gl,src,type){
+
+const shader = gl.createShader(type)
+gl.shaderSource(shader, src);
+gl.compileShader(shader);
+
+if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS)){
+console.log(`Shader compilation failed: ${gl.getShaderInfoLog(shader)}`);
+gl.deleteShader(shader);
+return null;
+}
+return shader;
+}
+
+
+static createGLProgram(gl,vSh,fSh,doValidate){
+
+//Link shaders together
+const prog = gl.createProgram();
+gl.attachShader(prog,vSh);
+gl.attachShader(prog,fSh);
+gl.linkProgram(prog);
+
+//Force predefined locations for specific attributes. If the attibute isn't used in the shader its location will default to -1
+
+gl.bindAttribLocation(prog,ATTR_POSITION_LOC,ATTR_POSITION_NAME);
+gl.bindAttribLocation(prog,ATTR_NORMAL_LOC,ATTR_NORMAL_NAME);
+gl.bindAttribLocation(prog,ATTR_UV_LOC,ATTR_UV_NAME);
+
+
+//Check if successful
+if(!gl.getProgramParameter(prog, gl.LINK_STATUS)){
+console.error("Error creating shader program.",gl.getProgramInfoLog(prog));
+gl.deleteProgram(prog); return null;
+}
+
+//Only do this for additional debugging.
+if(doValidate){
+gl.validateProgram(prog);
+if(!gl.getProgramParameter(prog,gl.VALIDATE_STATUS)){
+console.error("Error validating program", gl.getProgramInfoLog(prog));
+gl.deleteProgram(prog); return null;
+}
+}
+
+//Can delete the shaders since the program has been made.
+
+gl.detachShader(prog,vSh);
+//, detaching might cause issues on some browsers, Might only need to delete.
+gl.detachShader(prog,fSh);
+gl.deleteShader(fSh);
+gl.deleteShader(vSh);
+
+return prog;
+
+
+}
+
+
+
+
+
+
+}
+*/
+
+
+//gl.enable(gl.DEPTH_TEST)
+//gl.depthFunc(gl.LEQUAL)
+//gl.clearColor(0, 20, 6, 1)
+//gl.clearDepth(1.0)
+
+gl.enable(gl.DEPTH_TEST)
+
+gl.viewport(0, 0, canvas.width, canvas.height);
+gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+
+//gl.clearColor(5, 0, 9,1);
+
+//console.log(gl)
+
+
+
+
+
+
+//gl.fClear();
+
+
+
+let VShader = gl.createShader(gl.VERTEX_SHADER);
+let FShader = gl.createShader(gl.FRAGMENT_SHADER);
+
+gl.shaderSource(VShader,vShaderSrc);
+gl.shaderSource(FShader,fShaderSrc);
+
+
+
+gl.compileShader(VShader);
+
+if(!gl.getShaderParameter(VShader, gl.COMPILE_STATUS)){
+console.error(`Shader compilation failed: ${gl.getShaderInfoLog(VShader)}`);
+gl.deleteShader(VShader);
+}
+
+
+
+gl.compileShader(FShader);
+
+if(!gl.getShaderParameter(FShader, gl.COMPILE_STATUS)){
+console.error(`Shader compilation failed: ${gl.getShaderInfoLog(FShader)}`);
+gl.deleteShader(FShader);
+}
+
+
+let myProgram = gl.createProgram();
+gl.attachShader(myProgram,VShader);
+gl.attachShader(myProgram,FShader);
+gl.linkProgram(myProgram);
+
+//Check if successful
+if(!gl.getProgramParameter(myProgram, gl.LINK_STATUS)){
+console.error("Error creating shader program.",gl.getProgramInfoLog(myProgram));
+gl.deleteProgram(myProgram);
+}
+
+
+// Check agine b/w/n
+gl.validateProgram(myProgram);
+if(!gl.getProgramParameter(myProgram, gl.VALIDATE_STATUS)){
+console.error("Error Validating Program", gl.getProgramInfoLog(myProgram));
+}
+
+
+
+
+
+
+
+//let MyTriangle=[
+//    //x y         //r g b
+//    0.0, 0.5,    1.0, 0.0, 0.0,
+//    -0.5,-0.5,    0.0, 0.0, 1.0,
+//    0.5,-0.5,    0.8, 1.0, 2.0,
+//];
+
+
+let MyTriangle=[
+    //x   y     z     //r   g   b
+    0.0, 0.5, 0.0,    r(),r(),r(),
+    -0.5,-0.5, 0.0,   r(),r(),r(),
+    0.5,-0.5, 0.0,    r(),r(),r(),
+];
+
+
+
+let MyTriangleBufferObj = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, MyTriangleBufferObj);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(MyTriangle), gl.STATIC_DRAW);
+
+
+let my_GLSL_vel_a_vPos = gl.getAttribLocation(myProgram, `a_vPos`);
+
+let my_GLSL_vel_a_vColor = gl.getAttribLocation(myProgram, `a_vColor`);
+
+gl.vertexAttribPointer(
+    my_GLSL_vel_a_vPos,
+    3,//read the Element
+    gl.FLOAT,
+    gl.FALSE,
+    6 * Float32Array.BYTES_PER_ELEMENT,//total Element in each Colan
+    0
+);
+
+gl.vertexAttribPointer(
+    my_GLSL_vel_a_vColor,
+    3,
+    gl.FLOAT,
+    gl.FALSE,
+    6 * Float32Array.BYTES_PER_ELEMENT,
+    3 * Float32Array.BYTES_PER_ELEMENT
+);
+
+
+gl.enableVertexAttribArray(my_GLSL_vel_a_vPos);
+
+gl.enableVertexAttribArray(my_GLSL_vel_a_vColor);
+
+//gl.useProgram(myProgram);
+//gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+
+
+
+gl.useProgram(myProgram);
+
+const gameLoop=()=>{
+requestAnimationFrame(gameLoop);
+
+
+gl.clearColor(3.75, 0.85, 8.8, 1.0);
+gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
+
+gl.viewport(0,0,gl.canvas.width,gl.canvas.height);
+
+
+gl.drawArrays(gl.TRIANGLES, 0, 3);
+//gl.drawArrays(gl.ELEMENTS, 0, 3);
+
+
+
+
+
+}
+
+gameLoop();
+
+
+
+</script>
+</body>
+</html>

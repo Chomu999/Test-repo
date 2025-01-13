@@ -1,0 +1,377 @@
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+<title>HTML brain.js Neural Network  testing</title>
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+:root{
+
+--angle:45deg;
+
+--color1:#ff000044;
+--color2:#ff000088;
+
+--color3:#00000044;
+--color4:#00000088;
+
+--color5:#00CCFF44;
+--color6:#00CCFF88;
+
+--color7:#9500FF99;
+--color8:#FF008080;
+
+--color9:#ffffff22;
+
+--gradient_bg_color1: linear-gradient(var(--angle),
+#00E4FF, #FF0024);
+
+
+--tex_color1:#DEDFDD;
+--tex_color2:#E6E6E6;
+
+--title_color1:#fCfCfC;
+--title_color2:#2C2C2C;
+--title_bg_color1:var(--color3);
+--title_bg_color2:#1200FF;
+--title_font_size:3rem;
+
+--repeat_x:33%;
+--repeat_y:15rem;
+
+
+}
+
+
+html{
+font-size:10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style: none;
+}
+
+
+body{
+
+background:  var(--gradient_bg_color1);
+background-size: var(--repeat_x) var(--repeat_y);
+/* background-position: 20% 30%; */
+
+
+/* box-shadow: 2px 2px 60px 2px black inset; */
+
+animation: bg_ani 99s ease-in-out infinite alternate;
+
+}
+
+
+main{
+margin: 2rem 0;
+height: min(80rem, 100% - 5rem);
+background: var(--color9) ;
+overflow: auto;
+}
+
+
+.wrapper{
+margin:2rem auto;
+padding: 2rem;
+/* margin-inline: auto; */
+width:min(38rem, 100% - 2rem);
+background: var(--color3);
+border-radius:2rem;
+}
+
+.title{
+color:var(--title_color1);
+background: var(--title_bg_color1);
+font-size: var(--title_font_size);
+text-align: center;
+text-transform: capitalize;
+border-radius:9rem;
+}
+
+.container{
+margin-inline: auto;
+padding: 2rem;
+width:min(36rem, 100% - 2rem);
+background: var(--color2);
+border-radius:2rem;
+}
+
+.container > span , progress{
+font-size: 2rem;
+color: #202030;
+width: 5rem;
+}
+
+canvas{
+width: 100%;
+background:#EA8F93;
+}
+
+/*output screen code section*/
+
+.output_screen{
+
+}
+
+
+.output_screen>.sub_output_screen{
+height: min(30rem, 100% - 3rem);
+overflow:auto;
+}
+
+.output_screen p.output{
+margin:0.2rem 1rem;
+padding: 1rem ;
+font-size: 2rem;
+background: var(--color4);
+color: var(--tex_color1);
+border-radius: 1rem;
+
+
+
+}
+
+
+
+
+
+
+/* error box code section*/
+
+
+.error_box{
+overflow:hidden auto;
+}
+
+.error_box .title{
+display:block;
+background: linear-gradient(45deg,red, blue);
+text-decoration: underline;
+border-radius: 4em;
+}
+
+.error_box  pre{
+margin:0.2rem 0;
+padding: 1rem;
+
+height: min(30rem, 100% - 3rem);
+
+background: var(--color3);
+
+
+overflow: auto;
+border-radius: 1rem;
+
+
+
+}
+
+.error_box  p{
+margin:0.2rem 1rem;
+padding: 1rem ;
+
+background: var(--color4);
+color: #FF374E;
+border-radius: 1rem;
+}
+
+
+
+
+/*keyFrame animation start here */
+@keyframes bg_ani{
+0%{/* background:red; */}
+100%{background-position:200% 100%;}
+}
+
+
+</style>
+
+<script async src="/storage/emulated/0/g_js_libs/browser.js"></script>
+
+</head>
+<body>
+
+<main>
+
+
+<div class="wrapper">
+
+
+<h2 class="title">
+text to image AI testing
+</h2>
+
+</div>
+
+
+
+<section class="wrapper">
+
+<canvas id="canvas"></canvas>
+
+</section>
+
+<section id="progBar" class="output_screen wrapper">
+
+
+<h2 class="title">
+result will be print out here
+</h2>
+
+<div class="sub_output_screen wrapper">
+</div>
+
+</section>
+
+
+<div class="wrapper error_box">
+<h2 class="title">error and warning</h2>
+<pre></pre>
+</div>
+
+</main>
+
+
+
+<script>
+
+const canvas=document.getElementById("canvas");
+const gl=canvas.getContext("webgl2");
+
+
+
+const addResult=(msg)=>{
+const sub_output_screen = document.querySelector(".output_screen > .sub_output_screen");
+if(!sub_output_screen) return -1;
+sub_output_screen.innerHTML+=`<p class="output">${msg}</p>`;
+}
+
+
+const showError=(msg)=>{
+console.log(msg)
+const errorContainer=document.querySelector(".error_box > pre")
+if(!errorContainer) return -1;
+errorContainer.innerHTML+=`<p>${msg}</p>`;
+}
+
+
+const _INIT = ()=>{
+
+
+
+const myBrain = brain;
+
+
+
+// Text Encoder
+const textEncoder = new brain.NeuralNetwork({
+  input: ['text'], // text input
+  hidden: [128], // encoded representation
+  output: ['encoding']
+});
+
+// Generator
+const generator = new brain.NeuralNetwork({
+  input: ['encoding'], // encoded text
+  hidden: [128, 784], // image generation
+  output: ['image']
+});
+
+// Discriminator
+const discriminator = new brain.NeuralNetwork({
+  input: ['image'], // generated or real image
+  hidden: [128], // evaluation
+  output: ['realism']
+});
+
+
+const trainData = [
+  {
+    text: "A black cat sitting on a couch",
+    image: [8*8]
+  },
+  {
+    text: "A red car driving on a highway",
+    image: [16 * 16]
+  },
+  {
+    text: "A happy face with a big smile",
+    image: [32*32]
+  },
+];
+
+
+// Train the model
+textEncoder.train(trainData, {  });
+generator.train(trainData, {  });
+discriminator.train(trainData, { });
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+window.addEventListener("load", ()=>{
+
+showError("JS is Awesome")
+//console.log(window)
+
+try{
+_INIT();
+}catch(e){
+showError(e.stack)
+}
+
+
+})
+
+
+</script>
+</body>
+</html>

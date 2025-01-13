@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title> 3d object to binary app</title>
+
+<meta name="author" content="BBhowmick">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+
+html{
+font-size:10px;
+}
+
+
+body{
+width:100vw; height:100vh;
+}
+
+a{
+text-decoration:none;
+}
+
+main{
+width:100%; height:100%;
+background:#000321;
+display:grid;
+place-items:center;
+}
+
+div.container{
+padding:0.5rem;
+width:80%; height:80%;
+background:#9CACB8;
+display:grid;
+grid-template-columns:1fr;
+grid-template-rows:1fr 5fr 1fr;
+grid-gap:0.5rem;
+}
+
+
+div.container > div.childs {
+background:#5E7F85;
+}
+
+
+div.container > div.child1 .prosess{
+padding:1rem 2rem;
+background:#FF0095;
+color:blue;
+font-size:2rem;
+text-align:center;
+letter-spacing:0.2rem;
+}
+
+
+
+div.container > div.child2{
+padding:0.5rem;
+overflow:scroll;
+}
+
+div.container > div.child2 .code{
+width:100%;height:10rem;
+color:#00F6FF;
+font-size:1rem;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+div.container > div.child3{
+
+display: flex;
+justify-content:center;
+align-items:center;
+}
+
+div.container > div.child3 a{
+padding:1rem 2rem; 
+background:#FF0095;
+color:blue;
+font-size:2rem;
+letter-spacing:0.2rem;
+}
+
+
+</style>
+
+
+</head>
+<body>
+
+<main id="main">
+
+<div class="container">
+
+<div class="childs child1">
+
+<input type="file" name="objPicker" id="objPicker" />
+
+<div class="prosess">prosess</div>
+
+</div>
+
+
+<div class="childs child2">
+<div class="code" id="code">code</div>
+</div>
+
+
+<div class="childs child3">
+
+<a id="downloadBTN" href="./exercise15.html" download="./exercise15.html" type="application/octet-stream" >Download Here</a>
+
+</div>
+
+
+</div>
+
+</main>
+
+
+
+
+<script type="module">
+
+
+
+
+
+
+const getFile=async(url)=>{
+let file=await fetch(url);
+let content= await file.text();
+return content;
+}
+
+const main = async () =>{
+let url="./exercise15.html";
+let d= await getFile(url);
+
+
+code.innerText=d;
+
+
+
+objPicker.addEventListener("change", (e)=>{
+if(!e) return;
+let name=e.target.value;
+name=name.split('path\\')[1];
+console.log(name);
+console.log(e.target.formAction.split("").join("^"));
+
+});
+
+
+
+downloadBTN.addEventListener("click",(e)=>{
+
+});
+
+
+
+//console.log(d)
+}
+
+
+
+
+
+window.addEventListener("load", (event) => {
+
+//const canvas=document.querySelector("canvas");
+//const gl=canvas.getContext("webgl2");
+
+
+
+main();
+
+console.log(window);
+
+
+//encodeURI
+//encodeURIComponent
+
+//let o=new encodeURIComponent();
+//console.log(o)
+
+
+});
+
+
+
+
+
+
+
+window.addEventListener("resize", () => {
+//GLReSizer(gl);
+});
+
+
+
+
+
+
+
+
+
+
+</script>
+
+</body>
+</html>

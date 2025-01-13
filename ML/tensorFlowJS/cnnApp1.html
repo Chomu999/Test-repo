@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+
+<style>
+
+*:before, *, *:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+:root{
+
+
+}
+
+
+html{
+font-size:10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style: none;
+}
+
+
+body{
+color-scheme: default;
+background: #180044;
+
+}
+
+
+main{
+margin: 2rem 0;
+height: min(80rem, 100% - 5rem);
+overflow: auto;
+}
+
+
+.wrapper{
+margin:1rem;
+padding:1rem;
+width: min(39rem, 100% - 2rem);
+background: #9400FF23;
+border-radius:2rem;
+}
+
+.appTitle{
+margin: 1rem;
+padding: 1rem;
+color:#FF0400;
+background: #170061;
+font-size: 2rem;
+text-align: center;
+text-transform: capitalize;
+border-radius:9rem;
+}
+
+
+/* images container code section*/
+
+.predictContainer{
+aspect-ratio: 1;
+background: #97C3FF;
+overflow: auto;
+font-size: 2rem;
+text-transform: capitalize;
+text-align: center;
+
+box-shadow:3rem 3rem 3rem #000;
+}
+
+.predictContainer .prediction{
+margin: 1rem;
+padding: 1rem;
+display: inline-block;
+color: #0068FF;
+border: .1rem solid currentColor;
+border-radius: 1rem;
+}
+
+
+/* user Input container code section*/
+
+
+.userInputContainer{
+aspect-ratio: 1;
+background: #0060FF;
+overflow: auto;
+image-rendering: pixelated;
+}
+
+.userInputContainer canvas{
+margin: auto;
+display: block;
+width: 100%;
+/* height: 20rem; */
+
+background:#EA8F93;
+}
+
+/* button container code section*/
+
+.btnContainer{
+aspect-ratio: 5;
+background: #0060FF;
+/* overflow: auto; */
+text-align: center;
+align-items: space-around;
+}
+
+
+.btnContainer .btns{
+margin: 1rem;
+padding: 1rem;
+display:block;
+background: purple;
+color: lime;
+font-size: 2rem;
+text-transform: capitalize;
+border-radius: 2rem;
+}
+
+
+
+
+
+
+/* inputContainer box code section*/
+
+
+
+
+.inputContainer{
+aspect-ratio: 3;
+background: #00C6FF;
+}
+
+.inputContainer .userInput{
+margin: auto;
+padding: 2rem;
+display: block;
+outline: none;
+border: none;
+border-radius: 2rem;
+background: #3E00FF;
+color: #FF0071;
+letter-spacing: .2rem;
+text-align: center;
+}
+
+/* 
+utils classes
+
+*/
+
+.hide{
+display: none;
+}
+
+
+
+</style>
+
+
+<title>simple cnn m0del </title>
+
+
+
+<script  src="/storage/emulated/0/g_js_libs/tf.min.js"></script>
+<script  src="/storage/emulated/0/g_js_libs/tfjs-vis.umd.min.js"></script>
+
+
+
+
+</head>
+<body>
+
+<main class="wrapper">
+
+
+<div class="wrapper">
+
+
+<h2 class="appTitle">simple CNN m0del </h2>
+
+</div>
+
+
+<div class="wrapper predictContainer">
+
+<iframe src="http://localhost:3000/" frameborder="2"></iframe>
+
+
+</div>
+
+
+
+<div class="wrapper inputContainer">
+
+<input type="text" class="userInput">
+
+</div>
+
+
+<div id="chartCont" class="wrapper charatCont"></div>
+
+<div class="wrapper btnContainer">
+<span class="btns predictBtn">predictBtn</span>
+<span class="btns trainBtn">train</span>
+
+</div>
+
+</main>
+
+
+<script type="module">
+"use strict";
+
+//location.assign("localhost:3000")
+
+
+const vis = tfvis;
+
+function ShowTensor(tensor){
+console.log(tensor);
+console.log("shape :", tensor.shape);
+console.log("rank :", tensor.rank);
+console.log("size :", tensor.size);
+tensor.print();
+}
+
+
+const LoadData=()=>{
+
+
+const DataSet1 = [
+{x:[0, 0, 0, 0, 0, 0, 0, 0], y:0},
+{x:[0, 0, 0, 0, 0, 0, 0, 1], y:1},
+{x:[0, 0, 0, 0, 0, 0, 1, 0], y:2},
+{x:[0, 0, 0, 0, 0, 0, 1, 1], y:3},
+{x:[0, 0, 0, 0, 0, 1, 0, 0], y:4},
+{x:[0, 0, 0, 0, 0, 1, 0, 1], y:5},
+{x:[0, 0, 0, 0, 0, 1, 1, 0], y:6},
+{x:[0, 0, 0, 0, 0, 1, 1, 1], y:7},
+{x:[0, 0, 0, 0, 1, 0, 0, 0], y:8},
+{x:[0, 0, 0, 0, 1, 0, 0, 1], y:9},
+];
+
+const DataSet2 = [
+{x:0, y:0},
+{x:1, y:1},
+{x:2, y:4},
+{x:3, y:6},
+{x:4, y:8},
+{x:5, y:10},
+];
+
+
+//res.writeHead(200, {"content-type" : "application/json"});
+//res.end(JSON.stringify(j_data));
+
+
+const data = DataSet1.map((v)=> v.x).flat();
+const label = DataSet1.map((v)=> v.y);
+
+
+const xTensor = tf.tensor(data, [label.length, 1, 8]);//.cast("int32")//.reshape([1, 8]);
+const yTensor = tf.tensor(label, [label.length, 1, 1]);//.reshape([1, 1]);
+
+
+return [xTensor, yTensor];
+}
+
+
+
+const addPrediction=async(predict)=>{
+const pData =await predict.data();
+const predictContainer = document.querySelector(".predictContainer");
+if (!predictContainer) return;
+predictContainer.innerHTML+=`<b class="prediction">prediction : ${Math.round(pData)}</b>`;
+};
+
+
+
+const LoadFile=async(url, type)=>{
+const file = await fetch(url);
+return await file[type]();
+}
+
+const  INITIAL=async() =>{
+
+
+
+
+
+const predictBtn = document.querySelector(".predictBtn");
+const trainBtn = document.querySelector(".trainBtn");
+const userInput = document.querySelector(".userInput");
+
+
+//indexedDB
+
+
+
+const model = tf.sequential();
+
+const layer1 = tf.layers.dense({
+  units:8,
+  activition:"relu",
+  inputShape:[1, 8],
+});
+
+const layer2 = tf.layers.dense({
+  units:1,
+  activition:"relu",
+});
+
+
+
+
+model.add(layer1);
+model.add(layer2);
+
+model.compile({optimizer: 'sgd', loss: 'meanSquaredError'});
+
+
+
+const trainModel=async()=>{
+
+
+
+
+const [xTensor, yTensor] = LoadData()
+
+console.log("training start");
+await model.fit(xTensor, yTensor, {
+  epochs:100,
+});
+console.log("training end");
+
+
+
+
+}
+
+
+
+
+
+const predictFunc=async()=>{
+
+const arrData = userInput.value.split("").map(v=>parseInt(v))??(!!0);
+//const arrData= Array.from({length:8}, (x)=>Math.random()<.5?1:0);
+//console.log(arrData)
+if(!arrData ) return -6;
+const inputTensor = tf.tensor(arrData, [1, 1, 8]);
+//ShowTensor(inputTensor)
+//return
+
+const predictOutput = model.predict(inputTensor);
+//ShowTensor(predictOutput)
+
+//console.log(predictOutput.dataSync());
+
+await addPrediction(predictOutput);
+
+}
+
+
+
+
+
+//emiting clear canvas function
+//eraseBtn.addEventListener("click", ()=> eraseCanvas());
+
+//emiting predict number function
+predictBtn.addEventListener("click", predictFunc );
+
+//emiting train model  function
+trainBtn.addEventListener("click", trainModel );
+
+
+
+
+
+}
+
+
+
+
+try{
+console.log("tensorFlow",tf);
+console.log("Vis", tfvis);
+INITIAL();
+}catch(err){
+throw new Error(`javascript uncatch error ${err}`)
+}
+
+////////////////////
+
+//const t0001 = tf.tensor([1, 2, 3, 4, 5]);
+//const tArr0001=await t0001.array();
+//ShowTensor(t0001)
+
+//model.summary();
+//vis.show.modelSummary({
+//  name:"chartModel",
+//  showWeights:true,
+//  showShapes:true,
+//  showLayerNames:true,
+  //container:document.querySelector(".chartCont")
+//}, model);
+
+
+//vis.render.histogram(
+//  {
+//    name:"my bisu histogram",
+//    color:"orange",
+//    container:"chartCont",
+//    minValue:0,
+//    maxValue:10,
+//    numBins:10,
+//    binLabels:["a", "b", "c", "d", "e"]
+//  },
+//  tArr0001,
+//  {
+//    width:300,
+//    height:200,
+//    xlabel:"values",
+//    xlabel:"frequency",
+//    title:"aloo bhaloo chaloo daloo",
+//    legend:["abcd..."]
+//  }
+//);
+
+
+//vis.render.linechart(
+//  {name:"my linechart"},
+//  tArr0001
+//);
+
+//vis.render.heatmap(
+//  {name:"my heatmap"},
+//  tArr0001
+//);
+
+//vis.render.barchart(
+//  {name:"my barchart"},
+//  tArr0001
+//);
+
+
+
+
+</script>
+
+</body>
+</html>

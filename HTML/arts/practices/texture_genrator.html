@@ -1,0 +1,109 @@
+<!DOCTYPE HTML>
+<html lang="en-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+<style>
+
+*:before,*,*:after{
+margin:0; padding:0; box-sizing:border-box;
+}
+
+
+html{
+font-size: 10px;
+}
+
+body{
+background: #0074FF;
+}
+
+main{
+display: grid;
+place-items: center;
+}
+
+canvas{
+background: #424242;
+}
+
+</style>
+
+
+<script src="/storage/emulated/0/g_js_libs/p5.min.js"></script>
+
+<title>texture genrator with p5js </title>
+</head>
+
+<body>
+
+
+
+
+<script>
+
+let inc = 0.07;
+
+
+let zoomFactor;
+function preload(){
+ zoomFactor=90;
+}
+
+
+function setup(){
+createCanvas(innerWidth, innerHeight)
+background(255);
+myDraw()
+}
+
+function draw(){
+  myDraw()
+}
+
+function myDraw() {
+  loadPixels();
+  let yoff = 0;
+  for (let y = 0; y < height; y++) {
+    let xoff = 0;
+    for (let x = 0; x < width; x++) {
+      let index = (x + y * width) * 4;
+      let r = noise(xoff, yoff) * 255;
+      pixels[index + 0] = r;
+      pixels[index + 1] = r;
+      pixels[index + 2] = r;
+      pixels[index + 3] = 255;
+      xoff += inc;
+    }
+    yoff += inc;
+  }
+  updatePixels();
+}
+
+
+
+
+function resize(){
+//canvas.style.width=innerWidth+"px";
+//canvas.style.height=innerHeight+"px";
+//canvas.width=innerWidth;
+//canvas.height=innerHeight;
+}
+
+window.addEventListener("resize", resize)
+</script>
+
+</body>
+</html>

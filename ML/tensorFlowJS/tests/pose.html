@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+
+
+<title>pose net test</title>
+
+<style>
+
+*:after, *, *:before{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+:root{
+
+}
+
+
+html{
+font-size: 10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style-type: none;
+}
+
+
+*::selection{
+color: red;
+background: tan;
+}
+
+
+body{
+background: #c0c0c0;
+}
+
+
+.bf-1r{
+backdrop-filter: blur(1rem);
+}
+
+.bf-2r{
+backdrop-filter: blur(2rem);
+}
+
+.bf-3r{
+backdrop-filter: blur(3rem);
+}
+
+.bf-4r{
+backdrop-filter: blur(4rem);
+}
+
+
+.wrapper{
+margin: 1rem auto;
+padding: 1rem;
+width: min(100% - 2rem, 38rem);
+border-radius: 1rem;
+/* box-shadow: 0px 2px 20px 2px black; */
+}
+
+
+body{
+position: relative;
+}
+
+
+body:after, body:before{
+content: "";
+width: 20rem;
+height: 20rem;
+position: absolute;
+
+background: #0066FF;
+color: red;
+
+
+border-radius: 50%;
+z-index: -1;
+}
+
+
+
+body:before{
+top: 0;
+left: 0;
+}
+
+
+
+body:after{
+bottom: 0;
+right: 0;
+}
+
+
+
+
+
+.appContainer{
+height: min(70rem, 100% - 4rem);
+
+background: #fff3;
+overflow: auto;
+border: 2px solid white;
+}
+
+
+
+.titleContainer{
+background: transparent;
+border: 2px solid white;
+text-align: center;
+border-radius: 1rem;
+}
+
+
+
+.appTitle{
+margin: 0.6rem 0.4rem;
+padding: 0.4rem 0.8rem;
+color: #424242;
+background: #f0f0f0;
+
+background: linear-gradient(45deg, red, blue);
+
+background-clip: text;
+color: transparent;
+
+font-size: 4rem;
+font-weight: 800;
+font-family: Tahoma;
+text-transform: capitalize;
+border-radius: 1rem;
+border: 2px solid white;
+
+
+
+}
+
+
+
+.hiCont{
+border:2px solid white;
+height: clamp(20rem, 30rem 60rem);
+overflow: auto;
+}
+
+
+canvas{
+width: 100%;
+background: salmon;
+border-radius: 1rem;
+}
+
+
+.btnContainer{
+background: transparent;
+border: 2px solid white;
+text-align: center;
+}
+
+.btn{
+margin: 0.2rem 0.6rem;
+background: red;
+color: blue;
+padding: 1rem 2rem;
+border: 2px solid white;
+border-radius: 1rem;
+}
+
+.btn[disabled]{
+opacity: 0.5;
+background: purple;
+}
+
+
+.imgContainer{
+border:2px solid white;
+height: clamp(20rem, 30rem 60rem);
+overflow: auto;
+}
+
+.imgContainer img{
+width: 20%;
+/* width: 257;
+height: 257; */
+filter: blur(0.2px) drop-shadow(10px 10px 20px red);
+}
+
+
+</style>
+
+
+
+<script src="/storage/emulated/0/g_js_libs/tf.min.js"></script>
+
+<!-- <script src="/storage/emulated/0/g_js_libs/dat.gui.min.js"></script> -->
+<script src="/storage/emulated/0/g_js_libs/posenet.js"></script>
+
+
+</head>
+<body>
+
+
+<main class="wrapper bf-1r appContainer">
+<div class="wrapper titleContainer">
+  <h1 class="appTitle">pose net test</h1>
+</div>
+
+
+
+<div class="wrapper hiCont">
+<canvas id="canvas"></canvas>
+</div>
+
+
+<div class="wrapper btnContainer">
+<button class="btn loadModelBtn"> load Model</button>
+<button class="btn captureBtn"> capture</button>
+<button class="btn checkMemoryBtn"> check Memory</button>
+</div>
+
+
+
+
+<div class="wrapper imgContainer">
+
+<img id="img1" src="/storage/emulated/0/Download/Madara-Uchiha.png" alt="cat">
+<img id="img2" src="/storage/emulated/0/Download/images (8).jpeg" alt="alo">
+<img id="img3" src="/storage/emulated/0/Download/images (4).jpeg" alt="alo 2">
+<img id="img4" src="/storage/emulated/0/Download/140px-Dipper_Pines.png" alt="dipper 2">
+<img id="img5" src="/storage/emulated/0/Download/download (1).jpeg" alt="painting 2">
+<img id="img6" src="/storage/emulated/0/DCIM/Camera/IMG20210216162233.jpg" alt="painting 2">
+</div>
+
+
+</main>
+
+
+
+
+<!-- <script src="/storage/emulated/0/g_js_libs/tf.min.js"></script> -->
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet@2.2.2/dist/posenet.min.js" ></script> -->
+
+<script>
+let model;
+let net;
+let poses={};
+let keypoints=[];
+let confScore = 0.12;
+
+class A_Posenet{
+constructor(){}
+
+
+async loadModel(){
+return await tf.loadGraphModel("../models/posenet/posenet_model.json");
+}
+
+
+prosessInput(input ){
+
+return tf.tidy(()=>{
+	return tf.div(tf.sub(input, 127.5), 1.0);
+})
+
+}
+
+
+
+}
+
+
+
+const INITIAL= async()=>{
+
+console.log(tf.getBackend());
+
+const loadModelBtn = document.querySelector(".loadModelBtn");
+const captureBtn = document.querySelector(".captureBtn");
+const checkMemoryBtn = document.querySelector(".checkMemoryBtn");
+
+
+const canvas = document.querySelector("canvas");
+const ctx = canvas.getContext("2d");
+
+
+
+const CANVAS_WIDTH = 257;
+const CANVAS_HEIGHT = 257;
+const CANVAS_CLEAR_COLOR = "#BBFFC7";
+
+ctx.canvas.width=CANVAS_WIDTH;
+ctx.canvas.height=CANVAS_HEIGHT;
+//ctx.imageSmoothingEnabled=false;
+ctx.fillStyle="#fff";
+ctx.strokeStyle="#f00";
+
+const imageElement = document.getElementById('img6');
+
+//console.log(imageElement.width, imageElement.height)
+
+
+
+const draw=(pos, r=3, color="#fff")=>{
+
+ctx.beginPath();
+ctx.fillStyle=color;
+ctx.arc( pos.x, pos.y, r, 0, Math.PI*2);
+ctx.fill();
+ctx.closePath();
+
+}
+
+
+const line=(posa, posb, lw=2, color="#f0f")=>{
+
+ctx.beginPath();
+ctx.strokeStyle=color;
+ctx.lineWidth=lw;
+ctx.moveTo( posa.x, posa.y);
+ctx.lineTo( posb.x, posb.y);
+ctx.stroke();
+ctx.closePath();
+
+}
+
+
+const update = dt => {
+
+
+ctx.drawImage(imageElement, 0, 0,
+imageElement.naturalWidth , imageElement.naturalHeight,
+0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+
+
+
+// line to draw
+posenet.poseChain.forEach((a)=>{
+if(keypoints.length <= 0) return -1;
+
+let keyA = a[0], keyB = a[1];
+
+let valA = keypoints.filter( k => k.part===keyA)[0];
+let valB = keypoints.filter( k => k.part===keyB)[0];
+
+//console.log("a", valA);
+//console.log("b", valA);
+if (valA.score > confScore && valB.score > confScore){
+
+line(valA.position, valB.position, 2.4, "#94FFFD");
+draw(valA.position, 3, "#FFD400");
+draw(valB.position, 3, "#FFD400");
+}
+
+});
+
+
+
+
+
+}
+
+
+
+let lt=0;
+//animations
+const animate = ts =>{
+
+//ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
+const dt = (ts - lt) / 1000;
+lt = ts;
+
+ctx.beginPath();
+ctx.fillStyle=CANVAS_CLEAR_COLOR;
+ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
+ctx.closePath();
+update(dt);
+
+requestAnimationFrame(animate);
+}
+
+requestAnimationFrame(animate);
+
+
+//setInterval(animate, 2000)
+
+
+
+
+
+//controls
+
+
+
+const getPoses = async () => {
+if(!net) return -1;
+poses = await net.estimateSinglePose(canvas, { flipHorizontal: !true });
+//console.log(poses);
+keypoints=poses.keypoints;
+};
+
+
+
+const loadModelFunc = async ()=>{
+loadModelBtn.disabled=true;
+const modelUrl="../models/posenet/posenet_model.json";
+model = await tf.loadGraphModel(modelUrl);
+if(!model) return -1;
+net = await posenet.load(model);
+console.log("posenet model also loaded");
+
+};
+
+
+
+loadModelBtn.addEventListener("click", loadModelFunc, false);
+
+
+
+captureBtn.addEventListener("click", getPoses, false);
+
+
+
+checkMemoryBtn.addEventListener("click", ()=>{
+
+
+const memory = tf.memory();
+for(const i in memory){
+console.log(`${i}   ${memory[i]}`);
+}
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+try{
+//document.body.disabled=!0;
+console.log("javascript is awesome");
+console.log(tf)
+console.log(posenet);
+//console.log(tf.browser)
+tf.ready().then(()=>{
+INITIAL();
+})
+
+}catch(err){
+console.log(`javascript uncatch error : ${err.messeage} and ${err.stack}`);
+}
+
+</script>
+
+</body>
+</html>

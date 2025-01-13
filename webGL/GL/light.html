@@ -1,0 +1,264 @@
+<!DOCTYPE HTML>
+<html lang="en-in">
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=10.0, user-scalable=no"/>
+<style>
+*{
+margin:0; padding:0; box-sizing:border-box;
+}
+
+body{
+width:100%; height:100%;
+
+}
+
+main{
+width:100%; height:100%;
+background: black;
+display: grid;
+place-items: center;
+}
+
+canvas{
+}
+
+div.resource{
+display:none;
+}
+
+img{
+width:100%;
+}
+
+</style>
+
+<title>WEBGL Lighting Exercise 1</title>
+<script src="/storage/emulated/0/g_js_libs/gl-matrix.js" ></script>
+<!-- <script src="/storage/emulated/0/g_js_libs/dat.gui.min.js" ></script> -->
+</head>
+<body>
+
+<main id="mainElement">
+
+
+<div class="resource">
+
+<img src="/storage/emulated/0/Download/Zelda2.png" id="img1" alt="link" />
+
+<img src="/storage/emulated/0/Download/Zelda minish cap.jpeg" id="img2" alt="link casp" />
+
+</div>
+
+</main>
+
+<script type="module">
+import {gl} from "./js/gl.js"
+
+import UTILS from "./js/utils.js"
+
+
+
+/** @type gl */
+
+const checkGL=(fun)=>{
+
+//fun()
+while (0 != !gl.getError()){
+console.log(gl.getError())
+
+}
+
+}
+
+
+
+const app=async(gl)=>{
+
+let fData= await UTILS.getShader("./res/Shaders/idk1.shader.glsl");
+const Prog=new UTILS.Tool.Program(fData.vertex, fData.fragment);
+
+const loc={
+u:{
+ld:gl.getUniformLocation(Prog.ID, "uld"),
+lc:gl.getUniformLocation(Prog.ID, "ulc"),
+tex:[
+gl.getUniformLocation(Prog.ID, "uTex[0]"),
+gl.getUniformLocation(Prog.ID, "uTex[1]"),
+],
+},
+}
+
+const vertexData=new Float32Array([
+//pos                 uv            normal
+
+  1.0,  1.0,  0.0,    1,  1,    -1.0,  1.0, -1.0,
+ -1.0,  1.0,  0.0,    0,  1,     1.0, -1.0, -1.0,
+ -1.0, -1.0,  0.0,    0,  0,     1.0,  1.0,  1.0,
+  1.0, -1.0,  0.0,    1,  0,    -1.0,  1.0,  1.0,
+
+])
+
+const indexData=new Uint8Array([
+
+0,1,2,
+2,3,0,
+
+])
+
+const tex1=new UTILS.Tool.Texture(0, loc.u.tex[0], img2)
+//const tex2=new UTILS.Tool.Texture(1, loc.u.tex[1], img2)
+
+
+
+const vao = new UTILS.Tool.VA()
+const vbo = new UTILS.Tool.VB(vertexData)
+const ebo = new UTILS.Tool.EB(indexData)
+
+
+
+
+Prog.Bind()
+vao.Bind()
+//vbo.Bind()
+
+vao.linkAttrib(vbo, 0, 3, 32, 0)
+vao.linkAttrib(null, 1, 2, 32, 12)
+vao.linkAttrib(null, 2, 3, 32, 20)
+
+
+
+ebo.Bind()
+
+const lightDirection=[-2, 2, -0.5]
+const lightColor=[0.9, 0.9, 0.9, 1.0]
+
+gl.uniform4fv(loc.u.lc, lightColor)
+
+
+//console.log(gl.getParameter(gl.ACTIVE_ATTRIBUTES)  )
+//console.log(gl.getVertexAttrib(vao.ID, 1)  )
+
+
+
+vbo.Unbind()
+vao.Unbind()
+ebo.Unbind()
+Prog.Unbind()
+
+
+//console.log(loc)
+
+
+
+const Animate=(DeltaTime)=>{
+
+gl.viewport(0,0, gl.canvas.width, gl.canvas.height);
+gl.clearColor(0.3, 0.2, 0.6, 1.0);
+gl.clear(gl.COLOR_BUFFER_BIT);
+
+Prog.Bind()
+
+vec3.normalize(lightDirection, lightDirection)
+//vec3.rotateX(lightDirection, lightDirection, [0, 0, 0], 0.02)
+vec3.rotateY(lightDirection, lightDirection, [0, 0.2, -0.5], 0.02)
+gl.uniform3fv(loc.u.ld, lightDirection)
+
+tex1.Bind()
+//tex2.Bind()
+
+//gl.drawArrays(gl.POINTS, 0, 1);
+vao.Bind()
+gl.drawElements(gl.TRIANGLES, indexData.length, gl.UNSIGNED_BYTE, 0);
+
+
+}
+
+
+
+let currentTime=0, clock=performance;
+let lastTime=0, DeltaTime=0;
+
+const MainLoop=(TimeStamp)=>{
+
+DeltaTime= TimeStamp - lastTime;
+lastTime=TimeStamp;
+
+//calculating time clock
+currentTime = clock.now() / 1000 / 60 *  Math.PI * 180 / 2;
+
+Animate(DeltaTime);
+
+requestAnimationFrame(MainLoop);
+}
+
+MainLoop(0);
+
+
+
+
+
+
+
+
+
+
+//gl.canvas.
+window.addEventListener("keydown", (e)=>{
+
+if(!e.key) return;
+
+
+
+})
+
+
+
+}
+
+
+
+
+
+
+window.addEventListener("load",  ()  =>{
+
+
+console.log("js is awesome");
+
+//const gl = canvas.getContext("webgl2");
+gl.canvas.setAttribute("tabindex", 0);
+mainElement.appendChild(gl.canvas)
+
+
+gl.canvas.width=window.innerWidth;
+gl.canvas.height=window.innerHeight;
+console.log(gl);
+
+app(gl);
+
+
+})
+
+/*
+
+getVertexAttrib()
+getVertexAttribOffset()
+
+VERTEX_ARRAY_BINDING: 34229
+VERTEX_ATTRIB_ARRAY_BUFFER_BINDING: 34975
+VERTEX_ATTRIB_ARRAY_DIVISOR: 35070
+VERTEX_ATTRIB_ARRAY_ENABLED: 34338
+VERTEX_ATTRIB_ARRAY_INTEGER: 35069
+VERTEX_ATTRIB_ARRAY_NORMALIZED: 34922
+VERTEX_ATTRIB_ARRAY_POINTER: 34373
+VERTEX_ATTRIB_ARRAY_SIZE: 34339
+VERTEX_ATTRIB_ARRAY_STRIDE: 34340
+VERTEX_ATTRIB_ARRAY_TYPE: 34341
+
+*/
+</script>
+
+</body>
+</html>

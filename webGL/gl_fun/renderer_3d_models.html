@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+<meta name="author" content="bytebhowmick"/>
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+
+<title>webgl simple renderer</title>
+
+<style>
+
+
+
+*{
+margin: 0;
+padding: 0;
+box-sizing:border-box;
+/* border: 0.1px solid red; */
+}
+
+
+
+html{
+font-size: 10px;
+}
+
+a{
+text-decoration: none;
+}
+
+li{
+list-style:none;
+}
+
+
+
+
+body{
+background: #3e3e3e;
+
+}
+
+canvas{
+margin: auto;
+display: block;
+background:#FF986E;
+}
+
+
+.error_box{
+margin: 2rem 0;
+background:transparent;
+overflow:hidden auto;
+}
+
+.title{
+color:#222A3B;
+font-size: 3rem;
+display:block;
+text-align: center;
+text-transform: capitalize;
+background: linear-gradient(45deg,red, blue);
+text-decoration: underline;
+}
+
+.error_box  p{
+margin:0.2rem 1rem;
+padding: 1rem ;
+
+background: #0009;
+color: #FF374E;
+border-radius: 1rem;
+}
+
+
+.hidden{
+display: none;
+}
+
+</style>
+
+</head>
+<body>
+
+<main>
+
+<canvas id="canvas"></canvas>
+
+<div class="error_box">
+<span class="title">error and warning</span>
+<pre></pre>
+</div>
+
+</main>
+
+<div class="hidden">
+<img src="/storage/emulated/0/Download/images (7).jpeg" id="img1" />
+<img src="/storage/emulated/0/Download/Zelda2.png" id="img2" />
+<img src="/storage/emulated/0/Download/images (9).jpeg" id="img3" />
+<img src="/storage/emulated/0/Download/images (10).jpeg" id="img4" />
+</div>
+
+<script src="/storage/emulated/0/g_js_libs/gl-matrix.js"></script>
+
+<script >
+
+
+
+const canvas=document.querySelector("canvas");
+
+const gl=canvas.getContext("webgl2");
+
+
+const {PI, ceil, cos, sin, tan, abs, round} = Math;
+
+
+const Loader=async(url)=>{
+const file = await fetch(url);
+return await file.json()
+}
+
+
+
+
+
+
+const showError=(msg)=>{
+console.log(msg)
+const errorContainer=document.querySelector(".error_box > pre")
+if(!errorContainer) return -1;
+errorContainer.innerHTML+=`<p>${msg}</p>`;
+}
+
+
+
+class Rand{
+
+static Float(min=0, max=1){
+return Math.random() * (max - min) + min;
+}
+
+static Int(min=1, max=2){
+return Math.floor(Rand.Float(min, max));
+}
+
+static Choice(...args){
+return args[Rand.Int(0, args.length)];
+}
+
+
+}
+
+
+
+
+
+
+
+
+class Shader{
+
+constructor(vss, fss){
+this.ID=Shader.makeProgram(vss, fss)
+}
+
+
+Bind(){
+gl.useProgram(this.ID);
+}
+
+Unbind(){
+gl.useProgram(null);
+}
+
+Delete(){
+gl.deleteProgram(this.ID);
+}
+
+
+
+
+
+int(name, value){
+gl.uniform1i(this.GetUniformLocation( name), value);
+}
+
+float(name, value){
+gl.uniform1f(this.GetUniformLocation( name), value);
+
+
+
+//let ii = this.ID[name]=0;
+//showError(ii)
+//gl.uniform1f(this.GetUniformLocation(this.ID.loc.u[name]["loc"], name), value);
+//(gl.uniform1f(this.GetUniformLocation(this.ID.loc.u[name]["loc"], name), value));
+}
+
+vec2(name, value){
+gl.uniform2fv(this.GetUniformLocation(name), value);
+}
+
+vec3(name, value){
+gl.uniform3fv(this.GetUniformLocation(name), value);
+}
+
+vec4(name, value){
+gl.uniform4fv(this.GetUniformLocation( name), value);
+}
+
+mat4(name, value){
+//let uloc=gl.getUniformLocation(this.ID, name);
+gl.uniformMatrix4fv(this.GetUniformLocation( name), false, value);
+//(gl.uniformMatrix4fv(uloc, false, value));
+//showError(uloc)
+}
+
+
+
+UpdateUniform(name, type, value){
+this[type](name,value);
+}
+
+GetUniformLocation(name){
+
+let result = !this.ID.uniforms[name]["loc"] ? gl.getUniformLocation(this.ID, name): this.ID.uniforms[name]["loc"];
+this.ID.uniforms[name]["loc"] = result;
+return result;
+
+}
+
+
+
+
+static makeShader(type, source){
+const vof=Boolean(gl.VERTEX_SHADER==type)?"vertex":"fragment";
+const shader=gl.createShader(type);
+gl.shaderSource(shader, source);
+gl.compileShader(shader);
+if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS)){
+showError(`${vof} error ${gl.getShaderInfoLog(shader)}
+${gl.getShaderSource(shader)}
+`)
+}
+return shader;
+}
+
+
+static makeProgram(vss, fss){
+
+const vs=Shader.makeShader(gl.VERTEX_SHADER, vss);
+const fs=Shader.makeShader(gl.FRAGMENT_SHADER, fss);
+
+
+const prog=gl.createProgram();
+gl.attachShader(prog, vs);
+gl.attachShader(prog, fs);
+
+gl.linkProgram(prog);
+if(!gl.getProgramParameter(prog, gl.LINK_STATUS)){
+showError(` 22 ${gl.getProgramInfoLog(prog)}`)
+}
+
+gl.useProgram(prog);
+
+gl.validateProgram(prog);
+
+if(!gl.getProgramParameter(prog, gl.VALIDATE_STATUS)){
+showError(` 33 ${gl.getProgramInfoLog(prog)}`)
+}
+
+prog.uniforms={}
+
+return prog;
+
+}
+
+}
+
+
+
+class Program extends Shader{
+constructor( vss, fss, uniforms){
+super(vss, fss)
+
+this.ID.uniforms = uniforms;
+
+}
+
+
+}
+
+
+
+
+class VA{
+constructor(){
+this.ID=gl.createVertexArray()
+}
+
+Bind(){
+gl.bindVertexArray(this.ID);
+}
+
+Unbind(){
+gl.bindVertexArray(null);
+}
+
+Delete(){
+gl.deleteVertexArray(this.ID);
+}
+
+LA(vbo=null, layoutLocation=0, numberOfComponents=3, type=gl.FLOAT, normalize=!1, stride=0, offset=0){
+//vbo instanceof VB ? vbo.Bind():0;
+if(vbo) vbo.Bind();
+gl.vertexAttribPointer(layoutLocation, numberOfComponents, type, normalize, stride, offset);
+gl.enableVertexAttribArray(layoutLocation);
+}
+
+}
+
+
+
+class VB{
+constructor(arr){
+this.ID=gl.createBuffer()
+gl.bindBuffer(gl.ARRAY_BUFFER, this.ID);
+gl.bufferData(gl.ARRAY_BUFFER, arr, gl.STATIC_DRAW);
+
+}
+
+Bind(){
+gl.bindBuffer(gl.ARRAY_BUFFER, this.ID);
+}
+
+Unbind(){
+gl.bindBuffer(gl.ARRAY_BUFFER, null);
+}
+
+Delete(){
+gl.deleteBuffer(gl.ARRAY_BUFFER,this.ID);
+}
+
+
+}
+
+
+
+class IB{
+constructor(arr){
+this.ID=gl.createBuffer()
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ID);
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, arr, gl.STATIC_DRAW);
+
+}
+
+Bind(){
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ID);
+}
+
+Unbind(){
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+}
+
+Delete(){
+gl.deleteBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ID);
+}
+
+
+}
+
+
+
+
+/*
+class Texture2D{
+constructor(imgData){
+this.ID= gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, this.ID);
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, !0);
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, imgData);
+
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+//(gl.bindTexture(gl.TEXTURE_2D, null));
+
+}
+
+Bind(){
+gl.bindTexture(gl.TEXTURE_2D, this.ID);
+}
+
+Unbind(){
+gl.bindTexture(gl.TEXTURE_2D, null);
+}
+
+Delete(){
+gl.deleteTexture(this.ID);
+}
+
+
+}
+*/
+
+
+/*
+class TextureLoader{
+constructor(){
+this.path="/storage/emulated/0/";
+}
+
+ load(url){
+let _img = new Image();
+_img.src = this.path+url;
+
+const tex = new Texture2D(_img);
+return  tex;
+
+}
+
+}
+*/
+
+
+const INIT=async ()=>{
+
+const width=390, height=390;
+
+gl.canvas.width=width;
+gl.canvas.height=height;
+
+
+
+const extensionName= gl.getSupportedExtensions()
+
+extensionName.forEach((name)=>{
+gl.getExtension(name);
+});
+
+
+
+//showError(extensionName)
+showError(gl)
+
+
+
+
+const vss=`#version 300 es
+precision mediump float;
+layout (location=0) in vec4 aPos;
+//layout (location=1) in vec4 aColor;
+
+
+uniform mat4 uMatModal;
+uniform mat4 uMatViewProj;
+
+out vec4 vColor;
+
+void main(){
+vColor = aPos;
+gl_Position = uMatViewProj * uMatModal * aPos;
+
+}
+`
+
+const fss=`#version 300 es
+precision mediump float;
+layout (location=0) out vec4 FragColor;
+
+
+
+
+
+in vec4 vColor;
+
+void main(){
+FragColor = vColor;
+}
+`;
+
+//showError(HTMLImageElement)
+
+//const tex1 = new Texture2D(img1);
+//const tex1 = textureLoader.load("Download/images (4).jpeg");
+
+
+const uniforms={
+
+
+}
+
+const prog =  new Program( vss, fss, uniforms);
+
+showError(prog)
+
+
+
+
+const mesh = await Loader("./models/rabbit_mesh.gltf");
+
+
+const rabbitVertices = new Float32Array(mesh.meshes[0].primitives[0].attributes.POSITION);
+const rabbitIndices = new Uint16Array(mesh.meshes[0].primitives[0].indices);
+
+const numOfIndices= rabbitVertices.length
+
+const rabbitVbo =new VB(rabbitVertices);
+const rabbitIbo = new IB(rabbitIndices);
+
+const rabbitVao = new VA();
+
+rabbitVao.LA(rabbitVbo, 0, 3, gl.FLOAT, false, 0, 0);
+rabbitIbo.Bind()
+
+prog.Bind();
+
+const uMatViewProj_loc = gl.getUniformLocation(prog.ID, "uMatViewProj");
+const uMatModal_loc = gl.getUniformLocation(prog.ID, "uMatModal");
+
+showError(uMatModal_loc)
+showError(uMatViewProj_loc)
+
+
+
+
+//showError(shapes)
+
+
+
+
+
+let CameraAngle =0;
+
+const ModalMat = mat4.create()
+const ProjMat = mat4.create()
+const ViewMat = mat4.create()
+const viewPorjMat = mat4.create()
+
+
+
+gl.enable(gl.DEPTH_TEST)
+gl.enable(gl.BACK_FACE)
+gl.enable(gl.SCISSOR_TEXT)
+
+
+const draw=()=>{
+
+prog.Bind();
+
+//gl.uniformMatrix4fv(uMatModal_loc, false, ModalMat)
+//gl.uniformMatrix4fv(uMatViewProj_loc, false, viewPorjMat)
+
+prog.mat4("uMatModal", ModalMat)
+prog.mat4("uMatViewProj", viewPorjMat0)
+
+rabbitVao.Bind()
+gl.drawElements(gl.TRIANGLES, numOfIndices, gl.UNSIGNED_SHORT, 0);
+
+}
+
+
+const update=(dt)=>{
+
+
+
+//angle+= 0.006 * dt;
+CameraAngle += dt * glMatrix.toRadian(40);
+
+const CAMERA_X= PI * sin(CameraAngle)
+const CAMERA_Z= PI * cos(CameraAngle)
+mat4.lookAt(ViewMat, 
+vec3.fromValues(CAMERA_X, 5.0, CAMERA_Z),
+vec3.fromValues(0, 0, 0),
+vec3.fromValues(0, 1, 0));
+
+mat4.perspective(ProjMat, 
+glMatrix.toRadian(90), // fov
+gl.canvas.width / gl.canvas.height, // 
+0.1, 100.0 //far - nesr
+);
+
+mat4.mul(viewPorjMat, ProjMat, ViewMat);
+
+
+}
+
+
+
+
+const animate=(dt)=>{
+
+gl.clearColor(0.08, 0.08, 0.08, 1.0);
+gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+update(dt);
+
+}
+
+
+
+
+
+
+
+let lastFrameTime = performance.now();
+
+const MainLoop=(ts=0)=>{
+let currentFrameTime = performance.now()
+let dt = (currentFrameTime - lastFrameTime) / 1000;
+lastFrameTime = currentFrameTime;
+
+//showError(dt);
+animate(dt);
+
+requestAnimationFrame(MainLoop)
+
+}
+
+requestAnimationFrame(MainLoop)
+
+
+
+//showError(gl.canvas.toDataURL())
+
+}
+
+
+
+
+
+
+
+window.addEventListener("load", ()=>{
+
+try{
+
+
+
+
+showError("js is awesome".toUpperCase());
+INIT();
+
+
+}catch(e){
+console.log(e);
+}
+
+});
+
+
+
+</script>
+
+</body>
+</html>

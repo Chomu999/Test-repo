@@ -1,0 +1,75 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<!-- 
+<meta name="viewport" content="width=device-width, initial-scale=5.0 maximum-scale=5.0 user-scalable=0">
+ -->
+ 
+ <meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=9.0">
+<title>HTML 3d Element</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+body{
+background: gray;
+}
+
+canvas{
+position:absolute;
+top:50%;
+left:50%;
+transform: translate(-50%,-50%);
+}
+
+img{
+display: none;
+}
+
+
+
+</style>
+
+</head>
+<script src="./lib/kaboom.js"></script>
+
+<body>
+
+<canvas class="canvas"></canvas>
+
+
+<script>
+//const canvas=document.querySelector('.kaboom');
+
+
+kaboom()
+
+// Init with some options (check out #KaboomOpt for full options list)
+kaboom({
+    width: 320,
+    height: 240,
+    font: "sinko",
+    canvas: document.querySelector(".canvas"),
+    background: [ 0, 0, 255, ],
+})
+
+
+const k = kaboom({ global: false });
+
+
+loadSprite("birdy", "img/birdy.png");
+loadSprite("bg", "img/bg.png");
+loadSprite("pipe", "img/pipe.png");
+//loadSound("wooosh", "sounds/wooosh.mp3");
+
+//alert("hi biro");
+//console.log(kaboom.loadspirte())
+
+</script>
+</body>
+</html>

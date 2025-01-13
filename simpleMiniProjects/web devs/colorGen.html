@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=10.0 user-scalable=no" />
+
+<title> best color genrator </title>
+
+<style>
+
+*{
+margin:0; padding:0; box-sizing:border-box;
+/* border:0.1px dashed red; */
+}
+
+
+:root{
+--grad0:linear-gradient(45deg, red, blue);
+--grad1:linear-gradient(45deg, green, yellow, brown, orange, purple);
+--grad2:linear-gradient(45deg, orange, white, green);
+--grad3:linear-gradient(-45deg, #00A3FF, #0007FF, #090068, #2A5300, #4E9B00, #80FF00);
+}
+
+
+html{
+font-size:10px;
+}
+
+
+
+body{
+width:100vw; height:100vh;
+}
+
+h1{
+color:#9B9B9B;
+text-align: center;
+font-weight:600;
+font-size:4rem;
+text-transform:capitalize;
+}
+
+main{
+margin:5rem auto;
+width:calc(100% - 4rem); height:calc(100% - 15rem);
+background: #f0f0f0;
+
+/* grid-auto-flow:column; */
+overflow:auto;
+border-radius:2rem;
+
+}
+
+div.uiComponentContainer{
+padding:2rem;
+width:100%; height:12rem;
+background-color:#0008;
+display: grid;
+grid-template-rows:1fr;
+grid-template-columns:repeat(3, 1fr);
+grid-gap:2rem;
+/* place-items:center; */
+
+/* grid-auto-flow:column; */
+/* overflow:auto; */
+
+}
+
+div.colorBox{
+background-color: red;
+}
+
+</style>
+
+</head>
+<body>
+
+<h1 data-refresh="true"> best color genrator</h1>
+
+<main>
+
+<!-- <div class="uiComponentContainer">
+
+<div class="colorBox"></div>
+<div class="colorBox"></div>
+<div class="colorBox"></div>
+
+</div> -->
+
+
+</main>
+
+
+
+<script>
+
+
+class Rand{
+static Hex="0123456789abcdef";
+
+static Float(min=0,max=1){
+return Math.random() * (max-min) + min;
+}
+
+static Int(min=0,max=1){
+return Math.floor(Rand.Float(min, max+1));
+}
+
+static Choice(...args){
+return args[Rand.Int(0,args.length-1)];
+}
+
+static HexColor(len=3){
+let color="#";
+for(;color.length<=len;) color+=Rand.Choice(...Rand.Hex.split(""))
+return color;
+}
+}
+
+
+
+
+const createElement=(text)=>{
+const elmt=document.createElement("div");
+elmt.innerHTML = text.trim();
+return elmt.firstElementChild;
+}
+
+
+const app=()=>{
+
+const rootElement=document.querySelector("main")
+
+rootElement.innerHTML = ""
+/*
+
+for(let i=0;i<30;i++){
+const emlt = createElement(
+`
+<div class="uiComponentContainer">
+
+<div style="background:${Rand.HexColor()};" class="colorBox"></div>
+<div style="background:${Rand.HexColor()};" class="colorBox"></div>
+<div style="background:${Rand.HexColor()};" class="colorBox"></div>
+
+</div>
+
+`)
+
+rootElement.appendChild( emlt);
+
+}
+*/
+
+/*
+let lenOfColor=16
+
+
+let _finalOut=""
+let _outElement=""
+
+
+
+for(let x=0;x<lenOfColor;x++){
+
+
+for(let y=0;y<lenOfColor;y++){
+
+
+for(let z=0;z<lenOfColor;z++){
+
+
+let _HexColor=`#${Rand.Hex[x]}${Rand.Hex[y]}${Rand.Hex[z]}`;
+
+_outElement = `
+<div class="uiComponentContainer">
+
+<div style="background:${_HexColor};" class="colorBox"></div>
+
+</div>`
+//if(x>=lenOfColor) return;
+_finalOut += _outElement;
+
+
+}
+
+}
+
+}
+
+rootElement.innerHTML = _finalOut
+
+*/
+
+
+
+let lenOfColor=16
+
+
+let _finalOut=[]
+let _outElement=""
+
+let _start={
+r:0,
+g:0,
+b:0,
+}
+
+let _end={
+r:16,
+g:16,
+b:16,
+}
+
+
+
+for(let x=_start.r;x<_end.r;x++){
+
+for(let y=_start.g;y<_end.g;y++){
+
+for(let z=_start.b;z<_end.b;z++){
+
+console.log(x, y, z)
+
+
+let _HexColor=`#${Rand.Hex[x]}${Rand.Hex[y]}${Rand.Hex[z]}`;
+
+_outElement = `
+<div class="uiComponentContainer">
+
+<div style="background:${_HexColor};" class="colorBox"></div>
+
+</div>`
+//if(x>=lenOfColor) return;
+_finalOut.push(_outElement);
+
+
+
+}
+
+}
+
+}
+
+_finalOut.forEach((em)=>{
+
+rootElement.innerHTML += em
+})
+
+/// some condision
+
+
+/*
+for(let x=0;x<lenOfColor;x++){
+
+
+for(let y=0;y<lenOfColor;y++){
+
+
+for(let z=0;z<lenOfColor;z++){
+
+
+let _HexColor=`#${Rand.Hex[x]}${Rand.Hex[y]}${Rand.Hex[z]}`;
+
+_outElement = `
+<div class="uiComponentContainer">
+
+<div style="background:${_HexColor};" class="colorBox"></div>
+
+</div>`
+//if(x>=lenOfColor) return;
+_finalOut += _outElement;
+
+
+}
+
+}
+
+}
+
+rootElement.innerHTML = _finalOut
+*/
+
+
+}
+
+
+window.addEventListener("load", ()=>{
+
+console.log("JS is Awesome")
+app()
+
+
+document.addEventListener("click", (e)=>{
+
+const tar = e.target.getAttribute("data-refresh");
+if(!tar) return
+app()
+
+})
+
+
+})
+
+</script>
+
+
+
+
+</body>
+</html>

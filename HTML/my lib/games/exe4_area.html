@@ -1,0 +1,581 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>HTML CANVAS GAME BOI</title>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+#main{
+margin:0;
+padding:0;
+background-color:#03001A;
+
+
+
+}
+
+#screen{
+margin:0;
+padding:0;
+width:auto;
+height:auto;
+position:absolute;
+top:0;left:30px;
+/* 
+transform:translate(0,40px) rotateZ(90deg);
+*/}
+
+
+#btns_leyar_1,#btns_leyar_2{
+position:fixed;
+}
+
+#btns_leyar_1{
+margin:0;padding:0;
+display:grid;
+top:0;left:0;
+background-color:transparent;
+width:150px;
+height:150px;
+grid-template-columns:repeat(3,1fr);
+grid-template-rows:repeat(3,1fr);
+grid-gap:6px;
+outline:2px solid #fff;
+transform:translate(30px,140px);
+}
+
+
+.btns_1{
+background-color:#002CFF;
+border-radius:50%;
+box-shadow:0px 0px 20px 0.010px #00068F;
+}
+
+
+.btns_1:active{
+background-color:#001193;
+}
+
+
+
+
+.btn2{
+grid-column:2/3;
+grid-row:1/2;
+}
+
+
+.btn4{
+grid-column:1/2;
+grid-row:2/3;
+}
+
+.btn6{
+grid-column:3/4;
+grid-row:2/3;
+}
+
+.btn8{
+grid-column:2/3;
+grid-row:3/4;
+}
+
+
+
+
+
+#btns_leyar_2{
+margin:0;padding:0;
+display:grid;
+top:0;right:0px;
+background-color:transparent;
+width:150px;
+height:150px;
+grid-template-columns:repeat(3,1fr);
+grid-template-rows:repeat(3,1fr);
+grid-gap:6px;
+outline:2px solid #fff;
+
+transform:translate(-30px,140px);
+
+}
+
+
+
+
+.btns_2{
+background-color:#00E520;
+/*border-radius:25%;*/
+box-shadow:0px 0px 20px 0.010px #007C07;
+}
+
+
+.btns_2:active{
+background-color:#007C07;
+}
+
+
+
+.btn1{
+
+border-radius:100% 0 0 100%;
+grid-column:1/2;
+grid-row:2/3;
+}
+
+
+.btn3{
+border-radius:0 100% 100% 0;
+grid-column:3/4;
+grid-row:2/3;
+}
+
+.btn5{
+border-radius:50%;
+grid-column:2/3;
+grid-row:2/3;
+}
+
+
+.btn7{
+grid-column:2/3;
+grid-row:1/2;
+}
+
+
+.btn9{
+grid-column:2/3;
+grid-row:3/4;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+a{
+color:#fff;
+font-size:32px;
+}
+ 
+</style>
+</head>
+<body>
+
+<div id="main">
+<div id="screen">
+<canvas id="cvs"></canvas>
+</div>
+<div id="btns_leyar_1"></div>
+<div id="btns_leyar_2"></div>
+</div>
+
+<script type="module">
+
+
+import * as bistor from "./lib/bistor.js";
+
+let body,main,screen;
+let btns_leyar_1,btns_leyar_2;
+let cls,clk,px,id;
+
+cls='class';
+clk='click';
+px='px';
+id='id';
+
+
+body=document.body;
+
+main=document.getElementById('main')
+
+btns_leyar_1=document.getElementById('btns_leyar_1');
+
+btns_leyar_2=document.getElementById('btns_leyar_2');
+
+screen=document.getElementById('screen')
+
+
+
+
+
+const cvs= bistor.cvs;
+const ctx= bistor.ctx;
+
+
+
+let mainW,mainH,canvasWIDTH;
+
+mainW=window.innerWidth;
+mainH=window.innerHeight;
+
+
+
+canvasWIDTH=(mainW / 100) *85 +0.4;
+
+
+
+main.style.width=mainW;
+main.style.height=mainH;
+
+cvs.width=canvasWIDTH;
+cvs.height=300;
+
+console.log(ctx)
+
+
+
+//console.log((mainW / 100) *85 +0.4)
+
+window.addEventListener('scroll',()=>{
+
+
+});
+
+
+let cvsW=cvs.width;
+let cvsH=cvs.height;
+
+let plyW=30;
+let plyH=30;
+
+let player=new bistor.Player4(plyW,plyH,'red',8);
+
+
+let arrow=new bistor.Arrow2(player.position.x,player.position.y,5,'yellow',{x: 0,y: 0})
+
+
+//buttons functions
+
+
+
+//importin some buttons
+
+
+
+
+
+
+
+let btn1,btn2,btn3,btn4,btn5,btn6,btn7,btn8,btn9;
+let touch=['touchstart','touchend'];
+
+let classNames1='btns_1';
+
+let classNames2='btns_2';
+
+let btn_tag='div';
+let btnSize=110;
+
+
+btn1= new bistor.BTN5(btn_tag,cls,classNames2+' btn1',btns_leyar_2,touch[0],plyFireLeft,touch[1],plyFireStop)
+
+
+btn2= new bistor.BTN5(btn_tag,cls,classNames1+' btn2',btns_leyar_1,touch[0],plyUp,touch[1],plyStop)
+
+
+
+
+btn3= new bistor.BTN5(btn_tag,cls,classNames2+' btn3',btns_leyar_2,touch[0],plyFireRight,touch[1],plyFireStop)
+
+
+
+
+btn4= new bistor.BTN5(btn_tag,cls,classNames1+' btn4',btns_leyar_1,touch[0],plyLeft,touch[1],plyStop)
+
+
+
+
+btn5= new bistor.BTN5(btn_tag,cls,classNames2+' btn5',btns_leyar_2,touch[0],plyBig,touch[1],plySizeNormal)
+
+
+
+
+
+btn6= new bistor.BTN5(btn_tag,cls,classNames1+' btn6',btns_leyar_1,touch[0],plyRight,touch[1],plyStop)
+
+
+
+
+btn7= new bistor.BTN5(btn_tag,cls,classNames2+' btn7',btns_leyar_2,touch[0],none,touch[1],none)
+
+
+
+
+btn8= new bistor.BTN5(btn_tag,cls,classNames1+' btn8',btns_leyar_1,touch[0],plyDown,touch[1],plyStop)
+
+
+
+
+btn9= new bistor.BTN5(btn_tag,cls,classNames2+' btn9',btns_leyar_2,touch[0],none,touch[1],none)
+
+
+
+
+
+
+btn1.update()
+
+btn2.update()
+
+btn3.update()
+
+btn4.update()
+
+btn5.update()
+
+btn6.update()
+
+btn7.update()
+
+btn8.update()
+
+btn9.update()
+
+
+
+
+
+
+let btn_5;
+
+function classese(){
+
+btn_5=document.querySelector('.btn5');
+
+
+}
+
+classese()
+
+let playerMove = false;
+
+let playerSize = false;
+
+let playerFire = false;
+
+let plySteps = 3
+
+
+function plyUp(){
+playerMove = true;
+
+if(playerMove == true){
+
+player.speed.y -= plySteps*4;
+
+}
+
+}
+
+
+function plyLeft(){
+
+playerMove = true;
+
+if(playerMove == true){
+
+player.speed.x -= plySteps;
+
+}
+
+}
+
+
+function plyRight(){
+
+playerMove = true;
+
+if(playerMove == true){
+
+player.speed.x += plySteps;
+
+}
+
+}
+
+function plyDown(){
+
+playerMove = true;
+
+if(playerMove == true){
+
+player.speed.y += plySteps
+
+}
+
+}
+
+
+
+function plyBig(){
+
+playerSize = true;
+
+if(playerSize == true){
+
+player.width=plyW*2;
+player.height=plyH*2;
+player.position.y -= plyH;
+btn_5.style.display='none';
+
+}
+
+}
+
+function plyFireLeft(){
+
+
+arrow.x=player.position.x
+arrow.y=player.position.y
+
+playerFire = true;
+
+if(playerFire == true){
+
+arrow.speed.x -= plySteps
+
+}
+
+}
+
+
+
+function plyFireRight(){
+
+arrow.x=player.position.x
+arrow.y=player.position.y
+
+playerFire = true;
+
+if(playerFire == true){
+
+arrow.speed.x += plySteps
+
+}
+
+}
+
+
+
+function plyFireStop(){
+
+if(playerFire == true){
+
+setTimeout(()=>{
+
+arrow.speed.x = 0
+
+arrow.x=player.position.x
+arrow.y=player.position.y
+
+playerFire = false;
+
+},2500)
+
+}
+
+}
+
+
+
+
+
+
+function plySizeNormal(){
+
+if(playerSize == true){
+
+setTimeout(()=>{
+
+player.width=plyW;
+player.height=plyH;
+playerSize = false;
+
+if(playerSize == false){
+
+player.position.y += plyH
+btn_5.style.display='block';
+
+}
+
+},10000)
+}
+}
+
+
+function plyStop(){
+if(playerMove == true){
+player.speed.x = 0
+player.speed.y = 0
+playerMove = false;
+}
+}
+
+
+
+
+
+
+
+function none(){
+
+}
+
+
+
+
+
+
+
+function gameLoop(){
+
+
+window.requestAnimationFrame(gameLoop);
+
+ctx.clearRect(0,0,cvsW,cvsH);
+
+player.update()
+
+
+arrow.update()
+
+
+
+
+}
+
+gameLoop()
+
+
+
+
+
+
+</script>
+
+
+</body>
+</html>

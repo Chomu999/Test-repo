@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<!-- <meta http-equiv="X-UA-Compatible" content="text/html; charset=UTF-8"> -->
+<meta name="author" content="billbyte" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style >
+*:before, *, *:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+html{
+font-size:10px;
+}
+
+
+body{
+background:chocolate;
+color: saddlebrown;
+
+}
+
+main{
+width:100%;
+height:100%;
+display:grid;
+place-items:center;
+background: rgb(2,0,36);
+background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(6,6,90,1) 24%, rgba(18,18,92,1) 44%, rgba(0,212,255,1) 100%);
+background-image: linear-gradient( saddlebrown, chocolate);
+
+
+}
+
+
+.container{
+--width:30rem;
+width:var(--width);
+height:calc(100% - 10rem );
+background: #f0f0f088;
+display:flex;
+align-items:center;
+justify-content:space-around;
+flex-direction: column;
+
+box-shadow: #3e3e3e 2px 2px 20px -10px;
+}
+
+
+
+
+.wrapper{
+width:90%;
+height:12rem;
+background: #5300FF;
+display: flex;
+align-items: center;
+justify-content: space-around;
+}
+
+
+
+.btn_wrapper{
+width:90%;
+height:12rem;
+background: #5300FF;
+display: flex;
+align-items: center;
+justify-content: space-around;
+}
+
+.btns{
+flex: 1;
+width:10rem;
+height:4rem;
+border-radius:50rem;
+}
+
+.btns.btn_speak{
+background: #003DFF;
+}
+
+.btns.btn_pause{
+background: #ff3DFF;
+}
+.btns.btn_resume{
+background: #11DDFF;
+}
+
+#text_input{
+width:calc(var(--width) - 4rem);
+height:calc(var(--width) - 3rem);
+}
+
+#text_input{
+--width:33rem;
+text-align: center;
+background:#00040F;
+color:lime;
+}
+
+#btn_speak{
+background:lime;
+}
+
+
+</style>
+
+
+<title>text to speak</title>
+
+</head>
+
+<body>
+
+<main>
+
+
+
+<div class="container">
+
+<div class="wrapper">
+
+<select id="lang_input">
+<option value="hi-in">india</option>
+<option value="or">or</option>
+<option value="xor">xor</option>
+</select>
+
+<input type="range"  id="volume_input" max="1" min="0" step="0.1" />
+
+</div>
+
+<textarea id="text_input"></textarea>
+
+<div class="btn_wrapper">
+	
+<div class="btns btn_speak" id="btn_speak"> </div>
+<div class="btns btn_pause" id="btn_pause"> </div>
+<div class="btns btn_resume" id="btn_resume"> </div>
+
+</div>
+
+
+
+
+</div>
+
+</main>
+
+
+
+
+
+
+<script>
+
+
+
+//console.log(window)
+
+console.log(speechSynthesis)
+
+const app=()=>{
+
+
+let utterance = new SpeechSynthesisUtterance("");
+
+const speak_fun=(text="hi", lang="hi-in", volume=1)=>{
+utterance.text=text;
+utterance.lang=lang;
+utterance.volume=volume;
+speechSynthesis.cancel()
+speechSynthesis.speak(utterance)
+
+console.log(utterance)
+}
+
+btn_speak.addEventListener("click", ()=>{
+let text =text_input.value;
+let lang =lang_input.value;
+let volume =volume_input.value;
+if (!text) return
+speak_fun(text, lang, volume);
+})
+
+
+btn_resume.addEventListener("click", ()=>{
+
+speechSynthesis.resume()
+//speechSynthesis.speak(utterance)
+console.log("lol")
+
+})
+
+
+btn_pause.addEventListener("click", ()=>{
+
+speechSynthesis.pause()
+console.log(speechSynthesis)
+})
+
+
+
+
+
+}
+
+
+
+window.addEventListener("load", ()=>{
+
+
+try{
+app();
+}catch(error){
+console.error(error)
+}
+
+
+} );
+
+
+/*
+//pause,
+//resume
+webkitSpeechGrammar: ƒ SpeechGrammar()
+webkitSpeechGrammarList: ƒ SpeechGrammarList()
+webkitSpeechRecognition: ƒ SpeechRecognition()
+webkitSpeechRecognitionError: ƒ SpeechRecognitionErrorEvent()
+webkitSpeechRecognitionEvent
+
+*/
+
+
+
+
+
+</script>
+
+
+
+</body>
+</html>

@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html charset=utf-8" />
+<title>webgl2 example 8 rotate </title>
+
+
+<!-- <meta name="viewport" content="width=device-width ,initial-scale=1.0, maximum-scale=1.0"> -->
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+html{
+font-size:10px;
+}
+body{
+width:100%; height:100%;
+background:#000;
+}
+
+canvas {
+position:absolute;
+top:50%; left:50%;
+transform:translate(-50%,-50%);
+}
+
+.shader-data{
+display:none;
+}
+
+img{
+display:none!important;
+}
+
+
+</style>
+
+<script src="./js/utils.js" defer ></script>
+<script src="./js/lib/gl-matrix.js" defer ></script>
+
+<!-- <script src="/storage/emulated/0/g_js_libs/dat.gui.min.js"></script> -->
+
+<script>
+
+
+function glClearError(){
+//while (!gl.getError());
+
+gl.getError();
+}
+
+//let errNum=0;
+function glLogCall(fun=1){
+
+glClearError();
+fun;
+errNum++;
+//let err;
+while(err = gl.getError()){
+//throw InternalError('hi');
+//throw RangeError("webgl Error"+err);
+throw new Error("webgl Error :"+err` line on ${errNum}`);
+
+return false;
+}
+return true;
+
+}
+
+
+function glLayout( noc, offset) {
+
+let length = noc[noc.length-1];
+
+for(let i=0;i<noc.length-1; i++){
+
+gl.enableVertexAttribArray(i);
+gl.vertexAttribPointer(
+
+  i, noc[i],
+  
+  gl.FLOAT, false,
+  
+  length*4, offset[i]*4
+);
+
+}
+}
+
+
+</script>
+
+
+</head>
+<body>
+<main id="main">
+
+<canvas></canvas>
+
+
+<!-- <div class="shader-data" data-shader="shader">
+
+<p data-glsl-shader="vs">#version 300 es
+precision highp float;
+
+
+layout (location = 0) in vec3 a_Pos;
+layout (location = 1) in vec4 a_Color;
+//layout (location = 2) in vec3 a_offset;
+
+out vec4 v_Color;
+//out vec3 v_ColorOffset;
+
+void main(){
+
+gl_Position = vec4( a_Pos.xyz, 1.0f );
+v_Color = a_Color;
+//v_ColorOffset = a_offset;
+gl_PointSize = 10.0f;
+
+}
+
+</p>
+
+<p data-glsl-shader="fs">#version 300 es
+precision highp float;
+
+out vec4 FragColor;
+
+in vec4 v_Color;
+//in vec3 v_ColorOffset;
+
+
+
+void main(){
+//vec3 color=vec3(v_Color+v_ColorOffset);
+FragColor += v_Color.rgba;
+}
+
+</p>
+
+
+</div> -->
+
+<div class="shader-data" data-shader="shader">
+
+<p data-glsl-shader="vs">#version 300 es
+precision mediump float;
+
+
+layout (location = 0) in vec3 a_Pos;
+layout (location = 1) in vec4 a_Color;
+
+
+uniform mat4 uMatrix;
+
+out vec4 v_Color;
+
+void main(){
+
+gl_Position = uMatrix * vec4(a_Pos, 1.0);
+gl_PointSize = 10.0;
+v_Color = a_Color;
+
+}
+</p>
+
+<p data-glsl-shader="fs">#version 300 es
+precision mediump float;
+
+layout (location=0) out vec4 FragColor;
+in vec4 v_Color;
+
+
+
+void main(){
+FragColor = v_Color;
+}
+
+</p>
+
+
+</div>
+
+
+</main>
+
+
+<script>
+
+
+
+
+
+
+
+
+//const imgURL =`/storage/emulated/0/Download/Zelda2.png`
+
+const app=(gl)=>{
+
+//window.gui = new dat.gui.GUI();
+
+
+let verties=[
+ // X, Y, Z         R,  G,  B,  A
+ ///// 1
+		0.0,0.5,0.1,      1.0,0.0,0.0,1.0,
+		0.5,-0.5,0.1,     1.0,0.0,0.0,1.0,
+		-0.5,-0.5,0.1,    1.0,0.0,0.0,1.0,
+		/////2
+		0.0, 0.5,0.2,     0.1,0.5,0.0,1.0,
+		0.5,-0.5,0.2,     0.1,0.5,0.0,1.0,
+	-0.5,-0.5,0.2,     0.1,0.5,0.0,1.0,
+		/////3
+		0.0,0.5,0.3,      0.2,1.0,0.8,1.0,
+		0.5,-0.5,0.3,     0.2,1.0,0.8,1.0,
+	-0.5,-0.5,0.3,     0.2,1.0,0.8,1.0,
+		
+		
+];
+
+
+
+
+let Shader=new shaderUtils('div[data-shader="shader"]');
+
+//let vao=new VertexArray();
+let vbo=new VertexBuffer(verties,new Float32Array(verties));
+
+//let ibo=new IndexBuffer(indies,new Uint16Array(indies));
+
+
+Shader.Bind();
+
+VertexBufferLayout.glLayout(
+[3/*elmt vec3 1*/,
+ 4/*elmt vec4 2*/,
+// gono
+ 7/*length of arr column*/],
+/*offset*/
+ [0, 3] );
+
+
+
+
+
+let matrix=mat4.create();
+
+//mat4.translate(matrix, matrix, [0.2, 0.2, 0.2]);
+
+mat4.scale(matrix, matrix, [0.2, 0.2, 0.2]);
+Shader.SetUniformMat4fv("uMatrix",matrix);
+
+
+
+
+//vao.Unbind();
+vbo.Unbind();
+//ibo.Unbind();
+Shader.Unbind();
+/////////
+
+
+///////////
+
+
+
+
+
+//setting//
+
+//gl.enable(gl.BLEND);
+
+gl.enable(gl.DEPTH_TEST);
+//gl.enable(gl.CULL_FACE);
+//gl.frontFace(gl.CCW);
+//gl.cullFace(gl.BACK);
+//gl.blendFunc(gl.BLEND_SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+///
+let _R=40, _G=40, _B=40;
+
+const animate=(dt,gl)=>{
+
+
+gl.clearColor(_R/255, _G/255, _B/255, 1.0);
+gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+gl.viewport(0,0,gl.canvas.width,gl.canvas.height);
+
+
+
+
+
+Shader.Bind();
+
+mat4.rotateX(matrix, matrix, Math.PI/2 / 100);
+//mat4.rotateY(matrix, matrix, Math.PI/2 / 100);
+//mat4.rotateZ(matrix, matrix, Math.PI/2 / 100);
+
+Shader.SetUniformMat4fv("uMatrix",matrix);
+
+
+
+
+
+
+
+
+//angle=performance.now() / 1000 / 6 * 2 * Math.PI
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//vao.Bind();
+vbo.Bind();
+//ibo.Bind();
+gl.drawArrays(gl.TRIANGLES, 0, 9);
+//gl.drawArrays(gl.POINTS, 0, 3);
+
+//vbo.Unbind();
+//Shader.Unbind();
+
+//gl.drawElements(gl.TRIANGLES, indies.length,gl.UNSIGNED_SHORT, null);
+
+//gl.drawElements(gl.POINTS, indies.length,gl.UNSIGNED_SHORT, null);
+
+//gl.drawElements(gl.POINTS, indies.length,gl.UNSIGNED_SHORT, null);
+
+//texture.Bind();
+
+
+//gl.drawArrays(gl.POINTS, 0, 3);
+
+//gl.drawArrays(gl.POINTS, 0, 3);
+//gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+
+
+}
+
+
+let lt=1;
+const GameLoop=(ts)=>{
+
+let dt=ts-lt; lt+=ts;
+
+animate(dt,gl);
+window.requestAnimationFrame(GameLoop);
+
+}
+GameLoop(0);
+
+
+
+}
+
+
+///
+window.addEventListener("load",(e)=>{
+
+//
+//const canvas=document.querySelector("canvas");
+//
+//const gl=canvas.getContext("webgl2");
+
+//console.log(gl)
+
+//
+
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+//window.canvas=canvas;
+
+setTimeout(()=>{
+
+console.log(gl);
+app(gl);
+
+},1000);
+
+
+});
+
+
+//resize code here !
+window.addEventListener("resize",(e)=>{
+
+//canvas.width=innerWidth;
+//canvas.height=innerHeight;
+
+});
+
+///
+
+</script>
+
+</body>
+</html>

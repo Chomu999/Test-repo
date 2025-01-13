@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta charset="utf-8" />
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=no" />
+
+<style>
+
+
+
+</style>
+
+<title>tfjs test 5</title>
+
+<script src="/storage/emulated/0/g_js_libs/tf.min.js"></script>
+
+</head>
+
+<body>
+
+
+
+<main>
+
+<div class="wrapper btnCont">
+
+<div class="btn genBtn">generate image</div>
+
+</div>
+
+</main>
+
+
+
+<script>
+//"use strict";
+
+
+const loadFile=async(p,t="text")=>{
+const f=await fetch(p);
+return await f[t]();
+}
+
+
+// Generator model
+function makeGenerator() {
+  const model = tf.sequential();
+  model.add(tf.layers.dense({ units: 7*7*256, inputShape: [100], useBias: false}));
+  model.add(tf.layers.batchNormalization());
+  model.add(tf.layers.leakyReLU());
+  
+  model.add(tf.layers.reshape({targetShape:[7, 7, 256]}));
+  
+  model.add(tf.layers.conv2dTranspose({ filters: 128, kernelSize: [5, 5], strides: [1, 1], padding: "same", useBias: false}));
+  model.add(tf.layers.batchNormalization());
+  model.add(tf.layers.leakyReLU());
+  
+  
+  model.add(tf.layers.conv2dTranspose({ filters: 64, kernelSize: [5, 5], strides: [2, 2], padding: "same", useBias:false}));
+  model.add(tf.layers.batchNormalization());
+  model.add(tf.layers.leakyReLU());
+  
+  model.add(tf.layers.conv2dTranspose({ filters: 1, kernelSize: [5, 5], strides: [2, 2], padding: "same", useBias: false, activation: "tanh" }));
+
+  return model;
+}
+
+
+const g = makeGenerator()
+
+const _noise = tf.randomNormal([1, 100]);
+const _gen_img = g.predict(_noise);
+
+
+
+// Discriminator model
+function makeDiscriminator() {
+  const model = tf.sequential();
+  model.add(tf.layers.conv2d({ filters: 64, kernelSize: 5, strides: 2, padding: "same", inputShape: [28, 28, 1] }));
+  model.add(tf.layers.leakyReLU());
+  model.add(tf.layers.dropout(0.3));
+  model.add(tf.layers.conv2d({ filters: 128, kernelSize: 5, strides: 2, padding: "same"}));
+  model.add(tf.layers.leakyReLU());
+  model.add(tf.layers.dropout(0.3));
+  model.add(tf.layers.flatten());
+  model.add(tf.layers.dense({ units: 1, activation: 'sigmoid' }));
+  return model;
+}
+
+
+
+const d = makeDiscriminator()
+const _decision = d.predict(_gen_img);
+
+// Loss functions
+function discriminatorLoss(realOutput, fakeOutput) {
+  const realLoss = tf.losses.binaryCrossentropy(tf.ones_like(realOutput), realOutput);
+  const fakeLoss = tf.losses.binaryCrossentropy(tf.zeros_like(fakeOutput), fakeOutput);
+  return realLoss.add(fakeLoss);
+}
+
+function generatorLoss(fakeOutput) {
+  return tf.losses.binaryCrossentropy(tf.ones_like(fakeOutput), fakeOutput);
+}
+
+
+
+// Optimizers
+const generatorOptimizer = tf.train.adam(1e-4);
+const discriminatorOptimizer = tf.train.adam(1e-4);
+
+
+async function train(_g, _d, dataset, epochs) {
+for (let epoch = 0; epoch < epochs; epoch++) {
+const startTime = performance.now();
+
+for (const imageBatch of dataset) {
+
+/*
+const noise = tf.randomNormal([imageBatch.shape[0], 100]);
+
+const generatedImages = _g.predict(noise);
+const realOutput = _d.predict(imageBatch);
+const fakeOutput = _d.predict(generatedImages);
+const genLoss = generatorLoss(fakeOutput);
+const disLoss = discriminatorLoss(realOutput, fakeOutput);
+generatorOptimizer.minimize(genLoss);
+discriminatorOptimizer.minimize(disLoss);
+*/
+
+console.log(imageBatch)
+
+}
+
+console.log(`Epoch ${epoch + 1} time: ${(performance.now() - startTime) / 1000} sec`);
+}
+}
+
+
+
+
+
+
+
+
+//a loss function for other loss functions
+//const crossEntropy =  tf.metrics.binaryCrossentropy;
+
+
+
+//discriminator loss function use crossEntropy loss function
+const loss_dis=(realOutput, fakeOutput)=>{
+const realLoss = crossEntropy(tf.onesLike(realOutput), realOutput);
+const fakeLoss = crossEntropy(tf.zerosLike(fakeOutput), fakeOutput);
+const totalLoss = tf.add(realLoss,fakeLoss);
+return totalLoss;
+}
+
+//generator loss function using crossEntropy loss function
+const loss_gen=(fake_out)=>{
+return crossEntropy(tf.onesLike(fake_out), fake_out);
+}
+
+
+
+
+
+const INITIAL=async()=>{
+//querySelector
+
+
+
+
+const mnistData=await loadFile("../datasets/mnist/mnist_small.json", "json");
+
+
+const trainDatasetArr = mnistData.map((d)=> d[1]);
+const trainDatasetTensor = tf.tensor(trainDatasetArr);
+
+
+
+
+
+
+
+//const generator = makeGenerator();
+//const discriminator = makeDiscriminator();
+
+const EPOCHS = 10;
+
+const NOISE_DIM = 100;
+
+const NUM_EXAMPLE = 16;
+
+const SEED = tf.randomNormal([NUM_EXAMPLE, NOISE_DIM]);
+
+
+await train(g, d, trainDatasetArr, EPOCHS);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//draw mnist dataset Number as a image
+const drawNumber=(didx=0)=>{
+const _w = 28, _h = 28;
+const _imgD = new ImageData(_w, _h);
+for(let i=0;i<_w*_h;++i){
+const col = imgDatasets[didx][1][i]*255;
+const idx=(i * 4+0);
+_imgD.data[idx + 0] = col;
+_imgD.data[idx + 1] = col;
+_imgD.data[idx + 2] = col;
+_imgD.data[idx + 3] = 255;
+}
+ctx.putImageData(_imgD, 0, 0);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
+
+
+try{
+console.log(tf);
+
+tf.ready().then(INITIAL);
+
+}catch(err){
+throw new Error("js uncatch err", err)
+}
+
+</script>
+
+</body>
+</html>

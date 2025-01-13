@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="author" content="biswajit bhowmick"/>
+<title>canvas game 6</title>
+
+<style>
+
+
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+html{
+font-size:10px;
+}
+
+body{
+background:black;
+}
+
+
+
+
+#mainDiv{
+margin:0;padding:0;
+position:relative;
+width:100vw; height:100vh;
+background-color:#000;
+}
+
+
+#mainDiv #startBTN, #lock{
+padding:2rem 5rem;
+position:absolute;
+
+top:50%; left:50%;
+background:rgba(255,255,255,0.5);
+transform: translate(-50%,-50%);
+color:#00DDFF;
+font-size:3rem;
+}
+
+canvas{
+position:absolute;
+top:50%; left:50%;
+transform: translate(-50%,-50%);
+z-index:1;
+}
+
+
+
+.controlBox{
+padding:1rem;
+position:absolute;
+top:0; left:0;
+width:100%; height:100%;
+display:grid;
+grid-template-rows:repeat(1,1fr);
+grid-template-columns:repeat(2,1fr);
+grid-gap:1rem;
+z-index:2;
+}
+
+
+
+.MoveX, .MoveY{
+
+
+}
+
+.MoveX{
+grid-row:1/2;
+grid-column:1/2;
+}
+
+.MoveY{
+grid-row:1/2;
+grid-column:2/3;
+}
+
+.left{
+grid-row:2/3;
+grid-column:1/2;
+}
+
+.shift{
+grid-row:2/3;
+grid-column:2/3;
+}
+
+.right{
+grid-row:2/3;
+grid-column:3/4;
+}
+
+.backward{
+grid-row:3/4;
+grid-column:2/3;
+}
+
+img{
+display:none;
+}
+
+#fullScreenBTN{
+margin:auto;
+padding:2rem;
+width:60%;
+position:absolute; left:0;
+transform:translateX(30%);
+display:block;
+letter-spacing:0.4rem;
+word-spacing:0.2rem;
+font-size:3rem;
+text-align:center;
+color:tan;
+border:2px solid currentcolor;
+z-index:20;
+}
+
+</style>
+
+
+<script>
+
+class Rand{
+
+//return float
+static Float(min=1,max=10){
+return Math.random() * (max-min) + min;
+}
+
+//return int
+static Int(min=10,max=100){
+return Math.floor(Rand.Float(min,max));
+}
+
+//return String
+static Choice(arr){
+return arr[Rand.Int(0,arr.length)]
+}
+
+//return a hex color
+static color(){
+let color='#'
+for(let i=0;i<6;++i){
+color+=`${Rand.Choice('0123456789abcdef')}`;
+}
+return color;
+}
+
+
+}
+
+
+
+
+
+
+///
+
+
+
+
+</script>
+
+</head>
+<body>
+
+
+<main id="mainDiv">
+
+<canvas id="canvas"></canvas>
+
+<div id="fullScreenBTN">toggle to fullScreen</div>
+
+<img src="/storage/emulated/0/Download/enemy_spider.png" alt="spider" id="spiderImg"/>
+
+<div class="controlBox">
+ <div class="Movement MoveX"></div>
+ <div class="Movement MoveY"></div>
+</div>
+
+</main>
+
+
+<script>
+
+class InputHandler{
+constructor(){
+
+this.keys={
+top:false,
+left:false,
+right:false,
+down:false,
+}
+
+this.coord={
+x:0, y:0,
+}
+
+
+
+//
+window.addEventListener("pointerrawupdate",(e)=>{
+
+let [,elmt] = e.target.classList;
+if(!elmt) return;
+
+elmt=elmt.toUpperCase();
+
+if(elmt==="MOVEX"){
+//left
+if (e.movementX < 0){
+this.keys.right=false;
+this.keys.left=true;
+}
+//right
+if (e.movementX > 0){
+this.keys.right=true;
+this.keys.left=false;
+}
+this.coord.x=e.movementX;
+}
+
+if(elmt==="MOVEY"){
+//top
+if (e.movementY < 0){
+this.keys.down=false;
+this.keys.top=true;
+}
+//down
+if (e.movementY > 0){
+this.keys.down=true;
+this.keys.top=false;
+}
+
+this.coord.y=e.movementY;
+//console.log(e);
+}
+
+
+
+
+if(!e.target) return;
+
+if(elmt==="MOVEX" && (this.keys.left || this.keys.right)){
+
+e.target.addEventListener("touchend",()=>{
+//console.log("touch out X")
+this.keys.left=!true;
+this.keys.right=!true;
+
+});
+
+}
+
+if(elmt==="MOVEY" && (this.keys.top || this.keys.down)){
+ 
+e.target.addEventListener("touchend",()=>{
+//console.log("touch out Y")
+this.keys.top=!true;
+this.keys.down=!true;
+
+})
+}
+
+})
+
+
+
+}
+
+}
+
+//parent class
+class Enemy{
+constructor(game){
+this.game=game;
+
+this.pos={ x:0, y:200};
+
+this.radius=Rand.Int(10,20);
+
+this.velocity={x: -Rand.Float(0.5, 1.5), y:0};
+this.color="#fff"//rand.color();
+
+
+this.angle=0;
+this.free=true;
+
+
+
+}
+//
+update(dt){
+
+if(this.free) return;
+
+this.pos.x += this.velocity.x;
+this.pos.y += this.velocity.y;
+
+
+if(this.pos.x+this.radius<0){
+//this.free=true;
+//if(this.free)console.log("free");
+this.reset()
+}
+
+
+}
+//
+draw(c){
+if(this.free) return;
+
+c.strokeStyle=this.color;
+c.fillStyle=this.color;
+
+c.beginPath();
+//c.fillRect(this.pos.x, this.pos.y, this.radius, this.radius);
+c.arc(this.pos.x,this.pos.y,this.radius,0,Math.PI*2);
+
+//c.fill();
+c.stroke();
+c.closePath();
+
+}
+
+
+//
+reset(){
+this.free=true;
+}
+
+//
+start(){
+this.free=!true;
+
+
+
+this.radius=Rand.Int(10,20);
+this.pos={
+ x:this.game.width+this.radius,
+ y: Rand.Int(0,this.game.height)};
+
+
+this.velocity={x: -Rand.Float(0.5, 1.5), y:0};
+this.color=Rand.color();
+
+}
+
+}
+
+
+//child class
+class Spider extends Enemy{
+constructor(game){
+super(game)
+
+//this.pos=pos;
+}
+//
+update(dt){
+super.update(dt)
+
+//this.pos.x += this.velocity.x;
+//this.pos.y += this.velocity.y;
+
+}
+//
+draw(c){
+super.draw(c);
+
+//c.strokeStyle=this.color;
+//c.fillStyle=this.color;
+
+//c.beginPath();
+//c.fillRect(this.pos.x, this.pos.y, this.radius, this.radius);
+//c.arc(this.pos.x,this.pos.y,this.radius,0,Math.PI*2);
+
+//c.fill();
+//c.stroke();
+//c.closePath();
+
+
+}
+
+}
+
+//Game
+class Game{
+constructor(canvas){
+this.width=canvas.width;
+this.height=canvas.height;
+
+this.start=false;
+this.input=new InputHandler();
+
+//this.isLoaded=false;
+this.maxEnemy=4;
+//this.everyThing=[];
+
+
+this.enemies=[];
+this.enemyTimer=0;
+this.enemyInterval=1400;
+
+this._INIT();
+
+}
+
+//
+_INIT(){
+
+
+this.#genEnemy();
+
+
+}
+
+//
+update(dt){
+
+
+if(this.enemyTimer > this.enemyInterval){
+this.enemyTimer=0;
+const enemy=this.#getElement();
+if(enemy){ enemy.start(); }
+}else{
+this.enemyTimer += dt;
+}
+
+
+this.enemies.forEach((enmey)=>{
+enmey.update(dt);
+})
+
+
+
+
+}
+
+//
+draw(c){
+
+c.fillStyle="black";
+c.fillRect(0, 0, this.width, this.height);
+
+/*
+c.beginPath();
+c.fillStyle="red";
+c.fillText(" x :" + this.input.coord.x,300, 100);
+c.fillText(" y :" + this.input.coord.y,300, 120);
+c.fillText(`
+top :${this.input.keys.top}
+left :${this.input.keys.left}
+right :${this.input.keys.right}
+down :${this.input.keys.down} `,
+300, 160);
+c.closePath();
+*/
+
+this.enemies.forEach((enmey)=>{
+enmey.draw(c);
+});
+
+
+}
+
+
+render(c,dt){
+
+if(!this.start) return;
+
+this.update(dt);
+this.draw(c);
+
+}
+
+
+
+#genEnemy(){
+for(let i=0;i<this.maxEnemy;i++){
+this.enemies.push(new Spider(this));
+this.enemies[i].start();
+}
+}
+
+//return enemies free 
+#getElement(){
+for(let i=0;i<this.enemies.length;i++){
+if(this.enemies[i].free) return this.enemies[i];
+
+}
+
+}
+
+
+startEngine(){
+this.start=true;
+}
+
+stopEngine(){
+this.start=false;
+}
+
+}
+
+
+
+
+//child code wrapper
+const app=()=>{
+
+
+
+
+
+window.canvas = document.querySelector("canvas");
+window.ctx = canvas.getContext("2d");
+
+
+canvas.width=innerWidth;
+canvas.height=innerHeight;
+
+// create Game class intens
+window.game=new Game(canvas);
+game.startEngine()
+//
+//child animation loop//
+const animate=(dt)=>{
+
+game.render(ctx,dt);
+
+}
+
+//parent animation loop//
+let lt=0;
+const GameLoop=(ts)=>{
+const dt = ts-lt; lt = ts;
+
+//calling child animation loop//
+animate(dt);
+
+window.requestAnimationFrame(GameLoop);
+
+}
+
+
+//calling parent animation loop//
+GameLoop(0);
+
+
+
+
+}
+
+
+
+
+
+//parent code wrapper
+const INIT=()=>{
+
+
+//calling child code wrapper//
+app();
+
+fullScreenBTN.addEventListener("click",(e)=>{
+mainDiv.requestFullscreen();
+//document.fullscreenElement(mainDiv);
+
+});
+
+
+window.addEventListener("fullscreenerror",(e)=>{
+//console.log("Error")
+fullScreenBTN.style.display="none";
+})
+
+}
+
+
+
+//this code run when everything is loaded
+window.addEventListener("load",(e)=>{
+//calling parent code wrapper//
+INIT();
+
+//console.log(document)
+})
+
+
+//resize
+window.addEventListener("resize",()=>{
+
+//.width=innerWidth;
+//game.height=innerHeight;
+})
+
+//
+
+
+</script>
+
+</body>
+</html>
+

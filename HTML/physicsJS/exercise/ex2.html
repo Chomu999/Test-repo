@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html charset=utf-8" />
+<meta name="author" content="biswajit bhowmick"/>
+
+<title>
+js exmaple hex 1 idk
+</title>
+
+
+<meta name="viewport"
+content="width=device-width, user-scalable=no,           initial-scale=1.0, maximum-scale=10.0">
+
+
+<style>
+
+:root{
+--border1:2px solid white;
+}
+
+
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+html{
+font-size:10px;
+}
+
+body{
+width:100vw; height:100vh;
+background:#000;
+}
+
+main{
+width:100%; height:80%;
+}
+
+h1{
+margin:auto;
+color:#fff;
+}
+
+div.contailer{
+margin:auto;
+width:80%; height:80%;
+color:#1DC100;
+overflow-x:hidden;
+overflow-y:scroll;
+}
+
+</style>
+
+
+
+
+
+<script>
+//my math utils 
+
+
+
+
+class rand{
+ 
+static float(min=1,max=10){
+return Math.random() * (max-min) + min;
+}
+
+static int(min=1,max=10){
+return Math.floor(rand.float(min,max));
+}
+}
+
+
+
+</script>
+
+
+
+</head>
+<body>
+
+<main id="main">
+
+
+<h1> hi hex and little bit some math</h1>
+
+<div class="contailer"  id=contailer>
+
+</div>
+
+</main>
+
+<script>
+
+
+
+const app=()=>{
+
+//0, 1, 2, 3, 4, 5, 6, 7, 8, 9//
+//0, 1, 2, 3, 4, 5, 6, 7, 8, 9//
+
+//a,  b,  c,  d,  e,  f//
+//10, 11, 12, 13, 14, 15
+
+//2 = 0x000002; 4 = 0x000004; 8 = 0x000008; //
+//16 = 0x000010; 32 = 0x000020; 64 = 0x000040; //
+
+//128= 0x000080; 256= 0x000100; 512= 0x000200;
+//1024= 0x000400; 2048= 0x000800; 4096= 0x001000;
+
+//8192= 0x002000; 16384= 0x004000; 32768=0x008000;
+//65536=0x010000; 131072=0x020000; 262144=0x040000;
+//524288=0x080000; 1048576=0x100000; 2097152=0x200000;
+
+//4194304=0x400000; 8388608=0x800000; 16777216=
+
+//random 
+//273=000111; 111=00006f; 517=000205; 527=00020f;
+//1050=00041a; 1066=00042a; 36666=008f3a;
+//22949=0059a5; 44444=00ad9c;
+
+
+
+//const CSShex="00ad9c";
+
+
+
+//const JShex="0x"+CSShex;
+//const fianlHex=Number(JShex);
+
+
+
+//console.log(
+//fianlHex,
+//)
+let myHexCode="0123456789abcdef";
+
+
+
+let arr1=[],arr2=[],arr3=[],arr4=[];
+
+let result=[];
+let HTMLresult="";
+
+//console.log(result)
+
+
+
+for(let a=0;a<myHexCode.length;a++){
+
+arr1=[];
+
+for(let b=0;b<6;b++){
+arr1.push(myHexCode[a])
+}
+
+arr2.push(arr1);
+
+}
+
+result=arr2;
+
+result.forEach((r)=>{
+let out = r.join( ","," ");
+HTMLresult+=`<p>${out} : ${Number("0x"+out)}</p>`;
+
+})
+
+console.log(0x2cec)
+
+
+
+contailer.innerHTML=HTMLresult;
+
+//document.body.style.backgroundColor=`#${CSShex}`;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+window.addEventListener("load",(event)=>{
+
+
+app()
+
+
+/*
+console.log(0x0011)
+console.log(1e1011)
+console.log(0b0011)
+console.log(0o1010001)
+console.log(00100010)
+*/
+
+
+
+});
+
+</script>
+
+</body>
+</html>

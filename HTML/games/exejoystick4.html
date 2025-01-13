@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>
+        Mousebot
+    </title>
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+main{
+width:100vw; height:100vh;
+display:grid;
+place-items:center;
+
+}
+canvas{
+border:2px solid tan;
+}
+
+
+</style>
+
+
+</head>
+<body>
+
+
+<main id="main">
+
+<canvas id="cvs" name="game"></canvas>
+</main>
+
+<!-- <script>
+var connection = new WebSocket('ws://' + "192.168.4.1" + ':81/', ['arduino']);
+
+connection.onopen = function () {
+connection.send('Connect ' + new Date());
+};
+connection.onerror = function (error) {
+console.log('WebSocket Error ', error);
+alert('WebSocket Error ', error);
+};
+
+connection.onmessage = function (e) {
+console.log('Server: ', e.data);
+};
+
+function send(x,y,speed,angle){
+var data = {"x":x,"y":y,"speed":speed,"angle":angle};
+data = JSON.stringify(data);
+console.log(data);
+connection.send(data);
+}
+
+
+</script> -->
+
+<script>
+
+let canvas, ctx
+
+window.addEventListener('load', () => {
+
+
+canvas = document.getElementById('cvs')
+ctx = canvas.getContext('2d');
+resize(); 
+
+document.addEventListener('mousedown', startDrawing);
+
+document.addEventListener('mouseup', stopDrawing);
+
+document.addEventListener('mousemove', Draw);
+
+document.addEventListener('touchstart', startDrawing);
+
+document.addEventListener('touchend', stopDrawing);
+
+document.addEventListener('touchcancel', stopDrawing);
+
+document.addEventListener('touchmove', Draw);
+
+window.addEventListener('resize', resize);
+
+});
+
+      
+
+let width, height, radius,
+orig={x:0,y:0};
+function resize() {
+
+canvas.width = 120
+canvas.height = 120
+
+const width = canvas.width
+radius = 20;
+const height = canvas.height
+
+
+background();
+joystick(width / 2, height / 2);
+
+//console.log(ctx.canvas.width)
+}
+
+function background() {
+orig.x = ctx.canvas.width / 2;
+orig.y = ctx.canvas.height / 2;
+
+ctx.beginPath();
+ctx.arc(orig.x,orig.y, radius + 20, 0, Math.PI * 2, true);
+ctx.fillStyle = '#ECE5E5';
+ctx.fill();
+}
+
+function joystick(width, height) {
+ctx.beginPath();
+ctx.arc(width, height, radius-10, 0, Math.PI * 2, true);
+ctx.fillStyle = '#F08080';
+ctx.fill();
+ctx.strokeStyle = '#F6ABAB';
+ctx.lineWidth = 8;
+ctx.stroke();
+}
+
+let coord = { x: 0, y: 0 };
+let paint = false;
+
+function getPosition(event) {
+const mouse={
+x:0,
+y:0
+}
+mouse.x = event.clientX || event.touches[0].clientX;
+
+mouse.y = event.clientY || event.touches[0].clientY;
+
+coord.x = mouse.x - canvas.offsetLeft;
+
+coord.y = mouse.y - canvas.offsetTop;
+}
+
+
+
+function is_it_in_the_circle() {
+
+var current_radius = Math.sqrt(Math.pow(coord.x - orig.x, 2) + Math.pow(coord.y - orig.y, 2));
+
+
+if (radius >= current_radius) return true
+else return false
+
+
+}
+
+
+function startDrawing(event) {
+paint = true;
+getPosition(event);
+if (is_it_in_the_circle()) {
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+background();
+joystick(coord.x, coord.y);
+Draw();
+}
+}
+
+
+
+function stopDrawing() {
+paint = false;
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+background();
+joystick(ctx.canvas.width / 2, ctx.canvas.height / 2);
+
+}
+
+
+
+function Draw(event) {
+
+if (paint) {
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+background();
+var angle_in_degrees,x, y, speed;
+
+var angle = Math.atan2((coord.y - orig.y), (coord.x - orig.x));
+
+if (Math.sign(angle) == -1) {
+
+angle_in_degrees = Math.round(-angle * 180 / Math.PI);
+}
+else {
+angle_in_degrees =Math.round( 360 - angle * 180 / Math.PI);
+}
+
+
+if (is_it_in_the_circle()) {
+joystick(coord.x, coord.y);
+x = coord.x;
+y = coord.y;
+}
+else {
+x = radius * Math.cos(angle) + orig.x;
+y = radius * Math.sin(angle) + orig.y;
+joystick(x, y);
+}
+
+
+getPosition(event);
+
+let relative={x:0,y:0}
+
+var speed =  Math.round(100 * Math.sqrt(Math.pow(x - orig.x, 2) + Math.pow(y - orig.y, 2)) / radius);
+
+
+relative.x = Math.round(x - orig.y);
+
+relative.y = Math.round(y - orig.y);
+
+
+//send( relative.x,relative.y,speed,angle_in_degrees);
+}
+}
+
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>HTML bis HOME</title>
+
+<style>
+*{
+margin:0;padding:0;box-sizing:border-box;
+}
+
+#editor{
+margin:0;padding:0;
+width:100vw;height:100vh;
+display:grid;
+grid-template-columns:1fr;
+grid-template-rows:repeat(2,1fr);
+grid-gap:4px;
+}
+
+
+
+
+#run-box{
+margin:0;padding:0;
+/* width:50vw;height:50vh;
+background-color:green;*/
+}
+
+
+#editor-box{
+margin:0;padding:0;
+/* width:50vw;height:50vh; */
+background-color:red;
+
+display:grid;
+grid-template-columns:1fr;
+grid-template-rows:repeat(4,1fr);
+grid-gap:4px;
+}
+
+
+#Thtml,#Tcss,#Tjs{
+background-color:#000;
+color:#00FF44;
+font-size:20px;
+
+text-decoration:none;
+}
+
+
+#main-content{
+width:100vw;height:100vw;
+overflow:auto;
+}
+
+
+</style>
+
+</head>
+<body>
+
+<div id="editor">
+
+<div id="run-box">
+<style id="style2">
+
+</style>
+<div id="main-content">
+
+</div>
+
+<script id="script2">
+
+</script>
+
+</div>
+
+<div id="editor-box">
+
+ 
+<textarea id="Thtml" class="text-box" placeholder="HTML"></textarea>
+
+<textarea type="text" id="Tcss" class="text-box" placeholder="CSS"></textarea>
+<textarea type="text" id="Tjs" class="text-box" placeholder="JS"></textarea>
+<button type="button" name="run" id="run" value="RUN">RUN</button>
+
+
+</div>
+
+<script class="sss">
+
+let Thtml=document.getElementById('Thtml'),
+Tcss=document.getElementById('Tcss'),
+Tjs=document.getElementById('Tjs'),
+run=document.getElementById('run')
+sss=document.querySelector('.sss');
+
+
+style2=document.getElementById('style2'),
+mainContent=document.getElementById('main-content'),
+script2=document.getElementById('script2');
+
+
+function rrun(){
+
+
+style2.innerHTML=Tcss.value;
+mainContent.innerHTML=Thtml.value;
+script2.innerHTML=Tjs.value;
+Tjs.innerHTML=sss.innerHTML;
+//sss.innerHTML=Tjs.value;
+}
+
+
+run.addEventListener('click',rrun)
+
+//Tjs.innerHTML=sss.Attribute;
+console.log(Tjs.Attributes)
+console.log(sss.innerText)
+</script>
+</body>
+</html>

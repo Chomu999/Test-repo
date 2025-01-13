@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html charset=utf-8" />
+<meta name="authoer" content="biswajit bhowmick"/>
+<title>
+webgl2 example 22 multi texture
+</title>
+
+
+<meta name="viewport"
+content="width=device-width, user-scalable=no,           initial-scale=1.0, maximum-scale=10.0">
+
+
+<style>
+
+:root{
+--border1:2px solid white;
+}
+
+
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+html{
+font-size:10px;
+}
+
+
+
+#startBTN, #lock{
+padding:1rem;
+position: absolute;
+top:50%; left:50%;
+transform:translate(-50%, -50%);
+
+color:#0088FF;
+font-size:2rem;
+z-index:2000;
+}
+
+
+body{
+width:100%; height:100%; background:#000;
+}
+
+canvas {
+position:absolute; top:50%; left:50%;
+transform:translate(-50%,-50%);
+}
+
+
+div.res, div.shader-data{
+display:none!important;
+}
+
+
+
+
+/* controlBox */
+
+div.controlBox{
+width:100%; height:100%;
+position:absolute; top:0; left:0;
+display:grid;
+grid-template-rows:repeat(100,1fr);
+grid-template-columns:repeat(100,1fr);
+
+}
+
+/* pos xyz */
+
+div.positionBox1, div.positionBox2{
+padding:0.5rem;
+display:grid;
+border: var(--border1);
+grid-gap:0.5rem;
+}
+
+div.positionBox1{
+grid-row:40/100;
+grid-column:1/25;
+
+grid-template-rows:repeat(3,1fr);
+grid-template-columns:repeat(3,1fr);
+}
+
+div.positionBox2{
+grid-column:90/100;
+grid-row:40/100;
+
+grid-template-rows:repeat(3,1fr);
+grid-template-columns:repeat(1,1fr);
+}
+
+/* up left right donw btns pos */
+
+.FORWARD{
+grid-row:1/2;
+grid-column:2/3;
+}
+
+.LEFT{
+grid-row:2/3;
+grid-column:1/2;
+}
+
+.SHIFT{
+grid-row:2/3;
+grid-column:2/3;
+}
+
+.RIGHT{
+grid-row:2/3;
+grid-column:3/4;
+}
+
+.BACKWARD{
+grid-row:3/4;
+grid-column:2/3;
+}
+
+
+.UP{
+grid-row:1/2;
+grid-column:1/2;
+}
+
+.DOWN{
+
+grid-row:3/4;
+grid-column:1/2;
+}
+
+.btns{
+border: var(--border1);
+}
+
+
+
+
+
+
+@media (orientation:landscape){
+#lock{ display:none; }
+#mainBox{ display:block; }
+}
+
+@media (orientation:portrait){
+#lock{ display:block; }
+#main{ display:none; }
+}
+
+
+
+
+
+</style>
+
+<script src="./js/utils.js" defer ></script>
+
+<script
+src="./js/lib/gl-matrix.js" defer ></script>
+
+<script
+src="./res/models/Susan.js" defer ></script>
+
+<!-- <script
+src="/storage/emulated/0/g_js_libs/dat.gui.min.js"></script> -->
+
+
+<script>
+
+
+
+
+
+
+
+// my simple vertex buffer
+class VB{
+constructor(size){
+this.vb=gl.createBuffer();
+
+this.size=size;
+
+gl.bindBuffer(gl.ARRAY_BUFFER, this.vb);
+gl.bufferData(gl.ARRAY_BUFFER, this.size, gl.STATIC_DRAW);
+//gl.bindBuffer(gl.ARRAY_BUFFER, null);
+}
+//
+Delete(){
+gl.deleteBuffer( this.vb);
+}
+//
+Bind(){
+gl.bindBuffer(gl.ARRAY_BUFFER, this.vb);
+}
+//
+Unbind(){
+gl.bindBuffer(gl.ARRAY_BUFFER, null);
+}
+
+}
+
+
+//my simple index buffer
+class IB{
+constructor(size){
+this.ib=gl.createBuffer();
+this.size=size;
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ib);
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.size, gl.STATIC_DRAW);
+//gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+
+}
+//
+Delete(){
+gl.deleteBuffer( this.ib);
+}
+//
+Bind(){
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ib);
+
+}
+//
+Unbind(){
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+}
+}
+
+
+// my simple vertex array
+class VA{
+
+constructor(){
+
+this.va=gl.createVertexArray();
+//gl.bindVertexArray(this.va);
+this.Bind()
+}
+
+//
+Delete(){
+gl.deleteVertexArray(this.va);
+}
+//
+Bind(){
+gl.bindVertexArray(this.va);
+}
+//
+Unbind(){
+gl.bindVertexArray(null);
+}
+//
+LinkAttrib(vbo, layout=0, numCom=3, type=0, stride=0, offset=0){
+
+vbo.Bind();
+
+gl.enableVertexAttribArray(layout);
+gl.vertexAttribPointer(layout, numCom,
+  type, gl.FALSE, stride, offset);
+
+//vbo.Unbind();
+
+}
+
+
+}
+
+// my simple TEXTURE maker
+class TB{
+
+constructor(src,slot=0){
+
+
+this.tb=gl.createTexture();
+this.img=new Image();this.img.src=`${src}`;
+this.slot=slot;
+
+gl.bindTexture(gl.TEXTURE_2D, this.tb);
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+
+
+gl.texParameteri(gl.TEXTURE_2D,
+gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+
+gl.texParameteri(gl.TEXTURE_2D,
+gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+gl.texParameteri(gl.TEXTURE_2D,
+gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+
+gl.texParameteri(gl.TEXTURE_2D,
+gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+this.img.addEventListener("load",()=>{
+
+gl.texImage2D(gl.TEXTURE_2D, this.slot, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.img)
+
+gl.generateMipmap(gl.TEXTURE_2D);
+gl.bindTexture(gl.TEXTURE_2D, null);
+
+})
+
+
+}
+
+//
+Delete(){
+gl.deleteTexture(this.tb);
+}
+//
+Bind(){
+gl.bindTexture(gl.TEXTURE_2D, this.tb);
+gl.activeTexture(gl.TEXTURE0+this.slot);
+}
+//
+Unbind(){
+
+gl.bindTexture(gl.TEXTURE_2D, null);
+
+}
+
+
+}
+
+
+// my simple shader Program hepler
+class SH{
+//
+static compileShader(type,src){
+const id=gl.createShader(type);
+gl.shaderSource(id, src);
+gl.compileShader(id);
+
+if(!gl.getShaderParameter(id, gl.COMPILE_STATUS)){
+throw new Error(`${type==35633?"VERTEX":"FRAGMENT" } Shader compilation failed: ${gl.getShaderInfoLog(id)}`);
+gl.deleteShader(id);
+return -1;
+}
+return id;
+}
+//
+static createProgram(vsT,fsT){
+
+//let s=Shader.GetShaderText(domElmt)
+let Prog=gl.createProgram();
+let vs=SH.compileShader(gl.VERTEX_SHADER,vsT)
+let fs=SH.compileShader(gl.FRAGMENT_SHADER,fsT)
+
+gl.attachShader(Prog,vs);
+gl.attachShader(Prog,fs);
+
+
+//Check if successful
+gl.linkProgram(Prog);
+if(!gl.getProgramParameter(Prog, gl.LINK_STATUS)){
+throw new Error("Error creating shader program.",gl.getProgramInfoLog(Prog));
+gl.deleteProgram(Prog);
+return -1;
+}
+
+
+// Check agine b/w/n
+gl.validateProgram(Prog);
+if(!gl.getProgramParameter(Prog, gl.VALIDATE_STATUS)){
+throw new Error("Error Validating Program", gl.getProgramInfoLog(Prog));
+gl.deleteProgram(Prog);
+return -1;
+}
+
+
+
+
+gl.deleteShader(vs);
+gl.deleteShader(fs);
+
+return Prog;
+}
+//
+static GetShaderText(dom){
+
+let shaderDOM=document.body.querySelector(dom);
+const obj={}
+
+
+for(const i of shaderDOM.children){
+obj[i.getAttribute("data-glsl-shader")]=i.innerText;
+}
+return obj;
+}
+
+}
+
+
+// my simple shader Program maker
+class SP{
+constructor(vsT, fsT){
+ this.ID=SH.createProgram(vsT, fsT);
+}
+ 
+//
+Delete(){
+gl.deleteProgram(this.ID);
+}
+//
+Bind(){
+gl.useProgram(this.ID);
+}
+//
+Unbind(){
+gl.useProgram(null);
+}
+
+
+SetUniform1i(name,value){
+ gl.uniform1i(this.GetULoc(name),value);
+}
+
+SetUniform1f(name,value){
+ gl.uniform1f(this.GetULoc(name),value);
+}
+
+SetUniform4fv(name,value){
+ gl.uniform4fv(this.GetULoc(name),value);
+}
+
+
+SetUniformMat4fv(name,value){
+ gl.uniformMatrix4fv(this.GetULoc(name),gl.FALSE,value);
+}
+
+
+GetULoc(name){
+ return gl.getUniformLocation(this.ID,name);
+}
+
+}
+
+
+
+
+</script>
+<script>
+
+
+function glClearError(){
+//while (!gl.getError());
+
+gl.getError();
+}
+
+//let errNum=0;
+function glLogCall(fun=1){
+
+glClearError();
+fun;
+errNum++;
+//let err;
+while(err = gl.getError()){
+//throw InternalError('hi');
+//throw RangeError("webgl Error"+err);
+throw new Error("webgl Error :"+err` line on ${errNum}`);
+
+return false;
+}
+return true;
+
+}
+
+
+function glLayout( noc, offset) {
+
+let length = noc[noc.length-1];
+
+for(let i=0;i<noc.length-1; i++){
+
+gl.enableVertexAttribArray(i);
+gl.vertexAttribPointer(
+  i, noc[i],
+  gl.FLOAT, gl.FALSE,
+  length*4, offset[i]*4
+);
+
+}
+}
+
+
+//let emga=500/100;
+//console.log(emga*62);
+//console.log(emga*68.4);
+
+
+
+</script>
+
+
+</head>
+<body>
+
+<div id="lock">
+ <h1>rotate your device</h1>
+</div>
+
+<main id="main">
+
+<h2 id="startBTN">start !</h2>
+
+<canvas data-graphics=webgl2></canvas>
+
+
+<!-- all shader code -->
+<div class="shader-data" data-shader="shader">
+
+
+
+<!-- default shader-->
+<!-- vertex shader-->
+<p data-glsl-shader="vs">#version 300 es
+precision mediump float;
+
+
+
+in vec3 a_Pos;
+in vec4 a_Color;
+in vec2 a_texCood;
+in vec3 a_Normal;
+
+
+
+uniform mat4 model_mat;
+uniform mat4 camera_mat;
+
+
+out vec2 v_texCood;
+out vec4 v_Color;
+out vec3 v_Normal;
+
+void main(){
+
+
+gl_Position = camera_mat * model_mat * vec4(a_Pos, 1.0);
+
+
+v_texCood= a_texCood;
+v_Color= a_Color;
+v_Normal= a_Normal;
+
+}
+
+</p>
+<!-- fragment shader-->
+<p data-glsl-shader="fs">#version 300 es
+precision mediump float;
+
+//layout (location=0)
+out vec4 FragColor;
+
+uniform sampler2D tex0;
+uniform vec4 lightColor;
+
+in vec4 v_Color;
+in vec2 v_texCood;
+
+
+void main(){
+FragColor += v_Color;
+FragColor += texture(tex0,v_texCood) * lightColor;
+}
+
+</p>
+
+
+
+<!-- light shader code -->
+<!-- vertex shader-->
+<p data-glsl-shader="Light_vs">#version 300 es
+precision mediump float;
+
+
+//layout (location = 0) 
+//layout (location = 1)
+
+in vec3 a_Pos;
+
+
+uniform mat4 model_mat;
+uniform mat4 camera_mat;
+
+
+void main(){
+
+gl_Position = camera_mat * model_mat * vec4(a_Pos, 1.0);
+
+
+}
+
+</p>
+<!-- fragment shader-->
+<p data-glsl-shader="Light_fs">#version 300 es
+precision mediump float;
+
+out vec4 FragColor;
+
+uniform vec4 lightColor;
+
+
+void main(){
+FragColor = lightColor;
+
+}
+
+</p>
+
+
+<!-- model shader code -->
+<!-- vertex shader-->
+<p data-glsl-shader="Model_vs">#version 300 es
+precision mediump float;
+
+in vec3 a_Pos;
+in vec2 a_TexCood;
+
+
+
+uniform mat4 model_mat;
+uniform mat4 camera_mat;
+
+
+
+out vec2 v_TexCood;
+
+void main(){
+
+gl_Position = camera_mat * model_mat * vec4(a_Pos, 1.0);
+v_TexCood = a_TexCood;
+
+
+}
+</p>
+<!-- fragment shader-->
+<p data-glsl-shader="Model_fs">#version 300 es
+precision mediump float;
+
+out vec4 FragColor;
+
+
+uniform sampler2D Mtex0;
+uniform vec4 lightColor;
+
+in vec2 v_TexCood;
+
+
+void main(){
+
+FragColor =texture(Mtex0, v_TexCood) * lightColor;
+
+}
+
+</p>
+
+
+
+</div>
+
+
+
+<div class="res">
+
+<img id="img1" src="./res/imgs/link1.png" alt="link1" />
+
+<img id="img2" src="./res/imgs/SusanTexture.png" alt="Susan"/>
+
+</div>
+
+<div class="controlBox">
+ 
+ <div class="positionBox1">
+  <div class="btns FORWARD"></div>
+  <div class="btns LEFT"></div>
+  <div class="btns SHIFT"></div>
+  <div class="btns RIGHT"></div>
+  <div class="btns BACKWARD"></div>
+ </div>
+ 
+ <div class="positionBox2">
+  <div class="btns UP"></div>
+  <div class="btns DOWN"></div>
+ </div>
+ 
+ 
+</div>
+
+
+
+
+</main>
+
+<script>
+
+
+
+
+// gl resizer helper
+const glResize=(gl)=>{
+
+//let cvsSize;
+//innerWidth<innerHeight?cvsSize=innerWidth:cvsSize=innerHeight;
+gl.canvas.width=window.innerWidth;
+gl.canvas.height=window.innerHeight;
+
+}
+
+
+
+// parent code wrapper
+const app=(gl)=>{
+
+glResize(gl)
+
+const controlBox=document.querySelector(".controlBox");
+
+const controlPatten=[];
+const MouseCoord={ pos:{x:0,y:0}, };
+
+const shaderTextObj=Shader.GetShaderText(
+ 'div[data-shader="shader"]');
+//const gui = new dat.gui.GUI();
+
+
+
+// creatin TRIANGLES verties
+let verties=[
+ // coord          color                  uv     normal
+-0.5,0.0,0.5,   0.83, 0.70, 0.44, 1.0,   0.0,0.0,  0.0,-1.0,0.0,
+-0.5,0.0,-0.5,  0.83, 0.70, 0.44, 1.0,   0.0,5.0,  0.0,-1.0,0.0,
+0.5,0.0,-0.5,   0.83, 0.70, 0.44, 1.0,   5.0,5.0,  0.0,-1.0,0.0,
+0.5,0.0,0.5,    0.83, 0.70, 0.44, 1.0,   5.0,0.0,  0.0,-1.0,0.0,
+
+-0.5,0.0,0.5,   0.83, 0.70, 0.44, 1.0,  0.0,0.0,  -0.8,0.5,0.0,
+-0.5,0.0,-0.5,  0.83, 0.70, 0.44, 1.0,  5.0,0.0,  -0.8,0.5,0.0,
+0.0,0.8,0.0,    0.92, 0.86, 0.76, 1.0,  2.5,5.0,  -0.8,0.5,0.0,
+
+-0.5,0.0,-0.5,  0.83, 0.70, 0.44, 1.0,  5.0,0.0,  0.0,0.5,-0.8,
+0.5,0.0,-0.5,   0.83, 0.70, 0.44, 1.0,  0.0,0.0,  0.0,0.5,-0.8,
+0.0,0.8,0.0,    0.92, 0.86, 0.76, 1.0,  2.5,5.0,  0.0,0.5,-0.8,
+
+
+0.5,0.0,-0.5,   0.83, 0.70, 0.44, 1.0,  0.0,0.0,  0.8,0.5,0.0,
+0.5,0.0,0.5,    0.83, 0.70, 0.44, 1.0,  5.0,0.0,  0.8,0.5,0.0,
+0.0,0.8,0.0,    0.92, 0.86, 0.76, 1.0,  2.5,5.0,  0.8,0.5,0.0,
+
+0.5,0.0,0.5,    0.83, 0.70, 0.44, 1.0,  5.0,0.0,  0.0,0.5,0.8,
+-0.5,0.0,0.5,   0.83, 0.70, 0.44, 1.0,  0.0,0.0,  0.0,0.5,0.8,
+0.0,0.8,0.0,    0.92, 0.86, 0.76, 1.0,  2.5,5.0,  0.0,0.5,0.8,
+
+
+
+
+];
+
+
+
+// creatin CUBE verties
+let verties2=[
+// Crood
+-0.1, -0.1,  0.1,
+-0.1, -0.1, -0.1,
+
+ 0.1, -0.1, -0.1,
+ 0.1, -0.1,  0.1,
+ 
+-0.1,  0.1,  0.1,
+-0.1,  0.1, -0.1,
+
+ 0.1,  0.1, -0.1,
+ 0.1,  0.1,  0.1,
+
+];
+
+
+
+// creatin indies
+let indies=[
+0,1,2,
+0,2,3,
+4,5,6,
+7,9,8,
+10,12,11,
+13,15,14
+];
+
+
+
+// creatin indies
+
+let indies2=[
+0,1,2,
+0,2,3,
+0,4,7,
+0,7,3,
+3,7,6,
+3,6,2,
+2,6,5,
+2,5,1,
+1,5,4,
+1,5,0,
+4,5,6,
+4,6,7,
+];
+
+
+
+
+let verties3 = MySusan.meshes[0].vertices;
+let indices3 = [].concat.apply([], MySusan.meshes[0].faces);
+let uv3 = MySusan.meshes[0].texturecoords[0];
+
+
+
+// creatin Shader program passin html parent attribute
+let ShaderProg=new shaderUtils(
+ shaderTextObj.vs, shaderTextObj.fs );
+
+// creatin vertex array passin null
+let vao=new VA();
+
+// creatin vertex buffer passin verties
+let vbo=new VB(new Float32Array(verties));
+
+// creatin index buffer passin indies
+let ibo=new IB(new Uint16Array(indies));
+
+
+ShaderProg.Bind();
+
+VertexBufferLayout.glLayout(
+//vec's             length
+[3, 4, 2, 3,        12],
+//attribute's loc
+[0, 1, 2, 3],
+ // offset
+[0, 3, 7 , 9] );
+
+//Shader.SetUniform1i("tex0",0);
+
+// creatin Texture passin image html id
+
+let tbo=new Texture("img1");
+
+
+
+
+
+
+
+let camera=new Camera(gl.canvas.width,
+gl.canvas.height, vec3.fromValues(0, 5, 10))
+
+vao.Unbind();
+vbo.Unbind();
+ibo.Unbind();
+ShaderProg.Unbind();
+/////////
+
+let LightShader=new shaderUtils(
+shaderTextObj.Light_vs, shaderTextObj.Light_fs
+);
+ 
+// creatin vertex array passin null
+let Lightvao=new VA();
+
+// creatin vertex buffer passin verties
+let Lightvbo=new VB(new Float32Array(verties2));
+
+// creatin index buffer passin indies
+let Lightibo=new IB(new Uint16Array(indies2));
+
+
+LightShader.Bind();
+
+VertexBufferLayout.glLayout([3, 3], [0], [0]);
+
+Lightvao.Unbind();
+Lightvbo.Unbind();
+Lightibo.Unbind();
+
+
+let ModelProgs=[]
+let ModelVaos=[]
+let ModelVbos1=[]
+let ModelVbos2=[]
+let ModelIbos=[]
+let ModelTbos=[]
+
+
+
+
+
+
+
+let LightColor=vec4.fromValues(1.0, 1.0, 1.0, 0.8)
+
+let LightPos=vec3.fromValues(0.0, 0.0, 2.5);
+let LightModel=mat4.create();
+//LightModel=
+mat4.translate(LightModel,LightModel, LightPos);
+
+
+let PyramidPos=vec3.fromValues(0.0, 0.0, 0.0);
+let PyramidModel=mat4.create();
+//PyramidModel=
+mat4.translate(PyramidModel,PyramidModel, PyramidPos);
+
+LightShader.Bind();
+LightShader.SetUniformMat4fv("model_mat", LightModel);
+LightShader.SetUniform4fv("lightColor",LightColor)
+
+ShaderProg.Bind();
+ShaderProg.SetUniformMat4fv("model_mat", PyramidModel);
+ShaderProg.SetUniform4fv("lightColor",LightColor)
+//
+
+for(let i=0;i<30;++i){
+
+ModelProgs.push(
+new shaderUtils(
+shaderTextObj.Model_vs, shaderTextObj.Model_fs ))
+
+// creatin vertex array passin null
+ModelVaos.push(new VA());
+
+// creatin vertex buffer passin verties
+
+ModelVbos1.push(
+new VB(new Float32Array(verties3)));
+
+ModelVbos2.push(
+new VB(new Float32Array(uv3)));
+
+ModelIbos.push(
+new IB(new Uint16Array(indices3)));
+
+
+// creatin index buffer passin indies
+
+
+ModelProgs[i].Bind();
+ModelVbos1[i].Bind()
+VertexBufferLayout.glLayout( [3, 3], [0], [0] );
+ModelVbos2[i].Bind()
+VertexBufferLayout.glLayout( [2, 2], [1], [0] );
+
+
+// creatin Texture passin image html id
+ModelTbos.push(Modeltbo=new Texture("img2"));
+ModelProgs[i].SetUniform1i("Mtex0",0);
+
+
+ModelVaos[i].Unbind();
+ModelVbos1[i].Unbind();
+ModelVbos2[i].Unbind();
+ModelIbos[i].Unbind();
+ModelTbos[i].Unbind();
+
+ModelProgs[i].Unbind();
+
+
+
+
+
+
+let ModelPos=vec3.fromValues(
+ Rand.float(-100,200), 1.0,
+ Rand.float(-100,200)
+ )
+let ModelModel=mat4.create();
+mat4.translate(ModelModel, ModelModel, ModelPos);
+
+ModelProgs[i].Bind();
+ModelProgs[i].SetUniformMat4fv("model_mat",ModelModel)
+ModelProgs[i].SetUniform4fv("lightColor", LightColor)
+
+
+
+}
+
+
+
+//const posF=gui.addFolder("position");
+//const rotF=gui.addFolder("rotation");
+
+
+//position
+//posF.add(camera.pos, "x", -100, 100, 0.5);
+//posF.add(camera.pos, "y", -100, 100, 0.5);
+//posF.add(camera.pos, "z", -100, 100, 0.5);
+
+
+//rotation
+//rotF.add(camera.rot, "x", -100, 100, 0.5);
+//rotF.add(camera.rot, "y", -100, 100, 0.5);
+//rotF.add(camera.rot, "z", -100, 100, 0.5);
+///////////
+
+
+
+
+
+//some gl setting//
+gl.enable(gl.BLEND);
+
+gl.enable(gl.DEPTH_TEST);
+//gl.enable(gl.CULL_FACE);
+//gl.frontFace(gl.CCW);
+//gl.cullFace(gl.BACK);
+gl.blendFunc(gl.BLEND_SRC_ALPHA,
+gl.ONE_MINUS_SRC_ALPHA);
+
+///
+
+
+let _R=40, _G=40, _B=40;
+
+//child Animation Loop
+const animate=(dt,gl)=>{
+
+
+//clear everyFrame
+{
+ gl.clearColor(_R/255, _G/255, _B/255, 1.0);
+ gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+ gl.viewport(0,0,gl.canvas.width,gl.canvas.height);
+
+}
+
+// drawin Pyramid
+{
+ 
+ShaderProg.Bind();
+
+camera.UpdateMatrix(45, 0.1, 1000.0);
+camera.Matrix(ShaderProg ,"camera_mat");
+camera.Inputs(controlPatten,MouseCoord);
+
+
+tbo.Bind();
+
+vao.Bind();
+//vbo.Bind();
+ibo.Bind();
+
+
+gl.drawElements(gl.TRIANGLES, indies.length,gl.UNSIGNED_SHORT, null);
+
+//gl.drawElements(gl.POINTS, indies.length,gl.UNSIGNED_SHORT, null);
+
+}
+
+
+// drawin cube
+{
+
+LightShader.Bind();
+
+camera.Matrix(LightShader,"camera_mat")
+
+
+Lightvbo.Bind();
+Lightvao.Bind();
+Lightibo.Bind();
+
+
+gl.drawElements(gl.TRIANGLES, indies.length,gl.UNSIGNED_SHORT, null);
+
+
+}
+////
+
+// drawin model
+for(let i=0;i<30;++i){
+
+ModelProgs[i].Bind();
+
+camera.Matrix(ModelProgs[i],"camera_mat")
+ModelTbos[i].Bind();
+ModelVaos[i].Bind();
+//Modelvbo1.Bind();
+//Modelvbo2.Bind();
+ModelIbos[i].Bind();
+
+
+gl.drawElements(gl.TRIANGLES, indices3.length,gl.UNSIGNED_SHORT, 0);
+
+
+
+
+
+}
+//
+
+}
+
+//parent Animation Loop
+let lastTime=1;
+const GameLoop=(timeStamp)=>{
+
+//calculatin deltaTime here
+const dt=timeStamp-lastTime; lastTime+=timeStamp;
+
+//callin child Animation Loop
+animate(dt,gl);
+window.requestAnimationFrame(GameLoop);
+}
+
+//callin parent Animation Loop passin timeStamp 0
+GameLoop(0);
+
+
+controlBox.addEventListener("pointerdown",(e)=>{
+
+
+
+{
+if(
+ !(controlPatten.indexOf("FORWARD") > -1) ||
+ !(controlPatten.indexOf("LEFT") > -1) ||
+ 
+ !(controlPatten.indexOf("SHIFT") > -1) ||
+ 
+ !(controlPatten.indexOf("RIGHT") > -1) ||
+ !(controlPatten.indexOf("BACKWARD") > -1) ||
+ 
+ 
+ !(controlPatten.indexOf("UP") > -1) || 
+ !(controlPatten.indexOf("DOWN") > -1)
+){
+controlPatten.push(e.target.classList[1]);
+//console.log("on :", controlPatten);
+}
+
+}
+
+
+})
+
+controlBox.addEventListener("pointermove",(e)=>{
+
+
+//controlPatten.splice(e.target.classList[1],1);
+
+
+MouseCoord.pos.x=e.pageX;
+MouseCoord.pos.y=e.pageY;
+
+//console.log("off :", controlPatten);
+
+})
+
+controlBox.addEventListener("pointerleave",(e)=>{
+
+
+controlPatten.splice(controlPatten.indexOf(e.target.classList[1]),1);
+//console.log("off :", controlPatten);
+
+})
+
+
+
+//
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//everyThin load when this code will be run
+window.addEventListener("load",(e)=>{
+
+//console.log(document)
+
+
+const startBTN=
+document.body.querySelector("#startBTN");
+
+startBTN.addEventListener("click",(e)=>{
+
+
+document.body.querySelector("main").removeChild(startBTN)
+
+
+setTimeout( c => app(c) , 400, gl )
+})
+
+
+
+
+});
+
+
+//resize code here !
+window.addEventListener("resize",(e)=>{
+
+
+glResize(gl)
+
+
+});
+///
+
+
+
+
+
+
+
+
+
+
+</script>
+
+</body>
+</html>

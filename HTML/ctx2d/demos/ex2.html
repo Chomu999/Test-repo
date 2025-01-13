@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>canvas art game v1.0.1</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+html{
+font-size:10px;
+}
+
+body{
+overflow:hidden;
+}
+
+#mainBox{
+margin:0;padding:0;
+width:100vw; height:100vh;
+background-color:#000;
+}
+
+.controleBox{
+padding:1rem;
+width:100%; height:50%;
+background-color:rgba(0,0,0,0.1);
+display:grid;
+grid-template-rows:repeat(3,1fr);
+grid-template-columns:repeat(3,1fr);
+grid-gap:1rem;
+}
+
+.btns{
+background:rgba(255,255,255,0.3);
+}
+
+.forward{
+grid-row:1/2;
+grid-column:2/3;
+}
+
+.left{
+grid-row:2/3;
+grid-column:1/2;
+}
+
+.shift{
+grid-row:2/3;
+grid-column:2/3;
+}
+
+.right{
+grid-row:2/3;
+grid-column:3/4;
+}
+
+.backward{
+grid-row:3/4;
+grid-column:2/3;
+}
+
+img{
+display:none;
+}
+
+
+</style>
+
+<script>
+
+class DAU{
+
+//
+update(dt){
+this.pos.x += this.velocity.x;
+this.pos.y += this.velocity.y;
+}
+//
+draw(c){
+c.fillStyle=this.color;
+c.fillRect(this.pos.x,this.pos.y, this.width, this.height);
+}
+
+}
+
+class In1{
+constructor({
+ pos={x:0,y:0},
+ width=20,
+ height=20,
+ color="red",
+}) {
+this.pos=pos;
+this.velocity={x:0, y:0};
+this.width=width;
+this.height=height;
+this.color=color;
+this.delete=false;
+}
+
+}
+
+class In2 extends DAU{
+constructor({
+ pos={x:0,y:0},
+ width=20,
+ height=20,
+ color="red",
+}) {
+super();
+this.pos=pos;
+this.velocity={x:0, y:0};
+this.width=width;
+this.height=height;
+this.color=color;
+}
+
+}
+
+
+class Human extends In2{
+constructor({
+ name="user",
+ 
+ pos={x:100,y:190},
+ width=20,
+ height=40,
+ color="blue",
+
+}) {
+super({pos,width,height,color});
+this.name=name;
+this.action={
+forward:false,
+left:false,
+shift:false,
+right:false,
+backward:false,
+speed:3.0,
+};
+
+}
+
+move(action){
+
+
+this.velocity.y=0;
+this.velocity.x=0;
+
+
+if(action.forward) this.velocity.y= -action.speed;
+
+if(action.left) this.velocity.x= -action.speed;
+
+//if(action.left) this.velocity.x= -action.speed;
+
+if(action.right) this.velocity.x= action.speed;
+
+if(action.backward) this.velocity.y= action.speed;
+
+
+}
+
+}
+
+</script>
+
+<script>
+
+class rand{
+
+//return float
+static float(){
+return Math.random();
+}
+
+//return int
+static int(min=10,max=100){
+return Math.floor(rand.float() * (max-min) + min);
+}
+
+//return String
+static choice(arr){
+return arr[rand.int(0,arr.length)]
+}
+
+//return a hex color
+static color(){
+let color='#'
+for(let i=0;i<6;++i){
+color+=`${rand.choice('0123456789abcdef')}`;
+}
+return color;
+}
+
+
+}
+
+
+class Partical{
+constructor(effect){
+this.effect=effect;
+
+this.pos={
+ //x:150, y:150
+ x:rand.int(0,this.effect.width),
+ y:this.effect.height
+};
+
+this.velocity={
+ x: Math.random() * 3 - 3/2,
+ y: Math.random() * -6,
+}
+
+this.radius=rand.int(3,10);
+this.color="#fff"//rand.color();
+
+
+this.lineLength=rand.int(10,100);
+this.angle=0;
+
+
+
+
+}
+//
+update(dt){
+this.angle += 0.5 * rand.float();
+
+this.velocity.x=Math.sin(this.angle) * 5/2;
+//this.velocity.y=Math.cos(this.angle) * 5/2;
+
+
+//this.pos.x= this.effect.width+this.effect.pos.x;
+//this.pos.y = this.effect.height+this.effect.pos.y;
+
+//this.pos.x += this.velocity.x + this.effect.pos.x;
+//this.pos.y += this.velocity.y + this.effect.pos.y;
+
+this.pos.x += this.velocity.x;
+this.pos.y += this.velocity.y;
+
+
+
+}
+//
+draw(c){
+
+c.strokeStyle=this.color;
+c.fillStyle=this.color;
+
+c.beginPath();
+//c.fillRect(this.pos.x, this.pos.y, this.radius, this.radius);
+c.arc(
+ this.effect.pos.x+this.pos.x,
+ this.effect.pos.y+this.pos.y,
+ this.radius, 0, Math.PI*2
+);
+ 
+//c.fill();
+c.stroke();
+c.closePath();
+
+
+}
+}
+
+
+class Effect extends In1{
+constructor({width,height,pos}){
+super({width,height,pos})
+
+this.particals=[];
+this.NumberOfParticals=20;
+this._INIT();
+}
+_INIT(){
+
+for(let i=0;i<this.NumberOfParticals;i++)
+ this._AddPartical();
+
+
+}
+
+update(dt){
+this.pos.x += this.velocity.x;
+this.pos.y += this.velocity.y;
+
+this.particals.forEach((p)=>{
+p.update(dt)
+});
+
+this.particals.forEach((p)=>{
+if(p.pos.y > 0-this.height){
+this._AddPartical()
+this.particals.shift()
+}
+})
+
+/*
+p.radius=rand.int(3,20)
+//p.color=rand.color()
+p.pos.x= rand.int(p.radius,this.width-p.radius);
+p.pos.y= this.height+p.radius;
+
+p.velocity.y=rand.int(-1,-3);
+p.lineLength=rand.int(10,100);
+
+p.history=[{
+ pos:{
+  x: p.pos.x+this.pos.x,
+  y: p.pos.y+this.pos.y
+ }
+}];
+*/
+
+
+
+
+
+
+
+}
+//
+draw(c){
+
+this.particals.forEach((p)=>{
+p.draw(c)
+});
+c.strokeStyle="tan";
+c.strokeRect(this.pos.x,this.pos.y,this.width,this.height)
+
+}
+//
+_AddPartical(){
+this.particals.push(new Partical(this));
+}
+
+}
+
+
+
+
+
+
+///
+
+class Game{
+constructor(canvas){
+this.width=canvas.width;
+this.height=canvas.height;
+
+this.isLoaded=false;
+
+this._INIT();
+
+}
+
+//
+_INIT(){
+this.player=new Human({pos:{x:this.width,y: 200}});
+this.effects=[];
+
+this.effects.push(new Effect({
+ width:200, height: 200,
+ pos:{x:50,y: this.height-200},
+ 
+}));
+
+//this._AddPlayer("player1");
+
+}
+
+//
+update(dt){
+
+this.effects.forEach((effect)=>{
+effect.update(dt);
+})
+
+
+this.player.update(dt);
+this.player.move(this.player.action);
+
+
+this.effects.forEach((es)=>{
+//if(this.width > es.pos.x) es.velocity.x=1;
+//else es.pos.x=0-es.width;
+
+});
+
+
+
+
+
+
+
+}
+
+//
+draw(c){
+
+c.fillStyle="black";
+c.fillRect(0, 0, this.width, this.height);
+
+
+
+this.effects.forEach((effect)=>{
+effect.draw(c);
+});
+
+
+this.player.draw(c)
+c.fillStyle="brown"
+c.fillRect(0,this.height-60,this.width, 60);
+
+}
+
+render(c,dt){
+
+this.update(dt);
+this.draw(c);
+
+}
+
+_AddPlayer(id){
+//this.players.push(new Human({}))
+}
+
+}
+
+
+
+</script>
+
+</head>
+<body>
+
+<main id="mainBox">
+
+<canvas id="canvas"></canvas>
+
+<div class="controleBox">
+ <div class="btns forward"></div>
+ <div class="btns left"></div>
+ <div class="btns shift"></div>
+ <div class="btns right"></div>
+ <div class="btns backward"></div>
+</div>
+
+</main>
+
+
+<script>
+const canvas = document.querySelector("canvas");
+const controleBox = document.querySelector(".controleBox");
+const ctx = canvas.getContext("2d");
+let cvsSize;
+(window.innerHeight>window.innerWidth)?cvsSize=window.innerWidth:cvsSize=window.innerHeight;
+canvas.width=cvsSize;
+canvas.height=cvsSize;
+
+
+
+
+
+
+window.game=new Game(canvas);
+
+//console.log(game.effects[0].particals[0].velocity);
+
+
+const animate=(dt)=>{
+
+game.render(ctx,dt);
+
+
+}
+
+let ls=1;
+const GameLoop=(ts)=>{
+const dt = ls-ts;
+/*     */  ls += ts;
+
+//if(Math.floor(ls%9) == 0) 
+ 
+animate(dt);
+
+window.requestAnimationFrame(GameLoop);
+
+}
+
+GameLoop(0);
+
+
+ctx.canvas.addEventListener("pointerrawupdate",(e)=>{
+
+//game.effects[0].particals.forEach((p)=>{
+//p.pos.x=e.pageX;
+//p.pos.y=e.pageY;
+//})
+
+
+//game.effects[0].pos.x=e.pageX
+//game.effects[0].pos.y=e.pageY
+
+
+});
+
+
+//
+
+controleBox.addEventListener("touchstart", (e)=>{
+
+let [,cd]=e.target.classList;
+if(!cd) return-1;
+//cd=cd.toLowerCase();
+
+if(cd=="forward") game.player.action.forward=true;
+
+if(cd=="left") game.player.action.left=true;
+
+//if(cd=="shift") game.player.action.shift=true;
+
+if(cd=="right") game.player.action.right=true;
+
+if(cd=="backward") game.player.action.backward=true;
+else return -1;
+
+});
+
+controleBox.addEventListener("touchend", (e)=>{
+
+let [,cd]=e.target.classList;
+cd=cd.toLowerCase();
+if(!cd) return-1;
+
+if(cd=="forward") game.player.action.forward=false;
+if(cd=="left") game.player.action.left=false;
+
+//if(cd=="shift") game.player.action.shift=false;
+
+if(cd=="right") game.player.action.right=false;
+
+if(cd=="backward") game.player.action.backward=false;
+else return -1;
+
+});
+
+
+</script>
+
+</body>
+</html>
+

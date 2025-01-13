@@ -1,0 +1,234 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>HTML CANVAS DRAWIN APP BOI</title>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+#main{
+margin:0;
+padding:0;
+width:100vw;
+height:100vh;
+display:grid;
+grid-template-columns: repeat(2, 1fr);
+grid-template-rows: repeat(2, 1fr);
+grid-gap:2px;
+}
+
+
+canvas{
+grid-column:1/3;
+grid-row:1/2;
+background-color:#000756;
+}
+
+div#toolsBox{
+grid-column:1/3;
+grid-row:2/3;
+}
+
+div#toolsBox{
+margin:0;
+padding:0;
+display:grid;
+grid-template-columns: repeat(2, 1fr);
+grid-template-rows: repeat(2, 1fr);
+grid-gap:2px;
+background-color:#052B00;
+}
+
+
+
+
+</style>
+</head>
+<body>
+
+
+<div id="main">
+
+
+<canvas class="cvs"></canvas>
+<div id="toolsBox">
+
+<input onchange="changeColor()" type="color" id="color"/>
+<input onchange="sizeOfPen()" type="range" min="1" max="200" id="penSize"/>
+</div>
+
+</div>
+
+<script>
+
+
+
+
+
+let body,main,play_area,btn_box;
+
+let mainheight,mainwidth;
+
+
+let cls,clk,ani,px,id;
+
+cls='class';
+clk='click';
+ani='animationend';
+px='px';
+id='id';
+
+
+
+let btn_up,btn_down,btn_left,btn_right;
+
+
+body=document.body;
+
+main=document.getElementById('main');
+color=document.getElementById('color');
+pen=document.getElementById('penSize');
+toolB=document.getElementById('toolsBox')
+
+
+//g=toolB.getAttribute("id")
+g=toolB.attributes[0].name
+console.log(g)
+
+const cvs=document.querySelector('.cvs');
+const ctx = cvs.getContext('2d');
+
+console.log(ctx);
+
+mainwidth = window.innerWidth;
+mainheight = window.innerHeight;
+
+
+//const cvsW=mainwidth;
+//const cvsH=mainheight;
+
+//main.style.width=mainwidth;
+//main.style.height=mainheight;
+
+
+
+//cvs.width=cvsW;
+//cvs.height=cvsH;
+
+
+
+
+
+
+
+
+
+
+
+let touch=['touchstart','touchmove','touchend'];
+
+let its_drawin = false;
+let its_color='red';
+let its_penSize=2;
+
+cvs.addEventListener(touch[0],lineStart);
+
+
+cvs.addEventListener(touch[1],lineMove);
+
+
+cvs.addEventListener(touch[2],lineStop);
+
+function changeColor(){
+its_color = color.value;
+}
+
+function sizeOfPen(){
+its_penSize = pen.value;
+}
+
+function lineStart(e){
+if(its_drawin == false){
+
+ctx.beginPath()
+
+ctx.strokeStyle=its_color;
+ctx.moveTo(e.changedTouches[0].clientX,e.changedTouches[0].clientY);
+its_drawin = true;
+}
+}
+
+
+function lineMove(e){
+if(its_drawin == true){
+
+ctx.lineTo(e.changedTouches[0].clientX,e.changedTouches[0].clientY);
+
+ctx.lineWidth=its_penSize;
+
+ctx.lineCap='round'
+ctx.lineJoin='round'
+}
+}
+
+
+
+function lineStop(e){
+if(its_drawin == true){
+ctx.stroke();
+ctx.closePath();
+its_drawin = false;}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+function gameLoop(){
+
+window.requestAnimationFrame(gameLoop);
+
+//ctx.clearRect(0,0,cvsW,cvsH);
+
+
+//platformFlot()
+
+}
+
+//console.log(ctx)
+
+
+
+
+
+
+
+
+
+
+
+//gameLoop()
+
+
+
+
+
+</script>
+
+
+</body>
+</html>

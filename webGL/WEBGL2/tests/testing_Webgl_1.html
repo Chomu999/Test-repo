@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>webgl engine test 1</title>
+
+<meta name="author" content="BByte">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+
+
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+
+html{
+font-size:10px;
+}
+
+
+body{
+width:100%; height:100%;
+}
+
+
+main{
+width:100%; height:100%;
+background:#3E3E3E;
+display:grid;
+place-items:center;
+}
+
+.refresh{
+margin:2rem;
+font-size:5rem;
+color:red;
+background:blue;
+text-align:center;
+}
+canvas{
+background:#000;
+}
+
+.resources{
+display:none;
+}
+
+</style>
+
+<script src="/storage/emulated/0/g_js_libs/gl-matrix.js"></script>
+
+</head>
+<body>
+
+<main id="main">
+
+<div class="container">
+
+<canvas id="canvas" tabindex="0"></canvas>
+<!-- <div id="refresh" class="refresh">refresh</div> -->
+
+</div>
+
+<div class="resources">
+<img src="/storage/emulated/0/Download/Zelda2.png" alt="Zelda" id="img1" />
+<img src="/storage/emulated/0/Download/images (8).jpeg" alt="link" id="img2" />
+</div>
+
+
+</main>
+
+  
+
+
+<script>
+
+const canvas=document.getElementById("canvas")
+const gl=canvas.getContext("webgl2")
+
+const ReSizeGL=gl=>{
+//const cs = innerWidth>innerHeight?innerHeight:innerWidth
+gl.canvas.width=innerWidth
+gl.canvas.height=innerHeight
+}
+
+
+const randFloat=(min=0,max=1) => Math.random() * (max-min) + min
+const randInt=(min=1,max=10) => Math.floor(randFloat(max,min))
+
+
+
+class Program{
+constructor(vss, fss){
+this.ID=Program.MakeProgram(vss, fss)
+}
+
+Bind(){
+gl.useProgram(this.ID)
+}
+Unbind(){
+gl.useProgram(null)
+}
+Delete(){
+gl.deleteProgram(this.ID)
+}
+
+GetLocation(type, name){
+let out
+let LType=type.toUpperCase()
+
+if(LType=="ATTRIBUTE" || LType=="A") out=gl.getAttribLocation(this.ID, name)
+
+if(LType=="UNIFORM" || LType=="U") out=gl.getUniformLocation(this.ID, name)
+
+if(out==-1) console.log(`not found  maybe u type location ${LType} or wrong name : ${name}`)
+
+return out
+}
+
+static MakeShader(type, source){
+const msg=type==gl.VERTEX_SHADER?"vertex":"fragment"
+const ID=gl.createShader(type)
+gl.shaderSource(ID,source)
+gl.compileShader(ID)
+if(!gl.getShaderParameter(ID, gl.COMPILE_STATUS)){
+console.log(`${msg} error : ${gl.getShaderInfoLog(ID)} `)
+console.log(`${msg}  source : ${gl.getShaderSource(ID)} `)
+
+return -1
+}
+return ID
+}
+
+static MakeProgram(vsSource, fsSource){
+const vs=Program.MakeShader(gl.VERTEX_SHADER, vsSource)
+const fs=Program.MakeShader(gl.FRAGMENT_SHADER, fsSource)
+
+
+
+const ID=gl.createProgram()
+gl.attachShader(ID, vs)
+gl.attachShader(ID, fs)
+gl.linkProgram(ID)
+if(!gl.getProgramParameter(ID, gl.LINK_STATUS)){
+console.log("link error", gl.getProgramInfoLog(ID))
+}
+gl.useProgram(ID)
+gl.validateProgram(ID)
+if(!gl.getProgramParameter(ID, gl.VALIDATE_STATUS)){
+console.log("validate error", gl.getProgramInfoLog(ID))
+}
+
+gl.deleteShader(vs)
+gl.deleteShader(fs)
+return ID
+}
+}
+
+class Texture{
+constructor(imgData,slot,location){
+this.slot=slot
+this.location=location
+this.tex=gl.createTexture()
+gl.activeTexture(gl.TEXTURE0+this.slot)
+gl.bindTexture(gl.TEXTURE_2D, this.tex)
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1)
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+gl.uniform1i(this.location, this.slot)
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, imgData)
+gl.generateMipmap(gl.TEXTURE_2D)
+}
+
+Bind(){
+gl.activeTexture(gl.TEXTURE0+this.slot)
+gl.bindTexture(gl.TEXTURE_2D, this.tex)
+}
+Unbind(){
+gl.bindTexture(gl.TEXTURE_2D, null)
+}
+Delete(){
+gl.deleteTexture( this.tex)
+}
+
+}
+
+class VA{
+constructor(){
+this.ID=gl.createVertexArray()
+}
+
+Bind(){
+gl.bindVertexArray(this.ID)
+}
+Unbind(){
+gl.bindVertexArray(null)
+}
+Delete(){
+gl.deleteVertexArray(this.ID)
+}
+
+linkAttrib(vbo, layout, nomComponets, stride, offset){
+if(vbo)vbo.Bind()
+gl.vertexAttribPointer(layout, nomComponets, gl.FLOAT, gl.FALSE, stride, offset)
+gl.enableVertexAttribArray(layout)
+}
+
+}
+
+class VB{
+constructor(vertices){
+this.ID=gl.createBuffer()
+gl.bindBuffer(gl.ARRAY_BUFFER, this.ID)
+gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW)
+}
+
+Bind(){
+gl.bindBuffer(gl.ARRAY_BUFFER, this.ID)
+}
+Unbind(){
+gl.bindBuffer(gl.ARRAY_BUFFER, null)
+}
+Delete(){
+gl.deleteBuffer(this.ID)
+}
+
+}
+
+class EB{
+constructor(indices){
+this.ID=gl.createBuffer()
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ID)
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW)
+}
+
+Bind(){
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ID)
+}
+Unbind(){
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null)
+}
+Delete(){
+gl.deleteBuffer(this.ID)
+}
+
+}
+
+
+
+class Camera {
+constructor (Aspect, Position) {
+this.Position=Position ?? [0, 0, 0]
+this.Orientation=[0, 0, -1]
+this.Up=[0, 1, 0]
+this.Aspect=Aspect
+
+this.Speed=0.1
+this.Sensitivity=100.0
+
+}
+
+Matrix(FOV, Near, Far, ULoc){
+
+const viewM=mat4.create()
+const projM=mat4.create()
+
+mat4.lookAt(viewM, this.Position, vec3.add([], this.Position, this.Orientation), this.Up)
+
+mat4.perspective(projM, glMatrix.toRadian(FOV), this.Aspect, Near, Far)
+
+gl.uniformMatrix4fv(ULoc, gl.FALSE, mat4.mul([], projM, viewM))
+
+}
+
+Input(_input){
+if(!_input.keys) return
+
+if(_input.keys.w){
+this.Position[0] += this.Speed * this.Orientation[0]
+this.Position[1] += this.Speed * this.Orientation[1]
+this.Position[2] += this.Speed * this.Orientation[2]
+}
+
+if(_input.keys.a){
+const idk=vec3.add([], this.Position, vec3.normalize([], vec3.cross([], this.Orientation, this.Up)))
+this.Position[0] += this.Speed * -idk[0]
+this.Position[1] += this.Speed * -idk[1]
+this.Position[2] += this.Speed * -idk[2]
+}
+
+
+if(_input.keys.s){
+this.Position[0] += this.Speed * -this.Orientation[0]
+this.Position[1] += this.Speed * -this.Orientation[1]
+this.Position[2] += this.Speed * -this.Orientation[2]
+}
+
+if(_input.keys.d){
+const idk=vec3.add([], this.Position, vec3.normalize([], vec3.cross([], this.Orientation, this.Up)))
+
+this.Position[0] += this.Speed * idk[0]
+this.Position[1] += this.Speed * idk[1]
+this.Position[2] += this.Speed * idk[2]
+}
+
+if(_input.keys.Control){
+this.Position[0] += this.Speed * -this.Up[0]
+this.Position[1] += this.Speed * -this.Up[1]
+this.Position[2] += this.Speed * -this.Up[2]
+}
+
+if(_input.keys.Shift){
+this.Position[0] += this.Speed * this.Up[0]
+this.Position[1] += this.Speed * this.Up[1]
+this.Position[2] += this.Speed * this.Up[2]
+}
+
+
+}
+
+}
+
+
+class Renderer{
+
+}
+
+
+
+const APP=(gl)=>{
+
+const {width, height}=gl.canvas
+
+const MyMouseCoord={x:0, y:0}
+const MyKeyInput={w:0, a:0, d:0, s:0}
+const Inputs={
+ keys:{w:0, a:0, d:0, s:0},
+ mouse:{x:0, y:0}
+}
+
+gl.viewport(0,0, width, height)
+
+const vertexShaderSource=`#version 300 es
+precision mediump float;
+
+in vec4 aPos;
+in vec4 aColor;
+in vec2 aTexCoord;
+
+uniform mat4 uCamMatrix;
+
+out vec2 vTexCoord;
+out vec4 vColor;
+
+void main(){
+gl_Position= uCamMatrix * aPos;
+vColor=aColor;
+vTexCoord= aTexCoord;
+}
+`
+
+const fragmentShaderSource=`#version 300 es
+precision mediump float;
+out vec4 FragColor;
+
+uniform sampler2D uTex1;
+uniform sampler2D uTex2;
+
+in vec2 vTexCoord;
+in vec4 vColor;
+
+void main(){
+FragColor= mix(texture(uTex1, vTexCoord), texture(uTex2, vTexCoord), 0.5) * vColor;
+//FragColor= texture(uTex1, vTexCoord) * texture(uTex2, vTexCoord) * vColor;
+}
+
+`
+
+
+// creatin 3d verties
+let vertices=new Float32Array([
+//      Crood          color         s   t
+
+// top
+  1.0,  1.0, -1.0,  0.5, 0.5, 0.0,   0,  1,
+ -1.0,  1.0, -1.0,  0.5, 0.5, 0.0,   1,  1,
+ -1.0,  1.0,  1.0,  0.5, 0.5, 0.0,   1,  0,
+  1.0,  1.0,  1.0,  0.5, 0.5, 0.0,   0,  0,
+
+// left
+ -1.0, -1.0,  1.0,  1.0, 0.0, 0.5,   0,  1,
+ -1.0,  1.0, -1.0,  1.0, 0.0, 0.5,   1,  0,
+ -1.0,  1.0,  1.0,  1.0, 0.0, 0.5,   0,  0,
+ -1.0, -1.0, -1.0,  1.0, 0.0, 0.5,   1,  1,
+
+// right
+  1.0, -1.0,  1.0,  1.0, 0.0, 0.5,   0,  1,
+  1.0,  1.0, -1.0,  1.0, 0.0, 0.5,   1,  0,
+  1.0,  1.0,  1.0,  1.0, 0.0, 0.5,   0,  0,
+  1.0, -1.0, -1.0,  1.0, 0.0, 0.5,   1,  1,
+
+// bottom
+  1.0, -1.0, -1.0,  0.5, 0.5, 0.0,   0,  1,
+ -1.0, -1.0, -1.0,  0.5, 0.5, 0.0,   1,  1,
+ -1.0, -1.0,  1.0,  0.5, 0.5, 0.0,   1,  0,
+  1.0, -1.0,  1.0,  0.5, 0.5, 0.0,   0,  0,
+
+// font
+  1.0, -1.0,  1.0,  0.0, 0.5, 1.0,   0,  1,
+ -1.0, -1.0,  1.0,  0.0, 0.5, 1.0,   1,  1,
+ -1.0,  1.0,  1.0,  0.0, 0.5, 1.0,   1,  0,
+  1.0,  1.0,  1.0,  0.0, 0.5, 1.0,   0,  0,
+
+// back
+  1.0, -1.0, -1.0,  0.0, 0.5, 1.0,   0,  1,
+ -1.0, -1.0, -1.0,  0.0, 0.5, 1.0,   1,  1,
+ -1.0,  1.0, -1.0,  0.0, 0.5, 1.0,   1,  0,
+  1.0,  1.0, -1.0,  0.0, 0.5, 1.0,   0,  0,
+
+
+]);
+
+
+
+let indices=new Uint8Array([
+
+// top //
+0,1,2,
+2,0,3,
+
+// left //
+4,5,6,
+5,4,7,
+
+// right //
+8,9,10,
+9,8,11,
+
+// bottom //
+12,13,14,
+12,14,15,
+
+// font //
+16,17,18,
+18,16,19,
+
+// back //
+20,21,22,
+22,20,23,
+
+]);
+
+
+const shaderProg=new Program(vertexShaderSource, fragmentShaderSource)
+
+
+
+const aPosLoc=shaderProg.GetLocation("a", "aPos")
+const aColorLoc=shaderProg.GetLocation("a", "aColor")
+const aTexCoordLoc=shaderProg.GetLocation("a", "aTexCoord")
+
+const uTex1Loc=shaderProg.GetLocation("u", "uTex1")
+const uTex2Loc=shaderProg.GetLocation("u", "uTex2")
+const uCamMatrixLoc=shaderProg.GetLocation("u", "uCamMatrix")
+
+
+const texture1=new Texture(img1, 0, uTex1Loc)
+const texture2=new Texture(img2, 1, uTex2Loc)
+
+const vao=new VA()
+vao.Bind()
+
+const vbo=new VB(vertices)
+
+
+vao.linkAttrib(vbo, aPosLoc, 3, 8*4, 0)
+vao.linkAttrib(0, aColorLoc, 3, 8*4, 3*4)
+vao.linkAttrib(0, aTexCoordLoc, 2, 8*4, 6*4)
+
+
+
+const ebo=new EB(indices)
+
+
+
+//const modelValue=mat4.create()
+
+
+vbo.Unbind()
+vao.Unbind()
+ebo.Unbind()
+texture1.Unbind()
+texture2.Unbind()
+shaderProg.Unbind()
+
+
+
+gl.enable(gl.DEPTH_TEST)
+
+const camera=new Camera(width/height, [-0.5, 0.21, 5])
+
+setInterval(()=>{
+gl.clearColor(0.2, 0.2, 0.3, 1.0)
+gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+shaderProg.Bind()
+
+texture1.Bind()
+texture2.Bind()
+
+
+vao.Bind()
+//mat4.rotate(modelValue, modelValue, Math.PI/180, [1, 1, 1])
+//mat4.translate(modelValue, modelValue, [randFloat(-10, 10), randFloat(-10, 10), randFloat(-10, -20)])
+//gl.uniformMatrix4fv(uModelLoc, gl.FALSE, modelValue)
+//gl.uniformMatrix4fv(uViewLoc, gl.FALSE, viewValue)
+//gl.uniformMatrix4fv(uProjLoc, gl.FALSE, projValue)
+
+camera.Matrix(45, 0.1, 100, uCamMatrixLoc)
+camera.Input(Inputs)
+
+gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_BYTE, 0)
+
+
+
+}, 1000/30)
+
+
+
+
+
+
+
+
+
+
+
+document.addEventListener("keydown", (e)=>{
+if(["p", "a", "s", "d", "w", "Shift", "Control"].indexOf(e.key)) MyKeyInput[e.key]=1
+
+else if([" "].indexOf(e.key)) MyKeyInput["Space"]=1
+Inputs["keys"]=MyKeyInput
+})
+
+document.addEventListener("keyup", (e)=>{
+if(["p" ,"w", "a", "s", "d", "Shift", "Control"].indexOf(e.key)) MyKeyInput[e.key]=0
+else if(" ".indexOf(e.key)) MyKeyInput["Space"]=0
+Inputs["keys"]=MyKeyInput
+})
+
+
+
+
+document.addEventListener("mousedown", (e)=>{
+MyMouseCoord.x=e.x
+MyMouseCoord.y=e.y
+Inputs["mouse"]=MyMouseCoord
+})
+
+document.addEventListener("mousemove", (e)=>{
+MyMouseCoord.x=e.x
+MyMouseCoord.y=e.y
+Inputs["mouse"]=MyMouseCoord
+})
+
+document.addEventListener("mouseup", (e)=>{
+MyMouseCoord.x=e.x
+MyMouseCoord.y=e.y
+Inputs["mouse"]=MyMouseCoord
+})
+
+
+document.addEventListener("dblclick", (e)=>{
+console.log(Inputs)
+})
+
+
+}
+
+
+
+
+
+
+
+
+
+const INITIALZE=()=>{
+ReSizeGL(gl)
+console.log(gl)
+APP(gl)
+}
+
+
+window.addEventListener("load", () => INITIALZE() )
+
+
+
+
+window.addEventListener("resize", ()=>{
+ReSizeGL(gl)
+})
+
+
+//normalize
+//cross
+//mul
+
+
+</script>
+
+</body>
+</html>

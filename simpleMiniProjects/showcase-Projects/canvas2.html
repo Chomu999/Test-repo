@@ -1,0 +1,381 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>HTML CANVAS GAME BOI</title>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+div#mainBox{
+margin:0;padding:0;
+width:100vw;height:100rem;
+background-color:#0D0C1E;
+
+}
+
+canvas{
+margin:0;padding:0;position:fixed;
+top:0;left:16.51px;
+}
+
+
+div#mainBox div#btnBox{
+margin:0;padding:0;position:fixed;
+background-color:#FF7049;
+width:330px;height:330px;
+top:360px;left:16.51px;
+display:grid;
+grid-template-columns: repeat(3, 1fr);
+grid-template-rows: repeat(3, 1fr);
+grid-gap:2px;
+opacity:70%;
+overflow:hidden;
+}
+
+
+.btn2{
+grid-column:2/3;
+grid-row:1/2;
+}
+
+.btn4{
+grid-column:1/2;
+grid-row:2/3;
+}
+
+.btn6{
+grid-column:3/4;
+grid-row:2/3;
+}
+
+
+.btn8{
+grid-column:2/3;
+grid-row:3/4;
+}
+
+
+
+.btns{
+display:grid;
+
+grid-template-columns:1fr 9fr 1fr;
+grid-template-rows:1fr 9fr 1fr;
+background-color:rgba(0,0,0,0.06);
+border-radius:50%;
+/* background-color:transparent; */
+}
+
+.btns{
+box-shadow:0 0 4px inset black;
+}
+.btns div{
+grid-column:2/3;
+grid-row:2/3;
+border-radius:50%;
+box-shadow:0 1px 4px inset #C8CAC6;
+}
+
+div.btns:active div.btns div{
+border-radius:50%;
+box-shadow:0 1px 4px inset rgba(0,0,0,0.24);
+}
+
+
+
+.btns:active{
+background-color:rgba(0,0,0,0.24);
+grid-template-columns:2fr 9fr 2fr;
+grid-template-rows:2fr 9fr 2fr;
+}
+</style>
+</head>
+<body>
+<div id="mainBox">
+<canvas></canvas>
+
+<div id="btnBox">
+
+<div class="btns btn2"><div></div></div>
+
+<div class="btns btn4"><div></div></div>
+<div class="btns btn6"><div></div></div>
+
+<div class="btns btn8"><div></div></div>
+
+
+</div>
+</div>
+<script>
+
+let cvs=document.querySelector('canvas');
+let ctx=cvs.getContext('2d');
+let screenSize=300;
+let mainW=360;
+//=innerWidth;
+let mainH=innerHeight;
+let hue=0;
+let sorce=0,plySize=4
+let touch=['touchstart','touchmove','touchend']
+let isPlayerMove=false;
+let playerSpeed=3;
+cvs.width=mainW;
+cvs.height=mainW;
+
+let btn2=document.querySelector('.btn2'),
+btn4=document.querySelector('.btn4'),
+btn6=document.querySelector('.btn6'),
+btn8=document.querySelector('.btn8');
+
+let msg='';
+
+
+let player={
+img:undefined,
+Move:false,
+Width:60,
+Height:60,
+frameX:8,
+frameY:4,
+X:0,
+Y:0,
+Speed:3
+};
+
+player.img=new Image()
+player.img.src='./img/character.png';
+
+
+
+DrawSpite(player.img,player.Width * player.frameX,player.Height * player.frameY,player.Width,player.Height,player.X,player.Y,player.Width,player.Height)
+
+//console.log(fullImage);
+
+function r(min,max){
+return Math.floor(Math.random() * (max-min) + min)
+}
+
+
+function texts(text,x=90,y=78){
+ctx.fillStyle='#919191';
+ctx.fillText(`${text}`,x,y);
+}
+
+function ISButtonEvent(traget,condion,fun){
+traget.addEventListener(condion,fun);
+}
+
+
+function IScollision(ObjectA,ObjectB){
+return (ObjectA.x + ObjectA.width >= ObjectB.x &&
+ObjectA.x <= ObjectB.x + ObjectB.width &&
+ObjectA.y + ObjectA.height >= ObjectB.y &&
+ObjectA.y <= ObjectB.y + ObjectB.height)
+}
+
+
+
+function DrawSpite(img,sX,sY,sW,sH,dX,dY,dW,dH){
+ctx.drawImage(img,sX,sY,sW,sH,dX,dY,dW,dH)
+}
+
+
+
+class Box{
+constructor(x,y,color,width,height){
+this.x=x;
+this.y=y;
+this.width=width;
+this.height=height;
+this.color=color;
+this.speed={x: 0, y: 0};
+}
+draw(){
+ctx.beginPath()
+ctx.fillStyle=this.color;
+ctx.fillRect(this.x,this.y,this.width,this.height);
+ctx.closePath();
+}
+update(){
+this.draw();
+this.x += this.speed.x;
+this.y += this.speed.y;
+}
+}
+
+
+
+
+let boxBs=[]
+let hero=new Box(10,100,'#87FFEF',4,4);
+
+
+function spawnEnemies(){
+let r1,r2,c=1;
+for(let i=0;i<9;i++){
+r1=r(64,cvs.width-64*2);
+r2=r(64,cvs.height-64*2);
+c*=16
+boxBs.push(new Box(r1,r2,`hsl(${c},100%,50%,1)`,r(4,64),r(4,64)));
+}}
+//spawnEnemis();
+
+let mouse={X:undefined,Y:undefined};
+
+
+//ctx.stoke()
+
+cvs.addEventListener('click', (e)=>{
+mouse.X = e.offsetX;
+mouse.Y = e.offsetY;
+})
+
+
+
+ISButtonEvent(btn2,touch[0],plySU)
+ISButtonEvent(btn4,touch[0],plySL)
+ISButtonEvent(btn6,touch[0],plySR)
+ISButtonEvent(btn8,touch[0],plySD)
+
+
+
+ISButtonEvent(btn2,touch[2],plyEU)
+ISButtonEvent(btn4,touch[2],plyEL)
+ISButtonEvent(btn6,touch[2],plyER)
+ISButtonEvent(btn8,touch[2],plyED)
+
+
+
+function plySR(){
+isPlayerMove = true;
+if (isPlayerMove == true){
+hero.speed.x += playerSpeed;
+}
+}
+
+
+function plySL(){
+isPlayerMove = true;
+if (isPlayerMove == true){
+hero.speed.x -= playerSpeed;
+}
+}
+
+
+function plySD(){
+isPlayerMove = true;
+if (isPlayerMove == true){
+hero.speed.y += playerSpeed;
+}
+}
+
+
+function plySU(){
+isPlayerMove = true;
+if (isPlayerMove == true){
+hero.speed.y -= playerSpeed;
+}
+}
+
+
+function plyEU(){
+isPlayerMove = true;
+if (isPlayerMove == true){
+hero.speed.y = 0;
+isPlayerMove=false
+}
+}
+
+function plyED(){
+isPlayerMove = true;
+if (isPlayerMove == true){
+hero.speed.y = 0;
+isPlayerMove=false
+}
+}
+
+function plyEL(){
+isPlayerMove = true;
+if (isPlayerMove == true){
+hero.speed.x = 0;
+isPlayerMove=false
+}
+}
+
+function plyER(){
+isPlayerMove = true;
+if (isPlayerMove == true){
+hero.speed.x = 0;
+isPlayerMove=false
+}
+}
+
+setInterval(spawnEnemies,2000)
+
+function gameLoop(){
+requestAnimationFrame(gameLoop)
+ctx.clearRect(0,0,cvs.width,cvs.height)
+texts(`SORCE : ${sorce}`,20,40)
+
+
+hero.update()
+
+/*
+if(boxA.x + boxA.width >= ball.x &&
+boxA.x <= ball.x + ball.size &&
+boxA.y + boxA.height >= ball.y &&
+boxA.y <= ball.y + ball.size){
+texts('sbox uyfgh itfghj sbox')
+}
+*/
+
+
+
+
+
+/*if(IScollision(hero,boxB)){
+texts('hsfui uyfgh itfghj iyggh')
+spawnEnemis()
+}*/
+
+
+boxBs.forEach((sbox,index)=>{
+sbox.update()
+
+
+if(IScollision(hero,sbox)){
+sorce++
+boxBs.splice(index, 1)
+}})
+
+
+
+
+
+
+
+
+/*ctx.drawImage(player.img,
+*60,0,
+60,60,
+170,20,
+120,120)*/
+
+//DrawSpite(Img.player,)
+
+
+
+}gameLoop()
+
+
+console.log()
+
+
+</script>
+</html>

@@ -1,0 +1,249 @@
+<html lang="en">
+<head>
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=10, user-scalable=no">
+
+
+<style>
+
+*:after,*,*:before{
+
+margin:0;
+padding:0;
+box-sizing:border-box;
+
+}
+
+html{
+font-size: 10px;
+}
+
+
+
+.wrapper{
+width: min(33rem, 100% - 4rem);
+margin-inline: auto;
+}
+
+
+
+.wrapper.canvas{
+--size:min(100vh, 100vw - 4rem);
+width:var(--size);
+height:var(--size);
+background: chocolate;
+}
+
+#control_box{
+padding: 1rem 2rem;
+background: #373C32;
+height: 22rem;
+}
+
+.x_dir{
+background: #BCF1FF;
+box-shadow: 2px 2px red;
+}
+
+.y_dir{
+
+background: #535353;
+box-shadow: 2px 2px #A5AAB0;
+}
+
+
+.btns{
+margin: 2rem;
+padding: 2rem;
+display: inline-block;
+background: red;
+color: blue;
+font-size: 2rem;
+}
+
+
+</style>
+
+<title>simple parallax background test app</title>
+
+</head>
+
+<body>
+
+<div class="wrapper canvas">
+
+<canvas id="canvas"></canvas>
+</div>
+
+
+<div id="control_box" class="wrapper">
+	
+<div class="x_dir wrapper">
+
+<div ontouchmove="moves.x-=moves.speed" class="btns left">left</div>
+<div ontouchmove="moves.x+=moves.speed" class="btns right">right</div>
+</div>
+
+<div class="y_dir wrapper">
+
+<div ontouchmove="moves.y-=moves.speed" class="btns up">up</div>
+<div ontouchmove="moves.y+=moves.speed" class="btns down">down</div>
+</div>
+
+</div>
+
+
+<script>
+const canvas_container = document.querySelector("div.wrapper.canvas")
+
+const canvas = document.getElementById("canvas")
+const ctx =canvas.getContext("2d")
+
+
+//console.log(canvas_container)
+
+class Rand{
+static Float(min=1,max=2){
+return Math.random() * (max-min+1) + min;
+}
+static Int(min=10,max=30){
+return Math.floor(Rand.Float(min, max))
+}
+static Choice(...args){
+return args[Rand.Int(0,args.length - 1)];
+}
+
+}
+
+let info= canvas_container.getBoundingClientRect()
+let info2 = canvas_container.getClientRects()
+
+//console.log(canvas.attributes)
+canvas.height = info.height;
+canvas.width = info.width;
+
+
+
+
+const moves={
+x:2,
+y:-2,
+speed:1.4+Math.cos(2*Math.PI),
+}
+
+const draw_box=(c, x, y, w, h)=>{
+c.fillStyle = "red";
+c.fillRect(x, y, w, h);
+
+c.strokeStyle = "blue";
+c.strokeRect(x, y, w, h);
+}
+
+const update_box=(box)=>{
+
+}
+
+
+const app=(ctx)=>{
+
+
+let s_x =0, s_y = 0;
+const b={
+//x: () => Rand.Int(0,ctx.canvas.width),
+x:ctx.canvas.width*0.5,
+y:ctx.canvas.height*0.5,
+
+
+width:20, height:50
+}
+
+
+let boxs=[]
+
+let pos_x = 150, pos_y = 220;
+let width = 20, height = 40;
+
+//gap offset of piller's
+let offset={
+x:20, y:20
+}
+
+
+const animate=(dt)=>{
+ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+//console.log(dt)
+
+
+
+
+for(let i=0;i<3;i++){
+for(let j=0;j<3;j++){
+
+draw_box(ctx,
+
+moves.x*i +(width*j) + pos_x,moves.y*i + (height*j) + pos_y,
+width - i, height - j
+
+)
+
+}
+}
+
+
+//for(let i=0;i<=4;i+=1){
+
+//draw_box(ctx,
+
+//(i *moves.x + offset.x*i) + pos_x,
+//(moves.y * i) + pos_y,
+
+//width  * i, height * i);
+//}
+
+
+
+
+
+}
+
+
+
+
+
+const mainLoop=(ts=0)=>{
+let dt = 0.55 * ts ?? 0.1;
+animate(dt)
+window?.requestAnimationFrame(mainLoop)
+}
+mainLoop()
+
+
+
+
+
+
+
+document.addEventListener("keydown",(e)=>{
+
+})
+
+
+}
+
+
+
+
+
+try{
+app(ctx)
+}catch(e){
+console.log(e)
+}
+
+
+</script>
+</body>
+</html>

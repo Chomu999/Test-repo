@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+<title>border</title>
+<style>
+body{
+margin:0;
+width:100vw; height: 100vh;
+}
+
+main{
+width:100%; height:100%;
+background:#380032;
+display:grid;
+place-items:center;
+}
+
+div.boxContainer{
+width:80%; height:calc(50%);
+background: #FF00DB;
+overflow-y:scroll;
+
+}
+
+div.boxs {
+margin:5rem auto;
+width: 200px;
+height: 200px;
+background: #0003;
+}
+
+div.box1 {
+border:6px solid #fff;
+}
+
+div.box2 {
+border:6px dotted #000;
+}
+
+div.box3 {
+border:6px dashed green;
+}
+
+div.box4 {
+border:6px solid red;
+}
+
+div.box5 {
+border-bottom:6px solid tan;
+}
+
+div.box6 {
+border-left:6px solid tan;
+}
+
+div.box7 {
+border-right:6px solid tan;
+}
+
+div.box8 {
+border-top:6px solid tan;
+}
+
+div.box9 {
+border:6px solid black;
+border-radius:50%;
+}
+
+div.box10 {
+border:6px solid black;
+border-radius:50px 100px;
+}
+
+div.box11{
+border:6px solid black;
+border-radius:45px 10px 15px 45px;
+}
+
+div.box12{
+border:6px solid black;
+border-radius:50px 0 0 0;
+}
+
+div.box13{
+border:6px solid black;
+border-radius:0 50px 0 0;
+}
+
+div.box14{
+border:6px solid black;
+border-radius:0 0 50px 0;
+}
+
+div.box15{
+border:6px solid black;
+border-radius:0 0 0 50px;
+}
+
+
+div.box16{
+border:6px solid black;
+border-radius:0 50px 0 50px;
+}
+
+
+
+</style>
+</head>
+<body>
+<main>
+
+<div class="boxContainer">
+
+	<div class="boxs box1"></div>
+	<div class="boxs box2"></div>
+	<div class="boxs box3"></div>
+	<div class="boxs box4"></div>
+	<div class="boxs box5"></div>
+	<div class="boxs box6"></div>
+	<div class="boxs box7"></div>
+
+	<div class="boxs box8"></div>
+
+	<div class="boxs box9"></div>
+	<div class="boxs box10"></div>
+	<div class="boxs box11"></div>
+	<div class="boxs box12"></div>
+
+	<div class="boxs box13"></div>
+	<div class="boxs box14"></div>
+	<div class="boxs box15"></div>
+
+	<div class="boxs box16"></div>
+
+</div>
+</main>
+
+</body>
+</html>

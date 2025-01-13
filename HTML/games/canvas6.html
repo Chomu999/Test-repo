@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=1.0 user-scalable=0">
+
+<title>HTML CANVAS GAME BOI</title>
+
+<meta name="author" content="Biswsjit Bhowmick" />
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+.p1{
+
+position:absolute;
+top:50%;left:50%;
+transform: translate(-50%,-50%);
+font-size:50px;
+}
+.p1::after{
+
+content:'is awesome';
+position:absolute;
+top:100%;left:50%;
+transform: translate(-50%,-50%);
+font-size:16px;
+}
+</style>
+</head>
+<body>
+
+<canvas></canvas>
+
+<p class="p1">JavaScript</p>
+<script>
+
+let cvs=document.querySelector('canvas');
+let p1=document.querySelector('.p1');
+let tileInfo = p1.getBouningClientRect;
+
+
+let ctx=cvs.getContext('2d');
+cvs.width=window.innerWidth;
+cvs.height=window.innerHeight;
+let hue=0;
+
+let text = document.querySelector('.p1').getBoundingClientRect()
+
+boxDetails={
+x:text.x,
+y:text.y,
+width:text.width,
+height:text.height,
+}
+let textColor='#fff';
+
+let frection=0.69,gravity=2;
+
+let touch=['touchstart','touchmove','touchend']
+
+;
+
+
+function randint(min,max){
+return Math.floor(Math.random() * (max-min) + min)
+}
+
+
+
+function IScollision(ObjectA,ObjectB){
+return (ObjectA.x + ObjectA.width >= ObjectB.x &&
+ObjectA.x <= ObjectB.x + ObjectB.width &&
+ObjectA.y + ObjectA.height >= ObjectB.y &&
+ObjectA.y <= ObjectB.y + ObjectB.height)
+}
+
+
+
+
+
+
+
+
+class Box{
+constructor(x,y,color){
+
+this.x=x
+this.y=y
+//this.weight=3
+//randint(-4,4)
+this.color=color
+this.speed={x:randint(-3,3),y:randint(-1,-5)}
+this.size=randint(4,30)
+}
+draw(){
+ctx.fillStyle=this.color
+ctx.beginPath()
+ctx.arc(this.x,this.y,this.size,0,Math.PI * 2)
+ctx.fill()
+ctx.closePath()
+}
+update(){
+
+this.draw()
+
+
+this.y += this.speed.y;
+this.x += this.speed.x;
+
+
+
+if(this.y + this.size <= cvs.height){
+
+this.speed.y += 0.09;
+
+}
+//else this.speed.y = 0;
+
+if(this.y + this.size >= cvs.height + this.size){
+
+
+this.y = 0 - this.size;
+this.speed.y=0;
+
+this.speed.x = randint(-3,3);
+this.x = randint(0 + (this.size*2),cvs.width - this.size);
+}
+
+
+
+
+//this.weight += 0.3;
+//this.speed.y = this.weight;
+
+
+
+
+
+}
+
+
+}
+
+
+
+let boxs=[]
+function swapn(){
+for(let i=0;i<23;i++){
+//hue+= 2*8
+let x=randint(0,cvs.width -32);
+let y=randint(0,-32);
+boxs.push(new Box(x,y,
+`hsl(${randint(0,5000)},100%,50%,1)`))
+}
+}
+
+swapn()
+
+
+
+//let x=randint(0,cvs.width -32)
+//let y=randint(0,cvs.height -32)
+//let box=new Box(x,y)
+
+
+function gameLoop(){
+
+window.requestAnimationFrame(gameLoop);
+ctx.fillStyle='rgba(255,255,255,0.05)';
+//ctx.fillStyle='blue'
+ctx.fillRect(0,0,cvs.width,cvs.height);
+
+
+//box.update()
+
+boxs.forEach((ball)=>{
+ball.update();
+});
+
+
+
+boxs.forEach((ball,i)=>{
+
+
+
+
+
+if(ball.x + ball.size >= boxDetails.x && ball.x <= boxDetails.x + boxDetails.width && ball.y + ball.size >= boxDetails.y && ball.y <= boxDetails.y + boxDetails.height){
+
+ball.speed.y = -ball.speed.y;
+ball.speed.x = randint(-3,3);
+textColor = ball.color;
+//ball.weight -= 5;
+//console.log('hit');
+}
+
+
+
+if(ball.y - ball.size >= cvs.height){
+//ball.y = 0 - ball.size;
+//ball.x = randint(0 + (ball.size*2),cvs.width - ball.size);
+//ball.speed.x = randint(-1,-6)
+}
+
+
+})
+
+
+
+
+
+ctx.beginPath();
+ctx.fillStyle=textColor;
+ctx.fillRect(boxDetails.x,boxDetails.y,boxDetails.width,boxDetails.height);
+ctx.closePath();
+
+
+
+
+//ctx.fillStyle='tan'
+
+//ctx.shadowColor='purple'
+//ctx.restore=20
+//ctx.rotate(9,8,7,9)
+//ctx.shadowOffsetX=2
+//ctx.shadowOffsetY=2
+//ctx.shadowBlur=9
+//ctx.fillRect(200,300,40,20)
+//ctx.closePath()
+
+}
+gameLoop()
+
+console.log(ctx)
+
+
+</script>
+</body>
+</html>

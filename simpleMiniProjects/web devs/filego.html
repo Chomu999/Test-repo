@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=10.0 user-scalable=no" />
+
+<title>file go</title>
+
+<style>
+
+*{
+margin:0; padding:0; box-sizing:border-box;
+border:0.1px solid #2F080E;
+}
+
+
+:root{
+
+--ParagraphTextColor:#434343;
+
+}
+
+
+
+
+html{
+font-size:10px;
+color-scheme: light;
+}
+
+ul{
+list-style: none;
+}
+
+a{
+text-decoration: none;
+}
+
+body{
+}
+
+main{
+width:100%; height:100%;
+background: #f0f0f0;
+/* overflow:hidden auto; */
+display: grid;
+place-items: center;
+}
+
+
+
+.dummy{
+width:80%; height:20rem;
+background: #FFFFFF;
+border-radius:1rem;
+overflow: hidden;
+}
+
+
+
+.dummy  ul{
+display: flex;
+gap:2rem;
+}
+
+.dummy  ul > li{
+width:8rem; height:8rem;
+background: #716581;
+}
+
+
+.dummy > .wraper{
+margin:3rem auto;
+width: 80%;
+/* display:flex;
+flex-direction: column; */
+}
+
+.dummy > .wraper > p{
+color: #C2C2C2;
+text-align: center;
+}
+
+.dummy > .wraper > h2 {
+text-align: center;
+}
+.dummy > .wraper > button{
+margin:2rem auto;
+padding:1rem 4rem;
+color: #0058FF;
+text-align: center;
+border: 0.4rem solid currentColor;
+border-radius: 50rem;
+}
+</style>
+
+</head>
+<body>
+
+
+<main>
+
+
+
+<section class="dummy">
+<ul>
+	<li></li>
+	<li></li>
+	<li></li>
+</ul>
+
+<div class="wraper">
+
+<p>96.69 MB, 136 fils</p>
+<h2>Delete blurry photo</h2>
+<button>select file -></button>
+
+</div>
+
+</section>
+
+
+
+
+</main>
+
+<script>
+
+
+
+
+
+const app=()=>{
+
+const NotDownloadVideoTemp=`
+
+
+<div class="notDownloadVideoContainer">
+
+
+<div class="videoThumbnail">
+<img src="./images/notDownload/videoThumbnail-1.png" alt="video poster" />
+</div>
+
+<div class="videoDetail">
+
+<p class="videoTitle">I Built a Real iPhone 15 Pro Max in Minecraft Hardcore</p>
+
+<p class="channelName">Sathxu</p>
+
+
+</div>
+
+<div class="videoDownloadBTN">&#x2193;</div>
+
+</div>
+
+
+
+`
+
+
+const DownloadVideoTemp=`
+
+<div class="downloadVideoContainer">
+
+
+<div class="videoThumbnail">
+<img src="./images/videoThumbnail-1.jpg" alt=" video poster" />
+</div>
+
+<div class="videoDetail">
+
+<p class="videoTitle">how this game render millions of blades grass</p>
+
+<div class="channelNameAndVideoIsDownload">
+<div class="videoIsDownload">&xi;</div>
+<p class="channelName">Stylized Statoin</p>
+</div>
+
+<p class="numOfView">3.4 lakh views * 7 months ago</p>
+
+</div>
+
+<div class="deleteVideo">
+&Xi;
+</div>
+
+</div>
+
+
+
+
+`
+
+const offlineVideoTemp=`
+
+<div class="offlineContainer">
+
+<div class="videoThumbnail">
+
+</div>
+
+<div class="videoDetail">
+
+<div class="channelIcon">
+<div class="img"></div>
+</div>
+
+<div class="videoTitle">
+
+<div class="titleTexts title1"></div>
+<div class="titleTexts title2"></div>
+<div class="titleTexts title3"></div>
+
+</div>
+
+</div>
+
+</div>
+`
+
+const rootElement=document.querySelector("main")
+
+
+for(let i=0;i<20;i++){
+rootElement.innerHTML += DownloadVideoTemp;
+}
+
+
+}
+
+//querySelector
+//querySelectorAll
+
+window.addEventListener("load", ()=>{
+
+console.log("JS is Awesome")
+//app()
+//alert("hello world")
+
+})
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "demoserver",
+  "version": "1.0.0",
+  "type":"module",
+  "scripts": {
+    "start": "node ./server/server.js",
+    "test": "node --watch test.js"
+  },
+  "keywords": ["serverside", "backend", "clienttoserver"],
+  "author": "biswajitbhowmickb@gmail.com",
+  "license": "ISC",
+  "description": ""
+}

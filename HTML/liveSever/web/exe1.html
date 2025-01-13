@@ -1,0 +1,267 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>HTML bis HOME</title>
+<!-- 
+<link rel="stylesheet" href="./style/web1.css" type="text/css" media="all"/>
+ -->
+ 
+ 
+ <style>
+ *{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+#screen{
+margin:0;
+padding:0;
+width:100vw;
+height:100vh;
+position:fixed;
+top:0;
+left:0;
+background:#330035;
+}
+
+.cvs{
+position:absolute;
+}
+
+#box{
+margin:0;
+padding:0;
+position:absolute;
+top:0;
+left:0;
+background:#2A0C44;
+display:grid;
+
+grid-template-columns:repeat(3, 1fr);
+grid-template-rows:repeat(, 1fr);
+grid-gap:2px;
+
+}
+
+
+/* 
+.b1{
+grid-column:1/2;
+grid-row:1/2;
+background-color:#00FFF6;
+}
+ */
+.b2{
+grid-column:2/3;
+grid-row:1/2;
+background-color:#BB00FF;
+}
+/* 
+.b3{
+grid-column:3/4;
+grid-row:1/2;
+background-color:#BB00FF;
+}
+ */
+.b4{
+grid-column:1/2;
+grid-row:2/3;
+background-color:#BB00FF;
+}
+/* 
+.b5{
+grid-column:2/3;
+grid-row:2/3;
+background-color:#BB00FF;
+}
+ */
+.b6{
+grid-column:3/4;
+grid-row:2/3;
+background-color:#BB00FF;
+}
+/* 
+.b7{
+grid-column:1/2;
+grid-row:3/4;
+background-color:#BB00FF;
+} */
+
+.b8{
+grid-column:2/3;
+grid-row:3/4;
+background-color:#BB00FF;
+}
+/* 
+.b9{
+grid-column:3/4;
+grid-row:3/4;
+background-color:#BB00FF;
+}
+ */
+
+
+
+
+
+button{
+background-color:red;
+color:blue;
+}
+
+ 
+ </style>
+</head>
+<body>
+
+
+<div id="screen">
+
+<canvas class="cvs"></canvas>
+
+
+<div id="box">
+
+<div class="b2"></div>
+
+<div class="b4"></div>
+<div class="b6"></div>
+
+<div class="b8"></div>
+
+</div>
+</div>
+
+
+<script>
+
+
+
+const body=document.body;
+
+let box=document.querySelector('#box');
+
+let cvs=document.querySelector('.cvs');
+let ctx = cvs.getContext('2d');
+let px='px';
+
+//const cvsW=390;
+//const cvsH=390;
+
+
+
+let mainW=window.innerWidth;
+let mainH=window.innerHeight;
+
+let cvsW=mainH/2;
+
+let posLeft= (mainW - cvsW)/2
+
+
+cvs.width=cvsW;
+cvs.height=cvsW;
+cvs.style.left=posLeft+px;
+cvs.style.top=0+px;
+
+
+box.style.width=cvsW;
+box.style.height=cvsW;
+box.style.left=posLeft+px;
+box.style.top=cvsW+px;
+
+
+
+//canvas setup
+
+ctx.fillStyle='yellow'
+ctx.fillRect(0,0,cvs.width,cvs.height)
+
+
+//player and enemy
+
+class Mario{
+constructor(x,y,c,w,h){
+this.x=x
+this.y=y
+this.c=c
+this.w=w
+this.h=h
+}
+draw(){
+ctx.fillStyle=this.c;
+ctx.fillRect(this.x,this.y,this.w,this.h)
+}
+
+update(){
+
+this.draw()
+
+
+}
+
+}
+
+
+
+
+
+let ply= new Mario(200,200,'red',30,30)
+
+
+
+
+
+
+
+
+
+
+
+
+
+function gameLoop(){
+window.requestAnimationFrame(gameLoop);
+
+//ctx.clearRect(0,0,cvs.width,cvs.height)
+
+
+ctx.fillStyle='yellow'
+ctx.fillRect(0,0,cvs.width,cvs.height)
+
+
+
+ply.update()
+
+}
+
+
+
+
+
+gameLoop()
+
+function randInt(min,max){
+return Math.ceil(Math.random() * (max-min + 1) + min)
+
+}
+
+let p;
+
+
+for(let i=0;i<=100;i++){
+
+console.log(randInt(5,10))
+}
+
+
+console.log(p)
+console.log(console)
+
+
+</script>
+</body>
+</html>

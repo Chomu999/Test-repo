@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=10.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+<style>
+
+*:before, *, *:after{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+html{
+font-size: 10px;
+}
+
+ul{
+list-style-type: none;
+}
+
+a{
+text-decoration: none;
+}
+
+.wrapper{
+margin:1rem auto;
+padding: 1rem;
+width: min(38rem, 100% - 2rem);
+background:#EEEEEE ;
+border-radius: 2rem;
+box-shadow:
+2rem 2rem 0.1rem 1rem #191919,
+2rem 2rem 0.1rem 2rem #C7C7C7 inset;
+}
+
+.appContainer{
+aspect-ratio: 1;
+display: grid;
+place-items: center;
+}
+
+.btnContainer{
+background: #0097FF;
+text-align: center;
+box-shadow: none;
+}
+
+.appContainer > .btnContainer > button{
+padding: 1rem;
+margin: 1rem;
+color: red;
+font-size: 2rem;
+font-weight: bold;
+background: tan;
+border: 1rem solid #fff;
+border-radius: 2rem;
+}
+
+</style>
+
+<title>simple react app</title>
+
+
+
+<script  src="/storage/emulated/0/g_js_libs/react.development18.2.0.js"></script>
+<script  src="/storage/emulated/0/g_js_libs/react-dom.development18.2.0.js"></script>
+<script  src="/storage/emulated/0/g_js_libs/babel2.min.js"></script>
+
+</head>
+<body>
+
+
+<div class="rootElement" id="react-app"></div>
+
+
+
+
+
+
+
+<script type="text/babel" data-presets="env,react">
+
+//
+const {useState} = React;
+
+
+
+const getCurrentTime = () => new Date().toDateString();
+
+
+const App =()=>{
+console.log("hi App Component")
+const maxCount = 10 + 1;
+const [count, setCount] = useState(0);
+
+
+const IncCount=()=>{
+setCount((count + 1) % maxCount);
+}
+
+const DecCount=()=>{
+setCount((count - 1 + maxCount) % maxCount);
+}
+
+return (
+<>
+
+<div className="wrapper appContainer">
+<h1>Simple React Counter App </h1>
+<h2>Count is : {count}</h2>
+<div className="wrapper btnContainer">
+<button onClick={IncCount}> Increment</button>
+<button onClick={DecCount}> Decrement</button>
+</div>
+</div>
+
+</>
+);
+
+}
+
+const root = ReactDOM.createRoot(document.getElementById("react-app"));
+
+root.render(
+<React.StrictMode>
+<App/>
+</React.StrictMode>
+);
+
+
+
+
+</script>
+
+
+
+
+
+
+
+</body>
+</html>

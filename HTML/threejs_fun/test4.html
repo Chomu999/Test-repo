@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<meta name="author" content="billbyte"/>
+
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+html{
+font-size:10px;
+}
+
+
+
+
+</style>
+
+
+
+
+<!-- <script src="/storage/emulated/0/g_js_libs/ammo.js"></script> -->
+<script src="/storage/emulated/0/g_js_libs/three.min.js"></script>
+<script src="/storage/emulated/0/g_js_libs/OrbitControls.js"></script>
+
+
+<title>threejs app testing </title>
+
+</head>
+<body>
+<main>
+
+<canvas data-gl="gl"></canvas>
+
+
+
+</main>
+
+
+
+
+<script>
+const global_url=`/storage/emulated/0/`;
+const directry_url=`Download/`;
+
+const file_url=["Zelda2.png/", "images (7).jpeg", "images (9).jpeg"];
+
+const myTextureLoader = new THREE.TextureLoader();
+myTextureLoader.path = global_url
+//console.log(myTextureLoader)
+
+let tex1 = myTextureLoader.load(directry_url+file_url[0]);
+let tex2 = myTextureLoader.load(directry_url+file_url[1]);
+let tex3 = myTextureLoader.load(directry_url+file_url[2]);
+
+//console.log(tex1)
+
+const My_shader1 ={
+vertex:`
+
+
+uniform float uTime;
+
+out vec2 vUv;
+
+void main(){
+
+
+vUv = uv;
+gl_Position = projectionMatrix * viewMatrix *  modelMatrix * vec4(position, 1.0);
+}
+`,
+
+fragment:`
+
+uniform float uTime;
+uniform sampler2D uTex1;
+
+in vec2 vUv;
+
+void main(){
+
+vec2 uv = gl_FragCoord.xy / vec2(390.0, 700.0) * 2.0 - 1.0;
+float angle = 0.2 * uTime;
+
+for(float i = 0.0; i < 80.0; i += 1.0){
+
+uv = abs(uv);
+
+uv -= 0.5;
+
+uv *= 1.02;
+
+uv *= mat2(
+sin(angle), -cos(angle),
+cos(angle), sin(angle)
+);
+
+}
+
+vec4 outC = vec4(vec3(length(uv.r)), 1.0);
+
+
+vec4 img1 = texture(uTex1, vUv);
+gl_FragColor = mix(img1, outC, 0.5);
+
+
+}
+`,
+
+}
+
+
+
+const My_uniform1={
+
+uTime: {
+type:"f",
+value: 999990.5,
+},
+
+uTex1: {
+type:"t",
+value: tex1
+},
+
+
+}
+
+
+
+
+
+
+/*
+MeshBasicMaterial: 
+MeshDepthMaterial: 
+MeshDistanceMaterial:
+MeshLambertMaterial: 
+MeshMatcapMaterial: 
+MeshNormalMaterial: 
+MeshPhongMaterial: 
+MeshPhysicalMaterial: 
+MeshStandardMaterial:
+MeshToonMaterial:
+*/
+
+</script>
+
+<script>
+
+
+
+
+
+const INIT=()=>{
+//const gui = new dat.gui.GUI();
+
+
+
+
+const renderer = new THREE.WebGLRenderer({
+    antialis :true,
+    canvas:document.querySelector('canvas'),
+});
+
+
+
+renderer.shadowMap.enabled= true;
+renderer.shadowMap.type= THREE.PCFSoftShadowMap;
+
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.setPixelRatio(window.devicePixelRatio);
+
+
+
+
+renderer.setSize(window.innerWidth, window.innerHeight);
+
+
+//renderer.setClearColor('#2C00FF');
+
+const fov=75;
+const aspect= window.innerWidth / window.innerHeight;
+const near=1.0;
+const far=10000.0;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+
+scene.background=new THREE.Color('#424242');
+//scene.fog=new THREE.FogExp2('#00187A', 1000, 20);
+
+camera.position.set(0, 0, 50)
+
+
+let control = new THREE.OrbitControls(camera, renderer.domElement)
+
+//control.enableDamping = true
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//const _mat =new THREE.MeshBasicMaterial()
+//
+
+const _mat2 =new THREE.MeshBasicMaterial({color:"#ff0000"})
+
+const _mat3 =new THREE.ShaderMaterial({
+vertexShader: My_shader1.vertex,
+fragmentShader: My_shader1.fragment,
+
+uniforms:My_uniform1,
+
+})
+
+
+const _geo1 =new THREE.BoxGeometry(10, 20, 10)
+
+const _mesh1 = new THREE.Mesh(_geo1, _mat3)
+
+_mesh1.position.z = -20
+
+
+
+
+scene.add(_mesh1)
+
+
+
+const animate=(dt)=>{
+
+//_mesh1.rotation.x += 0.005;
+//_mesh1.rotation.y += 0.005;
+//_mesh1.rotation.z += 0.005;
+
+
+
+_mesh1.material.uniforms.uTime.value = dt;
+//console.log(dt)
+}
+
+console.log(_mesh1)
+
+
+const update=(dt)=>{
+
+
+//control.update();
+
+animate(dt);
+
+}
+
+
+
+
+
+
+const render=()=>{
+renderer.clear();
+renderer.render(scene, camera);
+}
+
+
+const gameLoop=(time)=>{
+const dt=time * 0.001 ?? 0.5;
+
+update(dt);
+render();
+
+
+
+//window.requestAnimationFrame(gameLoop);
+
+}
+
+renderer.setAnimationLoop(gameLoop);
+
+
+
+
+
+
+window.addEventListener( 'resize',  () => {
+
+camera.aspect = window.innerWidth / window.innerHeight;
+camera.updateProjectionMatrix();
+renderer.setSize( window.innerWidth, window.innerHeight );
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+window.addEventListener('load',(e)=>{
+
+//try{
+
+INIT()
+
+//}catch(e){
+//console.log(e)
+//}
+
+
+
+
+});
+
+
+
+</script>
+
+</body>
+</html>

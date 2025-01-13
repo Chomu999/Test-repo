@@ -1,0 +1,288 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<!-- 
+<meta name="viewport" content="width=device-width, initial-scale=5.0 maximum-scale=5.0 user-scalable=0">
+ -->
+ 
+ <meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=9.0">
+<title>HTML layout exe3</title>
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; }
+html{
+font-size:10px;
+}
+
+body{
+width:100%; height:100%;
+}
+
+
+.mainContainer{
+width:100vw; height:100vh;
+
+overflow:hidden;
+}
+
+ul{
+list-style:none;
+}
+
+#header{
+width:100%; height:6vh;
+display:block;
+background:#000;
+}
+main{
+width:100%; height:94vh;
+overflow:scroll;
+background:rgba(0,0,80,0.2);
+}
+
+#header ul{
+margin:0 2rem;
+padding:0;
+}
+#header ul li{
+margin:0;
+padding:0.6rem;
+position:relative;
+float:left;
+top:100%; left:0;
+color:#0064FF;
+font-size:1.2rem;
+text-align:center;
+text-transform:uppercase;
+border-left:2px solid red;
+border-bottom:2px solid red;
+}
+
+#header ul li ul{
+/* width:20rem; */
+position:absolute;
+top:100%;
+left:0;
+display:none;
+
+border-left:none;
+border-bottom:none;
+
+}
+
+#header ul li ul li{
+margin:0;
+
+width:20rem;
+font-size:100%;
+background:rgba(230,60,0,0.2);
+color:#0001FF;
+text-transform:capitalize;
+overflow: hidden;
+text-align:left;
+
+border-bottom:0.2rem solid #000;
+}
+
+
+#header ul li:hover ul{
+display:block;
+}
+
+#leftSideBar{
+width:25rem;
+height:100%;
+position:absolute;
+background:#1F2744;
+transform: translateX(-100%);
+transition: transform 0.25s ease;
+z-index:10;
+}
+
+
+#leftSideBar ul{
+margin:2rem 0;
+
+}
+
+#leftSideBar ul li{
+margin:2rem 0;
+padding:1rem 0;
+font-size:2rem;
+color:#fff;
+text-align:center;
+border-bottom:0.3rem solid rgba(255,255,255,0.10);
+}
+
+
+#LSBcheck{
+display:none;
+}
+
+
+#LSBcheck:checked ~ #leftSideBar{
+transform: translateX(0%);
+}
+
+
+.spiner{
+margin:0.4rem 0;
+width:3rem; height:0.3rem;
+background:#000018;
+transition:all 0.20s;
+}
+
+#LSBcheck:checked ~ .leftSideToggle > .spiner.top{
+margin-top:1.5rem;
+transform: rotateZ(135deg);
+
+}
+#LSBcheck:checked ~ .leftSideToggle > .spiner.middel{
+opacity:0;
+    
+}
+#LSBcheck:checked ~ .leftSideToggle > .spiner.bottom{
+margin-top:-1.5rem;
+transform: rotateZ(-135deg);
+}
+
+.leftSideToggle{
+position:absolute;
+transition:all 0.25s ease;
+z-index:11;
+}
+
+#LSBcheck:checked ~ .leftSideToggle{
+margin-left:20rem;
+}
+
+
+
+
+main div{
+margin:5rem auto;
+width:80%; height:40%;
+background:#2D0055;
+}
+main div p{
+color:#B0F2FF;
+font-size:2rem;
+
+}
+</style>
+
+<head>
+
+<body>
+
+
+<div class="mainContainer">
+
+<header id="header">
+
+<ul>
+    <li>home
+        <ul>
+            <li>home</li>
+            <li>home</li>
+            <li>home</li>
+            <li>home</li>
+            <li>home</li>
+        </ul>
+    </li>
+    <li>about us
+        <ul>
+            <li>about us</li>
+            <li>about us</li>
+            <li>about us</li>
+            <li>about us</li>
+            <li>about us</li>
+        </ul>
+    </li>
+    <li>gallery
+        <ul>
+            <li>gallery</li>
+            <li>gallery</li>
+            <li>gallery</li>
+            <li>gallery</li>
+            <li>gallery</li>
+            </ul>
+    </li>
+    <li>prodects
+        <ul>
+            <li>prodects</li>
+            <li>prodects</li>
+            <li>prodects</li>
+            <li>prodects</li>
+            <li>prodects</li>
+        </ul>
+    </li>
+    <li>Contect us
+        <ul>
+            <li>Contect us</li>
+            <li>Contect us</li>
+            <li>Contect us</li>
+            <li>Contect us</li>
+            <li>Contect us</li>
+        </ul>
+    </li>
+</ul>
+</header>
+
+
+<input type="checkbox" id="LSBcheck" />
+<label for="LSBcheck" class="leftSideToggle">
+<div class="spiner top"></div>
+<div class="spiner middel"></div>
+<div class="spiner bottom"></div>
+</label>
+
+<div id="leftSideBar">
+
+<ul>
+<li>home</li>
+<li>about us</li>
+<li>gallery</li>
+<li>prodects</li>
+<li>Contect us</li>
+</ul>
+
+</div>
+
+<main id="main">
+
+
+
+</main>
+
+</div>
+
+
+<!-- <script type=module>
+
+
+const getData=async(url)=>{
+const res = await fetch(url,{
+    mothed:'GET',
+    header:{
+    'Content-Type': 'application/json'
+    }
+})
+
+return await res.json();
+}
+
+
+for(let i=0;i<90;++i){
+main.innerHTML +=`<div>
+<p>hi no._${i}</p>
+</div>`;
+}
+
+
+
+//const myData= await getData('./userData.json');
+</script> -->
+
+</body>
+</html>

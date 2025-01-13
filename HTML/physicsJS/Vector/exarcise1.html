@@ -1,0 +1,297 @@
+<!DOCTYPE HTML>
+<html lang="en-in">
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=10.0, user-scalable=no"/>
+
+<meta name="author" content="billbyte ">
+<style>
+*{
+margin:0; padding:0; box-sizing:border-box;
+}
+
+body{
+width:100%; height:100%;
+}
+
+main{
+width:100%; height:100%;
+background: #272727;
+display: grid;
+place-items: center;
+}
+
+canvas{
+}
+
+div.resource{
+display:none;
+}
+
+img{
+width:100%;
+}
+
+</style>
+
+<title>JS Vector Operations</title>
+
+</head>
+<body>
+
+<main>
+
+<canvas id="canvas" tabindex="0"></canvas>
+
+
+</div>
+
+</main>
+
+
+<script>
+
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+
+
+class Rand{
+static Float(min=1,max=2){
+return Math.random() * (max-min) + min
+}
+
+static Int(min=10,max=20){
+return Math.floor(Rand.Float(min,max))
+}
+
+static Choice(...args){
+return args[Rand.Int(0,args.length-1)]
+}
+
+}
+
+
+
+const loadImage = (url) => new Promise((res)=>{
+let img=new Image()
+img.src=`/storage/emulated/0/${url}`;
+img.addEventListener("load", () => res(img));
+})
+
+const drawText=(c,text="hi", x=0, y=0, color="red")=>{
+c.fillStyle=color;
+c.fillText(text, x, y);
+}
+
+
+class Vec2{
+
+constructor(x=0, y=0){
+this.x=x;
+this.y=y;
+}
+
+add(a){
+return new Vec2(this.x + a.x, this.y + a.y)
+}
+
+sub(a){
+return new Vec2(this.x - a.x, this.y - a.y);
+}
+
+div(n){
+return new Vec2(this.x / n, this.y / n);
+}
+
+mul(n){
+return new Vec2(this.x * n, this.y * n);
+}
+
+normal(){
+return new Vec2(-this.y, this.x).unit();
+}
+
+unit(){
+if (this.mug() === 0) return new Vec2();
+else return new Vec2(this.x/this.mug(), this.y/this.mug());
+}
+
+mug(){
+return Math.sqrt(this.x**2 + this.y**2);
+}
+
+static dot(a, b){
+return a.x*b.x + a.y*b.y;
+}
+
+static cross(a, b){
+return a.x*b.y - a.x*b.y;
+}
+
+drawVec(c, sx=0, sy=0, n=1, color="red"){
+c.beginPath();
+
+c.moveTo(sx , sy);
+c.lineTo(sx + this.x * n, sy + this.y * n);
+c.strokeStyle=color;
+c.stroke();
+
+
+
+c.closePath();
+}
+
+
+}
+
+
+class Ball{
+constructor(x=0, y=0, radius=10){
+this.position=new Vec2(x, y);
+this.radius=radius;
+
+}
+
+update(){
+
+}
+
+draw (c){
+c.beginPath();
+c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
+c.fillStyle="red";
+c.fill();
+c.closePath();
+}
+
+drawLine(c){
+this.vel.drawVec(c, this.position.x, this.position.y, 20, "saddlebrown");
+ 
+
+}
+
+control(action){
+
+
+
+
+}
+
+}
+
+
+
+
+
+const app=(ctx)=>{
+
+const background_color="#000000"
+
+const action={
+a:0, d:0, s:0, w:0
+}
+
+
+const ball1 = new Ball(300, 200, 10);
+
+
+const ball2 = new Ball(150, 50, 15);
+
+
+
+
+
+const Animate=(DeltaTime)=>{
+
+ctx.fillStyle=background_color;
+ctx.fillRect(0,0, ctx.canvas.width, ctx.canvas.height);
+
+
+
+
+
+
+ball1.draw(ctx)
+ball2.draw(ctx)
+
+let v = ball1.position.sub(ball2.position)
+
+ball1.position = ball2.position.add(v).normal()
+
+
+
+
+}
+
+
+
+
+
+let currentTime=0, clock=performance;
+let lastTime=0, DeltaTime=0;
+
+const MainLoop=(TimeStamp)=>{
+
+DeltaTime= TimeStamp - lastTime;
+lastTime=TimeStamp;
+
+//calculating time clock
+currentTime = clock.now() / 1000 / 60 *  Math.PI * 180 / 2;
+
+Animate(DeltaTime);
+
+requestAnimationFrame(MainLoop);
+
+}
+
+MainLoop(0);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
+
+
+
+
+
+
+window.addEventListener("load",  ()  =>{
+
+
+console.log("js is awesome");
+
+
+ctx.canvas.width=390;
+//window.innerWidth;
+ctx.canvas.height=390;
+//window.innerHeight;
+console.log(ctx);
+
+app(ctx);
+
+
+})
+
+
+
+</script>
+
+</body>
+</html>

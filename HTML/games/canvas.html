@@ -1,0 +1,290 @@
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>HTML CANVAS GAME BOI proto 1</title>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+canvas{
+display: none;
+}
+
+button{
+position:fixed;
+background-color:rgba(255,0,0,0.3);
+top:50%;left:50%;
+transform: translate(-50%,-50%);
+}
+
+</style>
+</head>
+<body>
+
+<canvas></canvas>
+<button>full Screen</button>
+<!-- 
+<input type="month"/>
+ -->
+<script>
+let cvs=document.querySelector('canvas');
+let btn=document.querySelector('button');
+let ctx = cvs.getContext('2d');
+let screenSize=300;
+let mainW=innerWidth;
+let mainH=innerHeight;
+let hue=0;
+
+let clicked=false;
+
+cvs.width=mainW;
+cvs.height=mainH;
+
+let arrows=[];
+
+function r(min,max){
+return Math.floor(Math.random() * (max-min) + min)
+}
+
+
+
+class Ball{
+constructor(x,y){
+this.x=x
+this.y=y
+this.color='red'
+this.size=r(2,10)
+this.speed={x:Math.random() * 3 - 1.5 ,y:Math.random() * 3 - 1.5}
+}
+draw(){
+
+ctx.beginPath();
+ctx.fillStyle=this.color;
+ctx.arc(this.x,this.y,this.size,45,Math.PI * 2,false)
+ctx.fill()
+ctx.closePath();
+}
+
+update(){
+this.draw()
+}
+
+
+
+}
+
+
+
+class Arrow{
+constructor(x,y){
+this.x=x
+this.y=y
+this.color=`hsl(${r(1,1000)},100%,50%,0.09)`
+this.size=r(2,20)
+this.weight=r(1,3)
+this.speed={x:Math.random() * 3 - 1.5 ,y:Math.random() * 3 - 1.5}
+}
+draw(){
+
+ctx.beginPath();
+ctx.fillStyle=this.color;
+ctx.arc(this.x,this.y,this.size,45,Math.PI * 2,false)
+ctx.fill()
+ctx.closePath();
+}
+
+update(){
+this.draw()
+
+this.speed.x += this.weight;
+this.speed.y += this.weight;
+
+this.x += Math.sin(this.speed.x*this.y)
+
+this.y += Math.cos(this.speed.y*this.x)
+
+
+if(this.size > 0.2){
+this.size += -0.1;
+}
+
+}
+
+
+}
+
+function arrowsAdds(x,y){
+
+for(let i=0;i<r(10,19);i++){
+arrows.push(new Arrow(x,y))
+}
+}
+
+
+
+
+// click Event
+
+cvs.addEventListener('click', (e)=>{
+arrowsAdds(e.offsetX,e.offsetY)
+})
+
+
+btn.addEventListener('click', (e)=>{
+clicked=true;
+if(clicked == true){
+
+btn.style.display='none'
+cvs.style.display='block'
+
+cvs.requestFullscreen()
+
+clicked=true;
+
+}
+else{
+
+btn.style.display='block'
+cvs.style.display='none'
+}
+})
+
+// touch Event
+
+cvs.addEventListener('touchstart', (e)=>{
+arrowsAdds(e.changedTouches[0].clientX,e.changedTouches[0].clientY)
+})
+cvs.addEventListener('touchmove', (e)=>{
+arrowsAdds(e.changedTouches[0].clientX,e.changedTouches[0].clientY)
+})
+cvs.addEventListener('touchend', (e)=>{
+arrowsAdds(e.changedTouches[0].clientX,e.changedTouches[0].clientY)
+})
+
+
+// mouse Event
+
+cvs.addEventListener('mousestart', (e)=>{
+arrowsAdds(e.clientX,e.clientY)
+})
+cvs.addEventListener('mousemove', (e)=>{
+arrowsAdds(e.clientX,e.clientY)
+})
+cvs.addEventListener('mouseend', (e)=>{
+arrowsAdds(e.clientX,e.clientY)
+})
+
+
+
+function gameLoop(){
+requestAnimationFrame(gameLoop)
+ctx.fillStyle='rgba(0,0,0,0.01)'
+ctx.fillRect(0,0,cvs.width,cvs.height)
+//ctx.clearRect(0,0,cvs.width,cvs.height)
+
+arrows.forEach((arrow,index)=>{
+arrow.update()
+
+if(arrow.size <= 0.3){
+arrows.splice(index, 1)}
+})
+
+
+
+
+hue+=6
+
+
+
+
+}
+gameLoop()
+
+window.addEventListener('resize',()=>{
+cvs.width=window.innerWidth
+cvs.height=window.innerHeight;
+})
+/*
+console.log(cvs.style)
+console.log(console)
+console.info(cvs.style.display)
+console.table(cvs.style)
+
+let l=window.clientInformation
+ */
+console.log(13*5 )
+
+
+let Weeks=['Sun','Mon','Tue','Wen','Thu','Fri','Sat']
+let Months=[
+'Jan',
+'Feb',
+'Mar',
+'Apr',
+'Mey',
+'Jun',
+'Jul',
+'Aug',
+'Sep',
+'Oct',
+'Nov',
+'Dec'
+]
+/*
+let d = new Date();
+
+
+console.log(`${d.getFullYear()} || ${Months[d.getMonth()]} || ${d.getDate()} || ${Weeks[d.getDay()]} || ${d.getHours()}`)
+console.log(Months[d.getMonth()])
+console.log(d.getFullYear())
+console.log(d.getHours())
+console.log(d.getMinutes())
+console.log(d)
+*/
+
+let j=[
+
+{
+"text": "hi",
+"author": "a"
+},
+{
+"text": "bye",
+"author": "b"
+},
+{
+"text": "hey",
+"author": "c"
+},
+{
+"text": "hello",
+"author": "d"
+},
+{
+"text": "ashakku",
+"author": "e"
+},
+{
+"text": "bhaiya",
+"author": "f"
+}
+
+]
+
+
+//let j1 = JSON.parse(j);
+//let j2 =JSON.stringify(j);
+
+console.log(typeof(j[5].text))
+
+
+
+</script>
+</body>
+</html>

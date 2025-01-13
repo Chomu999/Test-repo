@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=10.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+<style>
+
+*:after, * ,*:before{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+
+:root{
+
+}
+
+*::selection{
+color: red;
+background: tan;
+}
+
+html{
+font-size: 10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style-type: none;
+}
+
+
+
+
+body{
+color-scheme: red;
+background: #434343;
+display: grid;
+place-items: center;
+}
+
+
+.wrapper{
+margin: 1rem auto;
+padding: 1rem;
+width: min(38rem, 100% - 2rem);
+background: #0001;
+border: .3rem solid #DADDDD;
+border-radius: 1rem;
+}
+
+
+
+.appContainer{
+position: relative;
+aspect-ratio: 2/3;
+overflow: hidden;
+background: #50687533;
+color: #EEEEEE;
+}
+
+
+.appContainer:before, .appContainer:after{
+content: '';
+position: absolute;
+width: 30rem;
+aspect-ratio: 1;
+rotate: 50deg;
+border-radius: 50%;
+box-shadow: 
+2px 2px 20rem 2rem white inset,
+2px 2px 20rem 2rem white;
+
+animation: ani 99s ease-in-out infinite;
+
+}
+
+.appContainer:before{
+--tragetY:60rem;
+bottom: 2rem;
+right: -9rem;
+background: linear-gradient(-45deg, #004FFF, orangered);
+}
+
+
+
+.appContainer:after{
+--tragetY:-60rem;
+top: 2rem;
+left: -9rem;
+background: linear-gradient(45deg, #A7FF4E, #FF005D);
+}
+
+.appContainer:hover{
+background: #2211;
+/* transform: translate(0, 30rem); */
+}
+
+
+
+
+
+.clock{
+margin:3rem auto;
+position: relative;
+aspect-ratio: 2/3;
+background: #0001;
+backdrop-filter: blur(1rem);
+
+
+z-index: 100;
+
+}
+
+/* expairement */
+.clock *{
+backdrop-filter: inherit;
+background: inherit;
+}
+
+.appTitle{
+margin: 1rem;
+padding: 2rem;
+
+text-align: center;
+font-size: 2rem;
+text-transform: capitalize;
+border-radius: 2rem;
+border: 2px solid ;
+outline: none;
+z-index: 10000;
+}
+
+
+
+.clock .numbers{
+aspect-ratio: 1;
+}
+
+
+.timeCont, .dateCont{
+/* border:.3rem solid  */;
+text-align: center;
+/* border-radius: 5rem; */
+}
+
+.numbers .timeCont{
+background: linear-gradient(44deg, #FF610066, #ffffff66, #1BBA0066);
+}
+
+.numbers .dateCont{
+background: #FF002822;
+}
+
+.numbers  h2{
+display:inline-block;
+padding: 1rem;
+font-weight: 600;
+font-size: 1.8rem;
+color: #00FFF1;
+background: #00053888;
+border: 0.3rem solid;
+border-radius: 2rem;
+transition: .2s ease-in-out;
+}
+
+h2:hover{
+text-shadow: 0 0 1rem ;
+box-shadow: 0 0 .6rem ,
+inset 0 0 .6rem ;
+}
+
+
+
+
+
+
+
+/*animation keys*/
+
+@keyframes ani{
+
+0%,100%{
+transform: translate(0, 0);
+}
+
+50%{
+transform: translate(0, var(--tragetY) );
+}
+
+}
+
+
+
+
+
+</style>
+
+<title>Clock App</title>
+
+</head>
+<body>
+
+
+<main class="wrapper appContainer">
+
+
+<div class="wrapper clock">
+
+<div class="wrapper">
+  <h1 class="appTitle">Simple Clock App</h1>
+</div>
+
+
+<div class="wrapper numbers">
+
+<div class="wrapper timeCont">
+<h2 class="timeOutput">07 : 33 : 28 AM</h2>
+</div>
+
+<div class="wrapper dateCont">
+<h2 class="dateOutput">2004 / 5 / 6</h2>
+</div>
+
+</div>
+
+</div>
+
+
+
+</main>
+
+
+
+<script>
+"use strict";
+
+
+const INITIAL=async()=>{
+
+const timeOutput = document.querySelector("h2.timeOutput");
+const dateOutput = document.querySelector("h2.dateOutput");
+
+//loop to clock update
+let interval = setInterval(()=>{
+
+const dateObj = new Date();
+
+
+const rawHourValue = dateObj.getHours();
+const rawMinuteValue = dateObj.getMinutes();
+const rawSecondValue = dateObj.getSeconds();
+
+
+const yearValue = dateObj.getFullYear();
+const monthValue = dateObj.getMonth();
+const dateValue = dateObj.getDate();
+
+
+const ampmValue = rawHourValue < 12?"AM":"PM";
+
+let hourValue = rawHourValue;
+//console.log(hourValue);
+if(hourValue > 12){
+hourValue -= 12;
+}
+
+
+hourValue = (hourValue < 10)?`0${hourValue}` :hourValue;
+
+
+const minuteValue = rawMinuteValue < 10?`0${rawMinuteValue}`:rawMinuteValue;
+const secondValue = rawSecondValue < 10?`0${rawSecondValue}`:rawSecondValue;
+
+
+
+timeOutput.innerText=`${hourValue} : ${minuteValue} : ${secondValue} ${ampmValue}`;
+dateOutput.innerText=`${yearValue} / ${monthValue} / ${dateValue}`;
+
+
+}, 1000);
+
+
+}
+
+
+
+window.addEventListener("load", ()=>{
+
+try{
+console.log("JavaScript is Awesome ".toUpperCase());
+INITIAL();
+}catch(err){
+console.log(`javascript uncatch error: ${err} `);
+}
+
+});
+
+
+</script>
+
+</body>
+</html>

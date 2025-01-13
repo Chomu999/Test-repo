@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<meta name="author" content="billbyte"/>
+<title> webgl app part 2</title>
+
+<style>
+
+
+
+*{
+margin: 0;
+padding: 0;
+box-sizing:border-box;
+/* border: 0.1px solid red; */
+}
+
+
+
+html{
+font-size: 10px;
+}
+
+a{
+text-decoration: none;
+}
+
+li{
+list-style:none;
+}
+
+
+
+
+body{
+width:100%;
+height:70vh;
+height:100svh;
+display:grid;
+grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+/* grid-template-rows: repeat(2, 1fr); */
+/* place-items:center; */
+/* gap: 1rem; */
+background: #3e3e3e;
+
+}
+
+canvas{
+background:#FF986E;
+}
+
+
+.error_box{
+background:#e3e3e3;
+overflow:hidden auto;
+}
+
+.error_box > p{
+margin:0.2rem 1rem;
+padding: 1rem ;
+font-size:2rem;
+
+background: #0009;
+color: #FF374E;
+
+}
+
+
+.hidden{
+display: none;
+}
+
+</style>
+
+</head>
+<body>
+
+
+
+<div class="hidden">
+<img src="/storage/emulated/0/Download/images (7).jpeg" id="img1" />
+<img src="/storage/emulated/0/Download/Zelda2.png" id="img2" />
+<img src="/storage/emulated/0/Download/images (9).jpeg" id="img3" />
+<img src="/storage/emulated/0/Download/images (10).jpeg" id="img4" />
+</div>
+
+<script type="module">
+
+import {bistor} from "./js/engine/bistor3D.js"
+//import {simple} from "./shaders/shaders.js"
+
+
+
+const {engine} = bistor;
+const {gl, canvas, func, graphicsTool, matrial} = engine;
+const {showError, Rand} = func;
+//console.log(simple)
+
+//canvas.width=360;
+//canvas.height=360;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const App=()=>{
+const width=360, height=360;
+func.init(width, height);
+
+//const simpleGeo=new Mesh(simple.vertex, simple.fragment)
+//const simpleMat=new Mesh(simple.vertex, simple.fragment)
+const simpleMesh=new matrial.simple()
+
+//showError(PositionVertexData1)
+
+const PositionVertexData=new Float32Array([
+  0.0,  0.5,
+ -0.5, -0.5,
+  0.5, -0.5,
+])
+
+
+const PositionVBO=new graphicsTool.VB(PositionVertexData)
+
+const Vao1=new graphicsTool.VA()
+
+Vao1.LinkAttrib(PositionVBO, 0, 2, gl.FLOAT, gl.FALSE, 0, 0)
+
+//showError(PositionVBO)
+
+
+setInterval(()=>{
+gl.viewport(0, 0, width, height)
+gl.clearColor(0.2, 0.2, 0.3, 1.0)
+gl.clear(gl.COLOR_BUFFER_BIT)
+
+simpleMesh.Bind()
+Vao1.Bind()
+gl.drawArrays(0, 0, 3);
+
+
+
+
+//func.showError("loop")
+
+}, 1000)
+
+
+}
+
+
+
+window.addEventListener("load", ()=>{
+
+try{
+
+//const cSize= innerWidth>innerHeight?innerHeight:innerWidth;
+//gl.canvas.width = cSize;
+//gl.canvas.height =cSize;
+
+App();
+//console.log(bistor);
+
+
+showError("JS IS Awesome");
+
+
+}catch(e){
+showError(e);
+console.error(e);
+}
+
+});
+
+
+
+</script>
+<!-- <script type="module" src="./js/app2.js"></script> -->
+
+</body>
+</html>

@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+:root{
+
+--angle:45deg;
+
+--color1:#ff000044;
+--color2:#ff000088;
+
+--color3:#00000024;
+--color4:#00000088;
+
+--color5:#00CCFF44;
+--color6:#00CCFF88;
+
+--color7:#9500FF99;
+--color8:#FF008080;
+
+--color9:#ffffff22;
+
+--gradient_bg_color1: linear-gradient(var(--angle), #FF8A00, #8D00FF);
+--gradient_bg_color2: linear-gradient(var(--angle),
+brown, lime, chocolate);
+--gradient_bg_color3: linear-gradient( 45deg, #FF6E00, #005EFF, #6BFF88, #FF00B5);
+
+--tex_color1:#DEDFDD;
+--tex_color2:#E6E6E6;
+
+--title_color1:#fCfCfC;
+--title_color2:#2C2C2C;
+--title_bg_color1:var(--color3);
+--title_bg_color2:#1200FF;
+--title_font_size:2rem;
+
+
+--TextColor1:#454B40;
+--TextColor2:#C9C9C9;
+--TextColor3:#62FFFE;
+
+
+}
+
+*::selection{
+color: #FFFE00;
+background: #2EFF00;
+}
+
+
+html{
+font-size:10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style: none;
+}
+
+
+body{
+
+background: #210E43;
+
+}
+
+
+main{
+/* margin: 2rem 0; */
+/* height: min(80rem, 100dvh - 5rem); */
+background: var(--color9) ;
+overflow:hidden auto;
+}
+
+
+
+.wrapper{
+margin:1rem auto;
+padding: 1.5rem;
+width:min(39rem, 100% - 1.2rem);
+background: var(--color3);
+border-radius:2rem;
+}
+
+
+.title{
+color:var(--title_color1);
+background: var(--title_bg_color1);
+font-size: var(--title_font_size);
+text-align: center;
+text-transform: capitalize;
+border-radius:9rem;
+}
+
+.outputContainer{
+aspect-ratio: 1;
+/* background: #FFE46498; */
+overflow: hidden auto;
+}
+
+
+.texts{
+--BGcolor:red;
+--color:blue;
+margin: 1rem;
+padding: 1rem;
+display: block;
+align-items: center;
+text-align: justify;
+line-break: 34px;
+font-size: 2rem;
+/* direction: rtl; */
+letter-spacing: 0.3rem;
+word-spacing: 2rem;
+background: var(--BGcolor);
+color: var(--color);
+text-decoration:underline;
+/* border: 1rem solid currentColor; */
+border-radius: 10rem;
+
+
+overflow: auto;
+
+}
+
+.encodeTextOutput{
+--BGcolor:#14BA00;
+--color:red;
+}
+
+.decodeTextOutput{
+--BGcolor:#ACACAC;
+--color:blue;
+}
+
+
+
+
+.inputContainer{
+text-align: center;
+align-items: center;
+background: #FF006A66;
+overflow: hidden auto;
+}
+
+.inputBoxs{
+width: 10rem;
+padding: 0.2rem 0;
+margin:0.1rem;
+height: 6rem;
+color: #78002F;
+background: #9EE6FF;
+font-size: 1.3rem;
+text-align:center;
+border:0.5rem solid currentColor;
+border-radius:5rem;
+}
+
+.inputContainer > label{
+background: #00FFE3;
+color: blue;
+display: block;
+padding: 1rem;
+font-size: 2rem;
+border-radius: 50rem;
+}
+
+
+
+
+
+.btnContainer{
+text-align: center;
+align-items: center;
+background: #FF006A66;
+}
+
+.btns{
+--colorBtn:#9100FF;
+margin:1rem;
+padding: 2rem;
+height: 10rem;
+color: var(--colorBtn);
+background: #070E00;
+font-size: 1.3rem;
+font-weight: bold;
+text-align:center;
+border:1rem solid currentColor;
+border-radius:5rem;
+text-transform: capitalize;
+transition: color 1s ease-in;
+}
+
+
+.encodeBTN{
+--colorBtn:red;
+}
+
+.decodeBTN{
+--colorBtn:blue;
+}
+
+.encodeBTN:hover{
+--colorBtn:#00FF0C;
+}
+
+.decodeBTN:hover{
+--colorBtn:#00FFD6;
+}
+
+
+</style>
+
+<title>EnCode And DeCode App</title>
+
+</head>
+<body>
+
+<main>
+
+
+<div class="wrapper">
+
+
+<h2 class="title">EnCode And DeCode App</h2>
+
+</div>
+
+
+
+
+
+
+
+
+
+<div class="wrapper outputContainer">
+</div>
+
+<div class="wrapper inputContainer">
+<label for="encodeText">encodeText</label>
+<input type="text" id="encodeText" class="inputBoxs encodeText" />
+
+<label for="decodeText">decodeText</label>
+<input type="text" id="decodeText" class="inputBoxs decodeText" />
+</div>
+
+<div class="wrapper btnContainer">
+<button   class="btns encodeBTN" >encode button</button>
+<button  class="btns decodeBTN" >decode button</button>
+</div>
+
+
+
+</main>
+
+
+
+
+<!-- <script async src="/storage/emulated/0/g_js_libs/tf.min.js"></script> -->
+
+
+<script>
+"use strict";
+
+//some utils
+class Rand{
+
+static Float(min=0, max=1){
+return Math.random() * (max - min+1) + min;
+}
+
+static Int(min=6, max=9){
+return Math.floor( Rand.Float(min, max));
+}
+
+static Choice(...args){
+return args[Rand.Int(0, args.length - 1)];
+}
+
+static Color(len=3){
+let outColor="#";
+for(let i=0;i<len;++i){
+outColor+=Rand.Choice(..."0123456789abcdef".split(""));
+}
+return outColor;
+}
+
+}
+
+
+//help to create html nested element easily
+const strToHTML=(_str_)=>{
+const element = document.createElement("div");
+element.innerHTML=_str_??"null";
+return element?.firstElementChild;
+}
+
+
+//
+const dummyBinGen=async(len=10, bits=8)=>{
+let out= "";
+for(let i=0;i<len;++i){
+out += "b";
+for(let j=0;j<bits;++j){
+out += Rand.Choice("0", "1");
+}
+}
+return await out;
+}
+
+//
+const dummyHexGen=async(len=10, size=2)=>{
+let out= "";
+for(let i=0;i<len;++i){
+out += Rand.Color(size);
+}
+return await out;
+}
+
+
+
+//Binary to String
+const binToStr=async(_bin_)=>{
+let out="";
+let g=_bin_.split("b");
+for(let i=0;i<g.length;++i){
+const num = Number(`0b${g[i]?g[i]:"00"}`);
+out += String.fromCharCode(num);
+}
+return await out;
+}
+
+
+//String to Binary
+const strToBin=async(_str_)=>{
+let out="";
+for(const i in _str_){
+out += "b"+_str_.charCodeAt(i).toString(2);
+}
+return await out;
+}
+
+
+
+
+//Hex to String
+const hexToStr=async(_hex_)=>{
+let out="";
+const g = _hex_.split("#");
+for(let i=0;i<g.length;i++){
+const num = Number(`0x${g[i]?g[i]:0}`);
+out += String.fromCharCode(num)
+}
+return await out;
+}
+
+//String to Hex
+const strToHex=async(_str_)=>{
+let out="str"
+return await out;
+}
+
+
+const RGBtoHEX = rgb => `#${((1 << 24) + (rgb[0] << 16) + (rgb[1] << 8) + rgb[2]).toString(16).slice(1)}`;
+
+
+
+
+//starting point
+const INITIAL=async()=>{
+
+const encodeTextInput=document.querySelector(".encodeText");
+const decodeTextInput=document.querySelector(".decodeText")
+
+const encodeButton=document.querySelector(".encodeBTN");
+const decodeButton=document.querySelector(".decodeBTN")
+
+
+// instance of "encoder" and "decoder" 
+// and some in build functions "atob" / "btoa"
+const EnCoderInstance=new TextEncoder();
+const DeCoderInstance=new TextDecoder();
+//String.__proto__;
+
+
+// dummy text
+const myDummyText = `hi hello goo kha lo :)`;
+
+
+const encodeTextStr = EnCoderInstance.encode(myDummyText);
+const decodeTextStr = DeCoderInstance.decode(encodeTextStr);
+
+
+let binText = `b01000000b11101101b11011010b01101101b01100010b10110100b11010010b00010011b11101111b00100000b10011111b00110011b10011010b10000110b11001100b10110011b01111110b11010000b01011101b10000010b01110110b11100010b10110010b11010001b11001111b10110111b10110101b01101100b01010000b01110001b00010101b10001001b11110000b11111100b00011110b00010001b01110110b01011110b00100111b01000011b01000010b01010100b01010111b01001111b00011100b00110001b10111100b01011010b11001111b00010001b01110111b10000101b01101100b10001000b11010110b11101110b11101110b00110011b00110101b00000010b00101101b10110000b01010110b00000101b01111000b11100110b00110010b11011100b11100010b11100111b11010011b10100101b10010111b00001100b01010110b01110011b10001000b11100011b01010000b10001000b11100000b01011101b10010000b11000100b00001111b01010111b10010100b01100110b11010001b11011001b00101110b11110111b10111001b11111101b10001011b01101000b10101001b00101101b11010100`;
+let hexText = `#a5b#c73#f8b#25a#d1b#21c#501#a4e#25c#64e#8c0#4ad#9c5#327#a93#192#1f3#3f7#d8e#c5a#b91#9ee#e7a#589#87a#419#5ed#b80#553#47b#f20#e11#6f8#766#77f#3f2#27b#e22#851#7ff#b83#175#387#ef0#7d6#3bd#a0d#c19#d65#698#29d#5fe#6ab#f86#ec2#36b#98b#649#783#a33#2cf#bec#1e3#780#ac9#664#239#837#b2b#08e#f5e#a38#6bb#a1c#e4c#ff7#7c8#322#d2a#b73#ce8#ef5#b46#9c1#7d0#90b#ee4#1d4#e2a#8a2#26e#483#c0b#0f2#508#f0c#f54#392#d63#623`;
+
+const base64enCode = `dG9kYXkgbXkgY2F0IG1vbGllIGVhdHMgdXAgbXkgZG9nIGplcnJ5cyBmb29kCmFuZCB3aGVuIHNo
+ZSBwbGF5IGFyb3VuZCAKdW50aWxsIG5pZ2h0ZmFsbCAKbXkgY2F0IFZvbWl0IGl0CmhhcnQK`;
+
+const base32enCode = `ORXWIYLZEBWXSIDDMF2CA3LPNRUWKIDFMF2HGIDVOAQG26JAMRXWOIDKMVZHE6LTEBTG633EBJQW
+4ZBAO5UGK3RAONUGKIDQNRQXSIDBOJXXK3TEEAFHK3TUNFWGYIDONFTWQ5DGMFWGYIAKNV4SAY3BOQQFM33NNF2CA2LUBJUGC4TUBI======`;
+
+
+//const encodedText22=`789049f0b4f50f58a492293a`;
+//const encodedText22=`blob:http://localhost:26543/34f6a561-7890-49f0-b4f5-0f58a492293a`;
+
+
+
+//help to add html bold tag easily
+const addText=(_str_="hi", _enCode_=true)=>{
+const outputContainer=document.querySelector(".outputContainer");
+if(!outputContainer) return -1;
+let btag = strToHTML(_enCode_?`<b class="texts encodeTextOutput">${_str_}</b>`:`<b class="texts decodeTextOutput">${_str_}</b>`);
+outputContainer.appendChild(btag);
+}
+
+
+
+
+
+//Text Decoding
+decodeButton.addEventListener("click", async ()=>{
+
+try{
+const encodeTextValue = encodeTextInput.value;
+const decodeTextValue = atob(encodeTextValue);
+
+addText(decodeTextValue, false);
+addText(encodeTextValue, true);
+
+}catch(err){
+console.log(err)
+}
+
+
+});
+
+//Text Encoding
+encodeButton.addEventListener("click", async ()=>{
+
+try{
+const decodeTextValue = decodeTextInput.value;
+const encodeTextValue = btoa(decodeTextValue);
+
+addText(decodeTextValue, false);
+addText(encodeTextValue, true);
+
+}catch(err){
+console.log(err)
+}
+
+
+});
+
+
+
+}
+
+
+
+
+
+try{
+INITIAL();
+}catch(err){
+console.log(`javascript : uncatch Error : ${err}`);
+}
+
+
+
+</script>
+</body>
+</html>

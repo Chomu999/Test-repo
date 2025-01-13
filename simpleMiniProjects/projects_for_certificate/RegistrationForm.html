@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Registration Form</title>
+
+<style>
+
+
+body{
+background: #1d1d33;
+color: #f7f7e5;
+font-family: tahoma;
+font-size: 16px;
+}
+
+main{
+  /* background: #150047; */
+}
+
+form{
+margin: 0 auto;
+padding: 2em;
+background: #150047;
+width: 60vw;
+min-width: 300px;
+max-width: 500px;
+}
+
+h1 , p{
+  margin: 1em 0;
+  color:#f0f0f0;
+  text-align: center;
+}
+
+
+fieldset{
+padding: 2em 0;
+border: 0;
+border-bottom: 3px solid #3b3b4f;
+}
+
+fieldset:last-of-type{
+border: none;
+}
+
+label{
+display: block;
+margin: 0.5rem 0;
+}
+
+input, textarea, select{
+margin: 10px 0 0;
+width: 100%;
+min-height: 2em;
+}
+
+input, textarea{
+background:#0a0a23 ;
+color: #fff;
+border: 1px solid #0a0a23;
+min-height: 2em;
+}
+
+
+.inline{
+width: unset;
+margin: 0 0.5rem 0 0;
+vertical-align: middle;
+display: inline;
+}
+
+
+input[type="submit"]{
+margin: 10px auto;
+padding: 10px 30px;
+display: block;
+width: 80%;
+background: #3b3b4f;
+border: solid ;
+}
+
+input[type="file"]{
+padding:1px 2px;
+}
+
+a{
+  color: #dfdfe2;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+<main>
+
+<h1>Registration Form</h1>
+<p>Please Fill out Requirement Form</p>
+
+<form action="chomu999.github.io" method="post">
+
+<fieldset>
+
+<label for="first-name"> First Name : 
+<input id="first-name" type="text" name="first-name" placeholder="Enter Your Fist Name">
+</label>
+
+<label for="last-name"> Last Name : <input id="last-name" type="text" name="last-name" placeholder="Enter Your Last Name">
+</label>
+
+<label for="email"> Email : <input id="email" type="email" name="email" placeholder="Enter Your email">
+</label>
+
+<label for="password"> Password : 
+<input id="password" type="password" name="password" pattern="[a-z0-5]{8,}" placeholder="Create a an New Password">
+</label>
+
+</fieldset>
+
+<fieldset>
+<legend>Account Type Required</legend>
+<label for="personal">
+<input checked id="personal" class="inline" value="personal" type="radio" name="account">
+  Personal :
+</label>
+
+<label for="business">
+<input id="business" class="inline" value="business" type="radio" name="account">
+  Business :
+</label>
+
+</fieldset>
+
+<fieldset>
+
+
+<label for="profile-picture"> Upload a Profile Pic
+<input id="profile-picture" name="profile-picture" type="file">
+</label>
+
+
+<label for="age">
+Age : <input id="age" name="age" type="number" min="13" max="120">
+</label>
+
+
+<label for="referrer">
+
+<select name="referrer" id="referrer">How did you hear about us?  
+<option selected disabled>(select one)</option>
+<option value="1">Facabook</option>
+<option value="2">Instagram</option>
+<option value="3">X</option>
+<option value="4">You Tube</option>
+<option value="5">Other</option>
+
+
+</select>
+
+</label>
+
+<label for="bio">
+Provide a bio :
+<textarea placeholder="i like coding" name="bio" id="bio" rows="4" cols="40"></textarea>
+</label>
+
+</fieldset>
+
+
+<label for="terms">
+
+<input id="terms" class="inline" type="checkbox" >
+I accept all
+<a href="#">
+terms and conditions
+</a>
+
+</label>
+
+
+<input type="submit" name="submit" id="" value="submit" />
+
+</form>
+
+</main>
+
+
+<script type="text/javascript" charset="utf-8">
+  //console.log(25 * (17+3))
+</script>
+</body>
+</html>

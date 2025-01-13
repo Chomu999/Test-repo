@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+
+<style>
+
+*:before, *, *:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+:root{
+
+
+}
+
+
+html{
+font-size:10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style: none;
+}
+
+
+body{
+color-scheme: drak;
+background: tan;
+
+}
+
+
+
+.wrapper{
+margin:1rem;
+padding:1rem;
+width: min(39rem, 100% - 2rem);
+background: #D6D6D688;
+border-radius:2rem;
+}
+
+
+main{
+margin: 2rem 0;
+height: min(90dvh, 100% - 5rem);
+overflow: auto;
+}
+
+
+.appTitle{
+margin: 1rem;
+padding: 1rem;
+color:#565656;
+background: #E2E2E2;
+font-size: 2rem;
+text-align: center;
+text-transform: capitalize;
+border-radius:9rem;
+box-shadow:
+2rem 1rem 2rem #0008,
+inset 2rem 1rem 2rem #0008;
+}
+
+.videoContainer{
+aspect-ratio: 1;
+
+}
+
+.videoContainer video{
+display: block;
+margin: auto;
+}
+
+
+.progressContainer{
+aspect-ratio: 1;
+
+}
+
+.progressContainer canvas{
+display: block;
+margin: auto;
+background: salmon;
+}
+
+
+
+</style>
+
+
+<title>apis in js </title>
+
+
+
+</head>
+<body>
+
+<main class="wrapper">
+
+
+
+
+<h2 class="appTitle">JS in build APIS </h2>
+
+
+<div class="wrapper videoContainer">
+  <video muted autoplay controls id="myVid"></video>
+</div>
+
+<div class="wrapper progressContainer">
+<canvas></canvas>
+</div>
+
+
+
+</main>
+
+
+<script type="module">
+"use strict";
+
+
+const INITIAL=async()=>{
+
+const vidEl = document.querySelector("video#myVid");
+const canvas = document.querySelector("canvas");
+const ctx = canvas.getContext("2d");
+
+console.log(ctx)
+
+
+const rect = canvas.parentElement.getClientRects()[0];
+
+
+const cameraMode = !0?"environment":"user";
+try{
+  const cam = await navigator?.mediaDevices?.getUserMedia({
+    audio:false,
+    video:{
+      width:300,
+      height:300,
+      facingMode:cameraMode,
+    }
+  });
+  vidEl.srcObject = cam;
+}catch(err){
+console.error("camera SyntaxError ", err)
+}
+
+
+
+
+
+const loop=()=>{
+canvas.width = rect.width*0.9;
+canvas.height = rect.height*0.9;
+
+ctx.drawImage(vidEl, 0, 0, canvas.width, canvas.height);
+
+webkitRequestAnimationFrame(loop)
+};
+
+loop(0);
+
+
+
+
+
+
+window.addEventListener("dblclick",async ()=>{
+
+//navigation.back()
+//locationbar.visible = false;
+
+//const arg = 69;
+//const idk = matchMedia(arg);
+//console.log(idk)
+
+//const idk = {x:0, y:0};
+//navigator.geolocation.getCurrentPosition((i)=> {
+//idk.x = i.coords.latitude;
+//idk.y = i.coords.longitude;
+//});
+//console.log(idk)
+
+
+//const idk = external.AddSearchProvider();
+//console.log(idk)
+
+//const idk1 = await navigator.clipboard.read();
+//const idk2 = await navigator.clipboard.readText();
+//console.log(idk1)
+//console.log(idk2)
+
+
+//const idk = await navigator.getInstalledRelatedApps()
+//console.log(idk);
+
+//const idk = navigator.contacts.select(2);
+//console.log(idk)
+
+//const idk = navigator.bluetooth;
+//console.log(await idk.getAvailability())
+//console.log( idk.requestDevice())
+
+
+console.log(navigator.javaEnabled(true));
+console.log(navigator);
+
+});
+
+
+
+}
+
+
+
+try{
+console.log(window)
+INITIAL()
+}catch(err){
+throw new  Error(`javascript uncatch error ${err}`);
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=5.0"> -->
+    <!-- <meta name="viewport" content="width=device-width"> -->
+
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <title>layout-1</title>
+
+    <meta name="author" content="Biswajit Bhowmick" />
+
+    <!-- <link rel="stylesheet" href="/storage/emulated/0/g_js_libs/bootstrap.min.css" type="text/css" media="all" /> -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+:root {
+            --day-bg-color: #D1DBFF;
+            --day-text-color: #00050C;
+            --day-text-bg-color: #99A7FF;
+        }
+
+        html {
+            font-size: 10px;
+        }
+        body {
+            overflow: hidden;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+
+        header {
+            width: 100%;
+            height:4vh;
+            background:#020012;
+            /* gap:space-butween; */
+            /* place-items:center; */
+        }
+
+        .dropdown-btn {
+            /* margin:0 1rem; */
+
+        }
+
+
+        main {
+            width: 100%;
+            height: min(50vh,40.8rem);
+            background: var(--day-bg-color);
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+        }
+
+
+
+        footer {
+            width: 100%;
+            height: 46vh;
+            overflow: scroll;
+            background: var(--day-bg-color);
+        }
+
+        p {
+            margin: 2rem 2rem;
+            background: blue;
+            font-size: 3rem;
+            color: #fff;
+            border: 0.2rem solid #ddd;
+            display: block;
+            transition: color 1s;
+        }
+
+/*
+navbar menu code
+*/
+        header ul {
+            margin:0;
+            padding: 0;
+            
+            /* width: 100%; */
+        }
+
+        header hr {
+            width: 180%;
+            height: 1px;
+            transform: translateX(-20%);
+            background: #000ddd;
+            border: none;
+        }
+        header ul li {
+            margin:0 0.4rem;
+            padding: 0.8rem;
+
+            position: relative;
+            float: left;
+            top: 100%;
+            left: 0;
+            display: block;
+            background: #00003B;
+            font-size: 1.5rem;
+            text-transform: capitalize;
+            color: #E7EFFF;
+            border-left:2px solid cyan;
+            border-bottom:2px solid cyan;
+        }
+
+        header ul ul {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            display: none;
+        }
+
+        header ul ul li {
+            margin: 0;
+            background:#213CAD;
+            color: red;
+            border-left:2px solid cyan;
+            border-bottom:2px solid cyan;
+            width: 20rem;
+            overflow: hidden;
+            text-align: left;
+        }
+
+        header ul li:hover ul {
+            display: block;
+        }
+
+
+    </style>
+</head>
+
+<body>
+
+    <header>
+
+
+        <ul>
+
+            <li class="file">file
+                <ul>
+                    <li>light</li>
+                    <li>light</li>
+                    <li>light</li>
+                </ul>
+            </li>
+            <li class="edit">edit
+                <ul>
+                    <li>light</li>
+                    <li>light</li>
+                    <li>light</li>
+                </ul>
+            </li>
+            <li class="add">add
+                <ul>
+                    <li>light</li>
+                    <li>light</li>
+                    <li>light</li>
+                </ul>
+            </li>
+            <li class="play">play
+                <ul>
+                    <li>light</li>
+                    <li>light</li>
+                    <li>light</li>
+                </ul>
+            </li>
+            <li class="example">example
+                <ul>
+                    <li>light</li>
+                    <li>light</li>
+                    <li><hr></li>
+                    <li>light</li>
+                </ul>
+            </li>
+            <li class="view">view
+                <ul>
+                    <li>light</li>
+                    <li>light</li>
+                    <li>light</li>
+                </ul>
+            </li>
+            <li class="help">help
+                <ul>
+                    <li>contect us</li>
+                    <li>report a problem</li>
+                </ul>
+            </li>
+
+
+        </ul>
+
+
+    </header>
+
+    <main>
+        <iframe src="/storage/emulated/0/HTML/threejs/ex/exe6_datgui.html" frameborder="0"></iframe>
+    </main>
+
+    <footer>
+
+        <div class="control" id=cc></div>
+    </footer>
+
+
+
+
+<script>
+
+function dropdown(elem) {
+elem.innerText = ``;
+}
+
+//for(let i=0;i<80;i++){
+//cc.innerHTML += `<p>my text test - ${i} \n</p>`;
+//}
+
+
+</script>
+
+</body>
+</html>

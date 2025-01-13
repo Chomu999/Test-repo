@@ -1,0 +1,153 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="author" content="Biswsjit Bhowmick" />
+
+<title>simple sreach engine</title>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+body{
+display:flex;
+justify-content:center;
+align-items:center;
+background:#319B83;
+}
+
+#mainBox{
+width:90vw;height:90vh;
+background:#CAFFF3;
+text-align:center;
+}
+
+h1{
+font-size:5rem;
+color: #414141;
+font-weight:800;
+text-transform: capitalize;
+}
+
+
+
+#userInput{
+text-align:center;
+color:#00450C;
+font-size:20px;
+letter-spacing:1.4px;
+}
+
+
+ul{
+list-style:none;
+background:#A7F7FF;
+box-shadow:2px 2px 8px black;
+}
+
+ul li{
+border:1px solid black;
+text-align:center;
+font-size:40px;
+text-transform:capitalize;
+}
+
+
+</style>
+</head>
+<body>
+
+
+<div id="mainBox">
+
+<h1>sreach box</h1>
+
+<input id="userInput" type="text" placeholder="sreach here"/>
+
+<ul id="myUL">
+
+<li><a>biswajit</a></li>
+<li><a>apubra</a></li>
+<li><a>raju</a></li>
+<li><a>mohit</a></li>
+<li><a>suraj</a></li>
+<li><a>karan</a></li>
+<li><a>shuvo</a></li>
+<li><a>amit</a></li>
+<li><a>ali</a></li>
+
+</ul>
+
+</div>
+
+<script>
+
+
+
+
+
+
+let body=document.body;
+
+
+
+let Filtter=document.querySelector('#userInput')
+///.value.toUpperCase();
+
+let ul=document.getElementById('myUL');
+
+
+
+
+let lis=document.querySelectorAll('ul li');
+
+let a = document.querySelectorAll(`li a`);
+
+
+
+
+function sreachFun(){
+
+
+
+let tv=Filtter.value.toUpperCase();
+
+for(let i=0;i<lis.length;i++){
+
+
+
+
+let textValue = a[i].innerText//a[i].innerHTML;
+
+
+if(textValue.toUpperCase().indexOf(tv) > -1) lis[i].style.display='block';
+
+
+
+else lis[i].style.display='none';
+
+
+
+
+
+
+
+}
+
+
+
+}
+
+
+
+document.querySelector('#userInput').addEventListener('keyup',sreachFun)
+
+
+
+
+</script>
+</body>
+</html>

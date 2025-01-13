@@ -1,0 +1,131 @@
+ <!DOCTYPE html>
+<html>
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+
+<title>image to binary file 0001</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
+html{
+font-size:10px;
+}
+
+a{
+text-decoration:none;
+}
+
+
+
+body{
+width:100vw; height:100vh;
+}
+
+main{
+width:100%; height:100%;
+background:#e3e3e311;
+display: grid;
+place-items: center;
+}
+
+
+.res{
+display: none;
+}
+
+.container{
+width:80%; height:50%;
+background:#220004;
+display:grid;
+place-items:center;
+}
+
+
+textarea.fileName{
+width:80%;
+color:#10FF00;
+background:#000000;
+text-align:center;
+}
+
+button{
+width:80%;
+}
+a.downloadBtn{
+color:#00E7FF;
+background: #00124D;
+font-size:3rem;
+}
+
+</style>
+</head>
+<body>
+
+<main>
+<div class="container">
+
+<textarea id=fileName class="fileName" placeholder="file Name + format"></textarea>
+<button>
+<a href="#" id=ad class="downloadBtn">download</a>
+</button>
+</div>
+
+<div class="res">
+<img src="/storage/emulated/0/Download/Zelda2.png" alt="Zelda And Link" id="img1">
+<!-- <img src="/storage/emulated/0/Download/img1.bin" alt="Zelda And Link" id="img1"> -->
+</div>
+
+</main>
+
+<script>
+const _canvas=document.createElement("canvas");
+const _ctx=_canvas.getContext("2d");
+
+
+
+const app=()=>{
+
+
+ad.addEventListener("click", ()=>{
+let {width, height} = img1;
+_canvas.width=width;
+_canvas.height=height;
+_ctx.drawImage(img1, 0, 0);
+
+_ctx.fillStyle="#FF00BB"
+_ctx.fillRect(50, 300, 40, 60)
+
+const out=_ctx.getImageData(0,0, width, height).data.buffer;
+
+let _blob=new Blob([out]);
+
+let _url=URL.createObjectURL(_blob);
+
+if(!fileName.value) return;
+
+ad.download=fileName.value;
+ad.href=_url;
+
+})
+
+}
+
+app()
+
+
+const init=async()=>{
+let fd=await fetch("/storage/emulated/0/Download/img1.bin");
+let src=await fd.arrayBuffer()
+//let myImage=new Image();
+//myImage.src=src;
+}
+
+//init()
+</script>
+
+</body>
+</html>

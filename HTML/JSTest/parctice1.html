@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=10.0 user-scalable=no" />
+
+<title>js test 1</title>
+
+<style>
+
+*{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+html{
+font-size: 10px;
+}
+
+body{
+width:100vw; height:100vh;
+}
+
+div#rootElement{
+width:100%; height:100%;
+background: #003AFF88;
+display: grid;
+place-items: center;
+}
+
+div#rootElement > div.resouce{
+display: none;
+}
+
+</style>
+
+
+</head>
+<body>
+
+
+<div class="rootElement" id="rootElement">
+
+
+</div>
+
+
+<script type="module">
+
+const app=async ()=>{
+
+
+
+const obj={
+name:"bis",
+age :18,
+friend:[
+"apu",
+"shuvo",
+"karan"
+]
+}
+
+
+//var a = __proto__
+//console.log(a);
+
+
+//console.log(Boolean())
+
+
+
+//let a1 =external;
+//let b = a1.AddSearchProvider("./exe1.html")
+//console.log(b)
+
+
+//let a2 =new window.IDBCursor();
+//console.log(a2);
+
+
+//let gyro =new Gyroscope();
+//gyro.start()
+
+//let gs =new GravitySensor();
+//console.log(gs);
+
+//let ci = clientInformation;
+//let Battery=await ci.getBattery()
+//console.log(ci.geolocation.getCurrentPosition());
+//console.log(Battery);
+//console.log(ci.virtualKeyboard);
+//console.log(ci);
+
+//let data=new Uint8Array([0, 6,8,23,99,63])
+//let _data = new Blob(data)
+//let myurl = URL.createObjectURL(_data);
+//console.log(myurl, _data, data);
+
+
+
+
+
+//let xhr =new XMLHttpRequest();
+//xhr.open( "GET", "./exe1.html");
+//xhr.onload = ()=>{
+//console.log(xhr.responseText)
+//}
+//xhr.send()
+
+
+//let xhr =new XMLHttpRequest();
+
+//xhr.open( "GET", "./exe1.html");
+
+//let upload = xhr.upload;
+
+//xhr.upload.onloadstart= ()=>{
+//console.log("server start ",xhr)
+//}
+
+
+//xhr.upload.onloadend= ()=>{
+//console.log(" server end ",xhr)
+//}
+
+//xhr.upload.onload= ()=>{
+//console.log(" server onload ",xhr)
+//}
+
+//xhr.onload= ()=>{
+//console.log(" text onload ",xhr)
+//}
+//xhr.open("SET",`http://localhost:26543/storage/emulated/0/.programimg/HTML/JSTest/exe1.html`);
+//xhr.open( "SET", "http://localhost:5000");
+//xhr.open( "SET", "./exe1.html");
+//xhr.onload = ()=>{
+//console.log(xhr)
+//console.log(xhr.abort())
+//}
+//xhr.send("SET")
+
+//const dataServer= JSON.stringify(obj)
+
+//headers > get | set
+//let a = await fetch("exe1.html")
+//let data = await a.text()
+//console.log(a.headers)
+//a.headers.append("aloo", 99)
+//console.log(dataServer)
+
+
+
+//let a=escape("bis")
+//let a=eval("bis")
+//if (a==="bis") console.log(a)
+
+
+//let a1=decodeURI("http://google.com")
+//let b1=decodeURIComponent("aloo")
+//console.log(a1, b1);
+//console.log(typeof a1, typeof b1);
+
+
+//let a2=encodeURI("http://google.com")
+//let b2=encodeURIComponent("aloo")
+//console.log(a2,b2)
+//console.log(typeof a2, typeof b2);
+
+
+//let a = unescape(obj) //8 //("aloo")
+//console.log(a);
+
+
+
+//let a =new Audio("/storage/emulated/0/Download/y2mate.com - Song of Storms Medieval Cover.mp3")
+//console.log(a);
+//a.setAttribute("controls", "")
+//rootElement.appendChild(a)
+
+//let a =new Range();
+//console.log(a)
+
+
+
+//let a=new RegExp("aloo kha lo guy's")
+//let b= /hi buddy/
+//let c= RegExp("hi hello goo kha lo guy")
+
+
+//console.log(a.__proto__);
+//console.log(a.test(/al/));
+//console.log(a.exec("al", "la"));
+//console.log(a.compile());
+//console.log(a);
+
+
+//console.log(a, b, c);
+//console.log(typeof a, typeof b, typeof c);
+
+
+
+//const {name:naam, age:aloo, friend:dost} = obj
+//console.log(naam, aloo, dost)
+
+
+
+//let a=[
+//0,1,2,3,4,5,6,7,8,9,0,
+//4,6,8,5,8,3,9,3,68,90,68,
+//"a", "b", "c", "d", "e",
+//"f", "g", "d", "a", "b",
+//]
+
+//let b = [...new Set(a)]
+
+//console.log(a);
+//console.log(b);
+
+
+//
+//let obj2 = Object.freeze({
+//...obj,
+//aloo:"20rs 1kg"
+//})
+
+
+//Object.defineProperty(
+//obj, "piyaz",
+//{value : "30rs 1kg"}
+//)
+
+//Object.defineProperties(obj, {
+
+//girl:{
+//value:0,
+//},
+
+//boy:{
+//value:1,
+//}
+
+//})
+
+
+//console.log(obj2);
+//console.log(obj);
+
+
+
+//let a = "aloo"
+
+
+//console.log(a.__proto__);
+
+//console.log(a.search("l"));
+//console.log(a.indexOf("l"));
+
+//console.log(a.match("lo"));
+//console.log(a.matchAll("a"));
+
+//console.log(a.replace("a", "b"));
+//console.log(a.replaceAll("o", "e"));
+
+//console.log(a.substr(0, 3));
+//console.log(a);
+
+//rootElement.innerHTML += (a.sub());
+//rootElement.innerHTML += (a.bold())
+//rootElement.innerHTML += (a.big())
+//rootElement.innerHTML += (a.small())
+//rootElement.innerHTML += (a.fontcolor("red"))
+//rootElement.innerHTML += (a.fontsize(40))
+
+
+
+
+
+
+
+
+//let str= "aaydstzgkbiguddufiohigdydyjghksyatsysyduysa6aeadswedchjju"
+
+
+//let b = [...new Set(str.split(""))];
+
+//let c=[]
+//let d={}
+//let totalnumof=0
+
+//for(let i in str){
+//if(!c.includes(str[i])) c.push(str[i])
+//}
+
+//for(let i in str){
+//d[str[i]] = str.split(str[i]).length-1
+//}
+
+//for(let i in d){
+//totalnumof += d[i]
+//}
+
+//console.log(str, str.length, totalnumof);
+//console.log(b);
+//console.log(c);
+//console.log(d);
+
+
+
+
+
+
+
+
+const Loop=()=>{
+
+}
+
+//setInterval( Loop, 1000)
+}
+
+
+
+
+///window.addEventListener("dblclick", app)
+
+
+app()
+
+
+</script>
+
+</body>
+</html>

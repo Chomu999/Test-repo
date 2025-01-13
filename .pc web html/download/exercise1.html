@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalabel=0" />
+<title>text downloader</title>
+
+<style>
+
+*{
+margin:0; padding:0; box-sizing:border-box;
+}
+
+html{
+font-size:10px;
+}
+
+a{
+text-decoration: none;
+}
+
+body{
+width: 100vw;
+height: 100vh;
+}
+
+
+header{
+width: 100%; height:16%;
+background: #434948;
+}
+
+
+header > h1.title{
+margin:1rem, 2rem;
+font-size: 2rem;
+color: #e3e3e3;
+word-spacing:0.2rem;
+letter-spacing:0.3rem;
+text-align:center;
+text-transform:capitalize;
+}
+
+main{
+width:100%; height: 84%;
+background: #837690;
+display:flex;
+align-items:center;
+justify-content:space-around;
+}
+
+main > div.file-config , main > div.work-Flow{
+width:calc(50% - 5rem);
+height:calc(100% - 5rem);
+}
+
+main > div.file-config{
+background: linear-gradient(45deg, #FF0085,  #FF8200, blue, #00B7FF, #00FEFF);
+background-size:400%;
+}
+
+main > div.file-config > section.user-Input, section.user-Input2{
+width:100%; height: calc(100% * 0.5);
+}
+
+main > div.file-config > section.user-Input{
+display:flex;
+background: rgba(20, 20, 20, 0.1);
+align-items: center;
+justify-content:space-around;
+}
+
+section.user-Input > div.FN , section.user-Input > div.FF {
+width: calc(50% - 2rem); height: calc(100% * 0.80);
+background: rgba(20, 20, 20, 0.1);
+
+}
+
+div.FN > label, div.FF > label{
+color:white; 
+font-size: 2rem;
+text-transform: capitalize;
+text-align: center;
+}
+
+div.FN > input, div.FF > input{
+margin: auto;
+width: 90%; height:60%;
+color:#ee33ee;
+
+font-size: 2rem;
+text-transform: capitalize;
+text-align: center;
+
+border: none;
+
+box-shadow: 2px, 2px 20px 2px black;
+
+
+}
+
+section.user-Input2{
+background:purple;
+}
+
+section.user-Input2 > a{
+margin: auto;
+width:100%; height: 80%;
+display: block;
+}
+
+
+section.user-Input2 > a{
+margin: auto;
+display: block;
+font-size:3rem;
+text-align:center;
+color: #D7FFFD;
+text-transform: capitalize;
+word-spacing: 0.2rem;
+}
+
+main > div.work-Flow{
+background: linear-gradient(-45deg, #FF0085, #FF8200, blue, #00B7FF, #00FEFF);
+background-size:300%;
+}
+
+@media (width:320px){
+main{
+
+}
+
+}
+
+</style>
+
+</head>
+<body>
+
+<header>
+<h1 class="title">object to binary file</h1>
+
+</header>
+
+<main>
+
+
+
+<div class="file-config">
+<section class="user-Input">
+ 
+<div class="FN">
+<label for="file-Name">file-Name</label>
+<input type="text" id="file-Name" placeholder="Enter File Name"/>
+
+</div>
+
+<div class="FF">
+<label for="file-Format">file-Format</label>
+<input type="text" id="file-Format" placeholder="Enter File Format Name"/>
+</div>
+
+
+</section>
+
+<section class="user-Input2">
+ 
+<a href="#" id="aaa"> download </a>
+
+</section>
+
+</div>
+
+<div class="work-Flow">
+<h2>hi guy's</h2>
+<canvas id="canvas"></canvas>
+
+</div>
+
+</main>
+
+
+
+
+<script type="module">
+
+
+console.log("JS is Awesome")
+
+
+
+
+const canvas=document.getElementById("canvas")
+const ctx=canvas.getContext("2d")
+
+
+canvas.width=360
+canvas.height=216
+ctx.fillRect(20, 30, 20, 20);
+
+
+
+const LoadFile=async(url)=>{
+const data=await fetch(url)
+return await data.text()
+}
+
+const strToNum=(str)=>{
+const muns=[]
+for(const s of str) muns.push(parseFloat(s))
+return muns
+}
+
+
+const fun2=(aTag,fn,ff, d)=>{
+
+
+const _BLOB=new Blob([d])
+const _URL= URL.createObjectURL(_BLOB)
+
+setTimeout(()=>{
+aTag.download=`${fn?fn:"file"}.${!ff?"txt":ff}`;
+aTag.href=_URL;
+}, 2000)
+
+}
+
+
+
+const parseFile=(fd)=>{
+
+const pos=[], nor=[], tex=[], absource=[]
+
+const lines=fd.split("\n");
+
+for(const line of lines){
+const [command, ...value] = line.split(" ");
+
+if(command==="v") pos.push( strToNum(value))
+if(command==="vt") tex.push( strToNum(value))
+if(command==="vn") nor.push( strToNum(value))
+
+if(command==="f"){
+
+for(const group of value){
+
+const [posI, texI, norI]=strToNum(group.split("/"))
+absource.push( ...pos[posI-1])
+absource.push( ...tex[texI-1])
+absource.push( ...nor[norI-1])
+
+}
+
+}
+
+}
+
+//console.log(pos)
+
+
+
+
+
+//console.log(absource)
+//console.log(od)
+return new Float32Array(absource).buffer;
+}
+
+
+const parseFile2=(file)=>{
+
+const pos=[], nor=[], tex=[], absource=[];
+
+const lines=file.split("\n");
+
+for(const line of lines){
+const [command, ...value] = line.split(" ", 4);
+
+
+if(command==="v") pos.push( value )
+if(command==="vt") tex.push( value )
+//if(command==="vn") nor.push( parseFloat(value))
+
+if(command==="f"){
+
+for(const group of value){
+
+const [posI, texI]=strToNum(group.split("/"))
+absource.push( ...pos[posI-1], ...tex[texI-1])
+//absource.push( ...tex[texI-1])
+//absource.push( ...nor[norI-1])
+//
+}
+
+}
+
+}
+
+
+
+for(const i in absource) absource[i]=parseFloat(absource[i]);
+
+
+
+return absource;
+//return new Float32Array(absource);
+}
+
+
+
+
+
+const app= async()=>{
+
+const fn=document.getElementById("file-Name");
+const ff=document.getElementById("file-Format");
+
+const bufferData=await LoadFile("../GL/res/rock02.obj")
+const data =parseFile(bufferData);
+
+aaa.addEventListener("click", ()=>{
+
+
+//console.log(data)
+if(!fn.value && !ff.value) return;
+
+fun2(aaa,fn.value, ff.value, data);
+
+})
+
+
+canvas.addEventListener("mousemove", (e)=>{
+
+ctx.fillStyle="#9700FF"
+ctx.fillRect(e.offsetX, e.offsetY, 20, 20)
+//console.log(e)
+
+})
+
+}
+
+window.addEventListener("load", ()=>{
+
+app()
+
+})
+</script>
+
+</body>
+</html>

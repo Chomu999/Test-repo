@@ -1,0 +1,250 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=10.0, user-scalable=no"/>
+<style>
+*{
+margin:0; padding:0; box-sizing:border-box;
+}
+
+body{
+width:100vw; height:100vh;
+
+}
+
+main{
+width:100%; height:100%;
+background: #757575;
+}
+
+canvas{
+}
+
+div.resource{
+display:none;
+}
+
+</style>
+
+<title>WEBGL Exercise 1</title>
+<script src="/storage/emulated/0/g_js_libs/gl-matrix.js" ></script>
+</head>
+<body>
+
+<main>
+<canvas id="canvas"></canvas>
+
+<div class="resource">
+<img src="/storage/emulated/0/Download/Zelda2.png" id=img1 alt="link">
+<img src="/storage/emulated/0/Download/Zelda minish cap.jpeg" id=img2 alt="link casp">
+</div>
+</main>
+
+<script>
+
+
+
+const vss=`#version 300 es
+
+layout (location=0) in vec4 aPosition;
+layout (location=1) in vec2 aUV;
+layout (location=2) in vec4 aColor;
+
+out vec2 vUV;
+out vec4 vColor;
+
+
+void main(void){
+gl_Position = aPosition; 
+vUV = aUV;
+vColor = aColor;
+}
+`;
+
+const fss=`#version 300 es
+precision mediump float;
+
+out vec4 FragColor;
+
+
+in vec2 vUV;
+in vec4 vColor;
+
+
+uniform sampler2D uTex;
+
+
+void main(void){
+FragColor = mix(texture(uTex, vUV), vColor, 0.5);
+}
+`;
+const app= async(gl)=>{
+const vs=gl.createShader(gl.VERTEX_SHADER);
+gl.shaderSource(vs,vss);
+gl.compileShader(vs);
+
+const fs=gl.createShader(gl.FRAGMENT_SHADER);
+gl.shaderSource(fs,fss)
+gl.compileShader(fs);
+
+const Prog=gl.createProgram();
+gl.attachShader(Prog, vs);
+gl.attachShader(Prog, fs);
+gl.linkProgram(Prog);
+gl.useProgram(Prog);
+gl.validateProgram(Prog);
+//gl.useProgram(Prog);
+
+
+
+
+const aPositionLoc=gl.getAttribLocation(Prog, "aPosition");
+const aUVLoc=gl.getAttribLocation(Prog, "aUV");
+const aColorLoc=gl.getAttribLocation(Prog, "aColor");
+
+const uTexLoc=gl.getUniformLocation(Prog, "uTex");
+//const uMatrixLoc=gl.getUniformLocation(Prog, "uMatrix");
+
+//console.log(uTexture1Loc, uTexture2Loc, uTexture3Loc)
+//console.log(aPositionLoc, aPointSizeLoc)
+
+console.log("attributes locations : ", aPositionLoc, aUVLoc, aColorLoc)
+console.log("uniforms locations : ",uTexLoc)
+
+const vertexData2=new Float32Array([
+
+  0.5,  0.5,  0.0,    1, 1,  1.0, 0.0, 0.0, //1.0,
+ -0.5,  0.5,  0.0,    0, 1,  0.0, 1.0, 0.0, //1.0,
+ -0.5, -0.5,  0.0,    0, 0,  0.0, 1.0, 1.0, //1.0,
+  0.5, -0.5,  0.0,    1, 0,  0.0, 0.0, 1.0, //1.0,
+]);
+
+
+const indexData=new Uint8Array([
+
+0,1,2,
+2,3,0
+
+]);
+
+const Tex=gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, Tex);
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img1);
+
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+//gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+//gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+//gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+
+
+
+
+
+const vbo1=gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, vbo1);
+gl.bufferData(gl.ARRAY_BUFFER, vertexData2, gl.STATIC_DRAW);
+
+
+gl.vertexAttribPointer(aPositionLoc, 3, gl.FLOAT, gl.FALSE, 8*4, 0);
+gl.enableVertexAttribArray(aPositionLoc);
+
+gl.vertexAttribPointer(aUVLoc, 2, gl.FLOAT, gl.FALSE, 8*4, 3*4);
+gl.enableVertexAttribArray(aUVLoc);
+
+gl.vertexAttribPointer(aColorLoc, 3, gl.FLOAT, gl.FALSE, 8*4, 5*4);
+gl.enableVertexAttribArray(aColorLoc);
+
+
+
+
+const ebo=gl.createBuffer();
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo);
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexData, gl.STATIC_DRAW);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const Animate=(DeltaTime)=>{
+gl.viewport(0,0, gl.canvas.width, gl.canvas.height);
+gl.clearColor(0.3, 0.2, 0.6, 1.0);
+gl.clear(gl.COLOR_BUFFER_BIT);
+
+
+
+
+gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_BYTE, 0);
+
+
+
+
+
+}
+
+
+
+let currentTime=0, clock=performance;
+let lastTime=0, DeltaTime=0;
+
+const MainLoop=(TimeStamp)=>{
+
+DeltaTime= TimeStamp - lastTime;
+lastTime=TimeStamp;
+
+//calculating time clock
+currentTime = clock.now() / 1000 / 60 *  Math.PI * 180 / 2;
+
+Animate(DeltaTime);
+
+requestAnimationFrame(MainLoop);
+}
+
+MainLoop(0)
+
+}
+
+
+window.addEventListener("load", ()=>{
+
+
+console.log("js is awesome")
+
+const canvas=document.getElementById("canvas");
+const gl = canvas.getContext("webgl2");
+
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+console.log(gl)
+
+
+app(gl)
+})
+
+
+</script>
+
+</body>
+</html>

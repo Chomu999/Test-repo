@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<!-- <meta charset="UTF-8"> -->
+
+<!-- <meta http-equiv="X-UA-Compatible" content="IE=Edge"> -->
+
+
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<meta name="author" content="billbyte"/>
+
+<title>stupid animation app</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+background:tan;
+}
+
+.scene{
+width: 100vw;
+aspect-ratio:1;
+background: #424242;
+border: 2px solid red;
+}
+
+#controlBox{
+position:absolute;
+inset:50px;
+
+}
+
+
+</style>
+</head>
+
+<body>
+
+
+<div class="scene context">
+
+<canvas class="canvas_context"></canvas>
+
+</div>
+
+<div class="scene inspector">
+
+</div>
+
+<div class="scene">
+
+</div>
+
+
+
+<div id="controlBox">
+<!-- 
+<input type="range" name="range" id="range" min=0 max="9" value="0" />
+
+ -->
+<label for="Animations">Animations</label>
+
+
+<select id="Animations" name="animations">
+
+<option value="idle">Idle</option>
+<option value="jump">Jump</option>
+<option value="fall">Fall</option>
+<option value="run">Run</option>
+<option value="damage">Damage</option>
+<option value="sit">Sit</option>
+<option value="roll">Roll</option>
+<option value="bite">Bite</option>
+<option value="death">Death</option>
+
+</select>
+
+ 
+ 
+ 
+ 
+</div>
+
+
+
+
+<script>
+
+const control_box=document.querySelector('#controlBox');
+
+const canvas=document.querySelector('canvas.canvas_context');
+const ctx = canvas.getContext('2d');
+
+
+let playerSatet='idle';
+
+const mouse={
+x:0,
+y:0,
+};
+
+let gameSpeed=3;
+let mainGameLoop;
+
+const canvas_
+//ctx.canvas.width=window.innerWidth;
+//ctx.canvas.height=window.innerHeight;
+
+
+
+const playerImg='/storage/emulated/0/pictures/soul_bird.png';
+
+
+const randInt =(min=1,max=2)=>{
+return Math.floor(Math.random() * (max-min) + min)
+}
+
+
+
+
+
+const animationSatets={
+
+idle:{
+FrameX:0,
+FrameY:0,
+},
+
+jump:{
+FrameX:7,
+FrameY:1
+},
+
+fall:{
+FrameX:7,
+FrameY:2,
+},
+
+run:{
+FrameX:8,
+FrameY:3,
+},
+
+damage:{
+FrameX:10,
+FrameY:4,
+},
+
+sit:{
+FrameX:5,
+FrameY:5,
+},
+roll:{
+FrameX:7,
+FrameY:6,
+},
+
+bite:{
+FrameX:7,
+FrameY:7,
+},
+
+death:{
+FrameX:12,
+FrameY:8,
+},
+
+};
+
+
+
+
+
+
+
+class Vec2{
+constructor(x=0, y=0){
+
+}
+
+static create(x=0, y=0){
+
+return {x, y};
+
+}
+
+static add(a, b){
+let result = Vec2.create();
+for(const i in result){
+result[i] = a[i] + b[i];
+}
+return result;
+}
+
+static sub(a, b){
+let result = Vec2.create();
+for(const i in result){
+result[i] = a[i] - b[i];
+}
+return resultl
+}
+
+static mul(a, b){
+let result = Vec2.create();
+for(const i in result){
+result[i] = a[i] * b[i];
+}
+return result;
+}
+
+static div(a, b){
+let result = Vec2.create();
+for(const i in result){
+result[i] = a[i] / b[i];
+}
+return result;
+}
+
+static mul_s(a, scaler=1){
+let result = Vec2.create();
+for(const i in result){
+result[i] = a[i] * scaler;
+}
+return result;
+}
+
+static div_s(a, scaler=1){
+let result = Vec2.create();
+for(const i in result){
+result[i] = a[i] * scaler;
+}
+return result;
+}
+
+
+
+
+}
+
+
+
+
+
+
+
+class Node{
+constructor(){
+this.parent;
+this.childrens=[];
+}
+
+add_child(...child){
+this.childrens(...child)
+}
+
+
+}
+
+class Node2D extends Node{
+constructor(x,y,width,height){
+super()
+this.x=x;
+this.y=y;
+this.width=width;
+this.height=height;
+this.fillC=`hsl(${randInt(0,370)},100%,50%,1)`;
+}
+draw(ctx){
+
+ctx.beginPath()
+ctx.strokeStyle='black';
+ctx.fillStyle=this.fillC;
+ctx.fillRect(this.x,this.y,this.width,this.height)
+//`hsl(${randint(0,180)},100%,50%,1)`;
+
+//ctx.arc(this.x,this.y,this.radius,0,Math.PI*2);
+//ctx.fill();
+ctx.stroke();
+ctx.closePath();
+
+}
+
+}
+
+
+
+
+
+
+class Sprite extends Node2D{
+constructor(img,x,y,width,height){
+super(x,y,width,height);
+
+this.IMAGE = new Image();
+this.IMAGE.src=img;
+
+
+this.frame={x:0,y:0};
+
+this.total={c:12,r:10};
+
+this.sprite={
+width:32,
+height:32,
+
+rows:8,
+columns:3,
+
+};
+
+this.IMAGE.addEventListener("load", ()=>{
+
+this.sprite.width = this.IMAGE.width / this.rows;
+this.sprite.height = this.IMAGE.height / this.columns;
+
+})
+
+}
+
+
+
+drawImg(c){
+
+
+
+c.drawImage(this.IMAGE,
+this.frame.x * this.sprite.width,
+this.frame.y * this.sprite.height,
+this.sprite.width,this.sprite.height,
+this.x,this.y,
+this.width,this.height);
+
+}
+
+
+update(){
+
+if(this.frame.x < this.total.c - 1){
+this.frame.x++;
+
+}else this.frame.x = 0;
+
+
+
+}
+
+}
+
+
+
+const INIT=(ctx)=>{
+
+
+
+const player = new Sprite(playerImg,0,500,128,128);
+
+
+
+const gameLoop=()=>{
+
+
+ctx.fillStyle='white';
+ctx.fillRect(0,0,canvas.width,canvas.height);
+
+
+//player.draw(ctx)
+
+
+
+
+player.total.c = animationSatets[playerSatet].FrameX;
+
+player.frame.y = animationSatets[playerSatet].FrameY;
+
+
+player.drawImg(ctx)
+
+
+
+
+if(gameSpeed % 4 == 0){
+player.update();
+}
+
+//if(player.x < canvas.width + player.width) player.x += 1;
+//else player.x = -player.width;
+
+
+gameSpeed++;
+
+
+requestAnimationFrame(gameLoop);
+
+}
+gameLoop();
+
+
+
+controlBox.addEventListener('change',(e)=>{
+
+
+playerSatet = e.target.value;
+
+
+});
+
+}
+
+
+window.addEventListener("load", ()=>{
+
+try{
+INIT(ctx);
+
+}catch(e){
+console.log(e.message, e.stack)
+}
+
+})
+
+
+
+</script>
+
+</body>
+
+</html>

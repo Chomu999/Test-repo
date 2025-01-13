@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+:root{
+
+--angle:45deg;
+
+--color1:#ff000044;
+--color2:#ff000088;
+
+--color3:#00000024;
+--color4:#00000088;
+
+--color5:#00CCFF44;
+--color6:#00CCFF88;
+
+--color7:#9500FF99;
+--color8:#FF008080;
+
+--color9:#ffffff22;
+
+--gradient_bg_color1: linear-gradient(var(--angle), #FF8A00, #8D00FF);
+--gradient_bg_color2: linear-gradient(var(--angle),
+brown, lime, chocolate);
+--gradient_bg_color3: linear-gradient( 45deg, #FF6E00, #005EFF, #6BFF88, #FF00B5);
+
+--tex_color1:#DEDFDD;
+--tex_color2:#E6E6E6;
+
+--title_color1:#fCfCfC;
+--title_color2:#2C2C2C;
+--title_bg_color1:var(--color3);
+--title_bg_color2:#1200FF;
+--title_font_size:3rem;
+
+--repeat_x:33%;
+--repeat_y:15rem;
+
+--TextColor1:#454B40;
+--TextColor2:#C9C9C9;
+--TextColor3:#62FFFE;
+
+--predictResultColor:var(--TextColor3, tan);
+
+}
+
+
+html{
+font-size:10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style: none;
+}
+
+
+body{
+
+background: #291726;
+/* background:  var(--gradient_bg_color3); */
+/* background-size: 40% 40%; */
+/* background-size: var(--repeat_x) var(--repeat_y); */
+/* background-position: 20% 30%; */
+
+
+/* box-shadow: 2px 2px 60px 2px black inset; */
+
+/* animation: bg_ani 99s ease-in-out infinite alternate; */
+/* animation: bg_ani2 10s ease-in-out infinite alternate; */
+
+}
+
+
+main{
+margin: 2rem 0;
+height: min(80rem, 100% - 5rem);
+background: var(--color9) ;
+overflow: auto;
+}
+
+
+
+.wrapper{
+margin:1.2rem auto;
+padding: 1.1rem;
+width:min(39rem, 100% - 1.2rem);
+background: var(--color3);
+border-radius:2rem;
+}
+
+
+.title{
+color:var(--title_color1);
+background: var(--title_bg_color1);
+font-size: var(--title_font_size);
+text-align: center;
+text-transform: capitalize;
+border-radius:9rem;
+}
+
+
+
+
+
+
+
+
+/* predictContainer code section*/
+
+
+.predictContainer{
+padding: 1rem;
+aspect-ratio:2;
+color: #C2EFFF;
+font-size: 2rem;
+overflow: hidden auto;
+}
+
+.predictContainer > .predictOutputResult{
+margin: 0.5em;
+padding: 0.5em;
+display: inline-block;
+font-size: 1em;
+color: var(--predictResultColor);
+background: transparent;
+border: 0.1em solid currentColor;
+border-radius: 2em 1rem 2em 1em;
+text-shadow:2px 2px 20px currentColor;
+box-shadow:
+-2px -2px 2px currentColor inset,
+ -5px 5px 3px gray,
+ -5px 5px 4px black
+;
+}
+
+
+
+
+
+
+
+.btnsContainer > .btns{
+margin:0.2rem 1rem;
+padding: 1rem ;
+font-size: 2rem;
+background: var(--color4);
+color: var(--tex_color1);
+border-radius: 1rem;
+text-align: center;
+
+display: inline-block;
+font-size: 2rem;
+text-transform: capitalize;
+
+
+overflow: auto;
+
+}
+
+
+
+
+
+
+/* drawing  box code section*/
+
+.drawContainer{
+aspect-ratio: 1;
+}
+
+
+
+canvas{
+width: 100%;
+background:#EA8F93;
+}
+
+
+/* error box code section*/
+
+
+.error_box{
+overflow:hidden auto;
+}
+
+.error_box .title{
+display:block;
+background: linear-gradient(45deg,red, blue);
+text-decoration: underline;
+border-radius: 4em;
+}
+
+.error_box  pre{
+margin:0.2rem 0;
+padding: 1rem;
+
+height: min(30rem, 100% - 3rem);
+
+background: var(--color3);
+
+
+overflow: auto;
+border-radius: 1rem;
+
+
+
+}
+
+.error_box  p{
+margin:0.2rem 1rem;
+padding: 1rem ;
+
+background: var(--color4);
+color: #FF374E;
+border-radius: 1rem;
+}
+
+
+
+
+
+</style>
+
+<title>GPU Neuron Network</title>
+
+</head>
+<body>
+
+<main>
+
+
+<div class="wrapper">
+
+
+<h2 class="title">
+my GPU neuron network
+</h2>
+
+</div>
+
+
+
+<div class="wrapper drawContainer">
+<canvas id="canvas"></canvas>
+</div>
+
+
+
+<div id="resultScreen" class="wrapper output_screen">
+
+<div class="wrapper predictContainer">
+
+
+</div>
+
+
+
+<div class="wrapper inputs_parent">
+<input type="number" class="inputNumber" id="inputNumber" value="0" />
+</div>
+
+
+<div class="wrapper btnsContainer">
+<span class="btns trainBtn">train </span>
+<span class="btns predictBtn">predict</span>
+
+<span class="btns showBtn">Show</span>
+<br>
+<span class="btns saveBtn">save DataSet</span>
+<span class="btns loadBtn">load DataSet</span>
+</div>
+
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+<div class="wrapper error_box">
+<h2 class="title">error and warning</h2>
+<pre></pre>
+</div>
+
+</main>
+
+
+
+
+
+
+<script>
+
+"use strict";
+
+//output = input * weigth + bais;
+
+const canvas=document.querySelector("canvas");
+const ctx=canvas.getContext("2d");
+
+
+const strToHtml=(html)=>{
+const element = document.createElement("div");
+element.innerHTML = html;
+return  element.firstElementChild??undefined;
+}
+
+//sleep function helps to hold up workflow
+const sleep=async (t=1) => new Promise( res => setTimeout( () => res(true), t*1000) );
+
+
+// help to show error and log for mobile device
+
+const showError=(msg)=>{
+console.log(msg)
+const errorContainer=document.querySelector(".error_box > pre")
+if(!errorContainer) return -1;
+errorContainer.innerHTML+=`<p>${msg}</p>`;
+}
+
+
+
+class Neuron {
+  constructor(weights, bias, activationFunction) {
+    this.weights = weights;
+    this.bias = bias;
+    this.activationFunction = activationFunction;
+  }
+
+  feedforward(inputs) {
+    let sum = 0;
+    for (let i = 0; i < inputs.length; i++) {
+      sum += inputs[i] * this.weights[i];
+    }
+    return this.activationFunction(sum + this.bias);
+  }
+}
+
+class NeuralNetwork {
+  constructor(neurons, learningRate) {
+    this.neurons = neurons;
+    this.learningRate = learningRate;
+  }
+
+  feedforward(input) {
+    let outputs = [];
+    for (let i = 0; i < this.neurons.length; i++) {
+      outputs.push(this.neurons[i].feedforward(input));
+    }
+    return outputs;
+  }
+
+  backpropagation(output, input) {
+    let errors = [];
+    for (let i = 0; i < this.neurons.length; i++) {
+      errors.push(output - this.neurons[i].feedforward(input));
+    }
+
+    for (let i = 0; i < this.neurons.length; i++) {
+      for (let j = 0; j < this.neurons[i].weights.length; j++) {
+        this.neurons[i].weights[j] += this.learningRate * errors[i] * input[j];
+      }
+      this.neurons[i].bias += this.learningRate * errors[i];
+    }
+  }
+
+  train(data, epochs) {
+    for (let i = 0; i < epochs; i++) {
+      for (let j = 0; j < data.length; j++) {
+        let input = data[j].input;
+        let output = data[j].output;
+        this.feedforward(input);
+        this.backpropagation(output, input);
+      }
+    }
+  }
+}
+
+
+
+// INITIAL point aka starting point
+const INITIAL = async ()=>{
+
+
+console.log("hi and now wait for 3 secend")
+await sleep(3)
+const ptag = strToHtml(`<p class="wrapper">hello world</p>`);
+console.log(ptag)
+console.log(" wait for another 3 secend")
+
+
+
+
+
+
+// Example usage:
+let sigmoid = (x) => 1 / (1 + Math.exp(-x));
+
+let neurons = [
+  new Neuron([0.1, 0.2], 0.3, sigmoid),
+  new Neuron([0.4, 0.5], 0.6, sigmoid)
+];
+
+let nn = new NeuralNetwork(neurons, 0.01);
+
+let data = [
+  { input: [0.5, 0.7], output: 0.8 },
+  { input: [0.3, 0.4], output: 0.6 }
+];
+
+nn.train(data, 1000);
+
+let inputs = [0.5, 0.7];
+let outputs = nn.feedforward(inputs);
+console.log(outputs);
+
+await sleep(3);
+console.log("program ended here")
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+showError("JS is Awesome")
+
+try{
+INITIAL();
+}catch(e){
+showError(`JavaScript uncatch error : ${e.stack}`);
+}
+
+
+
+
+</script>
+</body>
+</html>

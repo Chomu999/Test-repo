@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0 user-scalable=0"/>
+
+<style>
+*{
+margin: 0;
+padding: 0;
+box-sizing:border-box;
+}
+
+html{
+font-size: 10px;
+}
+
+body{
+width: 100vw; height: 100vh;
+}
+
+main{
+width: 100%; height: 100%;
+background: #0D001F;
+}
+
+</style>
+
+<title>Physics Engine without Any Expreasion Part 1 </title>
+</head>
+<body>
+
+<main>
+<canvas id="canvas" tabindex=0 ></canvas>
+</main>
+
+<script>
+console.log("Js is AWESOME")
+
+const frection=0.1;
+
+const det_coll_bb=(b1, b2)=>{
+if(b1.radius + b2.radius >= b2.pos.sub(b1.pos).mug()) return 1;
+else return 0;
+}
+
+const pen_res_bb=(b1, b2)=>{
+let dist= b1.pos.sub(b2.pos);
+let pen_depth= b1.radius + b2.radius - dist.mug();
+let pen_res=dist.unit().mul(pen_depth/(b1.inv_mass + b2.inv_mass));
+b1.pos = b1.pos.add(pen_res.mul(b1.inv_mass));
+b2.pos = b2.pos.add(pen_res.mul(-b2.inv_mass));
+}
+
+const coll_res_bb=(b1, b2)=>{
+let normal=b1.pos.sub(b2.pos).unit();
+let relVel=b1.velocity.sub(b2.velocity);
+let sepVel = Vec2.dot(relVel, normal);
+let new_sepVel= -sepVel * Math.min(b1.elasticity, b2.elasticity);
+
+let vsep_diff = new_sepVel - sepVel;
+let impules= vsep_diff / (b1.inv_mass + b2.inv_mass);
+let impulesVec= normal.mul(impules)
+
+b1.velocity=b1.velocity.add(impulesVec.mul(b1.inv_mass));
+b2.velocity=b2.velocity.add(impulesVec.mul(-b2.inv_mass));
+
+}
+
+const coll_det_bw=(b, w)=>{
+let ballToClose=closestPointBW(b,w).sub(b.pos);
+if(ballToClose.mug() <= b.radius) return 1;
+else return 0;
+}
+
+const pen_res_bw=(b, w)=>{
+let penVec=b.pos.sub(closestPointBW(b,w));
+b.pos=b.pos.add(penVec.unit().mul(b.radius-penVec.mug()));
+
+}
+
+const closestPointBW=(b, w)=>{
+
+let ballToWallStart=w.start.sub(b.pos);
+if(Vec2.dot(w.unit(), ballToWallStart) > 0) return w.start;
+
+let wallEndToBall=b.pos.sub(w.end);
+if(Vec2.dot(w.unit(), wallEndToBall) > 0) return w.end;
+
+let closedDict=Vec2.dot(w.unit(), ballToWallStart);
+let closedVec= w.unit().mul(closedDict);
+return w.start.add(closedVec);
+}
+
+
+
+
+class Rand{
+static Float(min=1,max=2){
+return Math.random() * (max-min) + min;
+}
+static Int(min=1,max=20){
+return Math.floor( Rand.Float(min, max));
+}
+static Choice(...args){
+return args[Rand.Int(0, args.length)];
+}
+}
+
+class Vec2{
+
+constructor(x=0, y=0){
+this.x=x
+this.y=y;
+}
+
+add(v){ return new Vec2(this.x+v.x, this.y+v.y); }
+
+sub(v){ return new Vec2(this.x-v.x, this.y-v.y); }
+
+mul(n){ return new Vec2(this.x*n, this.y*n); }
+
+mug(){ return Math.sqrt(this.x**2 + this.y**2); }
+
+normal(){return new Vec2(-this.y, this.x).unit(); }
+
+unit(){
+if(this.mug()===0) return new Vec2();
+else return new Vec2(this.x/this.mug(), this.y/this.mug());
+}
+
+static dot(v1, v2){
+return (v1.x*v2.x + v1.y*v2.y);
+}
+
+static cross(v1, v2){
+return (v1.x*v2.y - v2.y*v1.x);
+}
+
+
+}
+
+class Ball{
+
+constructor(x=0, y=0, radius=10, mass=0){
+this.pos=new Vec2(x,y);
+this.radius=radius;
+
+this.mass=mass
+this.inv_mass = (this.mass==0)?0:(1/this.mass);
+//if(this.mass===0) this.inv_mass=0;
+//else this.inv_mass=1/this.mass;
+
+this.elasticity=1;
+this.velocity=new Vec2();
+
+this.acceleration=new Vec2();
+this.accSpeed=5;
+}
+
+draw(c){
+c.beginPath()
+c.arc(this.pos.x, this.pos.y, this.radius, 0, Math.PI*2);
+//c.strokeStyle="white";
+c.stroke();
+c.closePath()
+}
+
+update(dt){
+
+this.acceleration=this.acceleration.unit().mul(this.accSpeed);
+
+this.velocity=this.velocity.add(this.acceleration);
+this.velocity=this.velocity.mul(1-frection);
+
+this.pos=this.pos.add(this.velocity);
+//ball1.acceleration.mul(1-frection);
+
+}
+
+}
+
+
+
+
+class Wall{
+constructor(x1, y1, x2, y2){
+this.start=new Vec2(x1, y1);
+this.end=new Vec2(x2, y2);
+
+}
+
+draw(c){
+c.beginPath();
+c.moveTo(this.start.x, this.start.y);
+c.lineTo(this.end.x, this.end.y);
+c.stroke();
+c.closePath();
+}
+
+update(dt){
+
+}
+
+unit(){return this.end.sub(this.start).unit(); }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const app=(ctx)=>{
+
+const {width, height} = ctx.canvas;
+const action={
+up:0,
+left:0,
+right:0,
+down:0,
+}
+
+
+ctx.strokeStyle="white";
+ctx.fillStyle="white";
+
+
+
+
+
+
+
+
+
+const balls=[]
+
+const walls=[]
+
+
+for(let i=0;i<1;++i){
+let radius = Rand.Int(10, 40);
+let mass = Rand.Int(0, 8);
+
+let x=Rand.Int(1, 11) * radius; 
+let y=Rand.Int(1, 11) * radius; 
+balls.push(new Ball(x,y, radius, mass))
+balls[i].elasticity=Rand.Float(0,10) / 10;
+}
+balls[0].player=1
+
+walls[0]=new Wall(100, 30, 400, 200)
+
+
+
+
+
+
+
+
+
+
+const Animate=(dt)=>{
+
+//ctx.fillStyle="black";
+//ctx.fillRect(0,0, ctx.canvas.width, ctx.canvas.height);
+ctx.clearRect(0,0, ctx.canvas.width, ctx.canvas.height);
+
+
+balls.forEach((b)=>{
+b.draw(ctx);
+b.update(dt);
+
+})
+
+walls.forEach((w)=>{
+w.draw(ctx);
+w.update(dt);
+
+})
+
+balls.forEach((b, Index)=>{
+
+walls.forEach((w)=>{
+
+if(coll_det_bw(b, w)){
+console.log("collision")
+pen_res_bw(b, w);
+
+}
+
+})
+
+
+for(let i=Index+1;i<balls.length; i++){
+if(det_coll_bb(balls[Index], balls[i])){
+pen_res_bb(balls[Index], balls[i]);
+coll_res_bb(balls[Index], balls[i]);
+
+}
+
+
+
+}
+
+if(!b.player) return;
+if(action.up) b.acceleration.y= -b.accSpeed;
+if(action.left) b.acceleration.x= -b.accSpeed;
+if(action.right) b.acceleration.x=b.accSpeed;
+if(action.down) b.acceleration.y=b.accSpeed;
+
+if(!action.up && !action.down) b.acceleration.y=0
+if(!action.left && !action.right) b.acceleration.x=0
+
+
+
+})
+
+
+
+
+}
+
+
+
+
+
+let LastTime=0;
+
+const MainLoop=(TimeStamp)=>{
+
+const deltaTime = TimeStamp - LastTime;
+LastTime = TimeStamp;
+Animate(deltaTime);
+
+requestAnimationFrame(MainLoop);
+
+}
+
+MainLoop(0);
+
+
+ctx.canvas.addEventListener("keydown", (e)=>{
+
+if(e.key==="w") action.up=1;
+if(e.key==="a") action.left=1;
+if(e.key==="d") action.right=1;
+if(e.key==="s") action.down=1;
+
+})
+
+ctx.canvas.addEventListener("keyup", (e)=>{
+
+if(e.key==="w") action.up=0;
+if(e.key==="a") action.left=0;
+if(e.key==="d") action.right=0;
+if(e.key==="s") action.down=0;
+
+
+})
+
+
+}
+
+window.addEventListener("load", ()=>{
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+console.log(ctx);
+app(ctx);
+})
+
+</script>
+</body>
+
+</html>

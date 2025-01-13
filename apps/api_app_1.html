@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=1.0 user-scalable=0">
+
+<meta name="author" content="BhowmickByte" />
+
+<style>
+
+*:after,*,*:before{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+html{
+font-size: 10px;
+}
+
+
+body{
+background:#0A151B;
+}
+
+.wrapper{
+margin-inline: auto;
+width: min(100% - 2rem, 33rem);
+}
+
+.error_box{
+height:min(22rem, 50%);
+overflow: hidden auto;
+background: red;
+color: blue;
+}
+
+.error_box > .error_title{
+margin: auto;
+width: min(30rem, 80% - 2rem);
+background: #80FF00;
+display: block;
+text-transform: capitalize;
+text-align: center;
+font-size: 3rem;
+}
+
+.error_box > p{
+margin: 1rem;
+padding:1rem;
+background-color: gray;
+color:orange;
+font-size:2rem;
+}
+
+</style>
+
+
+
+<title>api app 1</title>
+
+
+</head>
+<body>
+
+
+<div class="wrapper">
+
+
+
+<canvas id="canvas"></canvas>
+
+
+</div>
+
+<div class="wrapper">
+<button id="quit_btn" data-function="quit">quit btn</button>
+<button id="speak_btn" data-function="speak">speak btn</button>
+</div>
+
+<div class="wrapper">
+
+<div class="error_box">
+<span class="error_title">error and warning</span>
+</div>
+
+</div>
+
+
+<script>
+
+
+//const canvas=document.querySelector('canvas');
+//const gl=canvas.getContext('webgl2');
+
+
+const showError = msg =>{
+console.log(msg);
+const elmt = document.querySelector(".error_box");
+if(!elmt) return;
+elmt.innerHTML += `<p>${msg}</p>`;
+}
+
+
+class Rand{
+
+static Float= (min=1,max=2) => (Math.random() * (1+max-min) + min);
+
+
+static Int =(min=10,max=20) =>  Math.floor(Rand.Float(min, max));
+
+
+static Choice =(...args) => args[Rand.Int(0, args.length - 1)];
+
+
+}
+
+
+
+
+
+
+const quit_fun=()=>{
+//condision
+let _c = window?.confirm("do you want to exit our website");
+//showError(_c)
+_c?window?.close():0;
+}
+
+const speak_fun = (speak_speed=0.3, pitch_speed=12, volume=1) =>{
+
+
+let _text="javaScript is awesome all of the time \n there is no dout";
+let _utterance = new window.SpeechSynthesisUtterance(_text);
+_utterance.lang = "hi-in";
+_utterance.pitch = pitch_speed;
+_utterance.rate = speak_speed;
+_utterance.volume = volume;
+showError(speechSynthesis.getVoices());
+
+window?.speechSynthesis?.speak(_utterance);
+}
+
+
+const app=async()=>{
+
+
+
+
+//let idk1 = getComputedStyle(canvas)
+//showError(idk1)
+
+//let idk1 = getSelection(document.createElement("a"))
+//showError(idk1)
+
+//let idk1 = await indexedDB.open("")
+//showError(idk1)
+
+//let idk1 =  webkitRequestFileSystem("./", 1, {})
+//showError(idk1)
+
+const Loop=()=>{
+
+//showError("loop");
+//speak();
+
+}
+
+setInterval(()=>{
+
+Loop()
+
+}, 1000)
+
+
+
+
+
+//control
+document.addEventListener("click", (e)=>{
+
+
+})
+
+speak_btn.addEventListener("click", ()=>{
+speak_fun()
+})
+
+quit_btn.addEventListener("click", ()=>{
+quit_fun()
+})
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+window.addEventListener("load", ()=>{
+try{
+showError(window)
+app();
+
+
+}
+
+catch(e){
+showError("something wrong "+ e)
+}
+
+
+/*
+const grammar =
+  "#JSGF V1.0; grammar colors; public <color> = aqua | azure | beige | bisque | black | blue | brown | chocolate | coral | crimson | cyan | fuchsia | ghostwhite | gold | goldenrod | gray | green | indigo | ivory | khaki | lavender | lime | linen | magenta | maroon | moccasin | navy | olive | orange | orchid | peru | pink | plum | purple | red | salmon | sienna | silver | snow | tan | teal | thistle | tomato | turquoise | violet | white | yellow ;";
+const recognition = new SpeechRecognition();
+const speechRecognitionList = new SpeechGrammarList();
+speechRecognitionList.addFromString(grammar, 1);
+recognition.grammars = speechRecognitionList;
+recognition.continuous = false;
+recognition.lang = "en-US";
+recognition.interimResults = false;
+recognition.maxAlternatives = 1;
+
+const diagnostic = document.querySelector(".output");
+const bg = document.querySelector("html");
+
+document.body.onclick = () => {
+  recognition.start();
+  console.log("Ready to receive a color command.");
+};
+
+recognition.onresult = (event) => {
+  const color = event.results[0][0].transcript;
+  diagnostic.textContent = `Result received: ${color}`;
+  bg.style.backgroundColor = color;
+};
+
+*/
+
+
+});
+
+
+</script>
+</body>
+</html>

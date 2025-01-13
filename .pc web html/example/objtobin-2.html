@@ -1,0 +1,252 @@
+ <!DOCTYPE html>
+<html>
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+
+<title>3d object to binary file 2</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
+html{
+font-size:10px;
+}
+
+
+
+body{
+width:100vw; height:100vh;
+}
+
+main{
+width:100%; height:140rem;
+background:#e3e3e311;
+
+}
+
+.hero{
+margin: auto;
+width:98%; height:26rem;
+background: #0051FF;
+display: flex;
+align-items:center;
+justify-content:space-around;
+
+
+}
+
+.hero img{
+width:50%; height:90%;
+}
+
+.hero .heroText{
+width:50%; height:90%;
+}
+
+.hero .heroText h2{
+color: #040022;
+font-size:3rem;
+text-transform: capitalize;
+
+}
+
+.hero .heroText pre{
+font-size:1rem;
+color: #545464;
+}
+
+.contailer{
+margin:auto;
+width:96%; height:10rem;
+display: flex;
+align-items:center;
+justify-content:space-between;
+}
+
+
+.dummy1{
+width:50%; height:100%;
+}
+
+.dummy1 textarea{
+width:90%; height:40%;
+text-align: center;
+}
+
+.dummy1 a{
+text-align: center;
+padding:1rem 2rem;
+color:white;
+background:blue;
+font-size:2rem;
+text-decoration: none;
+text-transform: capitalize;
+}
+
+
+
+
+</style>
+</head>
+<body>
+
+<main>
+
+<div class="hero">
+<img src="so.png" loading="lazy" alt="zelda and link" />
+
+<div class="heroText">
+
+<h2>hero title heading</h2>
+<pre>
+zelda link
+</pre>
+</div>
+
+</div>
+
+<div class="contailer">
+
+<div class="dummy1">
+<textarea class="dataName" rows="2" cols="40" placeholder="fileName"></textarea>
+<a href="#" id="a1">DOWNLOAD data</a>
+ 
+</div>
+
+
+<div class="dummy1">
+ 
+<textarea class="indicesName" rows="2" cols="40" placeholder="fileName"></textarea>
+<a href="#" id="a2">DOWNLOAD indices</a>
+
+</div>
+
+</div>
+
+
+</main>
+
+<script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const strToFloat=(str)=>{
+const Numbers=[]
+for(const s of str){
+Numbers.push(parseFloat(s))
+}
+return Numbers;
+}
+
+const loadFile=async(url)=>{
+const d=await fetch(url)
+return await d.text()
+}
+
+
+
+
+
+const parseArrayBuffer=(data)=>{
+
+const lines=data.split("\n")
+
+const positions=[]
+const texCoords=[]
+const normals=[]
+
+const arrayBufferSource=[]
+const indices=[]
+
+for(const line of lines){
+
+const [commad, ...values]=line.split(" ",3)
+
+if(commad == "v"){
+positions.push(strToFloat(values))
+}
+
+else if(commad == "vt"){
+texCoords.push(strToFloat(...values))
+}
+
+else if(commad == "vn"){
+normals.push(strToFloat(...values))
+}
+
+else if(commad == "f"){
+
+for(const group of values){
+
+const [pi, ti, ni]=group.split("/")
+
+arrayBufferSource.push( ...positions[pi - 1])
+arrayBufferSource.push( ...texCoords[ti - 1])
+arrayBufferSource.push( ...normals[ni - 1])
+
+indices.push(pi)
+
+}
+
+}
+
+}
+
+return [new Float32Array(arrayBufferSource).buffer, new Uint8Array(indices).buffer]
+
+}
+
+
+const Download=(a, fileName, ab)=>{
+const _b=new Blob([ab], {type: "application/octet-stream"})
+const _url=URL.createObjectURL(_b)
+a.type="application/octet-stream"
+a.download=fileName
+a.href=_url
+}
+
+const app=async()=>{
+
+
+const file=await loadFile("./models/rock02.obj")
+
+const [abData,abIndices]=parseArrayBuffer(file);
+
+Download(a1, "rock.bin", abData)
+Download(a2, "rock.indices.bin", abIndices)
+//console.log(ab)//
+
+//fileResult.innerText = ab
+
+
+
+}
+
+app()
+
+
+
+
+
+
+
+
+
+</script>
+
+</body>
+</html>

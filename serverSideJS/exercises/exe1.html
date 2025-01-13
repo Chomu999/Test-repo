@@ -1,0 +1,187 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<!-- 
+<meta name="viewport" content="width=device-width, initial-scale=5.0 maximum-scale=5.0 user-scalable=0">
+ -->
+ 
+ <meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=9.0">
+<title>HTML fetch to nodejs example</title>
+<style>
+
+
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+body{
+background: #333;
+}
+
+#mainBox{
+width:90vw;height:90vh;
+position:absolute;
+top:50%;
+
+left:50%;
+transform: translate(-50%,-50%);
+background:lightgray;
+display:grid;
+
+grid-template-columns: repeat(1, 1fr);
+grid-template-rows:repeat(9, 1fr);
+grid-gap:10px;
+
+}
+#outputScreen{
+width:100%;height:100%;
+overflow:none;
+overflow-y:scroll;
+}
+
+pre{
+}
+
+
+form{
+grid-row:1/4;
+}
+
+#getSomething{
+margin-left:25%;
+padding:20px;
+background:rgba(30,40,70,1);
+color:white;
+border:none;
+font-size:20px;
+border-radius:50px;
+text-transform:capitalize;
+border-bottom:4px solid #6A0055;
+
+
+transition:all 250ms ease-out;
+}
+
+#getSomething:hover{
+background:rgba(30,40,70,0.3);
+color:black;
+}
+
+
+</style>
+
+<head>
+
+<body>
+
+<!-- <canvas class="gl"></canvas>
+ -->
+
+<div id="mainBox">
+
+
+<form
+class="myForm" 
+action="/MySave"
+method="post" accept-charset="utf-8">
+
+<label for="Fname">Fname</label>
+<input type="text" name="Fname" id="Fname" placeholder="F Name" />
+
+<br>
+
+<label for="Lname">Lname</label>
+<input type="text" name="Lname" id="Lname" placeholder="L Name" />
+
+<br>
+<br>
+<button type="submit" id=getSomething> submit</button>
+
+</form>
+
+
+
+</div>
+
+
+<!-- <script src="dumy.txt" data-dum=tex+></script> -->
+
+<script type=module>
+
+const mydataSet=[
+
+
+{name:'bis',age:20},
+{name:'wiz',age:35},
+{name:'lis',age:25},
+
+]
+const getData= async(url,type='text')=>{
+const res=await fetch(url,{
+method:'GET',
+mode:'cors',
+header:{
+"X-API-Key": "testing",
+"Context-Type": "application/json",
+}
+
+})
+
+const c=type.toUpperCase();
+if(c=='TEXT') return res.text();
+else if(c=='JSON') return res.json();
+else return null;
+}
+
+
+const setData= (url)=>{
+
+fetch(url,{
+method:'POST',
+mode:'cors',
+header:{
+"X-API-Key": "testing",
+"Context-Type": "application/json",
+},
+body:{
+"Content": JSON.stringify(mydataSet)
+
+}
+
+})
+
+}
+
+
+const getSomething=document.querySelector('#getSomething');
+const output=document.querySelector('#output');
+
+
+
+
+
+
+
+getSomething.addEventListener('click',(e)=>{
+e.preventDefault();
+//fout;
+
+setData('http://localhost:3000');
+
+alert(e)
+//console.log(e)
+})
+
+
+const mydata=await getData('./userData.json','json');
+
+console.log(mydata)
+
+//console.log(window)
+
+</script>
+</body>
+</html>

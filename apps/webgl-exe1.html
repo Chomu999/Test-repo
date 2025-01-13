@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=1.0 user-scalable=0">
+
+<title>WebGL exe 1</title>
+
+<meta name="author" content="BhowmickByte" />
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+body{
+width:100dvw; height:100dvh;
+background:#0A151B;
+}
+
+main{
+width:100%; height:100%;
+display:grid;
+place-items:center;
+}
+
+main div.res{
+display: none;
+}
+
+</style>
+
+
+
+
+</head>
+<body>
+
+<main>
+<canvas id="canvas"></canvas>
+
+<div class="res">
+<img src="/storage/emulated/0/Download/Zelda2.png" alt="zelda" id="img1" />
+</div>
+
+</main>
+
+
+
+<script>
+
+
+const canvas=document.querySelector('canvas');
+const gl=canvas.getContext('webgl2');
+
+const GLReSizer=(gl)=>{
+const cs=innerWidth>innerHeight?innerHeight:innerWidth;
+gl.canvas.width=cs;
+gl.canvas.height=cs;
+}
+
+
+
+class Rand{
+
+static Float(min=1,max=2){
+return (Math.random() * (1+max-min) + min);
+}
+
+static Int(min=10,max=20){
+return Math.floor(Rand.Float(min, max));
+}
+
+static Choice(...args){
+return args[Rand.Int(0, args.length - 1)];
+}
+
+}
+
+
+
+class Program{
+constructor(vs, fs){
+this.ID = this.#Make_Program(vs, fs);
+
+}
+
+Bind(){
+gl.useProgram(this.ID)
+}
+
+Unbind(){
+gl.useProgram(null)
+}
+
+Delete(){
+gl.deleteProgram(this.ID)
+}
+
+SetUniform1(name, value){
+gl.uniform1f(this.#GetUniformLocation(this.ID.loc.u, name), value)
+}
+
+SetUniform2(name, value){
+gl.uniform2fv(this.#GetUniformLocation(this.ID.loc.u, name), value)
+}
+
+SetUniform3(name, value){
+gl.uniform3fv(this.#GetUniformLocation(this.ID.loc.u, name), value)
+}
+
+SetUniform4(name, value){
+gl.uniform4fv(this.#GetUniformLocation(this.ID.loc.u, name), value)
+}
+
+#GetUniformLocation(store, name){
+let result = !store[name] ? gl.getUniformLocation(this.ID, name): store[name];
+store[name] = result;
+return result;
+}
+
+#Make_Shader(type, source){
+const vof= type===gl.VERTEX_SHADER?"vertex":"fragment";
+const Shader=gl.createShader(type);
+gl.shaderSource(Shader,source);
+gl.compileShader(Shader);
+if(!gl.getShaderParameter(Shader, gl.COMPILE_STATUS)){
+console.error(vof+" SHADER COMPILE ERROR ", gl.getShaderInfoLog(Shader));
+console.info(vof+" SHADER SOURCE ", gl.getShaderSource(Shader));
+}
+return Shader;
+}
+
+#Make_Program(vss, fss){
+const vs=this.#Make_Shader(gl.VERTEX_SHADER, vss)
+const fs=this.#Make_Shader(gl.FRAGMENT_SHADER, fss)
+
+
+const Prog=gl.createProgram();
+
+gl.attachShader(Prog,vs);
+gl.attachShader(Prog,fs);
+
+gl.linkProgram(Prog);
+if(!gl.getProgramParameter(Prog, gl.LINK_STATUS)){
+console.log(gl.getProgramInfoLog(Prog))
+}
+
+gl.useProgram(Prog);
+gl.validateProgram(Prog);
+if(!gl.getProgramParameter(Prog, gl.VALIDATE_STATUS)){
+console.log(gl.getProgramInfoLog(Prog));
+}
+//gl.useProgram(null);
+
+Prog.loc={
+a:{},
+u:{},
+}
+return Prog;
+}
+}
+
+
+class VA{
+constructor(){
+this.ID = gl.createVertexArray()
+}
+
+Bind(){
+gl.bindVertexArray(this.ID)
+}
+
+Unbind(){
+gl.bindVertexArray(null)
+}
+
+Delete(){
+gl.deleteVertexArray(this.ID)
+}
+
+LA(layoutLocation=0, numOfComponents=3, type=gl.FLOAT, normalize=false, stride=0, offset=0){
+
+gl.enableVertexAttribArray(layoutLocation);
+gl.vertexAttribPointer(layoutLocation, numOfComponents, type, normalize, stride, offset);
+
+}
+
+}
+
+
+class VB{
+constructor(vertices){
+this.ID=gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, this.ID);
+gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+}
+
+Bind(){
+gl.bindBuffer(gl.ARRAY_BUFFER, this.ID);
+}
+
+Unbind(){
+gl.bindBuffer(gl.ARRAY_BUFFER, null);
+}
+
+Delete(){
+gl.deleteBuffer(this.ID);
+}
+
+
+}
+
+class IB{
+constructor(vertices){
+this.ID=gl.createBuffer();
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ID);
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+}
+
+Bind(){
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ID);
+}
+
+Unbind(){
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+}
+
+Delete(){
+gl.deleteBuffer(this.ID);
+}
+
+
+}
+
+
+class Texture{
+constructor(imgData){
+this.ID= gl.createTexture();
+
+gl.bindTexture(gl.TEXTURE_2D, this.ID);
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, !0)
+
+
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, imgData)
+
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDG)
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDG)
+
+
+const color=[1.0, 0.0, 0.0, 1.0];
+
+//gl.texParameterfv(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, color)
+//CLAMP_TO_EDGE
+
+gl.bindTexture(gl.TEXTURE_2D, null)
+
+}
+
+Bind(){
+gl.bindTexture(gl.TEXTURE_2D, this.ID);
+}
+
+Unbind(){
+gl.bindTexture(gl.TEXTURE_2D, null);
+}
+
+Delete(){
+gl.deleteTexture(this.ID);
+}
+
+
+}
+
+
+class TextureLoader{
+constructor(){
+this.path="/storage/emulated/0/";
+}
+
+load(url){
+
+let img = new Image();
+img.src = this.path +url;
+let tex = new Texture(img);
+return tex;
+}
+
+}
+
+
+
+class Scene{
+constructor(){
+this.Childrens=[];
+}
+
+add_child(...child){
+this.Childrens.push(...child);
+}
+
+render(scene){
+
+this.Childrens.forEach((child)=>{
+child.render()
+});
+
+}
+
+}
+
+
+class Renderer{
+constructor(width, height){
+this.width=width;
+this.height=height;
+this.color=[.2, .5, .4, 1.0];
+}
+
+clear(){
+gl.clearColor(...this.color);
+gl.clear(gl.COLOR_BUFFER_BIT);
+gl.viewport(0,0, this.width, this.height)
+
+}
+
+render(scene){
+
+scene.render()
+
+}
+
+}
+
+
+
+const app=(gl)=>{
+
+
+let vsSource=`#version 300 es
+precision mediump float;
+
+in vec4 aPos;
+in vec2 aTexCoord;
+
+uniform float uTime;
+
+
+out vec4 vColor;
+out vec2 vTexCoord;
+
+void main(){
+
+gl_Position = aPos;
+vTexCoord = aTexCoord;
+
+}
+
+`;
+
+let fsSource=`#version 300 es
+precision mediump float;
+ 
+out vec4 FragColor;
+
+
+uniform sampler2D uTex;
+uniform float uTime;
+
+in vec2 vTexCoord;
+
+
+
+
+
+
+void main(){
+
+
+vec4 c = texture(uTex, vTexCoord * abs(cos(uTime)) + abs(sin(uTime)));
+vec4 c2 = texture(uTex, vTexCoord * 2.0);
+
+vec4 finalColor = vec4(vec3(c.r + c.g + c.b / 3.0), 1.0);
+FragColor = c2;
+//FragColor = vColor;
+
+}
+
+`;
+
+const {width, height} = gl.canvas;
+
+const _Renderer=new Renderer(width, height);
+
+//console.log(_Renderer)
+
+const Prog = new Program(vsSource, fsSource)
+
+
+
+
+console.log(Prog)
+
+let vertices=new Float32Array([
+//   pos       u  v
+ -1,  1,   0, 1,
+  1,  1,   1, 1,
+ -1, -1,   0, 0,
+  1, -1,   1, 0,
+
+]);
+
+let indices=new Uint8Array([
+0,1,2,
+1,2,3
+]);
+
+
+
+let aPosLoc=0??gl.getAttribLocation(Prog.ID,"aPos");
+let aTexCoordLoc=1??gl.getAttribLocation(Prog.ID,"aTexCoord");
+
+
+
+const tex = new Texture(img1);
+
+
+
+
+
+const Vao1=new VA()
+
+const Vbo1=new VB(vertices)
+
+const Ibo1=new IB(indices)
+
+Vao1.Bind();
+Vbo1.Bind();
+Vao1.LA(aPosLoc, 2, gl.FLOAT, false, 4 * 4, 0 * 4);
+Vao1.LA(aTexCoordLoc, 2, gl.FLOAT, false, 4 * 4, 2 * 4);
+Ibo1.Bind();
+
+
+
+const animate=(dt)=>{
+_Renderer.clear();
+
+//gl.activeTexture(gl.TEXTURE0+0);
+//gl.bindTexture(gl.TEXTURE_2D, tex);
+Prog.Bind()
+
+tex.Bind()
+
+Prog.SetUniform1("uTime", dt)
+//Prog.SetUniform4("uColor", [1., 0., 0, 1])
+
+Vao1.Bind()
+
+gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_BYTE, 0);
+
+}
+
+
+
+
+
+const MainLoop=(ts=0)=>{
+
+let dt = ts * 0.001 ?? 0.5;
+animate(dt);
+
+//if(0)
+window.requestAnimationFrame(MainLoop);
+
+
+}
+
+MainLoop();
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+const init=()=>{
+
+
+GLReSizer(gl);
+app(gl);
+console.log(gl);
+
+}
+
+
+
+
+
+
+window.addEventListener("load", ()=>{
+try{
+init();
+}
+catch(e){
+console.log("something wrong ", e)
+}
+
+
+
+
+
+});
+
+
+</script>
+</body>
+</html>

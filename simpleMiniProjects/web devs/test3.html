@@ -1,0 +1,130 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=5.0 user-scalable=0">
+ 
+ <!--<meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=1.0"> -->
+<title>html5 test 2</title>
+
+
+<style type="text/css" media="all">
+body {font-size: medium;
+ font-family: Serif;
+ background-color: black;
+ color: white;}
+#page {background-color: white;
+ color: black;
+ padding: 1em;}
+h1 {font-size: xx-large;
+ font-family: Sans-Serif;
+ color: black;
+ text-align: center;
+ border-bottom: solid 4px orange;}
+p {text-indent: 1em; 
+ text-align: justify;
+ line-height: 150%;}
+a:link {color: blue; text-decoration: none;}
+a:visited {color: red; text-decoration: none;}
+a:hover {color: red; text-decoration: underline;}
+a:active {color: red; text-decoration: none;}
+</style>
+
+</head>
+<body>
+
+<main>
+
+
+<hr>
+
+
+<form action="#" method="get">
+<fieldset>
+<legend>Basics</legend>
+<p>Enter your name: <input type="text" maxlength="35" size="20"><br>
+Enter your password: <input type="password" maxlength="35" size="20">
+</p>
+</fieldset>
+<p><label>Which is your favorite food?</label>
+ <input type="radio" name="favorite" value="Mexican">Mexican
+ <input type="radio" name="favorite" value="Russian">Russian
+ <input type="radio" name="favorite" value="Japanese">Japanese
+ <input type="radio" checked name="favorite" value="Other">Other
+</p>
+<p>
+ <input type="submit" value="Submit">
+ <input type="reset" value="Reset">
+</p>
+</form>
+HTML5 snippets
+<p><label> Three Letter Acronyms:
+ <input pattern="[A-Z]{3}" name="threeletter"
+ title="Enter an upper case three letter combination."/>
+</label></p>
+<p><label>Name: <input type="text" name="fullname" placeholder="Thomas A. 
+Powell"></label></p>
+<p><input type="range" name="slider"></p>
+<p><input type="date" oninput="year.value = valueAsDate.getYear();">
+<p>HTML5 finalized in the year <output output="year">&nbsp;</output></p>
+<p><label> Favorite Dog: <input list="dogs"></label></p>
+ <datalist id="dogs">
+ <option>Angus</option>
+ <option>Tucker</option>
+ <option>Cisco</option>
+ <option>Sabrina</option>
+ </datalist>
+
+
+<hr>
+
+<h2>keygen Example</h2>
+
+<form method="post" action="makecert.php"> 
+ <keygen name="RSA public key" challenge="123456789" keytype="RSA"> 
+ <input type="submit" name="createcert" value="Generate"> 
+</form>
+
+<hr>
+
+<map name="mainmap" id="mainmap">
+ <area shape="circle" coords="200,250,25"
+ href="file1.html" />
+ <area shape="rectangle" coords="50,50,100,100"
+ href="file2.html#important" />
+ <area shape="default" nohref="nohref" />
+</map>
+
+
+<hr>
+
+<pre>
+ Within PREFORMATTED text A L L formatting IS PRESERVED
+ NO m a t t e r how wild it is. Remember that some
+ <b>HTML</b> markup is allowed within the &lt;PRE&gt; element.
+</pre>
+
+<!-- .[9 LT 7]..
+<h1>hi hello</h1>
+-->
+
+<hr>
+
+<div id="page">
+<h1>HTML with Embedded Style</h1>
+<p>Cascading Style Sheets 2.1 as defined by the 
+<a href="http://www.w3.org">W3C</a> provides
+powerful page layout facilities. The technology
+depends on correct markup so make sure
+you get that right too!</p>
+</div>
+
+
+</main>
+
+<hr>
+
+
+</body>
+</html>

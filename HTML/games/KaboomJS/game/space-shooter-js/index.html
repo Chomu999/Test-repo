@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+
+<meta name="author" content="billbyte" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>kaboom space shooter game</title>
+<style >
+*:before, *, *:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+html{
+font-size:10px;
+}
+
+
+body{
+width:100vw;
+height:100vh;
+background:chocolate;
+color: saddlebrown;
+
+}
+
+main{
+width:100%;
+height:100%;
+display:grid;
+place-items:center;
+background: rgb(2,0,36);
+background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(6,6,90,1) 24%, rgba(18,18,92,1) 44%, rgba(0,212,255,1) 100%);
+/* background-image: linear-gradient( saddlebrown, chocolate); */
+
+
+}
+
+
+
+</style>
+
+
+<script src="./kaboom.js"></script>
+ 
+
+ 
+
+</head>
+
+<body>
+
+<main>
+
+
+
+<canvas id="canvas"></canvas>
+
+
+
+</main>
+
+
+
+<!-- <script src="./main.js"></script> -->
+
+
+
+<script>
+
+
+
+
+
+const app=()=>{
+
+
+const canvas=document.getElementById("canvas");
+
+kaboom({
+canvas,
+scale:1.5,
+width: 260,
+height: 300,
+background:[25, 25, 25],
+});
+
+// 
+let high_score=0;
+
+
+scene("game", ()=>{
+
+const alien_speed = -100;
+const bullet_damage = 8;
+
+const player = add([
+rect(20, 20),
+color(255, 0, 0),
+pos(50, 50),
+area(),
+body(),
+"player",
+{
+score:0,
+health:100,
+},
+
+]);
+
+
+
+const spawn_bullet=(pox)=>{
+
+let _w=8, _h=4;
+add([
+rect(_w, _h),
+color(255, 210, 10),
+pos(pox.x, pox.y),
+area(),
+"bullet",
+{
+damage: bullet_damage,
+}
+]);
+
+
+}
+
+
+
+const spawn_aliens=()=>{
+
+let _c=[ randi(0,255), randi(0,255), randi(0,255), ];
+let _w=randi(1, 5) * 8;
+let _h=randi(1, 5) * 8;
+let _y= randi(_h, height() - _h);
+let _point=randi(1, 10), _health=randi(3, 20), _damage=randi(1, 9);
+
+add([
+rect(_w, _h),
+color(..._c),
+pos(_w+width(), _y),
+area(),
+"alien",
+{
+point:_point,
+health:_health,
+damage: _damage,
+},
+
+
+]);
+
+
+}
+
+
+
+onUpdate("alien", (alien)=>{
+
+alien.move(alien_speed, 0);
+
+if(alien.pos.x + alien.width < 0){
+destroy(alien);
+//player.score+=alien.point;
+}
+
+});
+
+
+onUpdate("bullet", (bullet)=>{
+
+bullet.move(400, 0);
+
+if(bullet.pos.x - bullet.width > width()){
+destroy(bullet);
+}
+
+});
+
+
+onCollide("alien", "player", (alien, player)=>{
+
+player.health -= alien.damage;
+
+});
+
+
+onCollide("alien", "bullet", (alien, bullet)=>{
+
+destroy(bullet);
+
+alien.health -= bullet.damage;
+
+if(alien.health <= 0){
+destroy(alien);
+}
+player.score += alien.point;
+
+});
+
+
+
+
+
+onUpdate(()=>{
+
+
+if(player.health <= 0){
+go("loose", player.score)
+}
+
+if(player.pos.y > height()) player.health -= 1;
+
+
+
+});
+
+onTouchStart(()=>{
+player.jump(350);
+//spawn_bullet(player.pos);
+})
+
+
+
+
+onDraw(()=>{
+
+
+drawText({
+text:`SCORE : ${player.score}`,
+color:{r:250, g:250, b:0},
+size:10,
+pos:vec2(0, 5),
+});
+
+drawText({
+text:`HEALTH : ${player.health}`,
+color:{r:25, g:150, b:0},
+size:10,
+pos:vec2(180, 5),
+});
+
+
+
+
+});
+
+
+loop(1.4, spawn_aliens);
+loop(0.35, ()=> spawn_bullet( player.pos));
+
+});
+
+
+
+scene("loose", (score)=>{
+
+
+onTouchEnd(()=>{
+go("game");
+})
+
+let high_score_msg="";
+
+if(score > high_score){
+high_score_msg=`you beat the prev high score`;
+high_score = (high_score < score)?score:high_score;
+}else{
+high_score_msg="high score";
+}
+
+
+onDraw(()=>{
+
+drawText({
+text:`game over !`,
+color:{r:255, g:0, b:0},
+size:35,
+pos:vec2(0, 140),
+});
+
+
+drawText({
+text:`here your SCORE : ${score}`,
+color:{r:25, g:150, b:0},
+size:10,
+pos:vec2(0, 5),
+});
+
+drawText({
+text:`${high_score_msg} : ${high_score}`,
+color:{r:25, g:150, b:0},
+size:10,
+pos:vec2(130, 5),
+});
+
+drawText({
+text:`press any key `,
+color:{r:25, g:150, b:0},
+size:16,
+pos:vec2(120, 280),
+});
+
+
+
+
+});
+
+
+});
+
+
+scene("won", (score)=>{
+
+
+onTouchEnd(()=>{
+go("game");
+})
+
+
+
+
+onDraw(()=>{
+
+drawText({
+text:`you win !`,
+color:{r:255, g:0, b:0},
+size:35,
+pos:vec2(0, 140),
+});
+
+
+drawText({
+text:`here your SCORE : ${score}`,
+color:{r:25, g:150, b:0},
+size:10,
+pos:vec2(0, 5),
+});
+
+drawText({
+text:`press any key `,
+color:{r:25, g:150, b:0},
+size:16,
+pos:vec2(120, 280),
+});
+
+
+
+
+});
+
+
+});
+
+
+
+const start_game=()=>{
+go("won", 9);
+}
+
+start_game();
+
+}
+
+
+
+window.addEventListener("load", ()=>{
+
+
+app();
+
+} );
+
+
+
+
+
+
+
+
+</script>
+
+
+
+</body>
+</html>

@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+
+<style>
+
+*:after,*,*:before{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+:root{
+
+}
+
+*::selection{
+color: red;
+background: tan;
+}
+
+html{
+font-size: 10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style-type: none;
+}
+
+
+
+
+
+.wrapper{
+margin: 1rem auto;
+padding: 1rem;
+width: min(38rem, 100% - 2rem);
+background: #00000034;
+border-radius: 1rem;
+}
+
+
+.msgContainer{
+background: #C800FF;
+aspect-ratio: 3;
+}
+
+.msgContainer  .msgs{
+margin: 1rem;
+padding: 1rem;
+display:inline-block;
+color: tan;
+background: #FF006D;
+font-size: 1.2rem;
+border-radius: 1rem;
+}
+
+
+
+
+.pairContainer{
+aspect-ratio: 1;
+display: grid;
+/* grid-template-rows: 20rem 16rem 10rem 5rem; */
+grid-template-rows:repeat(2, 1fr);
+grid-template-columns:repeat(2, 1fr);
+
+gap:3rem;
+background: #A3FFFC77;
+}
+
+
+
+
+
+
+.pairBox{
+background:#ffffff;
+border:1rem solid #DBDBDB;
+border-radius: 5rem;
+position: relative;
+z-index: 10;
+transition: 1s ease-out;
+
+
+}
+
+
+.pairBox:before{
+content: "bye";
+position: absolute;
+width:100%;height:100%;
+background: #00ff0033;
+border-radius: 5rem;
+z-index: -20;
+}
+
+.pairBox:after{
+content: "hi bhai";
+width:50%;height:50%;
+position: absolute;
+background: #ff000033;
+border-radius: 5rem;
+z-index: 20;
+}
+
+
+.pairBoxAnime{
+transform:rotateY(360deg) ;
+}
+
+
+.pairIsFind{
+filter: blur(50%);
+backdrop-filter: blur(40%);
+
+/* visibility: hidden; */
+
+/* background: red; */
+animation:fadeHide 1s linear 2;
+}
+
+
+
+
+
+
+
+
+.btnContainer{
+aspect-ratio: 2;
+background: #008CFF;
+font-size: 2rem;
+text-align: center;
+align-items: center;
+}
+
+.btns{
+--color:#0300FF;
+--colorHover:#00FF37;
+margin:0.4rem 2rem;
+padding: 0.5rem;
+background: #5069FF;
+color: var(--color);
+border: none;
+border-radius: 1rem;
+border-bottom: 2rem solid currentColor;
+transition:.2s linear;
+}
+
+
+.btns:active{
+--color:var(--colorHover, red);
+border-bottom:0.5rem solid currentColor;
+transform: translate(0, 50%);
+}
+
+
+
+.optionContainer{
+background: #00C7FF;
+text-align: center;
+}
+
+.optionContainer *{
+font-size: 2rem;
+color: #FF009C;
+}
+
+
+
+@keyframes fadeHide{
+from{
+background: pink;
+}
+to{
+background: blue;
+}
+
+}
+
+
+</style>
+
+<title>Find The Pair</title>
+
+</head>
+<body>
+
+
+<main>
+
+<div class="wrapper msgContainer">
+
+<b class="msgs botMsg">hi hello gu khalo</b>
+<b class="msgs userMsg">hi hello gu khalo</b>
+<b class="msgs userMsg">hi hello gu khalo</b>
+<b class="msgs userMsg">hi hello gu khalo</b>
+
+</div>
+
+<div class="wrapper pairContainer">
+
+<div data-pair="red" class="pairs pairBox"></div>
+<div  data-pair="blue" class="pairs pairBox"></div>
+<div  data-pair="red" class="pairs pairBox"></div>
+<div  data-pair="blue" class="pairs pairBox"></div>
+
+</div>
+
+<div class="wrapper btnContainer">
+
+<button class="btns left startGame">start Game</button>
+<button class="btns center finishGame">center</button>
+<button class="btns right restartGame">Restart Game</button>
+
+
+
+
+<div class="wrapper optionContainer">
+
+<label for="defficaltySelector">defficaltySelector</label>
+<select  id="defficaltySelector">
+  <option value="easy">easy</option>
+  <option value="normal">normal</option>
+  <option value="hard">hard</option>
+</select>
+
+</div>
+
+</div>
+
+</main>
+
+
+<!-- <script src="/storage/emulated/0/g_js_libs/eruda.min.js"></script> -->
+
+<script type="module">
+"use strict";
+
+
+//some utils
+class Rand{
+
+static Float(min=0, max=1){
+return Math.random() * (max - min+1) + min;
+}
+
+static Int(min=6, max=9){
+return Math.floor( Rand.Float(min, max));
+}
+
+static Choice(...args){
+return args[Rand.Int(0, args.length - 1)];
+}
+
+static Color(len=3){
+let outColor="#";
+for(let i=0;i<len;++i){
+outColor+=Rand.Choice(..."0123456789abcdef".split(""));
+}
+return outColor;
+}
+
+}
+
+
+//help to create html nested element easily
+const strToHTML=(_str_)=>{
+const element = document.createElement("div");
+element.innerHTML=_str_??"null";
+return element?.firstElementChild;
+}
+
+//sleep function help to wait/puase for a particular amount of time
+const sleep=time=>new Promise((res,rej)=>{
+setTimeout(()=>{res(true)}, time*1000);
+});
+
+
+
+//querySelector
+
+const INITIAL=async()=>{
+
+
+const pairContainer=document.querySelector(".pairContainer");
+
+const allPairs = [...pairContainer?.children];
+const userPairGuess = [];
+const pairMatchSize = 2;
+
+console.log(allPairs)
+
+
+//for checking pairs have match or not
+const checkPairMatch=async(guess)=>{
+
+
+const value1 = guess[0]?.dataset?.pair??0;
+const value2 = guess[1]?.dataset?.pair??1;
+
+
+
+if(value1 === value2){
+
+console.log("found a match");
+
+
+for(const i of guess){
+//removing pairBoxAnime class to pair element
+i.classList.toggle("pairBoxAnime");
+
+//adding pairIsFind class to pair element
+i.classList.toggle("pairIsFind");
+}
+
+}
+else{
+
+console.log("not match  minus 1 life point");
+
+for(const i of guess){
+i.classList.toggle("pairBoxAnime")
+}
+
+}
+
+guess.splice(0, guess.length);
+
+let length=0;
+//checking  for is any pairs are left over or not by user
+for(const i of allPairs){
+
+//spliting current element classes/str into arr
+const currentElementClassArr = i.classList.value.split(" ");
+
+//checking  pairIsFind class/str is available or not
+const pass = currentElementClassArr[ currentElementClassArr.indexOf("pairIsFind") ] ?? "nullStr";
+
+if(pass === "pairIsFind"){
+length++;
+}
+
+}
+return await length;
+
+
+
+
+
+
+}
+
+
+
+//
+pairContainer.addEventListener("click", async (e)=>{
+
+
+
+//which element we got by clicking them
+const element = e?.srcElement ?? e?.target ?? null;
+
+//check for element were getting the element or not
+if(!element) return 0;
+
+//check  element is pair Box or not
+if(!element.dataset.pair) return 0;
+
+//spliting element classes into arr
+const arr = element.classList.value.split(" ");
+
+//checking last class is pairIsFind or not
+const pass = arr[ arr.indexOf("pairIsFind") ] ?? "nullStr";
+
+//check were clicking on find pair or not
+if(pass === "pairIsFind"){
+console.log("choose hide pair cards")
+return 0;
+}
+
+//check 1st pair and 2nd pair are the same or not
+if(userPairGuess[0]?.outerHTML === element.outerHTML){
+console.log("same pair choose another one")
+return 0;
+}
+
+//pushing element in to the userPairGuess arr
+userPairGuess.push(element);
+element.classList.toggle("pairBoxAnime");
+
+//checking userPairGuess arr length reach pairMatchSize or not
+if(userPairGuess.length >= pairMatchSize){
+await sleep(0.7);
+
+//if it reach we called a checkPairMatch function to check pairs have match or not
+const isWin = await checkPairMatch(userPairGuess);
+
+//checking by isWin and allPairs length are same or not
+if(isWin === allPairs.length){
+
+await sleep(1);
+
+alert("you win play it again")
+}
+
+}
+
+});
+
+
+
+//
+pairContainer.addEventListener("touchend", async (e)=>{
+
+//checking userPairGuess arr length reach pairMatchSize or not
+if(userPairGuess.length >= pairMatchSize){
+await sleep(0.7);
+//if it reach we called a checkPairMatch function
+checkPairMatch(userPairGuess);
+}
+
+
+
+});
+
+
+
+
+}
+
+
+
+try{
+INITIAL()
+
+}catch(err){
+console.log(`javascript uncatch error: ${err} `);
+}
+
+
+</script>
+
+</body>
+</html>

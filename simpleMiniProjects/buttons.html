@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+
+<meta name="viewport" content="width=device-width, ,initial-scale=1.0, maximum-scale=9.0">
+<!-- <meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0"> -->
+<title>HTML and CSS Buttons</title>
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+:root{
+--myBlkShadow:-2px 2px 1rem 0 #685E3F;
+--myBTNSize:5rem;
+--myBTNColor:cyan;
+}
+
+
+html{
+font-size:10px;
+}
+
+body{
+width:100vw; height:100vh;
+}
+
+main{
+width:100%; height:100%;
+background:tan;
+display:grid;
+place-items:center;
+}
+
+
+.btn-a{
+padding:calc(var(--myBTNSize) * 0.3) calc(var(--myBTNSize) * 0.6);
+position:relative;
+color:var(--myBTNColor);
+font-size:var(--myBTNSize);
+border:calc(var(--myBTNSize) * 0.2) solid currentColor;
+border-radius:var(--myBTNSize);
+
+overflow:hidden;
+}
+.btn-a > span{
+width:100%; height:100%;
+top:0;left:0;
+position:absolute;
+background:magenta;
+transition:all 0.4s ease-in;
+transform:translateX(-100%);
+}
+
+.btn-a:hover > span {
+transform:translateX(0);
+/* top:0; left:100%; */
+}
+
+
+
+.btn-b{
+padding:calc(var(--myBTNSize) * 0.2) calc(var(--myBTNSize) * 0.4);
+font-size:var(--myBTNSize);
+position:relative;
+color:var(--myBTNColor);
+user-select:none;
+}
+
+.btn-b > span{
+width:100%; height:100%;
+position:absolute;
+top:0; left:0;
+border:10px solid blue;
+border-radius:50rem;
+transition:all 0.5s ease;
+
+}
+
+.btn-b:hover span:first-child {
+transform:rotateZ(-45deg);
+}
+
+.btn-b:hover span:last-child {
+transform:rotateZ(45deg);
+}
+</style>
+</head>
+<body>
+
+<main>
+
+<!-- <div class="btn-a"> Hover Me
+  <span></span>
+</div> -->
+
+
+<div class="btn-b"> Hover Me
+<span data-1></span>
+<span data-2></span>
+</div>
+
+</main>
+
+
+
+
+
+
+
+<script>
+
+
+console.log(window)
+
+</script>
+</body>
+</html>

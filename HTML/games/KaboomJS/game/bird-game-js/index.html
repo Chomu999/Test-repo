@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+
+<meta name="author" content="billbyte" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>kaboom bird game</title>
+<style >
+*:before, *, *:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+html{
+font-size:10px;
+}
+
+
+body{
+width:100vw;
+height:100vh;
+background:chocolate;
+color: saddlebrown;
+
+}
+
+main{
+width:100%;
+height:100%;
+display:grid;
+place-items:center;
+background: rgb(2,0,36);
+background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(6,6,90,1) 24%, rgba(18,18,92,1) 44%, rgba(0,212,255,1) 100%);
+background-image: linear-gradient( saddlebrown, chocolate);
+
+
+}
+
+
+
+</style>
+
+
+<script src="./kaboom.js"></script>
+ 
+
+ 
+
+</head>
+
+<body>
+
+<main>
+
+
+
+<canvas id="canvas"></canvas>
+
+
+
+</main>
+
+
+
+<!-- <script src="./main.js"></script> -->
+
+
+
+<script>
+
+
+
+
+
+const app=()=>{
+
+
+const canvas=document.getElementById("canvas");
+
+kaboom({
+canvas,
+background:[25, 25, 25],
+});
+
+let score=0;
+let health_point=100;
+
+
+
+
+const logic=(score_text, hp_text)=>{
+
+
+
+onUpdate("bird", (bird)=>{
+
+bird.move(bird.speed_x, bird.speed_y);
+
+if(bird.pos.x + bird.width > width() || bird.pos.x < 0){
+bird.speed_x = -bird.speed_x;
+}
+bird.speed_y = Math.sin(.3 ) * 50;
+
+})
+
+
+
+
+onUpdate("rock", (rock)=>{
+
+rock.move(rock.speed_x, rock.speed_y);
+if(rock.pos.y < 0 || rock.pos.y + rock.width > height()){
+rock.speed_y = -rock.speed_y;
+}
+
+})
+
+
+
+onUpdate(()=>{
+
+score_text.text = `score :${score}`
+hp_text.text = `HP :${health_point}`
+
+
+//if()
+
+})
+
+
+onCollide("rock", "bottle", (rock, bottle)=>{
+
+destroy(rock)
+destroy(bottle)
+score += bottle.point
+})
+
+onCollide("rock", "bird", (rock, bird)=>{
+
+destroy(rock)
+destroy(bird)
+score -= bird.point
+health_point -= bird.hp
+})
+
+
+onTouchStart((id, pos)=>{
+if(!get("rock")[0]){
+spawn_rock(pos.x);
+}
+
+})
+
+
+onTouchMove((id, pos)=>{
+
+
+let rock =get("rock")[0];
+
+let aim =get("aim")[0];
+const [pi, ax, ay] = calcAim(aim.pos, rock.pos);
+console.log(aim)
+rock.pos.x += (aim.pos.x + aim.radius) * ax;
+rock.pos.y += (aim.pos.y + aim.radius) * ay;
+
+
+})
+
+
+
+onTouchEnd((id, pos)=>{
+
+
+let rock =get("rock")[0];
+rock.speed_y= -400;
+console.log(rock)
+
+})
+
+
+
+
+}
+
+
+
+const spawn_bottle = (pox)=>{
+
+
+add([
+rect(20, 20),
+color(255, 0, 0),
+pos(pox.x, pox.y),
+area(),
+"bottle",
+{
+point:10,
+}
+
+])
+
+
+
+}
+
+const spawn_rock = (x)=>{
+
+
+add([
+rect(20, 20),
+color(255, 0, 0),
+pos(x, 520),
+area(),
+"rock",
+{
+speed_x:0,
+speed_y:0,
+}
+])
+
+
+
+}
+
+
+
+const calcAim = (a, b)=>{
+let dx = a.x - b.x, dy = a.y - b.y;
+let destance = Math.hypot(dx, dy);
+let pi=Math.atan2(dx, dy);
+let aimx = dx / destance, aimy = dy / destance;
+return [pi, aimx, aimy];
+}
+
+
+scene("game", ()=>{
+
+
+const score_text = add([
+text("score :", {size:20}),
+color(255, 0, 255),
+pos(0, 90),
+])
+
+const hp_text = add([
+text("HP :", {size:20}),
+color(0, 255, 0),
+pos(0, 30),
+])
+
+for(let i=0;i<5;i++){
+
+let x=randi(0,width()), y=0;
+spawn_bottle({x:x, y:y})
+
+
+
+}
+
+
+add([
+rect(20, 20),
+color(255, 255, 0),
+pos(200, 90),
+area(),
+"bird",
+{
+speed_x:100,
+speed_y:100,
+point:20,
+hp:5,
+}
+]);
+
+
+add([
+circle(50),
+color(255, 255, 0),
+pos(200, 590),
+area(),
+"aim",
+
+])
+
+
+
+logic(score_text, hp_text)
+
+
+
+
+})
+
+
+
+go("game")
+
+}
+
+
+
+window.addEventListener("load", ()=>{
+
+
+app();
+
+} );
+
+
+
+
+
+
+
+
+</script>
+
+
+
+</body>
+</html>

@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+<meta name="author" content="bytebhowmick"/>
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+
+<title>webgl simple renderer</title>
+
+<style>
+
+
+
+*{
+margin: 0;
+padding: 0;
+box-sizing:border-box;
+/* border: 0.1px solid red; */
+}
+
+
+
+html{
+font-size: 10px;
+}
+
+a{
+text-decoration: none;
+}
+
+li{
+list-style:none;
+}
+
+
+
+
+body{
+background: #3e3e3e;
+
+}
+
+canvas{
+margin: auto;
+display: block;
+background:#FF986E;
+}
+
+
+.error_box{
+margin: 2rem 0;
+background:transparent;
+overflow:hidden auto;
+}
+
+.title{
+color:#222A3B;
+font-size: 3rem;
+display:block;
+text-align: center;
+text-transform: capitalize;
+background: linear-gradient(45deg,red, blue);
+text-decoration: underline;
+}
+
+.error_box  p{
+margin:0.2rem 1rem;
+padding: 1rem ;
+
+background: #0009;
+color: #FF374E;
+border-radius: 1rem;
+}
+
+
+.hidden{
+display: none;
+}
+
+</style>
+
+</head>
+<body>
+
+<main>
+
+<canvas id="canvas"></canvas>
+
+<div class="error_box">
+<span class="title">error and warning</span>
+<pre></pre>
+</div>
+
+</main>
+
+<div class="hidden">
+<img src="/storage/emulated/0/Download/images (7).jpeg" id="img1" />
+<img src="/storage/emulated/0/Download/Zelda2.png" id="img2" />
+<img src="/storage/emulated/0/Download/images (9).jpeg" id="img3" />
+<img src="/storage/emulated/0/Download/images (10).jpeg" id="img4" />
+</div>
+
+
+
+<!-- <script src="/storage/emulated/0/g_js_libs/eruda.min.js"></script> -->
+
+<script src="/storage/emulated/0/g_js_libs/gl-matrix.js"></script>
+
+
+
+<script >
+
+
+// debug only
+const addDebug=()=>{
+const elmt = document.createElement("script");
+elmt.innerHTML =  "eruda.init({ tool:['console']})";
+document.body.appendChild(elmt);
+console.log(document.head);
+
+}
+
+
+
+const canvas=document.querySelector("canvas");
+
+const gl=canvas.getContext("webgl2");
+
+
+const {PI, ceil, cos, sin, tan, abs, round} = Math;
+
+
+
+class Geomatry{
+
+static CUBE_Vertices =new Float32Array([
+ // X, Y, Z         R,  G,  B,  A
+		// Top
+		-1.0,1.0,-1.0,   0.0,1.0,0.0,
+		-1.0,1.0,1.0,    0.0,1.0,0.0,
+		1.0,1.0,1.0,     0.0,1.0,0.0,
+		1.0,1.0,-1.0,    0.0,1.0,0.0,
+
+		// Left
+		-1.0,1.0,1.0,    0.0,0.0,1.0,
+		-1.0,-1.0,1.0,   0.0,0.0,1.0,
+		-1.0,-1.0,-1.0,  0.0,0.0,1.0,
+		-1.0,1.0,-1.0,   0.0,0.0,1.0,
+
+		// Right
+		1.0,1.0,1.0,    0.0,0.0,1.0,
+		1.0,-1.0,1.0,   0.0,0.0,1.0,
+		1.0,-1.0,-1.0,  0.0,0.0,1.0,
+		1.0,1.0,-1.0,   0.0,0.0,1.0,
+
+		// Front
+		1.0,1.0,1.0,    1.0,0.0,0.0,
+		1.0,-1.0,1.0,   1.0,0.0,0.0,
+		-1.0,-1.0,1.0,  1.0,0.0,0.0,
+		-1.0,1.0,1.0,   1.0,0.0,0.0,
+
+		// Back
+		1.0,1.0,-1.0,    1.0,0.0,0.0,
+		1.0,-1.0,-1.0,   1.0,0.0,0.0,
+		-1.0,-1.0,-1.0,  1.0,0.0,0.0,
+		-1.0,1.0,-1.0,   1.0,0.0,0.0,
+
+		// Bottom
+		-1.0,-1.0,-1.0,   0.0,1.0,0.0,
+		-1.0,-1.0,1.0,    0.0,1.0,0.0,
+		1.0,-1.0,1.0,     0.0,1.0,0.0,
+		1.0,-1.0,-1.0,    0.0,1.0,0.0,
+
+]);
+
+
+
+
+static CUBE_Indices =new Uint16Array([
+		// Top
+		0, 1, 2,
+		0, 2, 3,
+
+		// Left
+		5, 4, 6,
+		6, 4, 7,
+
+		// Right
+		8, 9, 10,
+		8, 10, 11,
+
+		// Front
+		13, 12, 14,
+		15, 14, 12,
+
+		// Back
+		16, 17, 18,
+		16, 18, 19,
+
+		// Bottom
+		21, 20, 22,
+		22, 20, 23,
+	]);
+
+static Tabel_Vertices=new Float32Array([
+	// Top
+		-10.0, 0.0, -10.0,   0.2, 0.2, 0.2,
+		-10.0, 0.0, 10.0,    0.2, 0.2, 0.2,
+		10.0, 0.0, 10.0,     0.2, 0.2, 0.2,
+		10.0, 0.0, -10.0,    0.2, 0.2, 0.2,
+
+
+]);
+
+static Tabel_Indices=new Uint16Array([
+	// Top
+		0, 1, 2,
+		0, 2, 3,
+
+
+]);
+
+}
+
+
+class Shape{
+
+#modalMat=mat4.create()
+#scaleAxis=vec3.create()
+#rotation=quat.create()
+
+constructor(pos,scale,rotationAxis, rotationAngle, vao, indices_count){
+this.pos=pos;
+this.scale=scale;
+this.rotationAxis=rotationAxis;
+this.rotationAngle=rotationAngle;
+this.vao=vao;
+this.indices_count=indices_count;
+}
+
+draw(gl, program){
+quat.setAxisAngle(this.#rotation, this.rotationAxis, this.rotationAngle);
+vec3.set(this.#scaleAxis, this.scale, this.scale, this.scale);
+
+mat4.fromRotationTranslationScale(this.#modalMat,
+this.#rotation,
+this.pos,
+this.#scaleAxis
+);
+program.mat4("uMatModal", this.#modalMat);
+this.vao.Bind();
+gl.drawElements(gl.TRIANGLES, this.indices_count, gl.UNSIGNED_SHORT, 0)
+}
+
+}
+
+
+
+const showError=(msg)=>{
+console.log(msg)
+const errorContainer=document.querySelector(".error_box > pre")
+if(!errorContainer) return -1;
+errorContainer.innerHTML+=`<p>${msg}</p>`;
+}
+
+const showGlError =(ii=0)=>{
+for (let i in gl) if (gl[i] == ii){
+if (i == "POINTS") break; // points means 0 
+showError(i);
+break;
+}
+}
+
+const gl_Call =(work)=>{
+showGlError(gl.getError());
+let a= work;
+showGlError(gl.getError());
+return a;
+}
+
+
+class Rand{
+
+static Float(min=0, max=1){
+return Math.random() * (max - min) + min;
+}
+
+static Int(min=1, max=2){
+return Math.floor(Rand.Float(min, max));
+}
+
+static Choice(...args){
+return args[Rand.Int(0, args.length)];
+}
+
+
+}
+
+
+
+
+
+
+
+class Shader{
+
+constructor(vss, fss){
+this.ID=Shader.makeProgram(vss, fss)
+}
+
+
+Bind(){
+gl_Call(gl.useProgram(this.ID));
+}
+
+Unbind(){
+gl_Call(gl.useProgram(null));
+}
+
+Delete(){
+gl_Call(gl.deleteProgram(this.ID));
+}
+
+
+
+
+
+int(name, value){
+gl_Call(gl.uniform1i(this.GetUniformLocation( name), value));
+}
+
+float(name, value){
+gl_Call(gl.uniform1f(this.GetUniformLocation( name), value));
+
+
+
+//let ii = this.ID[name]=0;
+//showError(ii)
+//gl.uniform1f(this.GetUniformLocation(this.ID.loc.u[name]["loc"], name), value);
+//gl_Call(gl.uniform1f(this.GetUniformLocation(this.ID.loc.u[name]["loc"], name), value));
+}
+
+vec2(name, value){
+gl_Call(gl.uniform2fv(this.GetUniformLocation(name), value));
+}
+
+vec3(name, value){
+gl_Call(gl.uniform3fv(this.GetUniformLocation(name), value));
+}
+
+vec4(name, value){
+gl_Call(gl.uniform4fv(this.GetUniformLocation( name), value));
+}
+
+mat4(name, value){
+//let uloc=gl.getUniformLocation(this.ID, name);
+gl_Call(gl.uniformMatrix4fv(this.GetUniformLocation( name), false, value));
+//gl_Call(gl.uniformMatrix4fv(uloc, false, value));
+//showError(uloc)
+}
+
+
+
+UpdateUniform(name, type, value){
+this[type](name,value);
+}
+
+GetUniformLocation(name){
+
+let result = !this.ID.uniforms[name]["loc"] ? gl.getUniformLocation(this.ID, name): this.ID.uniforms[name]["loc"];
+this.ID.uniforms[name]["loc"] = result;
+return result;
+
+}
+
+
+
+
+static makeShader(type, source){
+const vof=Boolean(gl.VERTEX_SHADER==type)?"vertex":"fragment";
+const shader=gl.createShader(type);
+gl_Call(gl.shaderSource(shader, source));
+gl_Call(gl.compileShader(shader));
+if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS)){
+showError(`${vof} error ${gl.getShaderInfoLog(shader)}
+${gl.getShaderSource(shader)}
+`)
+}
+return shader;
+}
+
+
+static makeProgram(vss, fss){
+
+const vs=Shader.makeShader(gl.VERTEX_SHADER, vss);
+const fs=Shader.makeShader(gl.FRAGMENT_SHADER, fss);
+
+
+const prog=gl.createProgram();
+gl_Call(gl.attachShader(prog, vs));
+gl_Call(gl.attachShader(prog, fs));
+
+gl_Call(gl.linkProgram(prog));
+if(!gl.getProgramParameter(prog, gl.LINK_STATUS)){
+showError(` 22 ${gl.getProgramInfoLog(prog)}`)
+}
+
+gl_Call(gl.useProgram(prog));
+
+gl_Call(gl.validateProgram(prog));
+
+if(!gl.getProgramParameter(prog, gl.VALIDATE_STATUS)){
+showError(` 33 ${gl.getProgramInfoLog(prog)}`)
+}
+
+prog.uniforms={}
+
+return prog;
+
+}
+
+}
+
+
+class Program extends Shader{
+constructor( vss, fss, uniforms){
+super(vss, fss)
+
+this.ID.uniforms = uniforms;
+
+}
+
+
+}
+
+
+
+
+class Texture2D{
+constructor(imgData){
+this.ID= gl.createTexture();
+gl_Call(gl.bindTexture(gl.TEXTURE_2D, this.ID));
+gl_Call(gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, !0));
+gl_Call(gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, imgData));
+
+gl_Call(gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST));
+gl_Call(gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST));
+//gl_Call(gl.bindTexture(gl.TEXTURE_2D, null));
+
+}
+
+Bind(){
+gl_Call(gl.bindTexture(gl.TEXTURE_2D, this.ID));
+}
+
+Unbind(){
+gl_Call(gl.bindTexture(gl.TEXTURE_2D, null));
+}
+
+Delete(){
+gl_Call(gl.deleteTexture(this.ID));
+}
+
+
+}
+
+
+
+class VA{
+constructor(){
+this.ID=gl.createVertexArray()
+}
+
+Bind(){
+gl_Call(gl.bindVertexArray(this.ID));
+}
+
+Unbind(){
+gl_Call(gl.bindVertexArray(null));
+}
+
+Delete(){
+gl_Call(gl.deleteVertexArray(this.ID));
+}
+
+LA(vbo=null, layoutLocation=0, numberOfComponents=3, type=gl.FLOAT, normalize=!1, stride=0, offset=0){
+//vbo instanceof VB ? vbo.Bind():0;
+if(vbo) vbo.Bind();
+gl_Call(gl.vertexAttribPointer(layoutLocation, numberOfComponents, type, normalize, stride, offset));
+gl_Call(gl.enableVertexAttribArray(layoutLocation));
+}
+
+}
+
+
+class VB{
+constructor(arr){
+this.ID=gl.createBuffer()
+gl_Call(gl.bindBuffer(gl.ARRAY_BUFFER, this.ID));
+gl_Call(gl.bufferData(gl.ARRAY_BUFFER, arr, gl.STATIC_DRAW));
+
+}
+
+Bind(){
+gl_Call(gl.bindBuffer(gl.ARRAY_BUFFER, this.ID));
+}
+
+Unbind(){
+gl_Call(gl.bindBuffer(gl.ARRAY_BUFFER, null));
+}
+
+Delete(){
+gl_Call(gl.deleteBuffer(gl.ARRAY_BUFFER,this.ID));
+}
+
+
+}
+
+
+class IB{
+constructor(arr){
+this.ID=gl.createBuffer()
+gl_Call(gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ID));
+gl_Call(gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, arr, gl.STATIC_DRAW));
+
+}
+
+Bind(){
+gl_Call(gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ID));
+}
+
+Unbind(){
+gl_Call(gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null));
+}
+
+Delete(){
+gl_Call(gl.deleteBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ID));
+}
+
+
+}
+
+
+
+
+class TextureLoader{
+constructor(){
+this.path="/storage/emulated/0/";
+}
+
+ load(url){
+let _img = new Image();
+_img.src = this.path+url;
+
+const tex = new Texture2D(_img);
+//showError(tex)
+return  tex;
+
+}
+
+}
+
+
+const INIT=()=>{
+
+const width=390, height=390;
+
+gl.canvas.width=width;
+gl.canvas.height=height;
+
+//const textureLoader = new TextureLoader();
+
+
+const extensionName= gl.getSupportedExtensions()
+
+extensionName.forEach((name)=>{
+gl.getExtension(name);
+});
+
+
+
+//showError(extensionName)
+showError(gl)
+
+
+
+
+const vss=`#version 300 es
+precision mediump float;
+layout (location=0) in vec4 aPos;
+layout (location=1) in vec4 aColor;
+
+
+uniform mat4 uMatModal;
+uniform mat4 uMatViewProj;
+
+out vec4 vColor;
+
+void main(){
+vColor = aColor;
+gl_Position = uMatViewProj * uMatModal * aPos;
+
+}
+`
+
+const fss=`#version 300 es
+precision mediump float;
+layout (location=0) out vec4 FragColor;
+
+
+
+
+
+in vec4 vColor;
+
+void main(){
+FragColor = vColor;
+}
+`;
+
+//showError(HTMLImageElement)
+
+//const tex1 = new Texture2D(img1);
+//const tex1 = textureLoader.load("Download/images (4).jpeg");
+
+
+const uniforms={
+
+alpha:{
+value:0.9,
+type:"float",
+},
+
+uMatModal:{
+//value:0,
+},
+
+uMatViewProj:{
+//value:0,
+}
+
+}
+
+const prog =  new Program( vss, fss, uniforms);
+
+showError(prog)
+
+//showError(tex1)
+
+
+
+const cube_vbo1 = new VB(Geomatry.CUBE_Vertices);
+const cube_ibo1 = new IB(Geomatry.CUBE_Indices);
+
+
+const tabel_vbo1 = new VB(Geomatry.Tabel_Vertices);
+const tabel_ibo1 = new IB(Geomatry.Tabel_Indices);
+
+
+
+
+
+const cube_vao1 = new VA();
+
+const tabel_vao1 = new VA();
+
+
+
+prog.Bind();
+
+cube_vao1.Bind();
+cube_vao1.LA(cube_vbo1, 0, 3, gl.FLOAT, gl.FALSE, 6 * 4, 0 * 4);
+cube_vao1.LA(cube_vbo1, 1, 3, gl.FLOAT, gl.FALSE, 6 * 4, 3 * 4);
+cube_ibo1.Bind();
+
+tabel_vao1.Bind();
+tabel_vao1.LA(tabel_vbo1, 0, 3, gl.FLOAT, gl.FALSE, 6 * 4, 0 * 4);
+tabel_vao1.LA(tabel_vbo1, 1, 3, gl.FLOAT, gl.FALSE, 6 * 4, 3 * 4);
+tabel_ibo1.Bind();
+
+const UP_VEC = vec3.fromValues(0, 1, 0);
+
+const indices_count = Geomatry.CUBE_Indices.length;
+const tabel_indices_count = Geomatry.Tabel_Indices.length;
+
+const shapes = [
+new Shape([0, -0.2, 0], 1.0, UP_VEC, 0.0, tabel_vao1, tabel_indices_count),
+
+new Shape([0, 0.5, 0], 0.5, UP_VEC, 0.0, cube_vao1, indices_count),
+new Shape([5, 0.1, 0], 0.1, UP_VEC, glMatrix.toRadian(45), cube_vao1, indices_count),
+new Shape([0, 0.2, 5], 0.2, UP_VEC, glMatrix.toRadian(80), cube_vao1, indices_count),
+new Shape([5, 0.3, -5], 0.3, UP_VEC, glMatrix.toRadian(180), cube_vao1, indices_count),
+new Shape([-5, 0.4, -5], 0.4, UP_VEC, glMatrix.toRadian(340), cube_vao1, indices_count),
+
+];
+
+
+for(let i=0;i<10;i++){
+
+
+const position = [
+Rand.Float(-10, 10),
+0,
+Rand.Float(-10, 10),
+];
+
+const scale = Rand.Float(0.01, 2);
+const rotationAngle = Rand.Float(0, PI*2);
+
+
+//shapes.push(new Shape(
+//position, scale, UP_VEC, rotationAngle, cube_vao1, indices_count
+//));
+
+}
+
+//showError(shapes)
+
+let angle=0;
+
+
+//showError(gl.getSupportedExtensions())
+
+
+
+//showError(gl.getVertexAttrib(1, gl.CURRENT_VERTEX_ATTRIB))
+//showError(gl.getVertexAttrib(0, gl.CURRENT_VERTEX_ATTRIB))
+
+//showError(gl.getActiveUniform(prog.ID, 0))
+//showError(gl.getVertexAttrib(0, gl.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING))
+
+
+//showError(gl.getActiveAttrib(prog.ID, 0))
+//showError(gl.getActiveAttrib(prog.ID, 1))
+
+
+showError(gl.getParameter(gl.SCISSOR_BOX))
+
+//showError(gl.getBufferParameter(gl.ARRAY_BUFFER, gl.BUFFER_USAGE))
+//showError(gl.getBufferParameter(gl.ARRAY_BUFFER, gl.BUFFER_SIZE))
+
+
+//showError(gl.getBufferParameter(gl.ELEMENT_ARRAY_BUFFER, gl.BUFFER_USAGE))
+//showError(gl.getBufferParameter(gl.ELEMENT_ARRAY_BUFFER, gl.BUFFER_SIZE))
+
+
+
+
+
+const ModalMat = mat4.create()
+const ProjMat = mat4.create()
+const ViewMat = mat4.create()
+const viewPorjMat = mat4.create()
+
+
+let CameraAngle = 0;
+
+gl.enable(gl.DEPTH_TEST)
+gl.enable(gl.BACK_FACE)
+gl.enable(gl.SCISSOR_TEXT)
+//gl.
+
+//showError("hi lol")
+
+const draw=(dt)=>{
+
+//gl_Call(gl.scissor(0, 0, width, height));
+
+
+
+prog.Bind();
+//cube_vao1.Bind();
+//prog.int("uTex", 1);
+
+//prog.UpdateUniform("alpha", "float", 1.0);
+//prog.float("alpha", 1.0);
+
+//prog.mat4("uMatModal", ModalMat);
+prog.mat4("uMatViewProj", viewPorjMat);
+
+//gl.uniformMatrix4fv(gl.getUniformLocation(prog.ID, "uMatModal"), false, ModalMat);
+//gl.uniformMatrix4fv(gl.getUniformLocation(prog.ID, "uMatViewProj"), false, viewPorjMat);
+
+//tex1.Bind()
+
+//shapes[shapes.length - 1].rotationAngle += dt
+shapes.forEach( (shape) =>{
+
+shape.draw(gl, prog);
+
+
+});
+
+//gl_Call(gl.drawElements(gl.TRIANGLES, 12*3, gl.UNSIGNED_SHORT, 0));
+
+//showError("draw")
+
+}
+
+
+const update=(dt)=>{
+
+//angle+= 0.006 * dt;
+CameraAngle += dt * glMatrix.toRadian(40);
+
+const CAMERA_X= PI * sin(CameraAngle)
+const CAMERA_Z= PI * cos(CameraAngle)
+mat4.lookAt(ViewMat, 
+vec3.fromValues(CAMERA_X,abs(CAMERA_Z * CAMERA_X), CAMERA_Z),
+vec3.fromValues(0, 0, 0),
+vec3.fromValues(0, 1, 0));
+
+mat4.perspective(ProjMat, 
+glMatrix.toRadian(90), // fov
+gl.canvas.width / gl.canvas.height, // 
+0.1, 100.0 //far - nesr
+);
+
+mat4.mul(viewPorjMat, ProjMat, ViewMat);
+
+
+
+draw(dt);
+
+}
+
+
+
+//gl.enable(gl.BELND);
+//gl.blendFunc(gl.BLEND_SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+
+
+
+const animate=(dt)=>{
+
+gl_Call(gl.clearColor(0.08, 0.08, 0.08, 1.0));
+gl_Call(gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT));
+gl_Call(gl.viewport(0, 0, gl.canvas.width, gl.canvas.height));
+
+update(dt);
+
+}
+
+
+
+
+
+
+
+let lastFrameTime = performance.now();
+
+const MainLoop=(ts=0)=>{
+let currentFrameTime = performance.now()
+let dt = (currentFrameTime - lastFrameTime) / 1000;
+lastFrameTime = currentFrameTime;
+
+//showError(dt);
+animate(dt);
+
+requestAnimationFrame(MainLoop)
+
+}
+
+requestAnimationFrame(MainLoop)
+
+
+
+showError(prog)
+//showError(gl.canvas.toDataURL())
+
+
+
+
+
+document.addEventListener("dblclick", (e)=>{
+
+addDebug()
+
+})
+
+
+}
+
+
+
+
+
+
+
+window.addEventListener("load", ()=>{
+
+try{
+
+
+
+
+showError("js is awesome".toUpperCase());
+INIT();
+
+
+}catch(e){
+showError(e);
+}
+
+});
+
+
+
+</script>
+
+</body>
+</html>

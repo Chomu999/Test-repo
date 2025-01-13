@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+<meta name="author" content="bytebhowmick"/>
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+
+
+<title>shader runner app </title>
+
+
+
+<style>
+
+
+
+*{
+margin: 0;
+padding: 0;
+box-sizing:border-box;
+/* border: 0.1px solid red; */
+}
+
+
+
+html{
+font-size: 10px;
+}
+
+a{
+text-decoration: none;
+}
+
+li{
+list-style:none;
+}
+
+
+
+
+body{
+/* display:grid; */
+/* grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); */
+/* grid-template-rows: repeat(2, 1fr); */
+/* place-items:center; */
+/* gap: 1rem; */
+background: #3e3e3e;
+
+}
+
+main{
+display: grid;
+/* grid-template-columns: repeat(auto-fil, minmax(30rem, 1fr)); */
+grid-template-rows: repeat(auto-fil, minmax(1fr, 30rem));
+}
+
+canvas{
+margin: auto;
+background:#FF986E;
+}
+
+
+.wrapper{
+width: min(100% - 4rem, 38rem);
+margin-inline: auto;
+}
+
+.control_box{
+background: brown;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+
+.control_box > button{
+padding: 2rem;
+font-size:2rem;
+text-transform: capitalize;
+background: #009AFF;
+border: 0;
+border-radius: 8rem;
+}
+
+.error_box{
+margin: 2rem 0;
+background:transparent;
+overflow:hidden auto;
+}
+
+.title{
+color:#222A3B;
+font-size: 3rem;
+display:block;
+text-align: center;
+text-transform: capitalize;
+background: linear-gradient(45deg,red, blue);
+text-decoration: underline;
+}
+
+.error_box  p{
+margin:0.2rem 1rem;
+padding: 1rem ;
+
+background: #0009;
+color: #FF374E;
+border-radius: 1rem;
+}
+
+
+.hidden{
+display: none;
+}
+
+</style>
+
+<!-- <script src="/storage/emulated/0/g_js_libs/CCapture.all.min.js"></script> -->
+<script src="/storage/emulated/0/g_js_libs/gl-matrix.js"></script>
+
+</head>
+<body>
+
+<main>
+
+<canvas id="canvas"></canvas>
+
+
+
+
+<div class="error_box">
+<span class="title">error and warning</span>
+<pre></pre>
+</div>
+
+<div class="wrapper">
+
+
+<input type="file"  id="shader_file" />
+</div>
+
+
+
+</main>
+
+
+<script>
+
+
+
+const {PI, cos, sin, tan, abs} = Math;
+
+
+
+const showError=(msg)=>{
+console.log(msg)
+const errorContainer=document.querySelector(".error_box > pre")
+if(!errorContainer) return -1;
+errorContainer.innerHTML+=`<p>${msg}</p>`;
+}
+
+const showGlError =(ii=0)=>{
+for (let i in gl) if (gl[i] == ii) showError(i)
+}
+
+
+
+const canvas=document.querySelector("canvas");
+
+const gl=canvas.getContext("webgl2");
+
+
+
+
+
+class Rand{
+
+static Float(min=0, max=1){
+return Math.random() * (max - min) + min;
+}
+
+static Int(min=1, max=2){
+return Math.floor(Rand.Float(min, max));
+}
+
+static Choice(...args){
+return args[Rand.Int(0, args.length)];
+}
+
+
+}
+
+
+
+
+
+
+
+const makeProgram=( vss, fss)=>{
+const vs=gl.createShader(gl.VERTEX_SHADER)
+gl.shaderSource(vs, vss)
+gl.compileShader(vs)
+if(!gl.getShaderParameter(vs, gl.COMPILE_STATUS)){
+showError(`vertex error ${gl.getShaderInfoLog(vs)}
+${gl.getShaderSource(vs)}
+`)
+}
+
+const fs=gl.createShader(gl.FRAGMENT_SHADER)
+gl.shaderSource(fs, fss)
+gl.compileShader(fs)
+if(!gl.getShaderParameter(fs, gl.COMPILE_STATUS)){
+showError(`fragment error ${gl.getShaderInfoLog(fs)}
+${gl.getShaderSource(fs)}
+`)
+}
+
+
+const prog=gl.createProgram();
+gl.attachShader(prog, vs);
+gl.attachShader(prog, fs);
+
+gl.linkProgram(prog);
+if(!gl.getProgramParameter(prog, gl.LINK_STATUS)){
+showError(`${gl.getProgramInfoLog(prog)}`)
+}
+
+gl.useProgram(prog);
+
+gl.validateProgram(prog);
+if(!gl.getProgramParameter(prog, gl.VALIDATE_STATUS)){
+showError(`${gl.getProgramInfoLog(prog)}`)
+}
+
+return prog;
+}
+
+
+class Program{
+constructor(vss, fss){
+this.ID=makeProgram( vss, fss);
+
+this.ID.loc={
+u:{},
+a:{}
+};
+
+}
+
+Bind(){
+gl.useProgram(this.ID);
+}
+
+Unbind(){
+gl.useProgram(null);
+}
+
+Delete(){
+gl.deleteProgram(this.ID);
+}
+
+SetUniform1(name, value){
+gl.uniform1f(Program.GetUniformLocation(this.ID, this.ID.loc.u, name), value);
+}
+
+SetUniform2(name, value){
+gl.uniform2fv(Program.GetUniformLocation(this.ID, this.ID.loc.u, name), value);
+}
+
+SetUniform3(name, value){
+gl.uniform3fv(Program.GetUniformLocation(this.ID, this.ID.loc.u, name), value);
+}
+
+SetUniform4(name, value){
+gl.uniform4fv(Program.GetUniformLocation(this.ID, this.ID.loc.u, name), value);
+}
+
+SetUniformMat4(name, value){
+gl.uniformMatrix4fv(Program.GetUniformLocation(this.ID, this.ID.loc.u, name), gl.FLOAT, value)
+
+}
+
+static GetUniformLocation(prog, u, name){
+
+let result = !u[name] ? gl.getUniformLocation(prog, name): u[name];
+u[name] = result;
+return result;
+
+}
+
+}
+
+
+class ShaderLoader{
+constructor(path){
+this.path=path?path:"/storage/emulated/0/";
+}
+
+async load(url1, url2){
+
+let fl = new Loader(this.path);
+const vss =await fl.loadFile(url1);
+const fss =await fl.loadFile(url2);
+
+const shaderProg = new Program(vss, fss);
+
+return shaderProg
+}
+
+}
+
+
+
+class Texture{
+constructor(imgData){
+this.ID= gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, this.ID);
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, !0)
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, imgData)
+
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+gl.bindTexture(gl.TEXTURE_2D, null)
+
+}
+
+Bind(){
+gl.bindTexture(gl.TEXTURE_2D, this.ID);
+}
+
+Unbind(){
+gl.bindTexture(gl.TEXTURE_2D, null);
+}
+
+Delete(){
+gl.deleteTexture(this.ID);
+}
+
+
+}
+
+
+
+class VA{
+constructor(){
+this.ID=gl.createVertexArray()
+}
+
+Bind(){
+gl.bindVertexArray(this.ID);
+}
+
+Unbind(){
+gl.bindVertexArray(null);
+}
+
+Delete(){
+gl.deleteVertexArray(this.ID);
+}
+
+LA(vbo, layoutLocation=0, numberOfComponents=3, type=gl.FLOAT, normalize=!1, stride=0, offset=0){
+if (vbo instanceof VB) vbo.Bind();
+gl.enableVertexAttribArray(layoutLocation);
+gl.vertexAttribPointer(layoutLocation, numberOfComponents, type, normalize, stride, offset);
+
+}
+
+}
+
+
+class VB{
+constructor(Data){
+this.ID=gl.createBuffer()
+gl.bindBuffer(gl.ARRAY_BUFFER, this.ID);
+gl.bufferData(gl.ARRAY_BUFFER, Data, gl.STATIC_DRAW);
+
+}
+
+Bind(){
+gl.bindBuffer(gl.ARRAY_BUFFER, this.ID);
+}
+
+Unbind(){
+gl.bindBuffer(gl.ARRAY_BUFFER, null);
+}
+
+Delete(){
+gl.deleteBuffer(this.ID);
+}
+
+
+}
+
+
+class IB{
+constructor(Data){
+this.ID=gl.createBuffer()
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ID);
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, Data, gl.STATIC_DRAW);
+
+}
+
+Bind(){
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ID);
+}
+
+Unbind(){
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+}
+
+Delete(){
+gl.deleteBuffer(this.ID);
+}
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+class Scene{
+constructor(){
+this.childrens=[]
+
+}
+
+add_child(...args){
+this.childrens.push(...args)
+}
+
+_render(){
+
+
+this.childrens.forEach((child)=>{
+child._render()
+})
+
+}
+
+
+}
+
+
+class Renderer{
+constructor(width, height){
+this.width=width;
+this.height=height;
+this.Color=[0.9, 0.9, 0.9, 1.0];
+}
+
+Clear(){
+
+gl.viewport(0, 0, this.width, this.height);
+gl.clearColor(...this.Color);
+gl.clear(gl.COLOR_BUFFER_BIT );
+
+}
+
+render(scene){
+
+
+scene._render()
+
+}
+
+set color(value){
+this.Color = value;
+}
+
+}
+
+class Loader{
+constructor(path){
+this.path=path?path:"/storage/emulated/0/";
+}
+
+
+async loadFile(url, type="text"){
+
+let file = await fetch(this.path+url);
+return await file[type]();
+}
+
+}
+
+
+class TextureLoader{
+constructor(path){
+this.path=path?path:"/storage/emulated/0/";
+}
+
+
+load(url){
+
+let img = new Image();
+img.src = this.path +url;
+let tex = new Texture(img);
+return tex;
+}
+
+}
+
+
+
+
+
+
+const INIT=async()=>{
+
+const width=390, height=390;
+
+gl.canvas.width=width;
+gl.canvas.height=height;
+const clearColor = [0.3, 0.2, 0.4, 1.0];
+showError(gl)
+
+
+
+
+let sl = new ShaderLoader("./shaders/");
+
+let prog = await sl.load("dummy1.vert", "pracatices/pracatice3.frag")
+//let prog = await sl.load("dummy1.vert", "pracatices/pracatice1.frag")
+
+
+const mouse_coord={
+x:0, y:0, z:0, w:1
+};
+
+
+
+
+const vertices=new Float32Array([
+  1,  1,
+ -1,  1,
+ -1, -1,
+  1, -1,
+])
+
+const indices=new Uint8Array([
+0,1,2,
+2,3,0
+])
+
+
+
+const vao = new VA()
+const vbo = new VB(vertices)
+const ibo = new IB(indices)
+
+vao.Bind()
+vao.LA(vbo, 0, 2);
+ibo.Bind()
+
+const update=(dt)=>{
+
+prog.Bind();
+
+
+prog.SetUniform1("uTime", dt)
+prog.SetUniform2("uRes", [width, height]);
+prog.SetUniform4("uMouse", [mouse_coord.x, mouse_coord.y, mouse_coord.z, mouse_coord.w]);
+
+vao.Bind()
+
+gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_BYTE, 0);
+
+}
+
+
+
+
+
+const animate=(dt)=>{
+
+// clearing canvas
+
+
+gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+gl.clearColor(...clearColor);
+gl.clear(gl.COLOR_BUFFER_BIT );
+
+update(dt);
+
+
+}
+
+
+
+
+
+
+
+// performance.now();
+
+const MainLoop=(ts=0)=>{
+
+let dt = ts * 0.001 ?? 0.5;
+
+
+animate(dt);
+
+requestAnimationFrame(MainLoop)
+
+}
+
+MainLoop()
+
+
+
+
+//showError(window)
+
+
+// some controll
+
+gl.canvas.addEventListener("touchstart", (e)=>{
+if(!e.touches[0]) return;
+mouse_coord.x = e.touches[0].pageX;
+mouse_coord.y = e.touches[0].pageY;
+mouse_coord.z = 1;
+mouse_coord.w = 1;
+})
+
+gl.canvas.addEventListener("touchmove", (e)=>{
+if(!e.touches[0]) return;
+mouse_coord.x = e.touches[0].pageX;
+mouse_coord.y = e.touches[0].pageY;
+mouse_coord.z = 0;
+})
+
+gl.canvas.addEventListener("touchend", (e)=>{
+if(!e.touches[0]) return;
+mouse_coord.x = e.touches[0].pageX;
+mouse_coord.y = e.touches[0].pageY;
+mouse_coord.z = -1;
+mouse_coord.w = -1;
+})
+
+
+
+
+document.addEventListener("change",async (e)=>{
+
+//if  (true) return;
+
+try{
+
+let fssd =await e.composedPath()[0]["files"][0]["text"]()
+
+
+showError(fssd)
+//INIT(fssd);
+
+}catch(err){
+showError(err+"file invalide or not found")
+}
+
+
+})
+
+
+
+}
+
+
+
+
+
+
+
+window.addEventListener("load", ()=>{
+
+try{
+
+
+
+INIT()
+
+
+showError("js is awesome".toUpperCase());
+
+}catch(e){
+showError(e);
+}
+
+});
+
+
+
+</script>
+
+</body>
+</html>

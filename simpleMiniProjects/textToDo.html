@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+
+<meta name="viewport" content="width=device-width, ,initial-scale=1.0, maximum-scale=9.0">
+<!-- <meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0"> -->
+<title>TODO APP u fool</title>
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+:root{
+--myBlkShadow:-2px 2px 1rem 0 #685E3F;
+--myBTNSize:5rem;
+--myBTNColor:cyan;
+}
+
+
+html{
+font-size:10px;
+}
+
+body{
+width:100%; height:100%;
+}
+
+main{
+width:100%; height:100%;
+}
+
+.parentOfadd-delete{
+width:100%; height:25rem;
+display:flex;
+justify-content:space-around;
+align-items:center;
+border:2px solid black;
+}
+
+.add-todo, .deleteSection{
+width:45%; height:80%;
+background:#0099FF;
+
+border:2px solid black;
+}
+
+.deleteSection{
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.deleteAll, .deleteManuly{
+width:45%; height:45%;
+border-radius:50%;
+background:rgba(222,2,33,0.6);
+}
+
+.add-todo{
+display:grid;
+place-items:center;
+}
+
+.add{
+width:80%; height:80%;
+background:red;
+display:grid;
+place-items:center;
+font-size:10rem;
+color:#CCFFFE;
+border-radius:50%;
+display:none;
+}
+
+
+.ToDoInputArea{
+display:block;
+width:100%; height:100%;
+}
+
+.ToDoInputArea .ToDotask{
+width:100%; height:70%;
+display:block;
+}
+
+.saveToDo{
+margin:1rem auto;
+padding:1rem;
+font-size:1rem;
+display: block;
+}
+
+
+.todosList{
+width:100%; height:51rem;
+overflow:scroll;
+/* display:grid;
+place-items:center; */
+}
+
+.todosList .parent{
+margin:1rem 0;
+width:100%; height:30%;
+position:relative;
+background:#E6FFF9;
+/* display:flex;
+justify-content:space-around;
+align-items:center; */
+}
+
+.parent .todoText{
+width:100%;
+color:#0066FF;
+text-align:center;
+font-size:2rem;
+border:2px solid black;
+}
+
+.parent > span{
+padding:1rem 2rem;
+position:absolute;
+color:#FF9600;
+
+background:#163E56;
+border:2px solid black;
+}
+
+.parent .todoDate{
+bottom:0; left:0;
+}
+
+.parent .todoEditBtn{
+bottom:0; right:50%;
+}
+.parent .todoDelBtn{
+bottom:0; right:0;
+}
+
+
+</style>
+</head>
+<body>
+
+<main>
+
+
+<div class="parentOfadd-delete">
+
+<div class="add-todo">
+  <div class="ToDoInputArea">
+    <textarea class="ToDotask"></textarea>
+    <button class="saveToDo">Save</button>
+  </div>
+</div>
+
+<div class="deleteSection">
+  <div class="deleteAll"> delete All</div>
+  <div class="deleteManuly"></div>
+</div>
+
+</div>
+
+
+<div class="todosList">
+
+
+</div>
+
+
+</main>
+
+
+
+
+
+
+<script>
+
+const saveBTN=document.querySelector('.saveToDo');
+const todosList=document.querySelector('.todosList');
+
+const deleteManuly=document.querySelector('.deleteManuly');
+const deleteAll=document.querySelector('.deleteAll');
+const userInput=document.querySelector('.ToDotask');
+
+const myDateObj=new Date();
+
+let AllToDoList=[], numberOftodos=0, todoEnumber=0;
+let todosToDelete=[], nowDelete=false, nowEdit=false;
+
+
+const todoRtext=(d)=>{
+return `
+<div class="parent" data-index="${d.index}">
+  <div class="todoText" data-index="${d.index}">
+    <pre data-index="${d.index}">${d.index}: ${d.text}</pre>
+  </div>
+  
+  <span class="todoDate">${d.date}</span>
+  <span class="todoEditBtn" data-index="${d.index}" data-edit="edit">edit</span>
+  <span class="todoDelBtn" data-index="${d.index}" data-delete="todo">delete</span>
+</div>
+`;
+}
+
+const deleteTODOFun=({arr,index})=>{
+arr.splice(index,1);
+}
+
+const appendToDo=({element,arr})=>{
+if(!element || !arr) return;
+let te='';
+arr.forEach((o)=>{
+te += todoRtext(o);
+
+})
+
+element.innerHTML = te;
+
+//requestAnimationFrame(loop)
+}
+
+
+const loop=()=>{
+
+
+appendToDo({element:todosList, arr:AllToDoList});
+
+deleteManuly.innerHTML=todosToDelete.length;
+
+//console.log(todoEnumber)
+requestAnimationFrame(loop);
+
+}
+
+loop();
+
+
+
+saveBTN.addEventListener('click', ()=>{
+
+let date=`${myDateObj.getDate()} ${myDateObj.getMonth()+1} ${myDateObj.getFullYear()} \n ${myDateObj.getHours()}:${myDateObj.getMinutes()}:${myDateObj.getSeconds()}`;
+date=date.replace(' ', '/');
+
+let text=userInput.value;
+if(!text) return;
+
+if(nowEdit){
+nowEdit=false;
+AllToDoList[todoEnumber]={
+text:text,
+date:date,
+index:todoEnumber,
+}
+
+}else{
+numberOftodos+=1;
+AllToDoList.push({
+text:text,
+date:date,
+index:numberOftodos,
+});
+}
+
+userInput.value='';
+
+});
+
+
+
+///
+todosList.addEventListener('click',(e)=>{
+
+if(!AllToDoList[0]) return;
+let myIndex=Number(e.target.getAttribute('data-index'));
+
+todosToDelete.push(myIndex);
+//delete
+if('todo'==e.target.getAttribute('data-delete')){
+AllToDoList.forEach((b,j)=>{
+if(b.index==myIndex) deleteTODOFun({arr:AllToDoList, index:j});
+
+});
+
+todosToDelete=[];
+
+}
+
+
+//edittodo
+if('edit'==e.target.getAttribute('data-edit')){
+nowEdit=true;
+
+AllToDoList.forEach((b,j)=>{
+
+if(b.index==myIndex){
+
+userInput.value=b.text;
+todoEnumber=j;
+}
+
+
+//userInput.value='';
+
+})
+
+
+//todosToDelete=[];
+
+}
+
+
+});
+
+///////
+deleteManuly.addEventListener('click',(e)=>{
+todosToDelete.forEach((o)=>{
+AllToDoList.forEach((b,j)=>{
+if(b.index==o) deleteTODOFun({arr:AllToDoList, index:j});
+});
+});
+todosToDelete=[];
+});
+
+
+////////
+deleteAll.addEventListener('click',(e)=>{
+
+AllToDoList=[];
+nowDelete=false;
+todosToDelete=[];
+numberOftodos=0;
+
+})
+
+window.addEventListener("click",(e)=>{
+})
+
+
+</script>
+</body>
+</html>

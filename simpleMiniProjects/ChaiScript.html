@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+
+*::selection{
+color: tan;
+background:chocolate ;
+}
+
+
+html{
+font-size:10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style: none;
+}
+
+
+body{
+
+background: #EFFF00;
+
+}
+
+
+
+
+
+.wrapper{
+margin:1rem auto;
+padding: 1.5rem;
+width:min(39rem, 100% - 1.2rem);
+background: var(--color3, #006AFF44);
+border-radius:2rem;
+}
+
+
+
+</style>
+
+<title>ChaiScript programing language/compiler</title>
+
+</head>
+<body>
+
+
+<div class="wrapper parent">
+  
+<div class="wrapper childs">
+
+</div>
+
+
+</div>
+
+<!-- <script async src="/storage/emulated/0/g_js_libs/tf.min.js"></script> -->
+  
+
+
+<!-- <script type="text/chai">
+
+str name = "suman bhai";
+int age = 69;
+bool isMale = false;
+
+
+
+</script> -->
+
+<script type="text/chai">
+
+var : int a = 10;
+var : int b = 20;
+var : int c = (a + b);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var : int d = (c / 2);
+
+call : chai.print(d);
+
+
+</script>
+
+
+<script async >
+"use strict";
+
+
+class Chai{
+name="chai";
+constructor(){
+this.init()
+
+this.u=this.utils()
+
+this.setUp()
+
+}
+
+init(){
+
+this.dataTypes={}
+
+this.variables={}
+
+this.functions={}
+
+this.struckTypes={
+"var":0,
+"func":1,
+"call":2,
+}
+
+this.oprations={
+"=":0,
+"+":1,
+"-":2,
+"*":2,
+"/":4,
+"++":5,
+"--":6,
+}
+
+this.map={
+"var":"var : dataType varName oprationsType value;",
+"call":"call : dataType varName oprationsType value;",
+}
+
+
+}
+
+utils(){
+const data = {}
+
+return data;
+}
+
+log(...args){
+console.log(...args);
+}
+
+compile(code){
+
+//this.log(
+let c = code[0].split(" ");
+let a=""
+for(let i in c){
+
+for(let j in this.struckTypes){
+
+if(c[i] == j){
+a+=`${j}`;
+break
+}
+
+}
+
+}
+
+
+this.log(a)
+}
+
+parse(chaiCode){
+
+
+let code = chaiCode.replaceAll("\n", "").split(";");
+
+
+this.compile(code)
+
+
+
+}
+
+setUp(){
+
+
+const objs = [
+"Void",
+"Undefined",
+"Any",
+"Null",
+"Int",
+"Float",
+"Str",
+"Bool"];
+
+for(const i in objs){
+this.dataTypes[objs[i]]=i;
+}
+
+
+}
+
+}
+
+
+
+var chai = new Chai();
+
+
+const chaiCode = document.querySelector(`script[type="text/chai"]`).innerText;
+chai.parse(chaiCode);
+
+
+</script>
+
+
+
+
+
+<script type="application/javascript" charset="utf-8">
+
+
+console.log(chai)
+console.log(window)
+
+//assert.equal(Number(123.45), 123.45);
+
+</script>
+
+</body>
+</html>

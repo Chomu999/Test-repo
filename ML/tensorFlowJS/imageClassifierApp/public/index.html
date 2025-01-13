@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+<link rel="stylesheet" href="./style.css" type="text/css" media="all" />
+
+
+<title>simple image classifier app </title>
+
+
+
+<script  src="/storage/emulated/0/g_js_libs/tf.min.js"></script>
+
+
+</head>
+
+<body>
+
+
+
+<main class="wrapper appContainer">
+
+
+
+<div class="wrapper titleContainer">
+  <h1 class="appTitle">simple image classifier application </h1>
+</div>
+
+
+<div class="wrapper appMain">
+
+
+
+
+
+
+<div class="wrapper cameraContainer">
+
+<!-- <img loading="lazy" class="images img2" src="/storage/emulated/0/Download/cat.jpg" alt="abc" /> -->
+
+<!-- <video id="vid1" height="100" width="100" autoplay ></video> -->
+
+
+<video class="camera" muted autoplay></video>
+
+
+
+<canvas id="canvas"></canvas>
+
+
+</div>
+
+
+<div class="wrapper predictContainer">
+
+
+<ol class="wrapper predictionList"></ol>
+
+</div>
+
+
+<div class="wrapper btnContainer">
+
+<span class="btns predictBtn">predict </span>
+<span class="btns takePictureBtn">take Picture </span>
+
+</div>
+
+
+</div>
+
+
+</main>
+
+
+<!-- <script>
+
+
+const init=async()=>{
+
+const video = document.querySelector("video");
+const canvas = document.querySelector("canvas");
+const ctx = canvas.getContext("2d");
+
+
+canvas.width = 240;
+canvas.height = 240;
+
+video.width = 240;
+video.height = 240;
+
+console.log(ctx)
+
+const idk1 = navigator;
+console.log(idk1)
+
+//const idk2= await idk1.mediaDevices.getUserMedia({
+//	audio:false,
+//	video:{
+//		facingMode:"environment"
+//	}
+//});
+
+//console.log(idk2)
+//video.srcObject = idk2;
+//document.onclick = ()=> video.play();
+
+const update=()=>{
+
+
+ctx.drawImage(video,
+0, 0,
+video.videoWidth, video.videoHeight,
+0, 0,
+canvas.width, canvas.height);
+
+
+}
+
+
+
+
+const animate = ()=>{
+
+
+update();
+requestAnimationFrame(animate)
+}
+requestAnimationFrame(animate)
+
+
+
+
+//controls
+
+canvas.addEventListener("dblclick", ()=>{
+
+(video.paused)?video.play():video.pause();
+
+});
+
+
+
+}
+
+try{
+init()
+}catch(err){
+console.log(err)
+}
+
+
+</script> -->
+
+<script src="./main.js" type="module"></script>
+
+</body>
+</html>

@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html charset=utf-8" />
+<meta name="author" content="biswajit bhowmick"/>
+
+
+<meta name="viewport"
+content="width=device-width,
+         user-scalable=no,
+         initial-scale=1.0,
+         maximum-scale=10.0">
+
+<title>
+webgl2 test 2 fixing some errors
+</title>
+
+<style>
+
+:root{
+--border1:2px solid white;
+}
+
+
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+html{
+font-size:10px;
+}
+
+
+
+
+body{
+width:100%; height:100%; background:#000;
+}
+
+canvas {
+position:absolute; top:50%; left:50%;
+transform:translate(-50%,-50%);
+background:rgba(30, 30, 30, 1.0);
+}
+
+
+div.res, div.shader-data{
+display:none!important;
+}
+
+
+
+
+/*
+
+@media (orientation:landscape){
+#lock{ display:none; }
+#mainBox{ display:block; }
+}
+
+@media (orientation:portrait){
+#lock{ display:block; }
+#main{ display:none; }
+}
+*/
+
+
+
+
+</style>
+
+<!-- <script src="./js/utils.js" defer ></script> -->
+
+<!-- <script
+src="./js/lib/gl-matrix.js" defer ></script> -->
+
+<script
+src="/storage/emulated/0/g_js_libs/dat.gui.min.js" defer ></script> 
+
+
+
+<script type="text/cpp" charset="utf-8"></script>
+
+
+
+</head>
+<body>
+
+<main id="main">
+
+
+
+<!-- all shader code -->
+<div class="shader-data" data-shader="shader">
+
+</div>
+
+
+
+<div class="res">
+
+<img id="img1" src="./res/imgs/link1.png" alt="link1" />
+
+<img id="img2" src="/storage/emulated/0/Download/Zelda2.png" alt="zelda"/>
+
+</div>
+
+
+
+
+</main>
+
+<script type="module">
+
+import {bistor} from "./js/lib/bistor3D.js";
+
+
+
+
+
+const gui=new dat.gui.GUI();
+
+
+
+let default_vscode=`#version 300 es
+precision mediump float;
+in vec3 a_pos;
+in vec2 a_TexCoord;
+
+out vec2 v_TexCoord;
+
+void main(){
+
+gl_Position=vec4(a_pos, 1.0);
+gl_PointSize=30.0f;
+
+v_TexCoord=a_TexCoord;
+
+}
+
+`;
+
+let default_fscode=`#version 300 es
+precision mediump float;
+out vec4 FragColor;
+
+
+uniform sampler2D tex0;
+
+in vec2 v_TexCoord;
+
+void main(){
+
+//FragColor +=vec4(1.0, 0.1, 0.4, 2.0);
+
+FragColor +=texture(tex0, v_TexCoord);
+
+}
+`;
+
+const ResizeGl=function(gl){
+
+let cs;//cs=canvas Size
+innerWidth>innerHeight?cs=innerHeight:cs=innerWidth;
+gl.canvas.width=cs;
+gl.canvas.height=cs;
+
+}
+
+
+
+
+const app=(gl)=>{
+
+
+
+
+
+let vss=gl.createShader(gl.VERTEX_SHADER);
+let fss=gl.createShader(gl.FRAGMENT_SHADER);
+
+gl.shaderSource(vss, default_vscode);
+gl.shaderSource(fss, default_fscode);
+
+gl.compileShader(vss);
+gl.compileShader(fss);
+
+
+let prog=gl.createProgram();
+
+gl.attachShader(prog, vss);
+gl.attachShader(prog, fss);
+
+gl.linkProgram(prog);
+gl.useProgram(prog);
+gl.validateProgram(prog);
+
+
+
+const vertices=[
+//coord        u v
+
+0.5,0.5,0.0,   1,1, //0
+-0.5,0.5,0.0,  0,1, //1
+0.5,-0.5,0.0,  1,0, //2
+-0.5,-0.5,0.0, 0,0, //3
+
+];
+
+const indices=[
+0,1,2,
+3,2,1,
+]
+
+
+let vao=gl.createVertexArray();
+gl.bindVertexArray(vao);
+
+let vbo=gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(vertices),gl.STATIC_DRAW);
+
+let ibo=gl.createBuffer();
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Int8Array(indices),gl.STATIC_DRAW);
+
+gl.bindBuffer(gl.ARRAY_BUFFER,null);
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,null);
+
+
+
+gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+gl.enableVertexAttribArray(0);
+ gl.vertexAttribPointer(
+ 0, 3,
+ gl.FLOAT,gl.FALSE,
+ 5*4, 0 );
+
+
+gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+gl.enableVertexAttribArray(1);
+ gl.vertexAttribPointer(
+ 1, 2,
+ gl.FLOAT,gl.FALSE,
+ 5*4, 3*4 );
+
+
+
+let tbo=gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, tbo);
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+
+gl.texImage2D(
+gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
+gl.UNSIGNED_BYTE,
+document.getElementById("img1")
+);
+
+gl.useProgram(prog);
+
+const uniloc={
+tex:gl.getUniformLocation(prog,"tex0"),
+}
+
+//gl.uniform1i(uniloc.tex,0);
+
+gl.bindTexture(gl.TEXTURE_2D, null);
+gl.bindBuffer(gl.ARRAY_BUFFER, null);
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+gl.bindVertexArray(null);
+gl.useProgram(null);
+
+let options={
+
+Glc: [143,131,143,1],
+
+}
+
+const colorF=gui.addFolder("color");
+colorF.addColor(options, "Glc" );
+colorF.open()
+
+
+//
+
+gl.enable(gl.BLEND);
+gl.blendFunc(gl.SRC_ALPHA,
+gl.ONE_MINUS_SRC_ALPHA);
+
+
+const animate=(dt)=>{
+gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+gl.clearColor(options.Glc[0]/255, options.Glc[1]/255, options.Glc[2]/255, options.Glc[3] );
+gl.viewport(0,0,gl.canvas.width,gl.canvas.height);
+
+
+
+gl.useProgram(prog);
+
+//gl.uniform1i(uniloc.tex,0)
+gl.bindVertexArray(vao);
+
+//gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
+
+
+gl.activeTexture(gl.TEXTURE0);
+gl.bindTexture(gl.TEXTURE_2D,tbo);
+
+
+gl.drawElements(gl.POINTS, indices.length, gl.UNSIGNED_BYTE, null);
+gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_BYTE, null);
+
+}
+
+
+
+
+
+
+let lastTime=1;
+const GameLoop=(timeStamp)=>{
+
+let deltaTime=timeStamp-lastTime;
+lastTime+=timeStamp;
+animate(deltaTime);
+requestAnimationFrame(GameLoop);
+}
+
+//protected:
+GameLoop(0);
+
+
+}
+
+
+
+
+
+
+
+
+window.addEventListener("load",() => {
+
+setTimeout( c => {
+
+console.log(c);
+main.appendChild(c.canvas);
+ResizeGl(c);
+app(c);
+
+}, 400 ,bistor.gl);
+
+
+
+
+
+
+
+
+//let mat_a=bistor.math.mat4.create();
+//let mat_b=bistor.math.mat4.create();
+
+let a_pos;
+a_pos=bistor.MathUtils.mat4.translation(bistor.MathUtils.vec3.create(2, 3, 4));
+
+//let b=bistor.math.mat4.identity();
+
+
+//console.log(Math.toRadian(45))
+
+//console.log(a_pos)
+
+let b_pos=bistor.MathUtils.mat4.multiply(
+ a_pos,
+ bistor.MathUtils.mat4.identity(),
+ //a_pos,
+);
+
+console.log(a_pos);
+console.log(b_pos);
+
+//console.log(b_pos)
+//console.log(c);
+
+
+
+});
+
+
+window.addEventListener("resize",(e)=>{
+
+ResizeGl(bistor.gl);
+
+})
+
+window.addEventListener("dblclick",(e)=>{
+
+bistor.gl.canvas.requestFullscreen();
+
+
+
+
+bistor.canvas.addEventListener("fullscreenerror",(err)=>{
+console.warn('sorry Full screen mode is not avelavel on your desktop')
+})
+
+
+})
+
+
+</script>
+
+</body>
+</html>

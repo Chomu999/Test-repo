@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="viewpot" content="width=device-width, initial-scale=1.0">
+
+<title>webGL practice part 3</title>
+
+<style>
+
+*{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+html{
+font-size: 10px;
+}
+
+body{
+background: #00021B;
+}
+
+
+.appTitle{
+margin: 1rem ;
+padding: 1rem;
+text-align: center;
+background: #234500;
+color: #D2FFD6;
+border-radius: 1rem;
+}
+
+.canvasCont{
+width:100vmin;
+aspect-ratio: 1;
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+}
+
+canvas{
+margin: auto;
+width: 98%;
+display: block;
+background: salmon;
+}
+
+.assets{
+display: none;
+}
+
+</style>
+
+</head>
+
+<body>
+
+
+<h1 class="appTitle">webGL practice part 3</h1>
+
+<div class="wrapper canvasCont">
+<canvas id="canvas"></canvas>
+
+</div>
+
+
+<div class="assets">
+<img src="/storage/emulated/0/Download/Zelda2.png" id="img1" alt="img1" />
+</div>
+
+
+
+
+
+
+<script>
+
+
+const loadFile=async(p,t="text")=>{
+	const f =await fetch(p);
+	return await f[t]();
+}
+
+const INITIAL=async()=>{
+
+
+
+const canvas = document.getElementById("canvas");
+const gl = canvas.getContext("webgl2");
+
+//width or height
+
+const maxSize = (innerWidth>innerHeight)?innerHeight:innerWidth;
+canvas.width=maxSize;
+canvas.height=maxSize;
+
+
+console.log(gl);
+
+const img1 = document.getElementById("img1");
+//console.log(img1)
+
+
+
+const vertexShaderSource=`#version 300 es
+layout (location=0) in vec4 aPos;
+layout (location=1) in vec2 aUv;
+layout (location=2) in vec4 aColor;
+
+out vec2 vUv;
+out vec4 vColor;
+
+void main(){
+vUv = aUv;
+vColor = aColor;
+gl_Position = aPos;
+}
+`;
+
+const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+gl.shaderSource(vertexShader, vertexShaderSource);
+gl.compileShader(vertexShader);
+if(!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)){
+console.log(`vertexShader error ${gl.getShaderInfoLog(vertexShader)} \n  ${gl.getShaderSource(vertexShader)}`);
+}
+
+
+const fragmentShaderSource=`#version 300 es
+precision mediump float;
+layout (location=0) out vec4 FragColor;
+
+uniform sampler2D uTex;
+
+in vec2 vUv;
+in vec4 vColor;
+
+void main(){
+FragColor = mix(vColor, texture(uTex, vUv), 0.5);
+}
+`;
+
+const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+gl.shaderSource(fragmentShader, fragmentShaderSource);
+gl.compileShader(fragmentShader);
+if(!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)){
+console.log(`fragmentShader error ${gl.getShaderInfoLog(fragmentShader)} \n  ${gl.getShaderSource(fragmentShader)}`);
+}
+
+const shaderProgram = gl.createProgram();
+gl.attachShader(shaderProgram, vertexShader)
+gl.attachShader(shaderProgram, fragmentShader)
+
+gl.linkProgram(shaderProgram);
+if(!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)){
+console.log(`link not sucsses ${gl.getProgramInfoLog(shaderProgram)}`);
+}
+
+gl.validateProgram(shaderProgram);
+if(!gl.getProgramParameter(shaderProgram, gl.VALIDATE_STATUS)){
+console.log(`invalide Program ${gl.getProgramInfoLog(shaderProgram)}`);
+}
+
+gl.useProgram(shaderProgram);
+
+
+
+
+
+
+
+const cupVerticsBuffer= new Float32Array([
+//     xy           rgb              uv
+   0.5,   0.5,    1.0, 0.0, 0.0,    1, 1,
+  -0.5,   0.5,    0.0, 1.0, 0.0,    0, 1,
+  -0.5,  -0.5,    0.0, 1.0, 0.0,    0, 0,
+   0.5,  -0.5,    0.0, 0.0, 1.0,    1, 0,
+]);
+console.log(cupVerticsBuffer)
+
+
+
+const cpuIndicesBuffer= new Uint8Array([
+0, 1, 2,
+2, 3, 0,
+]);
+
+console.log(cpuIndicesBuffer);
+
+
+const vao1 = gl.createVertexArray();
+
+const vbo1 = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, vbo1);
+gl.bufferData(gl.ARRAY_BUFFER, cupVerticsBuffer, gl.STATIC_DRAW);
+gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+
+const ibo1 = gl.createBuffer();
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo1);
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, cpuIndicesBuffer, gl.STATIC_DRAW);
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+
+const aPosLoc = gl.getAttribLocation(shaderProgram, "aPos");
+console.log(aPosLoc);
+
+const aUvLoc = gl.getAttribLocation(shaderProgram, "aUv");
+console.log(aUvLoc);
+
+const aColorLoc = gl.getAttribLocation(shaderProgram, "aColor");
+console.log(aColorLoc);
+
+const uTexLoc = gl.getUniformLocation(shaderProgram, "uTex");
+console.log(uTexLoc);
+
+const tex = gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, tex);
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true)
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img1);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+gl.uniform1f(uTexLoc, 0);
+gl.bindTexture(gl.TEXTURE_2D, null);
+
+
+gl.bindVertexArray(vao1);
+
+gl.bindBuffer(gl.ARRAY_BUFFER, vbo1);
+
+gl.vertexAttribPointer(aPosLoc, 2, gl.FLOAT, false, 7 * 4, 0 * 4  );
+gl.enableVertexAttribArray(aPosLoc);
+
+gl.enableVertexAttribArray(aUvLoc);
+gl.vertexAttribPointer(aUvLoc, 2, gl.FLOAT, false, 7 * 4 , 5 * 4 );
+
+gl.enableVertexAttribArray(aColorLoc);
+gl.vertexAttribPointer(aColorLoc, 3, gl.FLOAT, false, 7 * 4 , 2 * 4 );
+
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo1);
+
+
+gl.bindBuffer(gl.ARRAY_BUFFER, null);
+gl.bindVertexArray(null);
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+gl.useProgram(null);
+
+
+
+
+function update(dt){
+gl.viewport(0, 0, canvas.width, canvas.height);
+gl.clearColor(0.2, 0.2, 0.2, 1.0);
+gl.clear(gl.COLOR_BUFFER_BIT);
+
+gl.useProgram(shaderProgram);
+
+gl.activeTexture(gl.TEXTURE0);
+gl.bindTexture(gl.TEXTURE_2D, tex);
+
+
+gl.bindVertexArray(vao1);
+gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_BYTE, null);
+
+}
+
+
+
+let lastTime=0;
+function animate(timeStamp) {
+const dt = timeStamp - lastTime;
+lastTime = timeStamp;
+update(dt);
+webkitRequestAnimationFrame(animate)
+}
+webkitRequestAnimationFrame(animate)
+
+
+}
+
+
+
+
+
+
+
+
+
+try{
+	INITIAL()
+}catch(err){
+	console.log(`error js uncatch at ${ err}` )
+}
+
+</script>
+
+</body>
+</html>

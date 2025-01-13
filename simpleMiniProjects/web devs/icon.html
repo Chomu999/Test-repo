@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=10.0 user-scalable=no" />
+
+<title>project 2 icon genrator</title>
+
+<style>
+
+*{
+margin:0; padding:0; box-sizing:border-box;
+/* border:.1px dashed red; */
+}
+
+
+:root{
+
+}
+
+
+
+
+html{
+font-size:10px;
+}
+
+body{
+width:100vw; height:100vh;
+}
+
+main{
+padding:3rem 0;
+width:100%; height:100%;
+background: #5F5F5F;
+/* display: grid;
+place-items:center; */
+}
+
+div#refreshBTN{
+margin:4rem auto;
+padding:2rem 4rem;
+width:30rem;
+font-size:2rem;
+text-transform:capitalize;
+text-align:center;
+color:red;
+background: purple;
+box-shadow: 2rem 2rem 2px black;
+transition: 0.5s;
+}
+
+.rootElement{
+margin: auto;
+width:30rem; height:60rem;
+background: #696969;
+display: grid;
+place-items:center;
+overflow:auto;
+
+box-shadow: 2rem 2rem 2px black;
+
+}
+
+.container{
+width:30rem; height:10rem;
+background:#818181;
+display: flex;
+align-items:center;
+justify-content:space-around;
+
+}
+
+.container > .icon{
+width:9rem; height:9rem;
+display: grid;
+place-items:center;
+background:#464646;
+color:#D8D8D8;
+border-radius:50%;
+}
+
+.container > .iconDetail{
+width:9rem; height:9rem;
+display: grid;
+place-items:center;
+background:#464646;
+color:#D8D8D8;
+border-radius:2rem;
+}
+
+div#refreshBTN:hover{
+box-shadow: -2rem 2rem 2px black;
+}
+
+
+
+</style>
+
+</head>
+<body>
+
+
+<main>
+
+
+<div class="rootElement"></div>
+
+<div id="refreshBTN"> refresh</div>
+
+<!-- <i>
+&#x2192;
+&#x2190;
+&#x2191;
+&Xi;
+
+&#x40;
+&#x39;
+&#x38;
+&#x37;
+</i> -->
+
+</main>
+
+<script>
+
+class Rand{
+
+static Float(min=1,max=2){
+return Math.random() * (max-min) + min;
+}
+
+static Int(min=10,max=20){
+return Math.floor( Rand.Float(min,max+1));
+}
+
+static Choice(...args){
+return args[Rand.Int(0,args.length-1)];
+}
+
+}
+
+//symbol used by icon
+let mySymbols="0123456789abcdefghijklmnopqrstuvwxyz"
+
+//console.log(mySymbols.split(""))
+
+
+const genIconCode=(len=4)=>{
+let out="";
+for(let i=0;i<len;i++){
+out+=Rand.Choice(...mySymbols.split(""));
+}
+return out;
+}
+
+const app=()=>{
+
+
+
+//
+let temp1=`
+
+<div class="container">
+
+<div class="icon">
+<p> {ic} </p>
+</div>
+
+<div class="iconDetail">
+<p> detail : {icd}  </p>
+</div>
+
+
+</div>
+
+`
+const rootElement=document.querySelector(".rootElement")
+
+
+
+const work=()=>{
+
+rootElement.innerHTML = "";
+
+for(let i=0;i<5;i++){
+let code1=Rand.Choice("&", "&x", "&X", "&#x")
+let code2=genIconCode(Rand.Int(1,4))
+rootElement.innerHTML += temp1.replace("{ic}", code1+code2+";").replace("{icd}", code1+" "+code2)
+}
+
+}
+
+
+work()
+
+//let loop = setInterval(()=>{
+//work()
+//}, 1500)
+//clearInterval(loop)
+
+refreshBTN.addEventListener("click", ()=>{
+
+//for(let i=0;i<20;i++)
+work();
+
+
+})
+
+
+
+
+}
+
+
+
+window.addEventListener("load", ()=>{
+
+console.log("JS is Awesome")
+app()
+
+
+
+//alert("hello world")
+
+})
+
+</script>
+
+</body>
+</html>

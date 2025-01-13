@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Snake Game</title>
+    <style>
+        /* Your CSS styles will go here */
+#gameCanvas {
+    border: 1px solid black;
+}
+
+
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="300" height="300"></canvas>
+    <script>
+
+
+
+// Get the canvas element and its context
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+// Set the game board dimensions and bird initial position
+const gap = 150;
+const pipeWidth = 50;
+const pipeHeight = 300;
+let birdX = 50;
+let birdY = 250;
+const birdRadius = 15;
+const gravity = 0.25;
+let velocity = 0;
+
+// Set the initial pipe position
+let pipeX = canvas.width;
+let pipeTop = Math.floor(Math.random() * (canvas.height - gap)) + gap / 2;
+
+// Game loop
+function draw() {
+    // Clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw the sky
+    ctx.fillStyle = '#70c5ce';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw the ground
+    ctx.fillStyle = '#c0c0c0';
+    ctx.fillRect(0, canvas.height - 100, canvas.width, 100);
+
+    // Draw the pipes
+    ctx.fillStyle = '#008000';
+    ctx.fillRect(pipeX, 0, pipeWidth, pipeTop);
+    ctx.fillRect(pipeX, pipeTop + gap, pipeWidth, canvas.height - pipeTop - gap);
+
+    // Draw the bird
+    ctx.beginPath();
+    ctx.arc(birdX, birdY, birdRadius, 0, Math.PI * 2);
+    ctx.fillStyle = '#000000';
+    ctx.fill();
+    ctx.closePath();
+
+    // Update the bird's position
+    velocity += gravity;
+    birdY += velocity;
+
+    // Check for collisions with the pipes
+    if (birdX + birdRadius >= pipeX && birdX - birdRadius <= pipeX + pipeWidth) {
+        if (birdY + birdRadius >= pipeTop && birdY - birdRadius <= pipeTop + gap) {
+            alert('Game Over');
+            return;
+        }
+    }
+
+    // Check for collision with the ground or ceiling
+    if (birdY + birdRadius >= canvas.height || birdY - birdRadius <= 0) {
+        alert('Game Over');
+        return;
+    }
+
+    // Update the pipe position
+    pipeX -= 2;
+
+    // Generate new pipes
+    if (pipeX + pipeWidth <= 0) {
+        pipeX = canvas.width;
+        pipeTop = Math.floor(Math.random() * (canvas.height - gap)) + gap / 2;
+    }
+
+    // Request the next frame
+    window.requestAnimationFrame(draw);
+}
+
+// Handle keyboard input
+document.addEventListener('keydown', function(event) {
+    if (event.keyCode === 32) {
+        velocity = -5;
+    }
+});
+
+
+
+// Handle keyboard input
+document.addEventListener('touchstart', function(event) {
+    
+        velocity = -50;
+    
+});
+
+
+
+
+// Start the game loop
+draw();
+
+</script>
+</body>
+</html>

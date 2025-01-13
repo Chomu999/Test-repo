@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+<meta name="author" content="bytebhowmick"/>
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<title>working some apis</title>
+
+<style>
+*:after,*,*:before{
+
+margin:0; padding:0; box-sizing:border-box;
+
+}
+
+html{
+font-size: 10px;
+}
+
+a{
+font-size: 3rem;
+
+text-decoration: none;
+}
+
+ul{
+list-style: none;
+}
+
+body{
+/* background-position: repeat; */
+background:
+
+linear-gradient(black, white) 
+300% 500% 
+
+repeat-x
+red
+200% 300%
+;
+
+}
+
+
+.wrapper{
+width: min(39rem, clac(4rem - 100%));
+height: min(39rem, clac(4rem - 100%));
+background: #fff555;
+}
+
+.main{
+width: ;
+background: 555555;
+color: green;
+}
+
+
+
+canvas{
+
+margin: auto;
+display: block;
+background: #004669;
+
+}
+
+p{
+margin: auto;
+padding: 2rem;
+display: inline-block;
+color: white;
+background: #A400FF;
+font-size: 3rem;
+text-align: center;
+}
+
+h1{
+margin: auto;
+padding: 2rem;
+color: #00BAFF;
+background: #A400FF;
+font-size: 3rem;
+text-align: center;
+}
+
+button{
+color: #F5FF68;
+background: lime;
+font-size: 3rem;
+padding: 2rem;
+}
+
+</style>
+
+</head>
+<body>
+<div class="wrapper">
+
+<input type="tel" id="num1" value="" />
+
+<input type="tel" id="num2" value="" />
+
+<button id="well_done_btn">drhgdfhrdrhg</button>
+</div>
+
+<pre id="outPut"></pre>
+
+<script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const work=(...aa)=>{
+let p=`<p>${aa}\n</p>`;
+outPut.innerHTML +=p
+console.log(aa);
+}
+
+
+
+well_done_btn.addEventListener("click", (e)=>{
+
+
+outPut.innerHTML=""
+let a = num1.value, b = num2.value;
+if(a||b){
+
+work(a+"<"+b, a<b)
+work(a+">"+b, a>b)
+
+work(a+"<="+b, a<=b)
+work(a+">="+b, a>=b)
+
+work(a+"=="+b, a==b)
+
+num2.value=	""
+num1.value=	""
+}
+
+
+
+})
+
+
+
+
+const LoadFile = async(url)=>{
+const f = await fetch(url);
+//console.log(f)
+return await f["text"]();
+}
+
+
+class Rand{
+
+static Float(min=0, max=1){
+return Math.random() * (max - min) + min;
+}
+
+static Int(min=1, max=2){
+return Math.floor(Rand.Float(min, max));
+}
+
+static Choice(...args){
+return args[Rand.Int(0, args.length)];
+}
+
+
+}
+
+const getRandPhoneNo=()=>{
+let str="";
+for(;;){
+if(str.length>=10){
+return str;
+}
+str+=Rand.Int(0,9);
+}
+}
+
+
+
+const INIT=async()=>{
+
+console.log(window)
+
+let _url = "/storage/emulated/0/Donwload/Zelda2.png";
+let _url2 = "file:///sdcard/Donwload/Zelda2.png";
+let obj = new Object()
+//let idk1= window.webkitRequestFileSystem({}, {}, _url);
+//let idk2= window.webkitResolveLocalFileSystemURL(_url2, obj);
+
+
+
+function gl_Error(){
+__count__ = 88
+//console.log(__count__)
+return __count__;
+}
+
+function work(work){
+let a =gl_Error();
+
+let b = work;
+let c =gl_Error();
+
+return [a, b, c];
+
+}
+
+
+let out = work(89);
+
+gl_Error.__count__ = out
+//let idk =new  HTMLImageElement();
+console.log();
+
+
+let idk =new Image();
+console.log(idk instanceof HTMLImageElement, )
+
+
+//external
+//AddSearchProvider: ƒ AddSearchProvider()
+//IsSearchProviderInstalled
+
+//let i1 = external;
+//let i2 = i1.AddSearchProvider()
+//let i3 = external.IsSearchProviderInstalled()
+//console.log(i3)
+
+//open()
+//openDatabase
+
+//let a1 = open();
+//let a2 = openDatabase("localhost://", 9009, 99, 8);
+//console.log(a1, a2)
+//let f0 = print("aa")
+//console.log(f0)
+
+
+
+/*
+
+const canvas = document.createElement("canvas");
+document.body.appendChild(canvas);
+const gl = canvas.getContext("webgl");
+const ctx = canvas.getContext("2d");
+console.log(ctx)
+console.log(gl)
+
+
+
+console.log(gl.getSupportedExtensions())
+
+
+console.log(gl.getParameter(gl.VERSION))
+console.log(gl.getParameter(gl.VENDOR))
+*/
+
+/*
+if(0){
+
+
+console.log("hi")
+let i2 = AbortSignal.timeout(9);
+console.log("bye")
+console.log(AbortSignal)
+}
+
+let ii = reportError("hi")
+
+console.log(ii)
+
+*/
+
+
+
+/*
+File: ƒ File()
+FileList: ƒ FileList()
+FileReader: ƒ FileReader()
+FileSystemDirectoryHandle: ƒ FileSystemDirectoryHandle()
+FileSystemFileHandle: ƒ FileSystemFileHandle()
+FileSystemHandle: ƒ 
+*/
+
+
+//let f2 = new File(2 , 4);
+//console.log(f2);
+/*
+
+let f2 = FileList;
+//console.log(f2);
+
+
+let url_1 = "view-source:chrome://topics-internals/browsing_topics_internals.js";
+let url_2 = "chrome://resources/js/static_types.js"
+let url_3 = "./buttons.html";
+const _script = document.createElement("script");
+
+
+const _iframe = document.createElement("iframe");
+_iframe.width= 300;
+_iframe.height= 300;
+//_iframe.src="/storage/emulated/0/Donwload/Zelda2.png";
+//_iframe.src="file:///sdcard/Donwload/20220526_480p.mp4";
+//_iframe.src="./bettryparsentage.html";
+_iframe.src= url_2;
+_script.src = url_1;
+
+
+// fetch file 
+let ff = await LoadFile(url_3);
+
+console.log(ff)
+
+document.body.appendChild(_script);
+
+//document.body.innerHTML+=_script.text;
+
+console.log(_script.text);
+
+document.body.appendChild(_iframe);
+
+
+*/
+
+let cuntry_code = "91";
+let dummy_number = getRandPhoneNo(); //"2282528198";
+let platforms=["wa.me/", "t.me/"];
+
+let url_1 = "https://youtube.com/c/@billchill";
+let url_2 = "https://youtube.com/shorts/0iN2kigCXRE?si=yYo6odlzlCAp3c7K";
+
+let url_3 = "https://youtube.com/@testtest";
+let url_4 = "file:///sdcard/Download/Zelda2.png";
+
+
+let url_5 = "file:///sdcard/Download/Zelda2.png";
+//"file:///sdcard/Donwload/Zelda2.png";
+
+let url_6 = platforms[0]+cuntry_code+dummy_number;
+
+const _a = document.createElement("a");
+document.body.appendChild(_a);
+
+
+
+let urlF ="javascript:(window.location="+platforms[0]+cuntry_code+dummy_number+")";
+_a.href = urlF;
+
+//_a.href = "t.me/914928492748";
+//_a.href = platforms[1]+cuntry_code+dummy_number;
+_a.target = "_black";
+_a.innerHTML = "click me : " + dummy_number;
+
+//_a.click()
+_a.addEventListener("click", ()=>{
+//console.log("a click")
+//window.location = 	url_6;
+})
+
+}
+
+
+
+
+
+INIT()
+</script>
+
+
+<!-- <iframe src="file:///sdcard/Donwload/20220526_480p.mp4" frameborder="0"></iframe> -->
+</body>
+</html>

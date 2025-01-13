@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+
+<link rel="stylesheet" href="./style.css" type="text/css" media="all" />
+<title>a simple application</title>
+
+<script src="./eruda.min.js"></script>
+
+<script>eruda.init({});</script>
+
+</head>
+<body>
+
+<main class="wrapper">
+<div class="wrapper cont__Title">
+
+<h1 class="appTitle">a simple app</h1>
+</div>
+
+
+<div class="wrapper cont__Hero">
+
+<video class="hide" src="/storage/emulated/0/Download/Bill cipher knows a lot about memes (yes I know this has been done before).mp4" id="video" autoplay  height="50" width="50"></video>
+
+<canvas id="canvas"></canvas>
+
+
+</div>
+
+<div class="wrapper cont__aa">
+<p id="outp">hi</p>
+</div>
+
+<div class="wrapper cont__Btn">
+<div class="btn toggleCameraBtn">toggle Camera</div>
+<div class="btn takePictureBtn">take Picture</div>
+</div>
+
+
+</main>
+
+
+<script src="./main.js"></script>
+
+<script>
+
+
+
+canvas.addEventListener("touchmove", (e)=>{
+
+const o = e.changedTouches[0];
+
+let l = canvas.offsetLeft;
+let t = canvas.offsetTop;
+
+let x = (o.clientX - l) + scrollX;
+let y = (o.clientY - t) + scrollY;
+
+
+mouse.x= x;
+mouse.y= y;
+
+});
+
+
+
+
+
+</script>
+
+</body>
+</html>

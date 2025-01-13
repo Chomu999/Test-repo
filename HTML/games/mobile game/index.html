@@ -1,0 +1,62 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0  maximum-scale=9.0">
+
+<title>HTML canvas bird game</title>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+#mainBox{
+margin:0;padding:0;
+width:100vw;height:100vh;
+background-color:#CBCBCB;
+}
+#cvs{
+/* 
+position:absolute;
+top:50%;left:50%;
+transform:translate(-50%,-50%);
+border:2px solid blue; */
+}
+
+img{
+display:none;
+}
+
+
+</style>
+<script src="./js/info.js" type="text/javascript" charset="utf-8" defer></script>
+
+<script src="./js/classes_fun.js" type="text/javascript" charset="utf-8" defer></script>
+
+<script src="./js/controll.js" type="text/javascript" charset="utf-8" defer></script>
+
+
+<script src="./js/main.js" type="text/javascript" charset="utf-8" defer></script>
+</head>
+<body>
+
+
+<main id="mainBox">
+
+<img id="wormimg" src="./img/enemy_worm.png"/>
+<img id="ghostimg" src="./img/enemy_ghost.png"/>
+<img id="spiderimg" src="./img/enemy_spider.png"/>
+<img id="backgroundimg" src="./img/background_single.png"/>
+<img id="playerimg" src="./img/player.png"/>
+
+<canvas id="canvas"></canvas>
+<!-- 
+<p class="gamePlay">tap to play</p>
+ -->
+</main>
+
+
+</body>
+</html>

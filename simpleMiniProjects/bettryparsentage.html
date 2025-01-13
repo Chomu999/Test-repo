@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html charset=utf-8" />
+<meta name="author" content="biswajit bhowmick"/>
+
+
+<meta name="viewport"
+content="width=device-width,
+         user-scalable=no,
+         initial-scale=1.0,
+         maximum-scale=10.0">
+
+<title>
+simple bettry shower
+</title>
+
+<style>
+
+:root{
+--border1:2px solid white;
+}
+
+
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+html{
+font-size:10px;
+}
+
+
+
+
+body{
+width:100%; height:100%; background:#000;
+}
+main{
+width:100%; height:100%;
+display:grid;
+place-items:center;
+}
+
+canvas {
+position:absolute; top:50%; left:50%;
+transform:translate(-50%,-50%);
+background:rgba(30, 30, 30, 1.0);
+}
+
+
+div.res, div.shader-data{
+display:none!important;
+}
+
+p{
+padding:1rem;
+color:#50FF43;
+font-size:1.3rem;
+letter-spacing:0.5rem;
+word-spacing:0.5rem;
+border:2px solid currentcolor;
+}
+
+
+/*
+
+@media (orientation:landscape){
+#lock{ display:none; }
+#mainBox{ display:block; }
+}
+
+@media (orientation:portrait){
+#lock{ display:block; }
+#main{ display:none; }
+}
+*/
+
+
+
+
+</style>
+
+
+
+
+
+
+</head>
+<body>
+
+<main id="main">
+
+<p id="output">output</p>
+
+
+
+</main>
+
+<script>
+
+
+function init(){
+alert("check the console")
+
+
+
+let bp = navigator.getBattery();
+
+bp.then((d1,d2)=>{
+
+output.innerText="charge is : " + d1.level.toString().substr(2,3);
+console.log(d1)
+
+})
+
+
+
+
+
+}
+
+window.addEventListener("load",(e)=>{
+init()
+})
+
+
+</script>
+
+</body>
+</html>

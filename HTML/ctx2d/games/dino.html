@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Snake Game</title>
+    <style>
+        /* Your CSS styles will go here */
+#gameCanvas {
+    border: 1px solid black;
+}
+
+
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="300" height="300"></canvas>
+    <script>
+// // Get the canvas element and its context
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+// Set the game board dimensions and dino initial position
+const groundHeight = 50;
+const dinoX = 50;
+let dinoY = canvas.height - groundHeight - 20;
+const dinoWidth = 20;
+const dinoHeight = 20;
+const obstacleWidth = 20;
+const obstacleHeight = 50;
+const obstacleSpeed = 3;
+
+// Game loop
+function draw() {
+    // Clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw the ground
+    ctx.fillStyle = '#808080';
+    ctx.fillRect(0, canvas.height - groundHeight, canvas.width, groundHeight);
+
+    // Draw the dino
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(dinoX, dinoY, dinoWidth, dinoHeight);
+
+    // Draw the obstacles
+    for (let i = 0; i < obstacles.length; i++) {
+        ctx.fillStyle = '#FF0000';
+        ctx.fillRect(obstacles[i].x, canvas.height - groundHeight - obstacleHeight, obstacleWidth, obstacleHeight);
+    }
+
+    // Update the dino's position
+    if (jumping) {
+        velocity -= gravity;
+        dinoY += velocity;
+        if (dinoY >= canvas.height - groundHeight - dinoHeight) {
+            jumping = false;
+            dinoY = canvas.height - groundHeight - dinoHeight;
+            velocity = 0;
+        }
+    }
+
+    // Update the obstacles
+    for (let i = 0; i < obstacles.length; i++) {
+        obstacles[i].x -= obstacleSpeed;
+        if (obstacles[i].x < 0) {
+            obstacles.splice(i, 1);
+        }
+    }
+
+    // Generate new obstacles
+    if (Math.random() < 0.02) {
+        obstacles.push({ x: canvas.width });
+    }
+
+    // Check for collisions
+    for (let i = 0; i < obstacles.length; i++) {
+        if (dinoX + dinoWidth >= obstacles[i].x && dinoX <= obstacles[i].x + obstacleWidth && dinoY + dinoHeight >= canvas.height - groundHeight - obstacleHeight) {
+            alert('Game Over');
+            return;
+        }
+    }
+
+    // Request the next frame
+    window.requestAnimationFrame(draw);
+}
+
+// Handle keyboard input
+document.addEventListener('keydown', function(event) {
+    if (event.keyCode === 32 && !jumping) {
+        jumping = true;
+        velocity = -10;
+    }
+});
+
+
+// Handle keyboard input
+document.addEventListener('touchstart', function(event) {
+    if ( !jumping) {
+        jumping = true;
+        velocity = -10;
+    }
+});
+
+
+
+// Handle keyboard input
+document.addEventListener('touchend', function(event) {
+    
+        jumping = false;
+      
+});
+
+
+
+
+
+
+// Initialize variables
+let jumping = false;
+let velocity = 0;
+let gravity = 0.5;
+let obstacles = [];
+
+// Start the game loop
+draw();
+
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>HTML CANVAS GAME BOI</title>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+div#mainBox{
+margin:0;padding:0;
+width:100vw;height:100vh;
+background-color:#0D0C1E;
+display:grid;
+grid-template-columns:1fr;
+grid-template-rows: repeat(2, 1fr);
+grid-gap:2px;
+}
+
+div#outputScreen{
+grid-column:1/2;
+grid-row:1/2;
+}
+
+
+#inputs{
+grid-column:1/2;
+grid-row:2/3;
+
+display:grid;
+
+grid-template-columns:1fr;
+grid-template-rows:repeat(3,1fr);
+background:#320B46;
+color:#00AEFF;
+}
+textarea{
+text-decoration:none;
+color:#333;
+}
+
+
+</style>
+
+<script>
+
+
+
+const isLoadingCoplid = () => {
+
+let htmlCode,cssCode,jsCode,output;
+
+let outputS=document.querySelector('#outputScreen').getBoundingClientRect();
+output=document.querySelector('#output');
+
+htmlCode=document.querySelector('#inputs .htmlCode');
+cssCode=document.querySelector('#inputs .cssCode');
+jsCode=document.querySelector('#inputs .jsCode');
+output.width=outputS.width;
+output.height=outputS.height;
+
+function gameLoop(){
+requestAnimationFrame(gameLoop)
+
+
+
+
+
+
+console.log('runing');
+
+
+
+
+
+}
+//gameLoop()
+
+
+
+const runCode = ()=>{
+
+
+output.contentDocument.head.innerHTML = '<style>'+cssCode.value+'</style>';
+output.contentDocument.body.innerHTML = htmlCode.value;
+console.clear()
+output.contentWindow.eval(jsCode.value);
+
+
+
+//console.log(htmlCode.innerText);
+//console.log(htmlCode.value);
+
+
+}
+
+
+htmlCode.addEventListener('keyup',runCode);
+cssCode.addEventListener('keyup',runCode);
+jsCode.addEventListener('keyup',runCode);
+
+
+}
+//alert('heloo');
+
+
+</script>
+
+</head>
+<body onload="isLoadingCoplid()">
+<div id="mainBox">
+
+
+
+<div id="outputScreen">
+<iframe id="output"></iframe>
+</div>
+
+<div id="inputs">
+<textarea class="htmlCode"></textarea>
+<textarea class="cssCode"></textarea>
+<textarea class="jsCode "></textarea>
+</div>
+
+</div>
+
+
+
+
+
+
+</body>
+</html>

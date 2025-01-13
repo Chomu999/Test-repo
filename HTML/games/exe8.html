@@ -1,0 +1,154 @@
+<html lang="en">
+<head>
+    
+    
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    
+<style>
+#box{
+position:absolute;
+width:100vw;height:40vh;
+top:50%;left:50%;
+transform:translate(-50%,-50%);
+background-color:rgba(0,0,0,0.08);
+}
+h2{
+padding:2px 2px;
+color:red;
+}
+strong{
+color:purple;
+}
+
+
+p.sourcebox, p.hisourcebox{
+padding:20px 20px;
+color:red;
+border:2px solid purple;
+}
+</style>
+<title>lol</title>
+</head>
+<body>
+
+<div id="box">
+<p class="sourcebox"></p>
+<p class="hisourcebox"></p>
+<h2 id="h1"></h2>
+</div>
+
+<script>
+
+let sourc=0;
+
+let h2=document.querySelector('h2');
+let sb=document.querySelector('.sourcebox');
+let hisb=document.querySelector('.hisourcebox');
+
+addEventListener('deviceorientation',(e)=>{
+
+
+let pos={
+x:Math.round(e.beta),
+y:Math.round(e.gamma),
+z:Math.round(e.alpha),
+}
+
+
+
+//console.log(pos.z)
+
+
+
+if(pos.x >= 20){
+console.log(1)
+}
+
+else if(pos.x <= -20){
+console.log(-1)
+}
+
+else{
+console.log(0)
+}
+
+
+
+
+
+
+
+
+
+h2.innerHTML=`
+X-Axis:
+<strong>${pos.x}</strong>
+:Y-Axis:
+<strong>${pos.y}</strong>
+:Z-Axis:
+<strong>${pos.z}</strong>`
+
+
+})
+
+
+let his=localStorage.getItem('hisource')
+
+
+hiss= JSON.parse(his)
+
+if(his === null){
+hiss=0;
+localStorage.setItem("hisource",`${hiss}`)
+console.log('create HiSource Storage')
+}
+else{
+
+hiss= JSON.parse(his)
+console.log(his)
+
+hisb.innerHTML=`
+Hisource: ${hiss}`
+}
+
+
+
+
+
+
+
+
+
+window.addEventListener('click',()=>{
+sourc++
+
+
+
+
+if(sourc>hiss){
+
+hiss=sourc
+
+localStorage.setItem("hisource",`${hiss}`)
+}
+
+sb.innerHTML=`source : ${sourc}`
+
+hisb.innerHTML=`hisource : ${sourc}`
+
+
+
+//console.log(his+'9')
+})
+
+console.log(
+
+his
+)
+
+</script>
+</body>
+</html>

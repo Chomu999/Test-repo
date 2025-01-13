@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+
+<title>canvas flow field 6</title>
+
+<style>
+
+
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+html{
+font-size:10px;
+}
+
+body{
+background:black;
+}
+
+
+
+
+
+#mainBox{
+margin:0;padding:0;
+position:relative;
+width:100vw; height:100vh;
+background-color:#000;
+
+}
+
+
+
+</style>
+
+
+<script>
+
+class rand{
+
+//return float
+static float(min=1,max=10){
+return Math.random() * (max-min) + min;
+}
+
+//return int
+static int(min=10,max=100){
+return Math.floor(rand.float(min,max));
+}
+
+//return String
+static choice(arr){
+return arr[rand.int(0,arr.length)]
+}
+
+//return a hex color
+static color(){
+let color='#'
+for(let i=0;i<6;++i){
+color+=`${rand.choice('0123456789abcdef')}`;
+}
+return color;
+}
+
+
+}
+
+let colorArr=["#FF00BB","#0041FF","#00FF8A"];
+
+
+class Partical{
+constructor(effect){
+this.effect=effect;
+
+this.pos={
+ x:rand.int(0,this.effect.width),
+ y:rand.int(0,this.effect.height)
+};
+
+//this.radius=rand.int(3,9);
+
+this.velocity={
+ x:Math.random() * 3 - 3/2,
+ y:Math.random() * 3 - 3/2,
+};
+
+this.color="red"//rand.choice(colorArr);
+
+
+this.angle=0;
+this.opacity=rand.float(0.05,0.1);
+
+this.history=[{x:this.pos.x, y:this.pos.y}];
+this.maxlineLen=3;//rand.int(50,100);
+
+this.free=true;
+
+}
+//
+update(dt){
+if(this.free) return;
+
+let x=Math.floor(this.pos.x / this.effect.cellSize);
+let y=Math.floor(this.pos.y / this.effect.cellSize);
+
+let index= y * this.effect.columns + x;
+this.angle = this.effect.flowfield[index];
+
+
+
+this.velocity.x = Math.cos(this.angle);
+this.velocity.y = Math.sin(this.angle);
+
+this.pos.x += this.velocity.x;
+this.pos.y += this.velocity.y;
+
+this.history.push({x:this.pos.x, y:this.pos.y});
+if(this.history.length > this.maxlineLen){
+this.history.shift();
+}
+
+
+}
+//
+draw(c){
+
+if(this.free) return;
+//c.beginPath();
+//c.arc( this.pos.x, this.pos.y, this.radius, 0, Math.PI*2);
+ 
+//c.fill();
+//c.stroke();
+//c.closePath();
+
+
+c.save();
+c.strokeStyle=this.color;
+c.fillStyle=this.color;
+c.beginPath();
+c.moveTo(this.history[0].x, this.history[0].y);
+for(let i=0;i<this.history.length;i++){
+c.lineTo(this.history[i].x, this.history[i].y);
+}
+
+
+//c.arc( this.pos.x,this.pos.y, 10, 0, Math.PI*2);
+//c.rect(this.pos.x, this.pos.y, 10, 10);
+
+c.globalAlpha=this.opacity;
+c.stroke();
+//c.fill();
+c.closePath();
+c.restore();
+
+
+
+}
+
+reset(){
+this.free=true;
+}
+
+
+start(){
+this.free=false;
+
+
+
+this.pos={
+ x:rand.int(0,this.effect.width),
+ y:rand.int(0,this.effect.height)
+}
+
+
+this.velocity={
+ x:Math.random() * 3 - 3/2,
+ y:Math.random() * 3 - 3/2,
+}
+
+this.color=rand.color()
+
+
+this.angle=0
+this.opacity=rand.float(0.05,0.1)
+
+this.history=[{x:this.pos.x, y:this.pos.y}]
+this.maxlineLen=3
+
+
+}
+
+}
+
+
+class Effect{
+constructor({width,height}){
+
+this.width=width;
+this.height=height;
+
+
+this.particals=[];
+
+
+
+this.curve=2.3;
+this.zoom=0.9;
+this.cellSize=6;
+this.rows=0;
+this.columns=0;
+this.flowfield=[];
+this.NumberOfParticals=rand.int(120,240);
+this.init();
+}
+
+
+
+init(){
+
+
+
+this.rows=Math.floor(this.height / this.cellSize);
+this.columns=Math.floor(this.width / this.cellSize);
+
+this.flowfield=[];
+
+for(let y=0;y<this.rows;y++){
+
+for(let x=0;x<this.columns;x++){
+
+let angle = (Math.cos(x * this.zoom) * Math.sin(y * this.zoom)) * this.curve;
+
+this.flowfield.push(angle);
+
+}
+
+}
+
+for(let i=0;i<this.NumberOfParticals;++i){
+this.particals.push(new Partical(this));
+this.particals[i].start();
+}
+
+
+
+
+}
+
+
+
+
+update(dt){
+
+
+this.particals.forEach((p)=>{
+p.update(dt)
+});
+
+
+
+this.particals.forEach((p,i)=>{
+
+if(p.pos.x >= this.width+(p.maxlineLen*2) ){
+this.particals[i].start()
+}
+
+});
+
+
+let partical=this.#getElement();
+if(partical) partical.start()
+
+
+
+
+
+
+
+}
+
+
+//
+draw(c){
+
+this.particals.forEach((p)=>{
+p.draw(c)
+});
+//c.strokeStyle="tan";
+//c.strokeRect(this.pos.x,this.pos.y,this.width,this.height)
+
+}
+
+
+#getElement(){
+for(let i=0;i<this.particals.length;i++){
+
+if(this.particals[i].free || this.particals[i].velocity.x===0){
+return this.particals[i];
+}
+
+
+}
+
+}
+
+}
+
+
+
+
+
+///
+
+
+
+</script>
+
+</head>
+<body>
+
+
+<main id="mainBox">
+
+<canvas id=canvas></canvas>
+
+</main>
+
+
+<script>
+
+
+
+
+
+const app=(ctx)=>{
+
+
+ctx.strokeStyle="#fff";
+ctx.lineWidth=1.4;
+
+window.effect1=new Effect({width:ctx.canvas.width,
+height:ctx.canvas.height});
+
+
+
+//console.log(effect1)
+
+
+//
+
+
+//
+const animate=(dt)=>{
+
+//ctx.fillStyle="black";
+//ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
+
+effect1.update(dt);
+effect1.draw(ctx);
+
+
+
+
+//ctx.beginPath();
+//ctx.strokeStyle="white";
+//ctx.moveTo(100,100);
+//ctx.lineTo(200,200);
+//ctx.stroke();
+//ctx.closePath();
+
+
+
+
+}
+
+
+
+
+let lt=0,dt=0;
+
+const GameLoop=(ts)=>{
+
+dt = ts - lt; lt = ts;
+
+
+animate(dt);
+window.requestAnimationFrame(GameLoop);
+
+}
+
+
+
+GameLoop(0);
+
+
+
+
+
+
+}
+
+
+
+
+
+//
+const INIT=()=>{
+
+const canvas = document.querySelector("canvas");
+const ctx = canvas.getContext("2d");
+
+canvas.width=innerWidth;
+canvas.height=innerHeight;
+
+
+app(ctx);
+console.log(ctx)
+}
+
+
+
+
+window.addEventListener("load",(e)=>{
+
+INIT();
+
+})
+
+
+//resize
+window.addEventListener("resize",()=>{
+
+canvas.width=innerWidth;
+canvas.height=innerHeight;
+
+
+})
+
+
+
+
+
+</script>
+
+</body>
+</html>
+

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<!-- <meta http-equiv="X-UA-Compatible" content="text/html; charset=UTF-8"> -->
+<meta name="author" content="billbyte" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+
+<style >
+#lock{
+display: none;
+}
+@media (max-width: 500px) and (orientation:landscape){
+main{
+display:grid;
+}
+
+#lock{
+display:none;
+}
+
+}
+
+
+@media (min-width: 500px) and (max-width:800px) and (orientation:portrait){
+
+main{
+display: none;
+}
+
+#lock{
+display:block;
+}
+
+
+}
+
+
+*:before, *, *:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+html{
+font-size:10px;
+}
+
+
+body{
+background:chocolate;
+color: saddlebrown;
+
+}
+
+
+
+main{
+/* width:100vw; */
+min-height:100vh;
+min-height:100svh;
+
+display:flex;
+align-items: center;
+justify-content: center;
+background: rgb(2,0,36);
+background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(6,6,90,1) 24%, rgba(18,18,92,1) 44%, rgba(0,212,255,1) 100%);
+background-image: linear-gradient( saddlebrown, chocolate);
+
+
+}
+
+
+.container{
+background: #f0f0f088;
+display:flex;
+box-shadow: #3e3e3e 2px 2px 20px -10px;
+}
+
+
+
+.key{
+width:var(--width);
+height:calc(var(--width) * 4);
+}
+
+.white{
+--width:5rem;
+background: white;
+border: 1px solid red;
+}
+
+.black{
+--width:3rem;
+background: black;
+border: 1px solid red;
+margin: 0 calc(var(--width) / 2) 0;
+z-index: 10;
+}
+
+.hidden{
+display: none;
+}
+
+
+.white.active{
+background: #C9C9C9;
+}
+
+.black.active{
+background: #242424;
+}
+
+</style>
+
+
+<title>sasta piano</title>
+
+</head>
+
+<body>
+
+
+<h2 id="lock">rotate your device</h2>
+
+<main>
+
+
+
+<div class="container">
+
+<div class="key white" data-note="C"></div>
+<div class="key black" data-note="Db"></div>
+<div class="key white" data-note="D"></div>
+<div class="key black" data-note="Eb"></div>
+<div class="key white" data-note="E"></div>
+<div class="key white" data-note="F"></div>
+<div class="key black" data-note="Gb"></div>
+<div class="key white" data-note="G"></div>
+<div class="key black" data-note="Ab"></div>
+<div class="key white" data-note="A"></div>
+<div class="key black" data-note="Bb"></div>
+<div class="key white" data-note="B"></div>
+
+</div>
+
+
+<div class="hidden">
+
+<audio class="C" src="./audio/notes/C.mp3" ></audio>
+<audio class="Db" src="./audio/notes/Db.mp3" ></audio>
+<audio class="D" src="./audio/notes/D.mp3" ></audio>
+<audio class="Eb" src="./audio/notes/Eb.mp3" ></audio>
+<audio class="E" src="./audio/notes/E.mp3" ></audio>
+<audio class="F" src="./audio/notes/F.mp3" ></audio>
+
+<audio class="Gb" src="./audio/notes/Gb.mp3" ></audio>
+<audio class="G" src="./audio/notes/G.mp3" ></audio>
+
+<audio class="Ab" src="./audio/notes/Ab.mp3" ></audio>
+<audio class="A" src="./audio/notes/A.mp3" ></audio>
+<audio class="Bb" src="./audio/notes/Bb.mp3" ></audio>
+<audio class="B" src="./audio/notes/B.mp3" ></audio>
+
+
+</div>
+
+</main>
+
+
+
+
+
+
+<script>
+
+
+
+//console.log(window)
+
+
+const app=()=>{
+
+//querySelectorAll
+let keyNotes =document.querySelectorAll(".key")
+let audioNotes =document.querySelectorAll(".hidden > audio")
+
+
+const play_keys=(key)=>{
+
+const audioNote= document.querySelector(`audio.${key.dataset.note}`)
+
+
+audioNote.currentTime=0;
+audioNote.play();
+//key.classList.add("active");
+
+audioNote.addEventListener("ended", ()=>{
+key.classList.remove("active");
+});
+
+
+}
+
+
+
+
+keyNotes.forEach((key)=>{
+
+key.addEventListener("click", (e)=>{
+if(e.repeat) return;
+//let elmt = e.target;
+//if(!elmt) return;
+key.classList.add("active")
+play_keys(key);
+
+
+});
+
+})
+
+
+
+}
+
+
+
+window.addEventListener("load", ()=>{
+
+
+try{
+app();
+}catch(error){
+console.error(error)
+}
+
+
+} );
+
+
+/*
+//pause,
+//resume
+webkitSpeechGrammar: ƒ SpeechGrammar()
+webkitSpeechGrammarList: ƒ SpeechGrammarList()
+webkitSpeechRecognition: ƒ SpeechRecognition()
+webkitSpeechRecognitionError: ƒ SpeechRecognitionErrorEvent()
+webkitSpeechRecognitionEvent
+
+*/
+
+
+
+
+
+</script>
+
+
+
+</body>
+</html>

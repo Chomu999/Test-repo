@@ -1,0 +1,136 @@
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>HTML 3d Element</title>
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+.cvs{
+position:absolute;
+top:50%;left:50%;
+transform:translate(-50%,-50%);
+border:2px solid blue;
+}
+
+.btnBox{
+width:100vw;height:22vh;
+background-color:#BD00FF;
+position:relative;
+left:0;
+top:76vh;
+}
+
+
+.joystick{
+width:25vw;height:25vw;
+background-color:#003CFF;
+position:absolute;
+border-radius:50%;
+left:0;top:20px;
+}
+</style>
+
+
+
+</head>
+<body>
+<canvas class="cvs"></canvas>
+
+<div class="btnBox">
+
+<div class="joystick"></div>
+
+</div>
+
+
+<script>
+let cvs=document.querySelector('.cvs')
+let ctx=cvs.getContext('2d');
+
+
+let joystick=document.querySelector('.joystick')
+
+
+
+
+cvs.width=300;
+cvs.height=300;
+
+
+
+class Bird{
+constructor(x,y,c){
+
+this.width=15
+this.height=15
+this.weight=0.66
+this.x=x
+this.y=x
+this.color=c
+this.speed={x:0,y:0}
+}
+
+draw(){
+ctx.fillStyle=this.color
+ctx.fillRect(this.x,this.y,this.width,this.height)
+
+}
+update(){
+this.draw()
+
+this.x += this.speed.x
+this.y += this.speed.y
+
+}
+
+}
+
+
+
+
+let player = new Bird(cvs.width/2,cvs.height/2,'red')
+
+
+//console.log(ctx)
+
+
+function gameLoop(){
+window.requestAnimationFrame(gameLoop)
+ctx.fillStyle='black'
+ctx.fillRect(0,0,cvs.width,cvs.height)
+//ctx.fillRect(60,80,40,40)
+
+
+
+
+
+
+
+
+player.update()
+
+
+
+ctx.fillStyle='#00FBFF'
+ctx.fillRect(cvs.width/2,0,1,cvs.height)
+ctx.fillRect(0,cvs.height/2,cvs.width,1)
+
+
+
+
+}
+gameLoop()
+
+</script>
+
+</body>
+</html>

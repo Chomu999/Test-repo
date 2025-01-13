@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+:root{
+
+--angle:45deg;
+
+--color1:#ff000044;
+--color2:#ff000088;
+
+--color3:#00000024;
+--color4:#00000088;
+
+--color5:#00CCFF44;
+--color6:#00CCFF88;
+
+--color7:#9500FF99;
+--color8:#FF008080;
+
+--color9:#ffffff22;
+
+--gradient_bg_color1: linear-gradient(var(--angle), #FF8A00, #8D00FF);
+--gradient_bg_color2: linear-gradient(var(--angle), brown, lime, chocolate);
+--gradient_bg_color3: linear-gradient( 45deg, #FF6E00, #005EFF, #6BFF88, #FF00B5);
+
+--tex_color1:#DEDFDD;
+--tex_color2:#E6E6E6;
+
+--title_color1:#fCfCfC;
+--title_color2:#2C2C2C;
+--title_bg_color1:var(--color3);
+--title_bg_color2:#1200FF;
+--title_font_size:2rem;
+
+
+--TextColor1:#454B40;
+--TextColor2:#C9C9C9;
+--TextColor3:#62FFFE;
+
+
+}
+
+*::selection{
+color: tan;
+background:chocolate ;
+}
+
+
+html{
+font-size:10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style: none;
+}
+
+
+body{
+
+background: #210E43;
+
+}
+
+
+main{
+/* margin: 2rem 0; */
+/* height: min(80rem, 100dvh - 5rem); */
+background: var(--color9) ;
+overflow:hidden auto;
+}
+
+
+
+.wrapper{
+margin:1rem auto;
+padding: 1.5rem;
+width:min(39rem, 100% - 1.2rem);
+background: var(--color3);
+border-radius:2rem;
+}
+
+
+.title{
+color:var(--title_color1);
+background: var(--title_bg_color1);
+font-size: var(--title_font_size);
+text-align: center;
+text-transform: capitalize;
+border-radius:9rem;
+}
+
+.outputContainer{
+aspect-ratio: 1;
+/* background: #FFE46498; */
+overflow: hidden auto;
+}
+
+
+.texts{
+--BGcolor:red;
+--color:blue;
+margin: 1rem;
+padding: 1rem;
+display: block;
+align-items: center;
+text-align: justify;
+line-break: 34px;
+font-size: 2rem;
+/* direction: rtl; */
+letter-spacing: 0.3rem;
+word-spacing: 2rem;
+background: var(--BGcolor);
+color: var(--color);
+text-decoration:underline;
+/* border: 1rem solid currentColor; */
+border-radius: 10rem;
+
+
+overflow: auto;
+
+}
+
+.encodeTextOutput{
+--BGcolor:#14BA00;
+--color:red;
+}
+
+.decodeTextOutput{
+--BGcolor:#ACACAC;
+--color:blue;
+}
+
+
+
+
+.inputContainer{
+text-align: center;
+align-items: center;
+background: #FF006A66;
+overflow: hidden auto;
+}
+
+.inputBoxs{
+width: 10rem;
+padding: 0.2rem 0;
+margin:0.1rem;
+height: 6rem;
+color: #00FFCB;
+background: #070E00;
+font-size: 1.3rem;
+text-align:center;
+border:0.5rem solid currentColor;
+border-radius:5rem;
+}
+
+.inputContainer > label{
+background: #00FFE3;
+color: blue;
+padding: 1rem;
+font-size: 2rem;
+border-radius: 50rem;
+}
+
+
+
+
+
+.btnContainer{
+text-align: center;
+align-items: center;
+background: #FF006A66;
+}
+
+.btns{
+--color:#9100FF;
+--hoverColor:#00D6FF;
+margin:1rem;
+padding:0.3rem 2rem;
+/* height: 10rem; */
+color: var(--color);
+background: #070E00;
+font-size: 1.3rem;
+font-weight: bold;
+text-align:center;
+
+border:none;
+
+border-bottom: 1rem solid currentColor;
+border-radius:1rem;
+text-transform: capitalize;
+transition: 0.3s ease-in;
+}
+
+
+.btns:active{
+--color:var(--hoverColor, tan);
+/* transform: rotateY(180deg); */
+
+transform:
+translate(0, 30% )
+/*rotate(45deg)*/
+;
+border-bottom: 0.5rem solid currentColor;
+}
+
+.encodeBTN{
+--color:red;
+}
+
+.decodeBTN{
+--color:blue;
+}
+
+.encodeBTN:hover{
+--color:#00FF0C;
+}
+
+.decodeBTN:hover{
+--color:#00FFD6;
+}
+
+
+</style>
+
+<title>content Downloader App</title>
+
+</head>
+<body>
+
+<main>
+
+
+<div class="wrapper">
+
+
+<h2 class="title">Content Downloader App</h2>
+
+</div>
+
+<div class="wrapper outputContainer">
+
+</div>
+
+<div class="wrapper inputContainer">
+  
+<input type="text" class="inputBoxs" id="dataIn" placeholder="enter data"  />
+<br>
+<input type="text" class="inputBoxs" id="nameIn" placeholder="enter name" />
+<br>
+<input type="text"class="inputBoxs" id="typeIn" placeholder="enter type"/>
+
+</div>
+
+<div class="wrapper btnContainer">
+
+<button class="btns downloadBtn">download</button>
+<button class="btns prevColor">prevus</button>
+<button class="btns nextColor">next</button>
+
+</div>
+
+
+
+
+
+
+
+
+
+</main>
+
+
+
+
+<!-- <script async src="/storage/emulated/0/g_js_libs/tf.min.js"></script> -->
+  
+
+<script>
+"use strict";
+
+//some utils
+class Rand{
+
+static Float(min=0, max=1){
+return Math.random() * (max - min+1) + min;
+}
+
+static Int(min=6, max=9){
+return Math.floor( Rand.Float(min, max));
+}
+
+static Choice(...args){
+return args[Rand.Int(0, args.length - 1)];
+}
+
+static Color(len=3){
+let outColor="#";
+for(let i=0;i<len;++i){
+outColor+=Rand.Choice(..."0123456789abcdef".split(""));
+}
+return outColor;
+}
+
+}
+
+
+
+const saveToSystem=(_data_, _name_, _type_)=>{
+
+const anchor= document.createElement("a");
+
+const _blob = new Blob([_data_], {
+  type:_type_,
+});
+
+const _url = URL.createObjectURL(_blob);
+
+anchor.download=_name_??0;
+anchor.href = _url??0;
+anchor.click();
+}
+
+//starting point
+const INITIAL=async()=>{
+
+//querySelector
+const outputContainer = document.querySelector(".outputContainer");
+const downloadBtn=document.querySelector(".downloadBtn");
+
+
+
+
+downloadBtn.addEventListener("click", ()=>{
+if(!dataIn.value || !nameIn.value || !typeIn.value){
+console.log("something wrong");
+alert("something wrong");
+return -1;
+}
+saveToSystem(dataIn.value, nameIn.value, typeIn.value);
+
+});
+
+
+
+let colorIndex=0;
+const colors=[]
+for (let i = 0; i  < 100; ++i) {
+  colors.push(Rand.Color(8));
+}
+
+
+document.body.addEventListener("click", (e)=>{
+
+// this help to incres by 1 when it reach max it set 0 aka begin of the array 
+const c = e?.srcElement?.classList[1];
+if(!c) return;
+
+if(c === "nextColor") colorIndex = (colorIndex + 1) % colors.length;
+else if(c === "prevColor") colorIndex = (colorIndex - 1 + colors.length) % colors.length;
+else return 0;
+document.body.style.backgroundColor = colors[colorIndex];
+const outputContainer = document.querySelector(".outputContainer");
+
+
+outputContainer.innerHTML = `<b class="texts encodeTextOutput">${colors[colorIndex] + " : " + colorIndex}</b>`;
+
+});
+
+
+
+}
+
+
+
+
+
+try{
+console.log("JS is Awesome")
+INITIAL();
+}catch(err){
+console.log(`javascript : uncatch Error : ${err}`);
+}
+
+
+
+</script>
+</body>
+</html>

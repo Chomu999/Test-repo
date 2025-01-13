@@ -1,0 +1,516 @@
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+<title>simple particle system</title>
+
+<style>
+
+*:before, *, *:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+:root{
+
+--angle:45deg;
+
+--color1:#ff000044;
+--color2:#ff000088;
+
+--color3:#00000044;
+--color4:#00000088;
+
+--color5:#00CCFF44;
+--color6:#00CCFF88;
+
+--color7:#9500FF99;
+--color8:#FF008080;
+
+--color9:#ffffff22;
+
+--gradient_bg_color1: linear-gradient(var(--angle),
+#00E4FF, #FF0024);
+
+
+--tex_color1:#DEDFDD;
+--tex_color2:#E6E6E6;
+
+--title_color1:#fCfCfC;
+--title_color2:#2C2C2C;
+--title_bg_color1:var(--color3);
+--title_bg_color2:#1200FF;
+--title_font_size:3rem;
+
+--repeat_x:33%;
+--repeat_y:15rem;
+
+
+}
+
+
+html{
+font-size:10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style: none;
+}
+
+
+body{
+background: #0052FF;
+}
+
+
+.wrapper{
+margin:1rem auto;
+padding: 1rem;
+width:min(38rem, 100% - 2rem);
+background: var(--color3);
+border-radius:2rem;
+border: 1px solid ;
+box-shadow: 2px 3px 10px 10px gray;
+}
+
+
+
+.appContainer{
+--bgC:#00300513;
+position: relative;
+height: min( 100svh - 2rem, 100dvh - 2rem);
+overflow: hidden;
+background: var(--bgC);
+color: #EEEEEE;
+}
+
+
+
+.appContainer:before, .appContainer:after{
+content: '';
+position: absolute;
+width: 26rem;
+aspect-ratio: 1;
+rotate: 160deg;
+border-radius: 50%;
+box-shadow: 
+inset 0 0 20rem 1rem,
+0 0 20rem 1rem ;
+animation: ani 66s ease-in-out infinite;
+z-index: -1;
+
+}
+
+.appContainer:before{
+--tragetY:60rem;
+bottom: 20rem;
+right: -9rem;
+background: linear-gradient(-45deg, #004FFF, orangered);
+}
+
+
+
+.appContainer:after{
+--tragetY:-60rem;
+top: 20rem;
+left: -9rem;
+background: linear-gradient(45deg, #A7FF4E, #FF005D);
+}
+
+
+.appMain{
+aspect-ratio: 2/4;
+background: var(--bgC);
+color: #D0D0D0;
+backdrop-filter: blur(.8rem);
+overflow: hidden auto;
+z-index: 1000;
+}
+
+
+
+.appMain *{
+backdrop-filter: inherit;
+background: inherit;
+}
+
+
+.titleContainer{
+align-items: center;
+/* padding: 1rem; */
+/* margin: ; */
+}
+
+.appTitle{
+padding: 1rem;
+color:var(--title_color1);
+background: var(--title_bg_color1);
+font-size: 2rem;
+text-align: center;
+text-transform: capitalize;
+border-radius:2rem;
+}
+
+canvas{
+width: 100%;
+background:#EA8F93;
+}
+
+/*output screen code section*/
+
+.output_screen{
+
+}
+
+
+.output_screen>.sub_output_screen{
+height: min(30rem, 100% - 3rem);
+overflow:auto;
+}
+
+.output_screen p.output{
+margin:0.2rem 1rem;
+padding: 1rem ;
+font-size: 2rem;
+background: var(--color4);
+color: var(--tex_color1);
+border-radius: 1rem;
+
+
+
+}
+
+
+
+
+
+
+/* error box code section*/
+
+
+.error_box{
+position: relative;
+
+height: min(20rem, 100% - 3rem);
+
+overflow:hidden auto;
+}
+
+.error_box:before{
+/* position: absolute; */
+content:"error and warning";
+display:block;
+text-align: center;
+font-size: 2rem;
+margin: 1rem;
+padding: 1rem;
+font-weight: bold;
+text-transform: capitalize;
+background: linear-gradient(45deg,red, blue);
+text-decoration: underline;
+border-radius: 4em;
+}
+
+
+.error_box  .error{
+margin:0.2rem 1rem;
+padding: 1rem ;
+
+background: var(--color4);
+
+color: var(--ec, #f0f0f0);
+border-radius: 1rem;
+}
+
+
+
+
+/*keyFrame animation start here */
+
+
+@keyframes ani{
+
+0%,100%{
+transform: translate(0, 0);
+}
+
+50%{
+transform: translate(0, var(--tragetY) );
+}
+
+}
+
+
+</style>
+
+<script async src="/storage/emulated/0/g_js_libs/browser.js"></script>
+
+</head>
+<body>
+
+<div class="wrapper appContainer">
+
+<div class="wrapper appMain">
+
+<div class="wrapper titleContainer">
+
+
+<h2 class="appTitle">
+simple particle system
+</h2>
+
+
+
+</div>
+
+
+
+<section class="wrapper">
+
+<canvas id="canvas"></canvas>
+
+</section>
+
+
+<div class="wrapper error_box">
+</div>
+
+
+</div>
+
+</div>
+
+
+
+<script>
+
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+
+ctx.canvas.width = 380;
+ctx.canvas.height = 380;
+
+
+const showError=(msg, type="red")=>{
+const errorContainer=document.querySelector(".error_box");
+if(!errorContainer) return -1;
+errorContainer.innerHTML+=`<p style="--ec:${type}" class="error">${msg}</p>`;
+}
+
+const addError=(msg)=>{
+showError(msg, "red");
+}
+
+const addWarn=(msg)=>{
+showError(msg, "yellow");
+}
+
+const addLog=(msg)=>{
+showError(msg, "#E2E2E2");
+}
+
+
+
+
+class Rand{
+
+static Float(min=0, max=1){
+return Math.random() * (max - min) + min;
+}
+
+static Int(min=1, max=2){
+return Math.floor(Rand.Float(min, max));
+}
+
+static Choice(...args){
+return args[Rand.Int(0, args.length)];
+}
+
+static Color(){
+let out = "#";
+for(let i = 0;i<8;i++){
+out += Rand.Choice(..."0123456789abcdef".split(""));
+}
+return out;
+}
+
+}
+
+//showError(Rand.Color());
+
+
+class ParticleSystem {
+  constructor(x, y) {
+    this.emitter = { x, y };
+    this.particles = [];
+    this.speed = 100;
+    this.lifetime = Rand.Float(1, 3);
+    this.spread = 145;
+    this.amount = 2;
+    this.gravity = {x:0, y:-9.8};
+  }
+
+  emit() {
+    for (let i = 0; i < this.amount; i++) {
+      const particle = new Particle(
+        this.emitter.x,
+        this.emitter.y,
+        Math.random() * this.speed,
+        Math.random() * this.spread - this.spread / 2,
+        this.lifetime,
+        this.gravity
+      );
+      this.particles.push(particle);
+    }
+  }
+
+  update(dt) {
+    for (let i = 0; i < this.particles.length; i++) {
+      const particle = this.particles[i];
+      particle.update(dt);
+      if (particle.lifetime <= 0) {
+        this.particles.splice(i, 1);
+      }
+    }
+  }
+
+  draw(ctx) {
+    for (let i = 0; i < this.particles.length; i++) {
+      const particle = this.particles[i];
+      particle.draw(ctx);
+    }
+  }
+}
+
+class Particle {
+  constructor(x, y, speed, angle, lifetime, gravity) {
+    this.x = x;
+    this.y = y;
+    this.vx = speed * Math.cos(angle);
+    this.vy = speed * Math.sin(angle);
+    this.lifetime = lifetime;
+    this.size = Rand.Float(1, 10);
+    this.color = Rand.Color();  //`hsla(${Math.random() * 360}, 100%, 50%, 0.5)`;
+    this.gravity = gravity;
+  
+  }
+
+  update(dt) {
+    this.vx += this.gravity.x * dt;
+    this.vy += this.gravity.y * dt;
+    this.x += this.vx * dt;
+    this.y += this.vy * dt;
+    this.lifetime -= 0.01;
+  }
+
+  draw(ctx) {
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, 2 * Math.PI);
+    ctx.fill();
+  }
+}
+
+const _INITIAL = ()=>{
+
+
+
+
+const particleSystem = new ParticleSystem(canvas.width*0.5, canvas.height*0.5);
+
+
+let lastTime=performance.now();
+
+function animate() {
+  const currentTime = performance.now();  
+  const dt = (currentTime - lastTime) / 1000;
+  lastTime = currentTime;
+  //ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle="#0C0036";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  particleSystem.emit();
+  particleSystem.update(dt);
+  particleSystem.draw(ctx);
+  requestAnimationFrame(animate);
+}
+
+animate();
+
+function controll(e){
+
+let x = e.x ?? e.changedTouches[0].pageX;
+let y = e.y ?? e.changedTouches[0].pageY;
+//showError(e)
+particleSystem.emitter.x = x;
+particleSystem.emitter.y = y;
+
+
+}
+
+ctx.canvas.addEventListener("touchstart",(e)=>{
+controll(e)
+});
+
+ctx.canvas.addEventListener("touchmove",(e)=>{
+controll(e)
+});
+
+ctx.canvas.addEventListener("touchend",(e)=>{
+controll(e)
+});
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+window.addEventListener("load", ()=>{
+
+addError("JS is Awesome");
+
+
+try{
+_INITIAL();
+}catch(e){
+addError(e.stack)
+}
+
+
+})
+
+
+</script>
+</body>
+</html>

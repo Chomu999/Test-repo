@@ -1,0 +1,296 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>HTML CANVAS Multi Ball GAME</title>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+</style>
+</head>
+<body>
+
+
+
+<canvas class="cvs"></canvas>
+
+
+<script>
+
+let cvs=document.querySelector('.cvs');
+let ctx = cvs.getContext('2d');
+
+
+const mouse={
+x:0,
+y:0,
+};
+
+
+cvs.width=window.innerWidth;
+cvs.height=window.innerHeight;
+
+
+
+
+
+
+function randint(min,max){
+return Math.floor(Math.random() * (max-min) + min)
+}
+
+
+
+function rotate(speed,angle){
+
+const rotatedVelocities={
+x: speed.x * Math.cos(angle) - speed.y * Math.sin(angle),
+y: speed.y * Math.sin(angle) + speed.y * Math.cos(angle)
+};
+return rotatedVelocities;
+}
+
+
+
+
+
+
+const Destance=(x1,y1,x2,y2)=>{
+const dx = x2 - x1;
+const dy = y2 - y1;
+return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+}
+
+
+
+function resolveCollision(ObjectA,ObjectB){
+
+const xSpeedDiff = ObjectA.speed.x - ObjectB.speed.x;
+
+const ySpeedDiff = ObjectA.speed.y - ObjectB.speed.y;
+
+
+const xDist = ObjectB.x - ObjectA.x;
+const yDist = ObjectB.y - ObjectA.y;
+
+
+if(xSpeedDiff * xDist + ySpeedDiff * yDist >= 0){
+
+const angle = -Math.atan2(ObjectB.y - ObjectA.y,ObjectB.x - ObjectA.x);
+
+const m1 = ObjectA.mass;
+const m2 = ObjectB.mass;
+
+
+
+const u1 = rotate(ObjectA.speed,angle);
+const u2 = rotate(ObjectB.speed,angle);
+
+
+
+const v1 = {x: u1.x * (m1 - m2) / (m1 + m2) + u2.x * 2 * m2 / (m1 + m2), y: u1.y};
+const v2 = {x: u2.x * (m1 - m2) / (m1 + m2) + u1.x * 2 * m2 / (m1 + m2), y: u2.y};
+
+
+
+const vF1 = rotate(v1, -angle);
+const vF2 = rotate(v2, -angle);
+
+ObjectA.speed.x = vF1.x;
+ObjectA.speed.y = vF1.y;
+
+ObjectB.speed.x = vF2.x;
+ObjectB.speed.y = vF2.y;
+}
+
+
+
+}
+
+
+
+
+const ISCircleCollision = (ObjectA,ObjectB) => {
+
+let dist=Math.hypot(ObjectA.x - ObjectB.x, ObjectA.y - ObjectB.y)
+
+return (dist - ObjectB.radius - ObjectA.radius < 0.5)
+}
+
+
+
+
+class NewMob{
+constructor(x,y,radius,color){
+this.x=x;
+this.y=y;
+this.radius=radius;
+this.color=color;
+
+this.fillC=`hsl(${randint(0,3700)},100%,50%,1)`;
+}
+draw(ctx){
+
+ctx.beginPath()
+ctx.strokeStyle=this.color;
+ctx.fillStyle=this.fillC
+//`hsl(${randint(0,180)},100%,50%,1)`;
+
+ctx.arc(this.x,this.y,this.radius,0,Math.PI*2);
+ctx.fill();
+ctx.stroke();
+ctx.closePath()
+
+
+}
+}
+
+
+class NewRock extends NewMob{
+constructor(x,y,radius,color){
+super(x,y,radius,color)
+this.mass=Math.random() * Math.random() * 2;
+this.speed={
+    x:(Math.random() - 0.5) * 4,
+    y:(Math.random() - 0.5) * 4
+};
+}
+
+
+update(Boxs){
+
+
+for(let i = 0;i < Boxs.length;i++){
+
+if(this == Boxs[i]){ continue;}
+
+if(Destance(this.x, this.y, Boxs[i].x, Boxs[i].y)  - this.radius * 2 < 0){
+
+resolveCollision(this, Boxs[i]);
+
+}
+
+
+
+}
+
+
+if(this.x + this.radius > cvs.width || this.x - this.radius < 0){
+ this.speed.x = -this.speed.x;
+}
+if(this.y + this.radius > cvs.height || this.y - this.radius < 0){
+this.speed.y = -this.speed.y
+}
+
+
+
+
+this.x += this.speed.x;
+this.y += this.speed.y;
+
+}
+
+
+
+}
+
+
+
+
+let allBoxs=[]
+
+
+
+for(let i=0;i < randint(30,120);i++){
+
+
+//let x1,y1,dx,dy,r;
+
+const r=12;
+let x1 = randint(r*2,cvs.width - r)
+let y1 = randint(r*2,cvs.height - r)
+
+//Math.floor(Math.random() * );
+
+//const dx= (Math.random() - 0.5) * 1;
+//const dy= (Math.random() - 0.5) * 1;
+
+if(i !== 0){
+
+
+for(let j=0;j < allBoxs.length;j++){
+
+
+if(Destance(x1,y1,allBoxs[j].x,allBoxs[j].y)  - r * 2 < 0){
+
+
+x1 = randint(r*2,cvs.width - r);
+y1 = randint(r*2,cvs.height - r);
+
+j = -1;
+
+}
+
+}
+
+
+}
+
+allBoxs.unshift(new NewRock(x1,y1,r,'##DEAAFF'));
+
+}
+
+
+const player = new NewRock(0,0,12,'#ECFEFF'
+);
+
+
+
+function gameLoop(){
+
+window.requestAnimationFrame(gameLoop);
+
+ctx.fillStyle="rgba(0,0,0,0.58)";
+ctx.fillRect(0,0,cvs.width,cvs.height);
+
+player.draw(ctx);
+player.update(allBoxs);
+
+allBoxs.forEach((box)=>{
+box.draw(ctx)
+box.update(allBoxs)
+})
+
+
+
+}
+
+gameLoop()
+
+
+
+
+
+
+cvs.addEventListener('touchmove',(e)=>{
+mouse.x = e.changedTouches[0].clientX;
+mouse.y = e.changedTouches[0].clientY;
+//mouse.clicked=true;
+//player.radius -= 0.05;
+
+player.x = mouse.x;
+player.y = mouse.y;
+
+
+})
+
+
+</script>
+</body>
+</html>

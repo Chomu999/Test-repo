@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="hi-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+:root{
+
+
+}
+
+
+html{
+font-size:10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style: none;
+}
+
+
+body{
+color-scheme: default;
+background: #353535;
+}
+
+
+
+
+
+
+.wrapper{
+margin:1rem auto;
+padding:1rem;
+width: min(39rem, 100% - 1rem);
+background: #9400FF23;
+border: .3rem solid #DADDDD;
+border-radius:2rem;
+box-shadow:
+1rem 1rem 2.2rem #0004,
+inset .5rem .6rem 2.2rem #fff4,
+inset -.5rem -.6rem 2.2rem #0004,
+-1rem -1rem 2.2rem #fff4
+;
+
+}
+
+
+.appContainer{
+aspect-ratio: 1;
+background: #E1FFF1;
+}
+
+.appTitle{
+padding: 1rem;
+color: red;
+background: tan;
+text-align: center;
+text-transform: capitalize;
+}
+
+
+
+
+.btnContainer{
+aspect-ratio: 3;
+background: #7641AD;
+/* text-align: center; */
+}
+.btnContainer .btn{
+margin: 1rem;
+padding: 1rem 2rem;
+display: inline-block;
+color: #00FF35;
+background: #060066;
+font-size: 2rem;
+border: 1px solid ;
+border-radius: 2rem;
+}
+
+
+
+.trainBtn{
+/* opacity: 0.6; */
+}
+
+</style>
+
+<title> sound maker app prototype</title>
+
+
+
+<script  src="/storage/emulated/0/g_js_libs/Tone.js"></script>
+
+
+
+</head>
+
+<body>
+
+
+
+<div class="wrapper appContainer">
+
+<div class="wrapper titleContainer">
+  <h1 id=startBtn class="appTitle">
+    sound maker app prototype
+  </h1>
+</div>
+
+
+
+<div class="wrapper btnContainer">
+
+  <span class="btn stopLoopBtn">stopLoop</span>
+  <span class="btn startLoopBtn">startLoop</span>
+  
+  <span class="btn aloBtn">alo</span>
+
+</div>
+
+</div>
+
+
+
+
+
+
+
+
+
+<script >
+"use strict";
+
+
+
+//
+const {floor, random, abs, sin, cos, tan, PI} = Math;
+
+
+
+const randInt=(min=0, max=1)=> Math.floor(Math.random() * ( max - min+1) + min);
+
+const randChoice=(...args) => args[randInt(0, args.length - 1)];
+
+
+
+
+//
+const strToHtml=(html)=>{
+const element = document.createElement("div");
+element.innerHTML = html;
+return  element.firstElementChild??undefined;
+}
+
+//sleep function helps to hold up workflow
+const sleep=async (t=1) => new Promise( res => setTimeout( () => res(true), t*1000) );
+
+
+
+
+
+
+
+
+
+
+// INITIAL point aka starting point
+const INITIAL = async ()=>{
+
+//querySelectorAll
+
+const aloBtn = document.querySelector(".aloBtn");
+
+Tone.start()
+
+
+
+const synth = new Tone.Synth().toDestination();
+
+//CDEFGAB
+
+//nhwdtsm
+
+const noteNamesA= "DA".split("");
+const noteNamesB= "nh".split("");
+
+
+let noteArr = [];
+let noteArr2 = [];
+let times = [];
+
+
+
+
+for(let x=0;x<50;x++){
+
+let [_1, _2] = [
+randChoice( ...noteNamesA),
+randChoice( ...noteNamesB),
+];
+
+let rn1 = randInt(1, 9);
+let rn2 = randInt(1, 9);
+
+
+let time = (0.2*x); //Tone.now() + (x);
+
+noteArr.push(`${_1}${rn1}`);
+noteArr2.push(`${rn2}${_2}`);
+
+times.push(time);
+
+}
+
+
+
+// console.log(noteArr, noteArr2, times);
+
+
+
+for(let i =0;i<noteArr.length;i++){
+let time = times[i];
+ synth.triggerAttackRelease(noteArr[i], noteArr2[i], time);
+
+}
+
+
+
+aloBtn.addEventListener("click", ()=>{
+
+
+location.assign(location.href);
+
+});
+
+
+}
+
+
+
+
+
+startBtn.addEventListener("click", INITIAL);
+
+window.addEventListener("load",()=>{
+
+try{
+
+console.log(`%c JavaScript is Awesome background: #000; color: #fff;`)
+console.log(window)
+console.log(Tone)
+
+INITIAL();
+
+}catch(e){
+console.log(`JavaScript uncatch error : ${e.stack}`);
+}
+
+});
+
+
+
+</script>
+
+</body>
+</html>

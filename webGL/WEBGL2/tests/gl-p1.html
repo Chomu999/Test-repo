@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title> webgl 1</title>
+
+<meta name="author" content="BBhowmick">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+
+
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+
+html{
+font-size:10px;
+}
+
+
+body{
+width:100vw; height:100vh;
+}
+
+
+main{
+width:100%; height:100%;
+background:#3E3E3E;
+display:grid;
+place-items:center;
+}
+
+.refresh{
+margin:2rem;
+font-size:5rem;
+color:red;
+background:blue;
+text-align:center;
+}
+canvas{
+background:transparent;
+}
+
+.resources{
+display:none;
+}
+
+</style>
+
+<script src="/storage/emulated/0/g_js_libs/gl-matrix.js"></script>
+
+</head>
+<body>
+
+<main id="main">
+
+<div class="container">
+
+<canvas id="canvas"></canvas>
+<!-- <div id="refresh" class="refresh">refresh</div> -->
+
+</div>
+
+<div class="resources">
+<img src="/storage/emulated/0/Download/Zelda2.png" alt="Zelda" id="img1" />
+<img src="/storage/emulated/0/Download/images (8).jpeg" alt="link" id="img2" />
+</div>
+
+
+</main>
+
+  
+
+
+<script>
+
+
+
+const randFloat=(min=1.0, max=10.0)=> Math.random() * (max-min) + min;
+const randInt=(min=1, max=10)=> Math.floor(randFloat(min, max));
+
+const GLReSizer=(gl)=>{
+const cs=innerWidth>innerHeight?innerHeight:innerWidth;
+gl.canvas.width=cs;
+gl.canvas.height=cs;
+}
+
+
+
+
+const app=(gl)=>{
+
+const worldClock=new Date();
+
+
+const vertexShaderSource=`#version 300 es
+//precision mediump float;
+
+
+in vec4 aPos;
+in vec4 aColor;
+in vec2 aTexCoord;
+
+
+
+
+
+out vec2 vTexCoord;
+out vec4 vColor;
+
+
+void main(){
+gl_Position=aPos;
+vTexCoord=aTexCoord;
+vColor=aColor;
+}
+`;
+
+const fragmentShaderSource=`#version 300 es
+
+precision mediump float;
+out vec4 FragColor;
+
+
+uniform sampler2D uTex1;
+uniform sampler2D uTex2;
+
+
+in vec2 vTexCoord;
+in vec4 vColor;
+
+
+void main(){
+//FragColor = texture(uTex2, vTexCoord) * vColor;
+
+FragColor = mix(texture(uTex1, vTexCoord), texture(uTex2, vTexCoord), 0.5) * vColor;
+//FragColor=texture(uTex2, vTexCoord) * vColor;
+}
+`;
+
+
+const vertexShader=gl.createShader(gl.VERTEX_SHADER);
+gl.shaderSource(vertexShader, vertexShaderSource);
+gl.compileShader(vertexShader);
+if(!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)){
+console.log("vertexShader error :", gl.getShaderInfoLog(vertexShader))
+console.log("vertexShader source :", gl.getShaderSource(vertexShader))
+}
+
+
+const fragmentShader=gl.createShader(gl.FRAGMENT_SHADER);
+gl.shaderSource(fragmentShader, fragmentShaderSource);
+gl.compileShader(fragmentShader);
+if(!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)){
+console.log("fragmentShader error :", gl.getShaderInfoLog(fragmentShader))
+console.log("fragmentShader source :", gl.getShaderSource(fragmentShader))
+}
+
+
+const shaderProgram=gl.createProgram();
+gl.attachShader(shaderProgram, vertexShader);
+gl.attachShader(shaderProgram, fragmentShader);
+gl.linkProgram(shaderProgram);
+if(!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)){
+console.log("link error", gl.getProgramInfoLog(shaderProgram))
+}
+
+gl.useProgram(shaderProgram);
+gl.validateProgram(shaderProgram);
+if(!gl.getProgramParameter(shaderProgram, gl.VALIDATE_STATUS)){
+console.log("validate error", gl.getProgramInfoLog(shaderProgram))
+}
+
+//gl.useProgram(shaderProgram);
+
+gl.useProgram(shaderProgram);
+
+const uTex1Loc=gl.getUniformLocation(shaderProgram, "uTex1");
+const uTex2Loc=gl.getUniformLocation(shaderProgram, "uTex2");
+
+
+
+const aPosLoc=gl.getAttribLocation(shaderProgram, "aPos");
+const aColorLoc=gl.getAttribLocation(shaderProgram, "aColor");
+const aTextCoordLoc=gl.getAttribLocation(shaderProgram, "aTexCoord");
+
+
+
+const Data=new Float32Array([
+//      pos             colors        vu
+
+  0.5,  0.5,  0.0,  1.0, 0.0, 0.0,   1, 1,
+ -0.5,  0.5,  0.0,  0.0, 1.0, 1.0,   0, 1,
+ -0.5, -0.5,  0.0,  1.0, 0.0, 1.0,   0, 0,
+  0.5, -0.5,  0.0,  1.0, 1.0, 0.0,   1, 0,
+  
+]);
+
+const Indices=new Uint8Array([
+//1 t
+
+0,1,2,
+0,2,3,
+
+]);
+
+const vao=gl.createVertexArray();
+gl.bindVertexArray(vao);
+
+const vbo=gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER,vbo);
+gl.bufferData(gl.ARRAY_BUFFER, Data, gl.STATIC_DRAW)
+
+
+gl.enableVertexAttribArray(aPosLoc)
+gl.vertexAttribPointer(aPosLoc, 3, gl.FLOAT, gl.FALSE, 8*4, 0);
+
+gl.enableVertexAttribArray(aColorLoc)
+gl.vertexAttribPointer(aColorLoc, 3, gl.FLOAT, gl.FALSE, 8*4, 3*4);
+
+gl.enableVertexAttribArray(aTextCoordLoc)
+gl.vertexAttribPointer(aTextCoordLoc, 2, gl.FLOAT, gl.FALSE, 8*4, 6*4);
+
+
+
+
+
+const ebo=gl.createBuffer();
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ebo);
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, Indices, gl.STATIC_DRAW);
+
+const slot1=0, slot2=1;
+
+
+
+const texture1=gl.createTexture();
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+gl.bindTexture(gl.TEXTURE_2D, texture1);
+
+
+//gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT);
+//gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
+
+
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+gl.uniform1i(uTex1Loc, slot1);
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img2);
+
+//gl.bindTexture(gl.TEXTURE_2D, null);
+
+
+
+const texture2=gl.createTexture();
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+gl.bindTexture(gl.TEXTURE_2D, texture2);
+
+
+//gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT);
+//gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
+
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+
+gl.uniform1i(uTex2Loc, slot2);
+gl.texImage2D(gl.TEXTURE_2D , 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img1);
+
+//MIRRORED_REPEAT
+//NEAREST _MIPMAP_ LINEAR
+
+gl.bindBuffer(gl.ARRAY_BUFFER, null);
+gl.bindVertexArray(null);
+gl.bindTexture(gl.TEXTURE_2D, null);
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+gl.useProgram(null);
+
+//BLEND_DST_ALPHA
+//BLEND_SRC_ALPHA
+//BLEND_EQUATION_ALPHA
+
+//SRC_ALPHA_SATURATE: 776
+//SRC_COLOR: 768
+
+//ONE_MINUS_SRC_ALPHA
+//ONE_MINUS_CONSTANT_ALPHA
+//ONE_MINUS_DST_ALPHA
+
+//gl.enable(gl.DEPTH_TEST);
+//gl.enable(gl.BLEND);
+
+
+//gl.blendFunc(gl.BLEND_SRC_COLOR, gl.ONE_MINUS_SRC_ALPHA);
+
+
+setInterval(()=>{
+
+gl.clearColor(0.2, 0.3, 0.3, 1.0);
+gl.clear(gl.COLOR_BUFFER_BIT);
+gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+gl.useProgram(shaderProgram);
+
+gl.activeTexture(gl.TEXTURE0+slot1);
+gl.bindTexture(gl.TEXTURE_2D, texture1);
+
+gl.activeTexture(gl.TEXTURE0+slot2);
+gl.bindTexture(gl.TEXTURE_2D, texture2);
+
+
+gl.bindVertexArray(vao);
+
+
+gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_BYTE, null);
+
+
+}, 1000/30)
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+window.addEventListener("load", (event) =>{
+
+const canvas=document.querySelector("canvas");
+const gl=canvas.getContext("webgl2");
+GLReSizer(gl);
+console.log(gl);
+app(gl);
+
+//refresh["addEventListener"]("click", () => app(gl) )
+
+
+})
+
+
+
+window.addEventListener("resize", ()=>{
+
+//GLReSizer(gl);
+})
+
+</script>
+
+</body>
+</html>

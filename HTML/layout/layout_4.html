@@ -1,0 +1,127 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<!-- 
+<meta name="viewport" content="width=device-width, initial-scale=5.0 maximum-scale=5.0 user-scalable=0">
+ -->
+ 
+ <meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=9.0">
+<title>HTML layout parcties 4</title>
+<style>
+
+
+*:before, *, *:after{
+margin:0; padding:0; box-sizing:border-box;
+border:0.1px solid white;
+}
+
+
+html{
+font-size:10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style:none;
+}
+
+header{
+height: 8rem;
+background: chocolate;
+}
+
+main{
+/* height: 55rem; */
+background: #AF5AFF;
+}
+
+section.hero{
+height: 30rem;
+background:#3049;
+}
+
+
+section.project_section{
+height: 38rem;
+background:#3749;
+}
+
+.projects{
+gap: 2rem;
+padding: 2rem;
+height: 100%;
+background: #FF3B0044;
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+/* grid-template-rows: repeat(auto-fit, minmax(20rem, 1fr)); */
+
+}
+
+.project{
+cursor: pointer;
+border-radius: 2rem;
+}
+
+footer{
+height: 12rem;
+background: #007DFF;
+}
+
+</style>
+
+<head>
+
+<body>
+
+<!--
+header section start
+ -->
+<header title="header">
+
+</header>
+
+<!--
+main section start
+ -->
+
+<main title="main">
+
+
+
+<section class="hero">
+
+</section>
+
+<section class="project_section">
+
+<div class="projects">
+
+<div class="project project1"></div>
+<div class="project project2"></div>
+<div class="project project3"></div>
+<div class="project project4"></div>
+<div class="project project5"></div>
+<div class="project project6"></div>
+
+</div>
+
+</section>
+
+
+</main>
+
+
+<!--
+footer section start
+ -->
+
+<footer title="footer">
+
+</footer>
+
+</body>
+</html>

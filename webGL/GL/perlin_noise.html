@@ -1,0 +1,199 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=10.0, user-scalable=no"/>
+<style>
+*{
+margin:0; padding:0; box-sizing:border-box;
+}
+html{
+font-size: 10px;
+}
+
+
+body{
+width:100vw; height:100vh;
+
+}
+
+main{
+width:100%; height:100%;
+background: #757575;
+}
+
+main div.container-title{
+width:100%; height: 10%;
+}
+
+main div.container-canvas{
+width:100%; height: 90%;
+display: grid;
+place-items: center;
+}
+
+div.container-title h2{
+color:#00ECFF;
+text-align: center;
+text-transform: capitalize;
+font-size: 3rem;
+}
+
+
+canvas{
+margin: auto;
+
+}
+
+div.resource{
+display:none;
+}
+
+</style>
+
+<title>Perlin Noise Test 1</title>
+<!-- <script src="/storage/emulated/0/g_js_libs/gl-matrix.js" ></script> -->
+</head>
+<body>
+
+<main>
+
+<div class="container-title">
+<h2>simple Perlin noise program</h2>
+</div>
+
+<div class="container-canvas">
+<canvas id="canvas"></canvas>
+</div>
+
+</main>
+
+
+
+
+
+<script type=module>
+
+
+class Rand{
+
+static Float(min=1, max=2){
+return Math.random() * (max-min) + min;
+}
+
+static Int(min=10, max=20){
+return Math.floor( Rand.Float(max, min));
+}
+
+static Choice(...args){
+return args[Rand.Int(0, args.length)];
+}
+
+}
+
+
+
+class Box{
+constructor(x=0, y=0, width=9, height=9, color="red"){
+this.x=x;
+this.y=y;
+this.width=width;
+this.height=height;
+this.color=color;
+}
+
+draw(c){
+c.fillStyle=this.color;
+c.fillRect(this.x, this.y, this.width, this.height);
+}
+
+}
+
+const app= async(ctx)=>{
+
+const {WIDTH, HEIGHT} = ctx.canvas;
+
+let BOXS=[]
+
+let pixelSize=4;
+let pixelWidth=pixelSize, pixelHeight=pixelSize, maxX=170, maxY=100;
+
+const createNoise=(targetX,targetY, pw, ph)=>{
+BOXS=[]
+for (let i=0; i<targetY; ++i){
+for (let j=0; j<targetX; j++){
+
+const x=(j*pw)
+const y=(i*ph)
+let r =Rand.Int(1, 256), a=Rand.Float(0,1);
+
+BOXS.push(new Box(x, y, pixelWidth, pixelHeight, `rgba(${r}, ${r}, ${r}, ${a})`))
+}
+}
+}
+
+createNoise(maxX,maxY, pixelWidth, pixelHeight)
+
+const Animate=()=>{
+ctx.clearRect(0,0, WIDTH, HEIGHT);
+BOXS.forEach((box)=>{
+if(!box) return;
+box.draw(ctx);
+})
+
+}
+
+Animate()
+
+
+
+
+
+
+
+window.addEventListener("keydown", (e)=>{
+if(e.key==="r"){
+createNoise(maxX,maxY, pixelWidth, pixelHeight)
+Animate()
+}
+
+if(e.key=="u"){
+pixelSize=prompt("plseae enter pixel Size value")
+pixelWidth=pixelSize
+pixelHeight=pixelSize
+}
+
+if(e.key=="y"){
+maxX=prompt("plseae enter maxX value")
+maxY=prompt("plseae enter maxY value")
+}
+
+})
+
+
+}
+
+
+window.addEventListener("load", ()=>{
+
+
+console.log("js is awesome")
+
+const canvas=document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+//const wh=document.querySelector("div.container-canvas")
+canvas.width=window.innerWidth*0.9;
+canvas.height=window.innerHeight *0.9;
+console.log(ctx)
+
+
+app(ctx)
+
+})
+
+
+</script>
+
+</body>
+</html>

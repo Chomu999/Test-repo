@@ -1,0 +1,418 @@
+<!--
+[attr],
+[attr=value],
+[attr*=value],
+[attr|=value],
+[attr!=value],
+[attr~=value],
+[attr=value][attr2=value],
+-->
+
+<!--
+p.id
+p, h2, pre
+p.class
+
+p + a
+h1 ~ p
+
+p  a
+pre p  a
+button > a
+button > p > a
+
+
+-->
+
+
+<div>
+
+<style type="text/css" media="screen">
+
+.two-column {
+background: #FF0069;
+columns: 2 100px ;
+column-rule-style: solid;
+column-width:40px;
+column-gap:10px;
+column-rule-width: 30px;
+column-rule-color: saddlebrown;
+}
+
+.three-column {
+background: #BA00FF;
+columns: 3 80px;
+column-rule-style: dashed;
+column-width:20px;
+column-gap:60px;
+column-rule-width: thin;
+column-rule-color: lime;
+}
+
+p{
+color:#363636;
+}
+
+</style>
+
+<body>
+
+<div class="three-column">
+<p> a </p>
+
+<p>b </p>
+<p> c</p>
+
+</div>
+
+<div class="two-column">
+<p>a</p>
+<p>b</p>
+
+</div>
+
+</body>
+</div>
+
+<!-- <div>
+
+<style type="text/css" media="screen">
+.two-column {
+background: #FF0069;
+columns: 2 100px ;
+column-rule-style: solid;
+column-width:40px;
+column-gap:10px;
+column-rule-width: 30px;
+column-rule-color: saddlebrown;
+}
+
+.three-column {
+background: #BA00FF;
+columns: 3 80px;
+column-rule-style: dashed;
+column-width:20px;
+column-gap:60px;
+column-rule-width: thin;
+column-rule-color: lime;
+}
+
+p{
+color:#363636;
+}
+
+</style>
+
+<body>
+
+<div class="three-column">
+<p> a </p>
+
+<p>b </p>
+<p> c</p>
+
+</div>
+
+<div class="two-column">
+<p>a</p>
+<p>b</p>
+
+</div>
+
+</body>
+</div> -->
+
+<!-- <div>
+
+<style type="text/css" media="screen">
+
+
+</style>
+
+<body>
+<p style="layout-grid-type: strict; layout-grid-line: 55px;">
+ A short text sample would likely be in Chinese, not English.</p>
+
+<p style="layout-grid-mode: none; layout-grid-line: 100px;">
+ A short text sample<br>
+ with layout-grid-mode<br>
+ set to a value of none<br>
+ to turn off the grid.</p>
+
+</body>
+</div> -->
+
+<!-- <div>
+
+<style type="text/css" media="screen">
+
+
+p:first-child { color: red;}
+
+textarea[rows]{
+scrollbar-track-color:blue;
+scrollbar-shadow-color: red;
+scrollbar-highlight-color: red;
+}
+.boxs{
+width:200px; height:200px;
+background:#8700FF;
+}
+
+.box1{
+opacity:0.8;
+}
+
+.box2{
+opacity:0.0;
+}
+
+.box3{
+opacity:1;
+}
+
+.box4{
+opacity:0.7;
+filter:alpha(opacity=70);
+}
+
+</style>
+
+<body>
+
+<div class="boxs box1"></div>
+<div class="boxs box2"></div>
+<div class="boxs box3"></div>
+<div class="boxs box4"></div>
+
+</body>
+</div> -->
+
+<!-- <div>
+
+<style type="text/css" media="screen">
+
+
+p:first-child { color: red;}
+
+textarea[rows]{
+scrollbar-track-color:blue;
+scrollbar-shadow-color: red;
+scrollbar-highlight-color: red;
+}
+
+</style>
+
+<body>
+
+<p style="overflow-y: scroll; height: 25px; width: 50px;
+ background-color: #00f;">
+ABC<br>
+DEF<br>
+GHI<br>
+JKL<br>
+MNO<br>
+PQR<br>
+STU<br>
+VWXYZ </p>
+
+<p style="overflow-x: scroll; width: 40px; background-color:#0ff;">
+ABCDEFGHIJKLMNOPQRSTUVWXYZ
+</p>
+
+
+<p style="overflow: auto;
+ overflow-x:-webkit-marquee;
+ display:-wap-marquee;
+ overflow-style: marquee-line;
+ width: 100px; background:#0079FF;">
+ABCDEFGHIJKLMNOPQRSTUVWXYZ
+</p>
+
+</body>
+</div> -->
+
+<!-- <div>
+
+<style type="text/css" media="screen">
+
+
+p:first-child { color: red;}
+
+textarea[rows]{
+scrollbar-track-color:blue;
+scrollbar-shadow-color: red;
+scrollbar-highlight-color: red;
+}
+
+</style>
+
+<body>
+<form action="#" method="get">
+<div>
+<textarea rows="3" cols="2"></textarea>
+</div>
+</form>
+
+</body>
+</div> -->
+
+<!-- <div>
+
+<style type="text/css" media="screen">
+
+@page {size: 8.5in 11in;}
+
+p:first-child { color: red;}
+
+</style>
+
+<body>
+
+<p>I should be red because I am the first child in the body.</p>
+<p>I should not be red because I am the second child in the body.</p>
+<div>
+ <p>I should be red because I am the first child of div.</p>
+ <p>Second child of div, thus not red.</p>
+</div>
+
+
+</body>
+</div> -->
+
+<!-- <div>
+
+<style type="text/css" media="screen">
+ .annoy:hover {border-style: dashed; background-color: yellow;}
+ input[type=text]:hover {background-color: yellow; }
+ input[type=text]:focus {background-color: #FFA500;}
+</style>
+
+
+<p class="annoy">Roll over me.</p>
+<p>Now <span class="annoy">roll over</span> that bit of text.</p>
+<form action="#">
+ <div><input type="text" size="40" value="Hover and then click into this 
+field"></div>
+</form>
+
+
+</div> -->
+
+<!-- <div>
+
+<style type="text/css" media="all">
+a:link {color: blue; text-decoration: none;}
+a:active {color: red; background-color: #FFC;}
+a:visited {color: purple; text-decoration: none;}
+a:hover {color: red; text-decoration: underline;}
+a:focus {border-style: dashed; border-width: 1px; 
+ background-color: #FFA500;}
+</style>
+
+<a href="http://www.htmlref.com">HTML: The Complete Reference</a>
+
+
+</div> -->
+
+<!-- <div>
+
+<style type="text/css">
+ #select1::selection {background-color: red;}
+ #select1::-moz-selection {background-color: red;}
+ #select2::selection {color: green;}
+ #select2::-moz-selection {color: green;} 
+</style>
+
+<p>Select <span id="select1">this text</span>. Now select <span 
+id="select2">this text</span>.</p>
+
+</div> -->
+
+<!-- <div>
+<style type="text/css" media="all">
+ p#intro:first-letter {font-size: 5em; font-weight: bold;
+ margin-right: .1em;
+ color: #999;}
+ p#intro:first-line {font-size: 1.5em; font-weight: bold;}
+</style>
+
+<p id="intro">It was the best of times, it was the worst of times, it was 
+the age of wisdom, it was the age of foolishness, it was the epoch of 
+belief, it was the epoch of incredulity, it was the season of Light, it was 
+the season of Darkness, it was the spring of hope, it was the winter of 
+despair, we had everything before us, we had nothing before us, we were all 
+going direct to heaven, we were all going direct the other way - in short, 
+the period was so far like the present period, that some of its noisiest 
+authorities insisted on its being received, for good or for evil, in the 
+superlative degree of comparison only.</p>
+
+
+</div> -->
+
+<!-- <div>
+<style>
+
+
+p [title*="found"] {background-color: red;}
+</style>
+
+<p title="The match is found in here">This should be red.</p>
+
+<p title="No match can be seen here">This shouldn't be red.</p>
+
+<p class="group4" title="*foundinside*">This should be red.</p>
+
+<p class="group4" title="*Foundinside*">This shouldn't be red.</p>
+
+
+</div> -->
+
+<!-- <div>
+<style>
+
+p.group4[title$="match end"] {background-color: red;}
+
+</style>
+<p class="group4" title="This should match end">This should be red.</p>
+<p class="group4" title="This won't match end!">This shouldn't be red.</p>
+</div> -->
+
+<!-- <div>
+<style>
+
+p [title ^="Start match"] {background-color: red;}
+
+</style>
+<p title="Start match">This should be red.</p>
+<p title="No Start Match">This should not be red.</p>
+</div> -->
+
+<!-- <div>
+<style>
+p[lang|="en"] {color: red;}
+
+</style>
+
+<p lang="en">This is English and red.</p>
+<p lang="en-uk">This is British English and red.</p>
+<p>Not red no lang specified.</p>
+<p lang="fr">C'est Francais. (Not red)</p>
+
+
+</div> -->
+
+<!-- <div>
+<style>
+p[title~="Larry"] {
+background: red;
+font-style: italic;}
+
+</style>
+
+
+<p title="Larry Curly and Moe">This is italic.</p>
+<p title="Larry">This is italic.</p>
+<p title="Larry-The-Stooge">This is not italic.</p>
+
+</div> -->

@@ -1,0 +1,71 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+<meta name="author" content="Biswsjit Bhowmick" />
+
+<title>HTML canvas bird game</title>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+#mainBox{
+margin:0;padding:0;
+width:100vw;height:100vh;
+background-color:#CBCBCB;
+}
+
+#cvs{
+position:absolute;
+top:50%;left:50%;
+transform:translate(-50%,-50%);
+border:2px solid blue;
+}
+
+.gamePlay{
+
+position:fixed;
+top:50%;left:50%;
+transform:translate(-50%,-50%);
+color:orangered;
+font-size:2rem;
+text-transform:capitalize;
+background-color:lightgreen;
+text-align:center;
+display:block;
+
+}
+
+
+
+</style>
+</head>
+<body>
+
+
+<div id="mainBox">
+
+<div id="gameBox">
+
+<canvas id="cvs"></canvas>
+
+<p class="gamePlay">tap to play</p>
+
+</div>
+</div>
+
+<script src="./bird.js"></script>
+<script src="./particles.js"></script>
+<script src="./obstacles.js"></script>
+<script src="./main.js"></script>
+
+
+
+</body>
+</html>

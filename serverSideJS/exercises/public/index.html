@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<!-- 
+<meta name="viewport" content="width=device-width, initial-scale=5.0 maximum-scale=5.0 user-scalable=0">
+ -->
+ 
+<meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=9.0">
+<title>TODO APP</title>
+<style>
+*{
+margin:0; padding:0; box-sizing:border-box;
+}
+
+:root{
+--textColor:#CEE7FF;
+
+--BGgradientColor1:linear-gradient(45deg,
+#00FFC7,#FFC5FC,
+#FF5000,#FF007D,
+#FFE661,#91FFBD
+);
+--BGgradientColor2:linear-gradient(45deg,rgba(0,0,255,0.9), #FFC5FC);
+
+--titleFontSize:6rem;
+--titleFontColor:#07002E;
+
+
+--descriptionFontSize:2rem;
+--descriptionFontColor:#042100;
+
+}
+
+/*
+
+display:grid;
+grid-template-columns: repeat(3, 1fr);
+grid-template-rows: repeat(3, 1fr);
+grid-gap:2px;
+opacity:70%;
+overflow:hidden;
+}
+
+
+.btn2{
+grid-column:2/3;
+grid-row:1/2;
+}
+
+
+
+*/
+
+
+
+html{
+font-size:10px;
+}
+
+body{
+width:100%; height:100%;
+display:grid;
+/* 
+grid-template-columns: repeat(1, 1fr);
+grid-template-rows:8rem 80rem 12rem; 
+*/
+background: #333;
+}
+
+
+
+#popupBox{
+width:100%; height:100vh;
+position:fixed;
+left:50%; top:50%;
+transform:translate(-50%,-50%);
+background:rgba(0,0,0,0.6);
+display:none;
+
+justify-content:center;
+align-items:center;
+}
+
+#inputBoxs{
+width:90%; height:34rem;
+background:var(--BGgradientColor2);
+backdrop-filter:blur(50%);
+position:relative;
+box-shadow:1rem 1rem 3rem rgba(0,0,0,0.4);
+}
+
+
+
+
+#inputBoxs h2,#inputBoxs h3{
+/* margin:0 auto; */
+text-align:center;
+text-transform:capitalize;
+}
+
+#inputBoxs h2{
+color:var(--titleFontColor);
+font-size:var(--titleFontSize);
+}
+
+#inputBoxs h3{
+color:var(--descriptionFontColor);
+font-size:var(--descriptionFontSize);
+}
+
+#inputBoxs .closeBTN{
+margin:0 0 0 calc(100% - 2rem);
+
+padding:0;
+
+width:2rem; height:2rem;
+place-items:center;
+/* 
+position:absolute;
+left:90%; top:0; */
+font-size:4rem;
+background:white;
+color:#CA00FF;
+border-radius:2rem;
+transform:rotateZ(45deg);
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+#inputBoxs #titleInPut{
+margin:2rem auto;
+width:80%; height:4rem;
+display:block;
+text-align:center;
+box-shadow:1rem 1rem 2.5rem rgba(0,0,0,0.4);
+}
+
+#inputBoxs #descriptionInPut{
+margin:2rem auto;
+width:80%; height:4rem;
+display:block;
+text-decoration:none;
+color:var(--textColor);
+text-shadow:0 0 1rem red;
+background:rgba(0,0,0.7);
+text-align:center;
+box-shadow:1rem 1rem 2.5rem rgba(0,0,0,0.4);
+}
+
+#inputBoxs button{
+margin:2rem auto;
+padding:0.1rem 1rem;
+display:block;
+
+color:#3100B8;
+background:rgba(244,244,244,0.4);
+text-align:center;
+text-transform:capitalize;
+font-size:4rem;
+border:none;
+border-radius:1rem;
+box-shadow:1rem 1rem 2.5rem rgba(0,0,0,0.4);
+}
+
+
+
+h1{
+margin:1rem 0;
+font-size:4rem;
+text-transform: capitalize;
+color:var(--textColor);
+text-align:center;
+}
+
+
+main{
+
+background:var(--BGgradientColor1);
+background-size:500%;
+overflow:hidden;
+background-position:left;
+transition:background-position 0.5s;
+animation:bg-Animate 30s linear infinite;
+
+/* 
+display:flex;
+align-items:center;
+justify-content:center;
+ */
+
+}
+@keyframes bg-Animate{
+0%{background-position:left}
+50%{background-position:right}
+100%{background-position:left}
+
+
+}
+
+
+#btnBox{
+margin:4rem auto;
+width:90%; height:8rem;
+box-shadow:1rem 1rem 3rem rgba(0,0,0,0.4);
+
+border-radius:5rem;
+display:flex;
+align-items:center;
+justify-content:space-between;
+
+
+}
+
+#addingNodeBTN,#deleteNodeBTN{
+margin:0; padding:2rem;
+font-size:3rem;
+color:var(--textColor);
+text-align:center;
+border-radius:4rem;
+text-transform:capitalize;
+}
+
+
+
+
+div#overflowBox{
+margin:5rem auto;
+width:90%; height:60%;
+
+/* 
+grid-column:1/7;
+grid-row:2/7; */
+/* 
+display:flex;
+align-items:center;
+justify-content:center; */
+border-radius:1rem;
+box-shadow:1rem 1rem 3rem rgba(0, 0, 0, 0.4);
+overflow:auto;
+}
+
+div#TODOLists{
+width:100%; height:auto;
+background:rgb(255 255 255 0.3);
+display:grid;
+
+
+
+
+grid-template-columns:repeat(2,1fr);
+grid-template-rows:repeat(1,15rem);
+grid-gap:1rem;
+/* place-items:center; */
+}
+
+
+
+.TODOs{
+background:rgba(0, 0, 0, 0.4);
+border-radius:2rem 2rem;
+}
+
+.TODOs h2{
+background:#CFEDFF;
+font-size:2rem;
+font-weight:400;
+text-align:center;
+}
+
+
+.TODOs p{
+color:#B4FFEF;
+font-size:2rem;
+font-weight:400;
+text-align:center;
+}
+
+
+
+#outputScreen{
+width:100%;height:100%;
+overflow:auto;
+}
+
+p{
+font-size:0.5rem;
+color:var(--textColor);
+}
+
+
+#getSomething{
+padding:20px;
+background:#FF00D7;
+color:white;
+border:none;
+font-size:20px;
+border-radius:50px;
+text-transform:capitalize;
+border-bottom:4px solid #6A0055;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="popupBox">
+
+
+
+<div id="inputBoxs">
+
+<div id="closeBTN" class="closeBTN">+</div>
+
+<h2>title</h2>
+<textarea id="titleInPut" placeholder="kuchh likho yaar"></textarea>
+<h3>description</h3>
+<textarea id="descriptionInPut" placeholder="yha bhi kuchh likho yaar"></textarea>
+
+<button id="saveTOOD">save</button>
+
+</div>
+
+
+
+</div>
+
+
+<main>
+
+
+<h1>Aur bhai kaise aana hua??</h1>
+
+<div id="overflowBox">
+
+<div id="TODOLists">
+
+
+
+
+</div>
+
+</div>
+
+<div id="btnBox" class="some-btns">
+
+<div id="addingNodeBTN" class="TODOs addNodes">Add Node</div>
+<div id="deleteNodeBTN" class="TODOs deleteNode">delete all Node</div>
+
+</div>
+
+
+
+
+</main>
+
+
+
+
+
+<script>
+
+
+let userTODOcounts=0,totalRows=0,helpVel=0;;
+const userTODOLists=[];
+const ShowUserTODOLists=[];
+
+//userTODOLists.push('00');
+
+
+
+
+class Form{
+
+static gday(i){
+const weeks=['sun','mon','tue','wed','thu','fri','sat']
+return weeks[i];
+}
+
+static gmonth(i){
+const months=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec']
+return months[i];
+}
+
+constructor({title='bazar jana hai',description='mai nhai jarha hu abhi'}){
+this.title=title
+this.description=description
+
+
+const d=new Date;
+
+
+this.details={
+    savinMonth:Form.gmonth(d.getMonth()),
+    savinDate:Form.gday(d.getDay()),
+    savinHour:d.getHours(),
+    savinMinutes:d.getMinutes(),
+}
+
+}
+
+
+
+
+}
+
+
+
+addingNodeBTN.addEventListener('click',()=>{
+
+
+popupBox.style.display='flex';
+
+
+})
+
+
+
+
+
+saveTOOD.addEventListener('click',()=>{
+
+
+if(titleInPut.value != '' && descriptionInPut.value !=''){
+
+//console.log(userTODOLists)
+userTODOLists.push(new Form({title:titleInPut.value,description:descriptionInPut.value}))
+
+userTODOcounts++;
+
+userTODOLists.forEach((o,i)=>{
+
+if (o.title == titleInPut.value){
+
+ShowUserTODOLists.push(userTODOLists.splice(i,1));
+}
+
+})
+
+titleInPut.value='';
+descriptionInPut.value='';
+}else{
+
+titleInPut.value='';
+descriptionInPut.value='';
+alert('enter something');
+}
+
+//ShowUserTODOLists
+
+TODOLists.innerHTML =''
+
+ShowUserTODOLists.forEach((o,i)=>{
+
+    
+//console.log(o[0].title)
+
+TODOLists.innerHTML +=`
+<div class="TODOs mytodoNode-${i+1}">
+<h2>${o[0].title}</h2>
+<p>${o[0].description}</p>
+</div>
+`;
+
+
+
+
+
+
+popupBox.style.display='none';
+
+})
+
+//TODOLists.appendChild(todomainbox);
+
+
+
+TODOLists.style.gridTemplateRows=`repeat(${ShowUserTODOLists.length/2 + 1} ,15rem)`;
+
+
+
+})
+
+
+closeBTN.addEventListener('click',()=>{
+
+
+popupBox.style.display='none';
+
+})
+
+
+
+deleteNodeBTN.addEventListener('click',()=>{
+
+
+TODOLists.innerHTML='';
+
+})
+
+
+
+
+
+
+
+
+
+
+console.error(`your code is workin but it's error  for you`);
+
+
+
+</script>
+
+</body>
+</html>

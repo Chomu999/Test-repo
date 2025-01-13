@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+<link rel="stylesheet" href="/storage/emulated/0/g_js_libs/font-awesome.css"/>
+
+<style>
+
+*:after,*,*:before{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+:root{
+
+}
+
+*::selection{
+color: red;
+background: tan;
+}
+
+html{
+font-size: 10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style-type: none;
+}
+
+
+
+
+
+.wrapper{
+margin: 1rem auto;
+padding: 0.4rem;
+width: min(38rem, 100% - 2rem);
+background: #0e00FF21;
+border-radius: 1rem;
+}
+
+
+.inputContainer{
+aspect-ratio: 4;
+background: #0054FF;
+
+}
+
+
+.inputs{
+margin: 2rem;
+padding: 1rem;
+display: inline-block;
+background: #1C3700;
+color: lime;
+border: none;
+border-radius: 3rem;
+box-shadow: 2rem 0.2rem 0.2rem 0.6rem white;
+transition: .5s linear;
+}
+
+.inputs:focus{
+border: 0.3rem solid red;
+box-shadow: -2rem -0.2rem 0.2rem 0.2rem gray;
+
+}
+
+
+
+
+.outputContainer{
+aspect-ratio: 2/1;
+background: #0010FF;
+align-items: center;
+text-align: center;
+overflow: hidden auto;
+}
+
+.outputs{
+margin: 0.5rem 1rem;
+padding: 0.3rem 2rem;
+display: inline-block;
+color: #2C5700;
+background: #00FFDC;
+font-size: 2rem;
+border: none;
+border-radius: 5rem;
+}
+
+
+
+
+.btnContainer{
+aspect-ratio: 3;
+background: #6000FF;
+}
+
+.btns{
+margin: 0.8rem;
+padding: 0.8rem;
+color: red;
+border: none;
+border-bottom: 1rem solid currentColor;
+border-radius:2rem;
+
+}
+
+
+</style>
+
+<title>text Generator maybe</title>
+
+</head>
+<body>
+
+
+<main class="wrapper">
+<div class="wrapper">
+<h1>Text Generator AI Model</h1>
+</div>
+
+
+
+
+<div class="wrapper inputContainer">
+
+<input placeholder="enter text seed" type="text" class="inputs textSeed" />
+<input placeholder="enter text length" type="text" class="inputs textLength" />
+
+</div>
+
+<div class="wrapper outputContainer">
+<b class="outputs">hi hello</b>
+<b class="outputs">goo kha lo</b>
+
+<b class="outputs">My name is Giovanni Giorgio but everybody me call me Jorge</b>
+
+</div>
+
+<div class="wrapper btnContainer">
+
+<button class="btns trainBtn" >Train Model</button>
+<button class="btns genBtn" >Generate Text</button>
+<button class="btns dummyBtn">Dummy BTN</button>
+
+
+</div>
+
+
+
+
+
+
+
+
+</main>
+
+
+<script src="/storage/emulated/0/g_js_libs/tf.min.js"></script>
+
+<script type="module">
+"use strict";
+
+
+//some utils
+class Rand{
+
+static Float(min=0, max=1){
+return Math.random() * (max - min+1) + min;
+}
+
+static Int(min=6, max=9){
+return Math.floor( Rand.Float(min, max));
+}
+
+static Choice(...args){
+return args[Rand.Int(0, args.length - 1)];
+}
+
+static Color(len=3){
+let outColor="#";
+for(let i=0;i<len;++i){
+outColor+=Rand.Choice(..."0123456789abcdef".split(""));
+}
+return outColor;
+}
+
+}
+
+
+//sleep function help to wait/puase for a particular amount of time
+const strToHTML=(html)=>{
+const element = document.createElement("div");
+element.innerHTML=html;
+return element.firstElementChild;
+}
+
+//sleep function help to wait/puase for a particular amount of time
+const sleep=time=>new Promise((res,rej)=>{
+setTimeout(()=>{res(true)}, time*1000);
+});
+
+
+//querySelector
+
+const INITIAL=async()=>{
+
+//querySelector
+const outputContainer = document.querySelector(".outputContainer");
+
+const textSeed = document.querySelector(".textSeed");
+
+const textLength = document.querySelector(".textLength");
+
+
+const trainBtn = document.querySelector(".trainBtn");
+
+const genBtn = document.querySelector(".genBtn");
+
+const dummyBtn = document.querySelector(".dummyBtn");
+
+
+
+
+
+//charAt
+//charCodeAt
+//codePointAt
+//fromCharCode
+//fromCodePoint
+//raw
+
+
+
+
+
+// show the output on the screen
+const showOutput=(msg)=>{
+const show = strToHTML(`<b class="outputs">${msg}</b>`)
+outputContainer.appendChild(show);
+}
+
+
+
+
+// Define the text data
+const text = 'The quick brown fox jumps over the lazy dog';
+
+// Create a sequence of characters
+const sequence = text.split('');
+
+// Create a simple RNN model
+const model = tf.sequential();
+model.add(tf.layers.rnn({
+  units: 128,
+  inputShape: [sequence.length, 1],
+  returnSequences: true
+}));
+model.add(tf.layers.dense({ units: 1 }));
+
+// Compile the model
+model.compile({ optimizer: "adem", loss: 'meanSquaredError' });
+
+
+
+// Train the Model
+const TrainModel=_model_=>{
+
+const trainData = tf.tensor2d(sequence.map(char => char.charCodeAt(0)), [1, sequence.length, 1]);
+const trainLabels = tf.tensor2d(sequence.map(char => char.charCodeAt(0)), [1, sequence.length, 1]);
+_model_.fit(trainData, trainLabels, { epochs: 100 });
+
+
+}
+
+
+// Generate new text
+const generateText = (_model_) => {
+  const seed = textSeed.value;
+  const length = textLength.value;
+  const input = tf.tensor2d(seed.split('').map(char => char.charCodeAt(0)), [1, seed.length, 1]);
+  const output = _model_.predict(input);
+  const generatedText = output.dataSync().map(charCode => String.fromCharCode(charCode));
+  return generatedText.join('');
+};
+
+
+
+
+
+
+
+
+
+
+
+
+dummyBtn.addEventListener("click", ()=>{
+
+showOutput("developer : hi nice too meet you :)");
+
+});
+
+
+trainBtn.addEventListener("click", ()=>{
+//const genOutput = 
+TrainModel(model);
+//showOutput(`gen text is : ${genOutput}`);
+});
+
+genBtn.addEventListener("click", ()=>{
+const genOutput = generateText(model);
+showOutput(`gen text is : ${genOutput}`);
+});
+
+
+if(0){
+
+//
+const BASE64_ARRAY="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".split("").map((x) => x.charCodeAt(0));
+
+const BASE64_ENCODE_TABLE = new Map( BASE64_ARRAY.map((ord, i) => [i, ord]) );
+const BASE64_DECODE_TABLE = new Map( BASE64_ARRAY.map((ord, i) => [ord, i]) );
+
+
+
+console.log(BASE64_ARRAY)
+
+console.log(BASE64_ENCODE_TABLE)
+console.log(BASE64_DECODE_TABLE)
+
+console.log(BASE64_ENCODE_TABLE.get(0))
+console.log(BASE64_DECODE_TABLE.get(65))
+
+
+const text = "0123456789ABCDEF";
+console.log(text.__proto__);
+console.log(String.fromCharCode(97));
+
+console.log(String.fromCodePoint(105))
+
+console.log(text.charAt(0));
+console.log(text.charCodeAt(0));
+}
+
+
+
+}
+
+
+
+try{
+console.log("JavaScript is Awesome ");
+//console.log(tf);
+
+INITIAL();
+
+}catch(err){
+console.log(`javascript uncatch error: ${err} `);
+}
+
+
+</script>
+
+</body>
+</html>

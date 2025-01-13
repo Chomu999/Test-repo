@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>webGL practice part 2</title>
+
+<style>
+
+*{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+html{
+font-size: 10px;
+}
+
+body{
+background: #00021B;
+}
+
+
+.appTitle{
+margin: 1rem ;
+padding: 1rem;
+text-align: center;
+background: #234500;
+color: #D2FFD6;
+border-radius: 1rem;
+}
+
+.canvasCont{
+width:100vmin;
+aspect-ratio: 1;
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+}
+
+canvas{
+margin: auto;
+width: 98%;
+display: block;
+background: salmon;
+}
+
+.assets{
+display: none;
+}
+
+</style>
+
+</head>
+
+<body>
+
+
+<h1 class="appTitle">webGL practice part 2</h1>
+
+<div class="wrapper canvasCont">
+<canvas id="canvas"></canvas>
+
+</div>
+
+
+
+
+
+
+
+
+
+<script>
+
+
+const loadFile=async(p,t="text")=>{
+	const f =await fetch(p);
+	return await f[t]();
+}
+
+const INITIAL=async()=>{
+
+
+
+const canvas = document.getElementById("canvas");
+const gl = canvas.getContext("webgl2");
+
+//width or height
+
+const maxSize = (innerWidth>innerHeight)?innerHeight:innerWidth;
+canvas.width=maxSize;
+canvas.height=maxSize;
+
+
+console.log(gl);
+
+
+
+const vertexShaderSource=`#version 300 es
+layout (location=0) in vec4 aPos;
+layout (location=1) in vec4 aColor;
+
+out vec4 vColor;
+
+void main(){
+vColor = aColor;
+gl_Position = aPos;
+}
+`;
+
+const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+gl.shaderSource(vertexShader, vertexShaderSource);
+gl.compileShader(vertexShader);
+if(!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)){
+console.log(`vertexShader error ${gl.getShaderInfoLog(vertexShader)} \n  ${gl.getShaderSource(vertexShader)}`);
+}
+
+
+const fragmentShaderSource=`#version 300 es
+precision mediump float;
+layout (location=0) out vec4 FragColor;
+
+
+in vec4 vColor;
+
+void main(){
+FragColor = vColor;
+}
+`;
+
+const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+gl.shaderSource(fragmentShader, fragmentShaderSource);
+gl.compileShader(fragmentShader);
+if(!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)){
+console.log(`fragmentShader error ${gl.getShaderInfoLog(fragmentShader)} \n  ${gl.getShaderSource(fragmentShader)}`);
+}
+
+const shaderProgram = gl.createProgram();
+gl.attachShader(shaderProgram, vertexShader)
+gl.attachShader(shaderProgram, fragmentShader)
+
+gl.linkProgram(shaderProgram);
+if(!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)){
+console.log(`link not sucsses ${gl.getProgramInfoLog(shaderProgram)}`);
+}
+gl.validateProgram(shaderProgram);
+if(!gl.getProgramParameter(shaderProgram, gl.VALIDATE_STATUS)){
+console.log(`invalide shaderProgram ${gl.getProgramInfoLog(shaderProgram)}`);
+}
+gl.useProgram(shaderProgram);
+
+
+
+
+
+
+const geometryVerticesData = [
+//       xy
+   0.0,   0.5,
+  -0.5,  -0.5,
+   0.5,  -0.5,
+];
+const cupVerticsBuffer= new Float32Array(geometryVerticesData);
+
+const geometryColorsData = [
+255, 0, 0,
+0, 255, 0,
+0, 0, 255,
+];
+
+const cpuColorsBuffer= new Uint8Array(geometryColorsData);
+
+const vbo1 = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, vbo1);
+gl.bufferData(gl.ARRAY_BUFFER, cupVerticsBuffer, gl.STATIC_DRAW);
+gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+const vbo2 = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, vbo2);
+gl.bufferData(gl.ARRAY_BUFFER, cpuColorsBuffer, gl.STATIC_DRAW);
+gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+const aPosLoc = gl.getAttribLocation(shaderProgram, "aPos");
+console.log(aPosLoc);
+
+const aColorLoc = gl.getAttribLocation(shaderProgram, "aColor");
+console.log(aColorLoc);
+
+
+gl.bindBuffer(gl.ARRAY_BUFFER, vbo1);
+gl.vertexAttribPointer(aPosLoc, 2, gl.FLOAT, false, 0 , 0 );
+gl.enableVertexAttribArray(aPosLoc);
+//gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+gl.bindBuffer(gl.ARRAY_BUFFER, vbo2);
+gl.vertexAttribPointer(aColorLoc, 3, gl.UNSIGNED_BYTE, true, 0 , 0 );
+gl.enableVertexAttribArray(aColorLoc);
+//gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+
+
+
+
+
+function update(dt){
+gl.viewport(0, 0, canvas.width, canvas.height);
+gl.clearColor(0.2, 0.2, 0.2, 1.0);
+gl.clear(gl.COLOR_BUFFER_BIT);
+
+
+
+gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+}
+
+
+
+let lastTime=0;
+function animate(timeStamp) {
+const dt = timeStamp - lastTime;
+lastTime = timeStamp;
+update(dt);
+webkitRequestAnimationFrame(animate)
+}
+webkitRequestAnimationFrame(animate)
+
+
+}
+
+
+
+try{
+	INITIAL()
+}catch(err){
+	h1.innerText = `error js uncatch at ${ err}`
+}
+
+</script>
+
+</body>
+</html>

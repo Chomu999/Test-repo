@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=1.0 user-scalable=0">
+<title>The last fish game v1.1</title>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+/* overflow:hidden; */
+/* background-color:rgba(20,20,118,1);
+*/
+}
+
+#mainBox{
+margin:0;padding:0;
+width:100%;height:100%;
+background:#569BFF;
+}
+canvas{
+/* 
+width:330px;height:330px;
+position:absolute;
+top:50%;left:50%;
+transform:translate(-50%,-50%);
+outline:1px solid #000;
+ */
+}
+
+
+</style>
+</head>
+<body>
+
+
+<canvas id="cvs"></canvas>
+<script>
+
+let gameSpeed=2,sorce=0;
+
+const canvas=document.getElementById('cvs')
+const ctx =canvas.getContext('2d');
+
+ctx.font="40px sans-serif";
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+canvasPosition=canvas.getBoundingClientRect();
+
+const mouse={
+x: canvas.width/2, y: canvas.height/2,
+clicked:false
+};
+
+
+
+
+
+
+//localStorage
+
+let bufferData={
+hungerBar:{
+crr:10,
+max:10,
+},
+enrgyBar:{
+crr:10,
+max:10,
+},
+
+}
+
+//let bufferData=89;
+let crrData;
+let rawData = localStorage.getItem("FishGameData");
+
+
+if(rawData === null){
+
+localStorage.setItem("FishGameData", JSON.stringify(bufferData));
+
+}else{
+
+crrData = JSON.parse(rawData);
+
+}
+
+
+
+//console.log(window)
+console.log(crrData.hungerBar.max)
+//console.log(localStorage)
+
+
+
+
+
+
+
+
+
+const ISCircleCollision = (ObjectA,ObjectB) => {
+let dist=Math.hypot(ObjectA.x - ObjectB.x, ObjectA.y - ObjectB.y)
+
+return (dist - ObjectB.radius - ObjectA.radius < 0.5)
+}
+
+
+
+
+const randint=(min,max)=>{
+return Math.floor(Math.random() * (max-min) + min)
+}
+
+
+
+
+
+
+
+class NewMob{
+constructor(x,y,radius,color){
+this.x=x;
+this.y=y;
+this.radius=radius;
+this.color=color;
+}
+draw(ctx){
+
+
+
+ctx.beginPath()
+ctx.fillStyle=this.color;
+ctx.arc(this.x,this.y,this.radius,0,Math.PI*2);
+ctx.fill();
+ctx.stroke();
+ctx.closePath()
+
+
+}
+
+
+
+}
+
+class NewFish extends NewMob{
+constructor(x,y,radius,color,health=1){
+super(x,y,radius,color);
+this.speed=30;
+this.health=health;
+this.hunger=20;
+this.enrgy=20;
+}
+
+update(mouse){
+let dx = this.x - mouse.x;
+let dy = this.y - mouse.y;
+
+if(mouse.x != this.x){
+this.x -= dx/this.speed;
+}
+
+if(mouse.y != this.y){
+this.y -= dy/this.speed;
+}
+
+}
+
+}
+
+
+
+
+class NewEatabelFish extends NewMob{
+constructor(x,y,radius,speed,enrgy,color){
+super(x,y,radius,color);
+this.speed=speed;
+this.enrgy=enrgy;
+}
+
+update(){
+//this.x += this.speed.x;
+this.y += this.speed;
+}
+
+}
+
+
+
+
+
+
+
+let fishess=[]
+
+const hendelFishess = () =>{
+
+if(gameSpeed%90 == 0){
+let x=randint(30, canvas.width - 30)
+let enrgy=Math.random() * 0.3;
+let radius=randint(1,4) * 10;
+fishess.unshift(new NewEatabelFish(x,canvas.height/3 * 4,radius,-Math.random() * 5,enrgy,'tan'))
+
+//console.log(enrgy)
+}
+
+
+}
+
+
+
+let movingC=0;
+
+const player=new NewFish(165,165,5,'pink');
+//player.speed.y = 1;
+
+
+const gameLoop = () => {
+requestAnimationFrame(gameLoop);
+
+ctx.fillStyle='rgba(0,0,130,0.28)';
+
+ctx.fillRect(0,0,canvas.width,canvas.height);
+
+
+player.draw(ctx);
+player.update(mouse);
+
+
+
+fishess.forEach((fish)=>{
+fish.draw(ctx)
+fish.update()
+})
+
+
+fishess.forEach((fish,i)=>{
+
+if(fish.y < 0 - fish.radius*2){
+fishess.splice(i,1);
+
+player.enrgy -= 1;
+
+//if(player.radius >= 4) player.radius -= 4.6;
+}
+
+})
+
+
+fishess.forEach((fish,i)=>{
+if(ISCircleCollision(player,fish) || ISCircleCollision(fish,player)){
+
+if(i > -1){
+
+fishess.splice(i,1);
+
+sorce += 1;
+
+player.hunger += 0.5;
+
+player.enrgy += fish.enrgy;
+
+if(randint(1,5) >= 4){
+if(player.radius <= 30*3) player.radius += fish.radius/10;
+}
+
+}
+
+}
+})
+
+
+
+hendelFishess()
+
+if(gameSpeed%4 == 0 && player.enrgy <= 20){
+//player.enrgy += 1;
+}
+
+
+
+
+
+ctx.beginPath();
+ctx.fillStyle='#25FF00';
+for(let i=0;i<crrData.enrgyBar.crr;i++){
+ctx.fillRect(20 + i*10,canvas.height - 40,4,10)
+}
+ctx.closePath();
+
+
+
+ctx.beginPath();
+ctx.fillStyle='#983000';
+for(let i=0;i<crrData.hungerBar.crr;i++){
+ctx.fillRect(20 + i*10,canvas.height - 20,4,10)
+}
+ctx.closePath();
+
+
+if(sorce >= 5){
+
+crrData.enrgyBar.max = sorce;
+crrData.enrgyBar.crr += crrData.enrgyBar.max;
+
+crrData.hungerBar.max = sorce;
+crrData.hungerBar.crr += crrData.hungerBar.max;
+sorce = 0;
+}
+
+
+
+
+
+ctx.beginPath();
+ctx.font="30px sans-serif";
+ctx.fillStyle='white';
+ctx.fillText(`sorce : ${sorce}`,4,30);
+ctx.closePath();
+
+
+
+
+
+
+gameSpeed++
+
+}
+
+gameLoop()
+
+
+//touch events
+
+canvas.addEventListener('touchstart',(e)=>{
+mouse.x = e.touches[0].clientX;
+mouse.y = e.touches[0].clientY;
+mouse.clicked=true;
+})
+
+
+canvas.addEventListener('touchmove',(e)=>{
+mouse.x = e.changedTouches[0].clientX;
+mouse.y = e.changedTouches[0].clientY;
+movingC++;
+mouse.clicked=true;
+
+})
+
+canvas.addEventListener('touchend',(e)=>{
+mouse.x = e.changedTouches[0].clientX;
+mouse.y = e.changedTouches[0].clientY;
+mouse.clicked=false;
+
+})
+
+
+//mouse events
+
+canvas.addEventListener('mouseenter',(e)=>{
+mouse.x = e.x || e.changedTouches[0].clientX;
+mouse.y = e.y || e.changedTouches[0].clientY;
+mouse.clicked=true;
+console.log('mouse down')
+})
+
+
+canvas.addEventListener('mousemove',(e)=>{
+mouse.x = e.x || e.changedTouches[0].clientX;
+mouse.y = e.y || e.changedTouches[0].clientY;
+movingC++;
+mouse.clicked=true;
+
+})
+
+canvas.addEventListener('mouseout',(e)=>{
+mouse.x = e.x || e.changedTouches[0].clientX;
+mouse.y = e.y || e.changedTouches[0].clientY;
+mouse.clicked=false;
+console.log('mouse up')
+})
+
+
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>parent child and grand child js</title>
+
+<meta name="author" content="BByte">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+
+
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+
+html{
+font-size:10px;
+}
+
+
+body{
+width:100%; height:100%;
+background:#3E3E3E;
+}
+
+
+main{
+width:100%; height:100%;
+background:#3E3E3E;
+display:grid;
+place-items:center;
+}
+
+</style>
+
+
+</head>
+<body>
+
+
+
+<script>
+
+
+class Box{
+constructor(name="ram", age=19){
+this.name=name
+this.age=age
+this.children=[]
+}
+
+hello(){
+console.log(this.name ," say hello to everyone")
+console.log("and mainoin his age is ", this.age)
+this.children.forEach((child)=>{
+child.hello()
+})
+}
+
+add(...childs){
+this.children.push(...childs)
+}
+}
+
+
+
+
+
+const parent=new Box("ram", 35)
+
+for(let i=0;i<9;i++){
+const child1=new Box("love :"+i, 12+i)
+const child2=new Box("kush :"+i, 12+i)
+
+const apple=new Box("apple"+i, 1+i)
+const banana=new Box("banana"+i, 1+i)
+child1.add(apple,banana)
+child2.add(banana, apple)
+parent.add(child1)
+parent.add(child2)
+}
+
+
+function Hello(){
+
+parent.hello()
+
+}
+
+Hello()
+console.log(parent)
+
+
+
+
+</script>
+
+</body>
+</html>

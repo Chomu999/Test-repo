@@ -1,0 +1,174 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<!-- 
+<meta name="viewport" content="width=device-width, initial-scale=5.0 maximum-scale=5.0 user-scalable=0">
+ -->
+ 
+ <meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=9.0">
+<title>HTML xhr exe1 lol</title>
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; }
+html{
+font-size:10px;
+}
+body{
+background: #333;
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+#mainBox{
+width:90vw;height:90vh;
+
+background:lightgray;
+/* display:grid;
+
+grid-template-columns: repeat(1, 1fr);
+grid-template-rows:9fr 1fr;
+grid-gap:10px;
+ */
+ 
+}
+#outputScreen{
+width:100%;height:90%;
+overflow:none;
+overflow-y:scroll;
+/* display:inline; */
+}
+
+
+.boxs{
+display:block;
+
+background:orange;
+box-shadow:2px 2px 10rem 0 orangered;
+/* transform:translateX(-50%); */
+}
+
+.box{
+width:10rem;
+height:10rem;
+}
+
+.userSection{
+margin:auto;
+/* padding:2rem 0; */
+width:70%; height:14rem;
+/* background:rgba(20,0,0,0.5); */
+}
+.userSection .users{
+margin:4rem 0;
+width:100%; height:100%;
+background:#00020A;
+
+}
+.users .userImage{
+margin:1rem 0;
+width:100%; height:70%;
+/* background:rgba(20,20,20,0.5); */
+}
+.users p{
+color:#C0C5BC;
+background:#72778E;
+text-align:center;
+}
+
+
+#getSomething{
+margin:auto;
+padding:1rem 0;
+width:60%;
+height:10%;
+background:#FF00D7;
+color:white;
+font-size:20px;
+border-radius:50px;
+text-align:center;
+text-transform:capitalize;
+border-bottom:4px solid #6A0055;
+transition:0.5s;
+}
+
+#getSomething:active{
+color:red;
+border-bottom:none;
+}
+
+</style>
+
+<head>
+
+<body>
+
+<!-- <canvas class="gl"></canvas>
+ -->
+<div id="leftSideBar">
+
+</div>
+
+<div id="mainBox">
+
+<div id="outputScreen">
+
+<div class="boxs box"></div>
+<div class="boxs box"></div>
+</div>
+
+<div id=getSomething>get something</div>
+
+
+
+</div>
+
+
+
+<script type=module>
+
+const outputScreen=document.getElementById('outputScreen');
+const getSomething=document.getElementById('getSomething');
+
+const getData=async(url)=>{
+const res = await fetch(url,{
+    mothed:'GET',
+    header:{
+    'Content-Type': 'application/json'
+    }
+})
+
+return await res.json();
+}
+
+
+
+
+getSomething.addEventListener('click',(e)=>{
+
+
+
+//console.log(myData[ Math.floor(Math.random() * myData.length) ]);
+
+
+for(let i=0;i<myData.length;++i){
+outputScreen.innerHTML += `
+<div class="userSection hero">
+<div class="users">
+
+
+<img class="userImage" src=".imgs/worker/${myData[i].name}.png" alt="worker ${myData[i].name}">
+<p class="userName">name : ${myData[i].name}</p>
+<p class="userAge">age : ${myData[i].age}</p>
+<p class="password">password : ${myData[i].password}</p>
+
+</div>
+</div>`;
+}
+
+})
+
+const myData= await getData('./userData.json');
+</script>
+</body>
+</html>

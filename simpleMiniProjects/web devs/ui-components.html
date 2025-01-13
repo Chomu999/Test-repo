@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=10.0 user-scalable=no" />
+<meta name="author" content="billbyte"/>
+
+<title>ui utils components</title>
+
+<style>
+
+*{
+margin:0; padding:0; box-sizing:border-box;
+/* border:0.1px dashed red; */
+}
+
+
+:root{
+--grad0:linear-gradient(45deg, red, blue);
+--grad1:linear-gradient(45deg, green, yellow, brown, orange, purple);
+--grad2:linear-gradient(45deg, orange, white, green);
+--grad3:linear-gradient(-45deg, #00A3FF, #0007FF, #090068, #2A5300, #4E9B00, #80FF00);
+}
+
+
+html{
+font-size:10px;
+}
+
+
+
+body{
+width:100vw; height:100vh;
+}
+
+main{
+width:100%; height:100%;
+background: black;
+
+/* grid-auto-flow:column; */
+overflow:auto;
+
+
+}
+
+div.uiComponentContainer{
+width:100%; height:12rem;
+display: grid;
+place-items:center;
+/* grid-auto-flow:column; */
+/* overflow:auto; */
+
+}
+
+
+
+.toggleBTNContainer{
+
+width:10rem; height:4rem;
+background:#A8A8A8;
+border-radius:5rem;
+transition: 0.3s;
+}
+
+.circle{
+width:2rem; height:2rem;
+background:#CFCFCF;
+border-radius:50%;
+box-shadow:black 0 0 .4rem .02rem;
+transform: translate(50%, 50%);
+transition: 0.3s;
+}
+
+.toggleBTNContainer:hover{
+background:#0044FF;
+}
+
+
+
+.toggleBTNContainer:hover .circle{
+transform:translate(350%, 50%);
+}
+
+
+
+.BTN2Container{
+padding:1rem 2rem;
+background:#FF00CF;
+color:#9F00FF;
+border-bottom:2rem solid #3E004E;
+/* border-radius:5rem; */
+text-align: center;
+font-size: 2rem;
+}
+
+.BTN2Container:hover{
+
+animation: BTN2hover 250ms 0.02s ease-in-out;
+}
+
+.NeonBTNContainer{
+padding:1rem 2rem;
+background:#9F00FF;
+/* background:#FF00CF; */
+color:#000C3F;
+border-radius:5rem;
+
+text-shadow:#9F00FF 0 0 0.2rem;
+box-shadow:#9F00FF 0 0 1rem .2rem;
+font-size: 2rem;
+text-align: center;
+transition: 0.05s;
+text-transform:capitalize;
+}
+
+.NeonBTNContainer:hover{
+/* font-size: 4rem; */
+box-shadow:#9F00FF 0 0 4rem .2rem;
+}
+
+
+
+.BTN3{
+padding:2rem 4rem;
+font-size:2rem;
+text-transform:capitalize;
+border-radius:1rem;
+color:white;
+background-image: var(--grad0);
+background-size:200% 400%;
+background-position:20rem 20rem;
+transition: 0.5s;
+
+}
+
+.BTN3:hover{
+background-position:2rem 2rem;
+}
+
+.BTN4{
+padding:2rem 4rem;
+position: relative;
+color:white;
+background:#8400ff23;
+text-transform:capitalize;
+font-size:2rem;
+border-radius:1rem;
+
+overflow: hidden;
+
+
+/* transition:0.5s; */
+
+}
+
+.BTN4 > span{
+width:2rem; height:18rem;
+background:#fff3;
+position:absolute;
+transform: translate(-14rem,-8rem)  rotateZ(45deg);
+
+transition: transform 0.5s ease-out;
+}
+
+.BTN4:hover  > span{
+transform: translate(5rem, -8rem)  rotateZ(45deg);
+}
+
+
+.colorFullText{
+padding:2rem 4rem;
+font-size:2rem;
+text-transform:capitalize;
+border-radius:1rem;
+color:blue;
+background-image: var(--grad2);
+transition: 1s;
+}
+
+.colorFullText:hover{
+animation:gigal 1s;
+}
+
+
+
+@keyframes BTN2hover{
+
+0%{
+transform: translateY(0);
+border-bottom:2rem solid  #3E004E;
+}
+
+50%{
+transform: translateY(2rem);
+border:none;
+}
+
+100%{
+transform: translateY(0);
+border-bottom:2rem solid #3E004E;
+}
+
+}
+
+@keyframes gigal{
+
+0%{
+transform: rotateX(0);
+}
+
+50%{
+transform: rotateZ(-30deg);
+}
+
+
+100%{
+transform: rotateZ(0);
+}
+
+}
+
+
+</style>
+
+</head>
+<body>
+
+
+<main>
+
+<div class="uiComponentContainer">
+<div class="toggleBTNContainer">
+
+<div class="circle"></div>
+
+</div>
+</div>
+
+<div class="uiComponentContainer">
+<div class="BTN2Container">hover me</div>
+</div>
+
+
+<div class="uiComponentContainer">
+
+<div class="NeonBTNContainer">
+
+hover me
+</div>
+
+</div>
+
+
+
+<div class="uiComponentContainer">
+
+<div class="BTN3">hover me</div>
+
+</div>
+
+
+<div class="uiComponentContainer">
+
+<div class="BTN4">
+hover me
+<span></span>
+</div>
+
+</div>
+
+
+
+<div class="uiComponentContainer">
+
+<div class="colorFullText">hover me</div>
+
+</div>
+
+
+
+
+
+</main>
+
+
+
+<script>
+
+
+
+
+
+const app=()=>{
+
+const rootElement=document.querySelector("main")
+
+
+for(let i=0;i<14;i++){
+rootElement.innerHTML += "\n";
+}
+
+
+}
+
+
+window.addEventListener("load", ()=>{
+
+console.log("JS is Awesome")
+//app()
+
+})
+
+</script>
+
+
+
+
+</body>
+</html>

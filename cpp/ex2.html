@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>JSCPP test</title>
+
+<meta name="author" content="BByte">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+
+
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+
+html{
+font-size:10px;
+}
+
+
+body{
+width:100%; height:100%;
+background:#000;
+}
+
+main{
+width:100%; height:100%;
+overflow:scroll;
+}
+
+pre{
+color:#00D129;
+font-size:2rem;
+}
+
+</style>
+
+<script src="/storage/emulated/0/g_js_libs/JSCPP.es5.min.js"></script>
+
+</head>
+<body>
+
+<main id="main">
+
+<pre id="outCode"></pre>
+
+
+</main>
+
+
+<script type="text/javascript" charset="utf-8">
+
+
+
+
+
+
+let code = `
+#include <iostream>
+#include <cmath>
+
+
+
+using namespace std;
+
+#define ww 9
+
+#define myEnd }
+
+
+void _hello(){
+cout<< "hello" <<endl;
+}
+
+int main() {
+int a;
+cin >> a;
+
+cout << ww << endl;
+
+for(int i=0;i<10;i++){
+cout <<a<<" x "<< i+1 <<" = "<<a*(i+1) << endl;
+
+_hello();
+
+}
+
+int a1 = 3;
+float b1 = 4.5;
+double c1 = 5.25;
+double sum;
+
+sum = a1 + b1 + c1;
+
+cout << "The sum of a, b, and c is " << sum << endl;
+
+return 0;
+
+myEnd
+`
+
+
+
+
+
+
+
+var input = "5";
+var output = "";
+
+const config = {
+stdio: {
+write: function(s) {
+output += s;
+}
+},
+unsigned_overflow: "error" // can be "error"(default), "warn" or "ignore"
+};
+
+const exitCode = JSCPP.run(code, input, config);
+
+outCode.innerText = output;
+outCode.innerText+="\nprogram exited with code " + exitCode;
+
+//console.log(output + "\nprogram exited with code " + exitCode);
+
+</script>
+
+</body>
+</html>
