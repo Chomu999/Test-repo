@@ -92,15 +92,14 @@ const vertexShaderSource = `#version 300 es
 in vec4 aPos;
 in vec2 aUv;
 
-
+uniform vec2 uPos;
 
 out vec2 vUv;
 
-uniform vec2 uPos;
 
 void main(){
 
-gl_Position = vec4(aPos.xy + uPos, aPos.zw);
+gl_Position =  vec4(aPos.xy + uPos, aPos.zw);
 vUv = aUv;
 }
 `;
@@ -110,12 +109,13 @@ precision mediump float;
 out vec4 FragColor;
 
 in vec2 vUv;
-uniform sampler2D uTex1;
+uniform sampler2D uTex[2];
 
 void main(){
-vec4 tc1 = texture(uTex1, vUv);
+vec4 tc1 = texture(uTex[0], vUv);
+vec4 tc2 = texture(uTex[1], vUv);
 
-FragColor =tc1;
+FragColor =mix(tc1, tc2, 0.4);
 }
 `;
 
@@ -149,37 +149,75 @@ gl.useProgram(shaderProgram);
 
 
 const uPosLoc = gl.getUniformLocation(shaderProgram, "uPos");
-const uTex1Loc = gl.getUniformLocation(shaderProgram, "uTex1");
+const uTex0Loc = gl.getUniformLocation(shaderProgram, "uTex[0]");
+const uTex1Loc = gl.getUniformLocation(shaderProgram, "uTex[1]");
 
 
-const texture1 = gl.createTexture();
-texture1.slot = 0;
-gl.bindTexture(gl.TEXTURE_2D, texture1);
-//gl.activeTexture(gl.TEXTURE0+ texture1.slot );
+//console.log(uTex0Loc)
+//console.log(uTex1Loc)
+
+
+
+const _texSlot0 = 0, _texSlot1 = 1;
+
+
+
+const imgColorData0 = new Uint8Array([
+255, 255, 0, 255,
+100, 255, 0, 255,
+0, 233, 223, 255,
+]),
+imgColorData1 = new Uint8Array([
+255, 0, 0, 255,
+0, 255, 0, 255,
+0, 233, 223, 255,
+]), imgColorDataWidth = 3, imgColorDataHeight = 1, imgColorDataChennal = 0;
+
+//0st texture
+const tex00 = gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, tex00);
 gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, !0)
-
-//gl.uniform1i(uTex1Loc, texture1.slot)
-
+//gl.activeTexture(gl.TEXTURE0+ _texSlot0 );
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+gl.uniform1i(uTex0Loc, _texSlot0);
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA,...[imgColorDataWidth, imgColorDataHeight, imgColorDataChennal], gl.RGBA, gl.UNSIGNED_BYTE, imgColorData0);
+//gl.bindTexture(gl.TEXTURE_2D, null)
 
+
+//1st texture
+const tex0 = gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, tex0);
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, !0)
+//gl.activeTexture(gl.TEXTURE0+ _texSlot0 );
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+gl.uniform1i(uTex0Loc, _texSlot0);
 gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img1);
+//gl.bindTexture(gl.TEXTURE_2D, null)
 
 
-const texture2 = gl.createTexture();
-texture2.slot = 0;
-gl.bindTexture(gl.TEXTURE_2D, texture2);
-//gl.activeTexture(gl.TEXTURE0+ texture2.slot );
-
+//2nd texture
+const tex1 = gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, tex1);
 gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, !0)
-
-
+//gl.activeTexture(gl.TEXTURE0+ _texSlot1 );
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-
+gl.uniform1i(uTex1Loc, _texSlot1);
 gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img2);
+//gl.bindTexture(gl.TEXTURE_2D, null);
 
-
+//2nd texture
+const tex11 = gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, tex11);
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, !0)
+//gl.activeTexture(gl.TEXTURE0+ _texSlot1 );
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+gl.uniform1i(uTex1Loc, _texSlot1);
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, ...[imgColorDataHeight, imgColorDataWidth, imgColorDataChennal], gl.RGBA, gl.UNSIGNED_BYTE, imgColorData1);
+//gl.bindTexture(gl.TEXTURE_2D, null);
 
 
 const vertices= new Float32Array([
@@ -194,6 +232,7 @@ const indices= new Uint16Array([
 0,1,2,
 2,3,0,
 ]);
+
 
 
 const vbo = gl.createBuffer();
@@ -219,6 +258,8 @@ gl.enableVertexAttribArray(1);
 
 
 
+
+
 const update=(dt)=>{
 
 //clearing canvas
@@ -234,19 +275,61 @@ gl.viewport(0, 0, canvas.width, canvas.height);
 
 
 //1st
-gl.bindTexture(gl.TEXTURE_2D, texture1);
-gl.activeTexture(gl.TEXTURE0+texture1.slot);
-gl.uniform1i(uTex1Loc, 0);
+
+gl.activeTexture(gl.TEXTURE0+ _texSlot0);
+gl.bindTexture(gl.TEXTURE_2D, tex0);
+
+
+gl.activeTexture(gl.TEXTURE0+ _texSlot1);
+gl.bindTexture(gl.TEXTURE_2D, tex1);
+
 gl.uniform2fv(uPosLoc, [ 0.5, 0.5]);
+
 gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
 
 
-//2nd
-gl.bindTexture(gl.TEXTURE_2D, texture2);
-gl.activeTexture(gl.TEXTURE0+texture2.slot);
-gl.uniform1i(uTex1Loc, 0);
+
+//2st
+
+gl.activeTexture(gl.TEXTURE0+ _texSlot0);
+gl.bindTexture(gl.TEXTURE_2D, tex00);
+
+
+gl.activeTexture(gl.TEXTURE0+ _texSlot1);
+gl.bindTexture(gl.TEXTURE_2D, tex1);
+
 gl.uniform2fv(uPosLoc, [ -0.5, -0.5]);
+
 gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+
+
+//3rd
+
+gl.activeTexture(gl.TEXTURE0+ _texSlot0);
+gl.bindTexture(gl.TEXTURE_2D, tex0);
+
+
+gl.activeTexture(gl.TEXTURE0+ _texSlot1);
+gl.bindTexture(gl.TEXTURE_2D, tex11);
+
+gl.uniform2fv(uPosLoc, [ -0.5, 0.5]);
+
+gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+
+
+//4th
+
+gl.activeTexture(gl.TEXTURE0+ _texSlot0);
+gl.bindTexture(gl.TEXTURE_2D, tex00);
+
+
+gl.activeTexture(gl.TEXTURE0+ _texSlot1);
+gl.bindTexture(gl.TEXTURE_2D, tex11);
+
+gl.uniform2fv(uPosLoc, [ 0.5, -0.5]);
+
+gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+
 
 
 

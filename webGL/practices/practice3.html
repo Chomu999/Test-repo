@@ -179,18 +179,18 @@ let numPoint = 0;
 const cupVerticsBuffer= new Float32Array([
 //     xyz              	rgba   
 //green one z=-1.0, a=0.1
-  -0.5,   0.5,  -1.0,    0.0, 1.0, 0.0, 0.1,
-  -0.5,  -0.5,  -1.0,    0.0, 1.0, 0.0, 0.1,
-   0.5,   0.0,  -1.0,    0.0, 1.0, 0.0, 0.1,
+  -0.5,   0.5,  -1.0,    0.0, 1.0, 0.0, 0.3,
+  -0.5,  -0.5,  -1.0,    0.0, 1.0, 0.0, 0.3,
+   0.5,   0.0,  -1.0,    0.0, 1.0, 0.0, 0.3,
 
 //red one z=0.0, a=0.3
    0.0,   0.5,   0.0,    1.0, 0.0, 0.0, 0.3,
   -0.5,  -0.5,   0.0,    1.0, 0.0, 0.0, 0.3,
    0.5,  -0.5,   0.0,    1.0, 0.0, 0.0, 0.3,
 //blue one z=0.9, a=0.2
-   0.5,   0.5,   0.9,    0.0, 0.0, 1.0, 0.2,
-   0.5,  -0.5,   0.9,    0.0, 0.0, 1.0, 0.2,
-  -0.5,   0.0,   0.9,    0.0, 0.0, 1.0, 0.2,
+   0.5,   0.5,   0.9,    0.0, 0.0, 1.0, 0.3,
+   0.5,  -0.5,   0.9,    0.0, 0.0, 1.0, 0.3,
+  -0.5,   0.0,   0.9,    0.0, 0.0, 1.0, 0.3,
 
 ]);
 
@@ -268,7 +268,8 @@ dfactor: ZERO, ONE, [ONE_MINUS_]SRC_COLOR,
 
 //gl.blendColor(1.0, 0.0, 0.0, 0.3)
 
-gl.blendFunc(gl.ONE_MINUS_SRC_ALPHA, gl.SRC_ALPHA);
+//gl.blendFunc(gl.ONE_MINUS_SRC_ALPHA, gl.SRC_ALPHA);
+gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
 
 function update(dt){
@@ -278,9 +279,11 @@ gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 gl.useProgram(shaderProgram);
 
-
+gl.depthMask(false)
 gl.bindVertexArray(vao1);
 gl.drawArrays(gl.TRIANGLES, 0, 9);
+gl.depthMask(!false)
+
 //gl.drawArrays(gl.TRIANGLES, 0, 3);
 //gl.drawArrays(gl.TRIANGLES, 3, 3);
 //gl.drawArrays(gl.TRIANGLES, 6, 3);

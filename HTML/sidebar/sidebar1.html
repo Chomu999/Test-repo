@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>side bar 1</title>
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0"/>
+
+<style>
+*{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+html{
+font-size: 10px;
+}
+
+.container{
+width: 100dvw;
+height: 40rem;
+background: #A400FF33;
+display: flex;
+justify-content: center;
+align-items: center;
+}
+
+.window{
+margin: 1rem;
+width: 20em;
+height: min(100% - 2rem, 30rem);
+/* display: inline-block; */
+background: #060927;
+border-radius: 1rem;
+
+}
+
+.window__app{
+width: 8rem;
+overflow: auto;
+text-align: center;
+}
+
+.window__toolbox{
+width: 20rem;
+}
+
+.window__toolbox .title__container{
+text-align: center;
+color: #E8E8E8;
+}
+
+.window__toolbox .functions{
+margin: auto;
+width: 80%;
+height: 50%;
+}
+
+.functions .func{
+margin: 0.6rem;
+width: 3rem;
+aspect-ratio: 1;
+display: inline-block;
+background: white;
+}
+
+.window__toolbox .break__point{
+margin: auto;
+width: 90%;
+height: 1px;
+}
+
+.window__app .app{
+display:inline-block;
+margin:0.4rem;
+width: 80%;
+aspect-ratio:1;
+background: #D1D1D1;
+border-radius: 50%;
+}
+
+input[type="checkbox"]{
+display: none;
+}
+
+input:not(:checked) ~ .container{
+
+transform: translate(-100%, 0);
+
+animation: ani_out 450ms linear;
+}
+
+input:checked ~ .container{
+
+animation: ani_in 450ms linear;
+}
+
+label{
+font-size: 4rem;
+color: #FF5A00;
+}
+
+
+@keyframes ani_in{
+	0%{
+		transform: translate(-100%, 0);
+	}
+	100%{
+		transform: translate(0, 0);
+	}
+}
+
+@keyframes ani_out{
+	100%{
+		transform: translate(-100%, 0);
+	}
+	0%{
+		transform: translate(0, 0);
+	}
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="box">
+
+<label for="checkboX">
+show button
+</label>
+<input id="checkboX" type="checkbox" />
+
+
+<div class="container">
+
+<div class="window window__app">
+<div class="app"></div>
+<div class="app"></div>
+<div class="app"></div>
+<div class="app"></div>
+<div class="app"></div>
+<div class="app"></div>
+<div class="app"></div>
+<div class="app"></div>
+<div class="app"></div>
+<div class="app"></div>
+</div>
+
+<div class="window window__toolbox">
+
+<div class="title__container">
+	<h2 class="title">toolbox</h2>
+</div>
+
+<div class="functions">
+<div class="func func__record"></div>
+<div class="func func__record"></div>
+<div class="func func__record"></div>
+<div class="func func__record"></div>
+</div>
+
+<hr class="break__point">
+
+</div>
+
+
+</div>
+</div>
+
+</body>
+</html>

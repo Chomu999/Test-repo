@@ -742,8 +742,10 @@ BLEND_SRC_RGB: 32969
 
 
 
+gl.enable(gl.DEPTH_TEST);
 gl.enable(gl.BELND);
-gl.blendFunc(gl.BLEND_SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+
+gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
 
 let angle = 0;

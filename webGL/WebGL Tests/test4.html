@@ -1,0 +1,452 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0" />
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+<title>webgl test 4</title>
+
+
+
+<style>
+
+*{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+html{
+font-size: 10px;
+}
+
+
+main{
+height: min(100dvh, 100vh, 80rem);
+background: #000000;
+}
+
+h1{
+padding: 1rem;
+font-weight: bold;
+color: #fa9191;
+text-align: center;
+}
+
+canvas{
+margin: auto;
+width: 100%;
+display: block;
+background: orange;
+}
+
+.hide{
+display: none;
+}
+
+
+</style>
+
+</head>
+
+
+
+<body>
+
+
+<main class="main">
+<h1>webGL test 4</h1>
+<canvas width="300" height="300" id="canvas"></canvas>
+</main>
+
+<div class="hide">
+<img src="/sdcard/Download/Zelda2.png" alt="img1" id="img1" />
+<img src="/sdcard/Download/images (7).jpeg" alt="img2" id="img2" />
+<img src="/sdcard/Download/Zelda2.png" alt="img3" id="img3" />
+</div>
+
+
+<script src="/sdcard/g_js_libs/gl-matrix.js"></script>
+
+<script>
+
+const {PI, cos, pow, sin, tan} = Math;
+
+const randFloat=(min=1, max=2)=>Math.random() * (max - min+1) + min;
+const randInt=(min=1, max=2)=>Math.floor(randFloat(min, max));
+
+
+
+
+
+class Shape{
+
+
+#scaleAxis = vec3.create();
+#rotation = quat.create();
+#modelMat = mat4.create();
+
+constructor(position, scale, rotationAxis, rotationAngle, vao, indices_count){
+this.position = position;
+this.scale = scale;
+this.rotationAxis = rotationAxis;
+this.rotationAngle = rotationAngle;
+this.vao = vao;
+this.indices_count = indices_count;
+
+}
+
+
+draw(gl, program, uniformLoc){
+
+quat.setAxisAngle(this.#rotation, this.rotationAxis, this.rotationAngle);
+vec3.set(this.#scaleAxis, this.scale, this.scale, this.scale);
+
+mat4.fromRotationTranslationScale(this.#modelMat, this.#rotation, this.position, this.#scaleAxis);
+gl.useProgram(program);
+gl.uniformMatrix4fv(uniformLoc, gl.FALSE, this.#modelMat);
+gl.bindVertexArray(this.vao);
+gl.drawElements(gl.TRIANGLES, this.indices_count, gl.UNSIGNED_SHORT, 0)
+}
+
+}
+
+console.log(quat, mat4, vec3)
+
+
+
+
+const init=()=>{
+
+const canvas = document.getElementById("canvas");
+const gl = canvas.getContext("webgl2");
+
+
+
+console.log(window);
+console.log(gl);
+
+
+const vertexShaderSource = `#version 300 es
+in vec4 aPos;
+in vec2 aUv;
+
+uniform mat4 uModelMat;
+uniform mat4 uCameraMat;
+
+out vec2 vUv;
+
+
+void main(){
+
+gl_Position = uCameraMat * uModelMat * aPos;
+vUv = aUv;
+}
+`;
+
+const fragmentShaderSource = `#version 300 es
+precision mediump float;
+out vec4 FragColor;
+
+in vec2 vUv;
+uniform sampler2D uTex;
+
+void main(){
+
+FragColor =texture(uTex, vUv);
+}
+`;
+
+const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+gl.shaderSource(vertexShader, vertexShaderSource);
+gl.compileShader(vertexShader);
+if(!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)){
+console.log(`${gl.getShaderInfoLog(vertexShader)}  ${gl.getShaderSource(vertexShader)}`)
+}
+
+const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+gl.shaderSource(fragmentShader, fragmentShaderSource);
+gl.compileShader(fragmentShader);
+if(!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)){
+console.log(`${gl.getShaderInfoLog(fragmentShader)}  ${gl.getShaderSource(fragmentShader)}`)
+}
+
+const shaderProgram = gl.createProgram();
+gl.attachShader(shaderProgram, vertexShader);
+gl.attachShader(shaderProgram, fragmentShader);
+gl.linkProgram(shaderProgram);
+if(!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)){
+console.log(gl.getProgramInfoLog(shaderProgram))
+}
+gl.validateProgram(shaderProgram);
+if(!gl.getProgramParameter(shaderProgram, gl.VALIDATE_STATUS)){
+console.log(gl.getProgramInfoLog(shaderProgram))
+}
+gl.useProgram(shaderProgram);
+
+
+
+const uTexLoc = gl.getUniformLocation(shaderProgram, "uTex");
+
+const uModelMatLoc = gl.getUniformLocation(shaderProgram, "uModelMat");
+const uCameraMatLoc = gl.getUniformLocation(shaderProgram, "uCameraMat");
+
+
+
+const _texSlot0 = 0;
+
+
+const imgColorData0 = new Uint8Array([
+255, 165, 0, 255,
+255, 165, 0, 255,
+255, 165, 0, 255,
+255, 255, 255, 255,
+0, 0, 255, 255,
+255, 255, 255, 255,
+0, 255, 0, 255,
+0, 255, 0, 255,
+0, 255, 0, 255,
+]),imgColorDataWidth = 3, imgColorDataHeight = 3, imgColorDataChennal = 0;
+
+//0st texture
+const tex0 = gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, tex0);
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, !0)
+//gl.activeTexture(gl.TEXTURE0+ _texSlot0 );
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+gl.uniform1i(uTexLoc, _texSlot0);
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA,...[imgColorDataWidth, imgColorDataHeight, imgColorDataChennal], gl.RGBA, gl.UNSIGNED_BYTE, imgColorData0);
+//gl.bindTexture(gl.TEXTURE_2D, null)
+
+
+
+
+
+const vertices = new Float32Array([
+		// X, Y, Z         U, V
+		// Top
+		-1.0, 1.0, -1.0,   0, 0,
+		-1.0, 1.0, 1.0,    0, 1,
+		1.0, 1.0, 1.0,     1, 1,
+		1.0, 1.0, -1.0,    1, 0,
+
+		// Left
+		-1.0, 1.0, 1.0,    0, 0,
+		-1.0, -1.0, 1.0,   1, 0,
+		-1.0, -1.0, -1.0,  1, 1,
+		-1.0, 1.0, -1.0,   0, 1,
+
+		// Right
+		1.0, 1.0, 1.0,    1, 1,
+		1.0, -1.0, 1.0,   0, 1,
+		1.0, -1.0, -1.0,  0, 0,
+		1.0, 1.0, -1.0,   1, 0,
+
+		// Front
+		1.0, 1.0, 1.0,    1, 1,
+		1.0, -1.0, 1.0,    1, 0,
+		-1.0, -1.0, 1.0,    0, 0,
+		-1.0, 1.0, 1.0,    0, 1,
+
+		// Back
+		1.0, 1.0, -1.0,    0, 0,
+		1.0, -1.0, -1.0,    0, 1,
+		-1.0, -1.0, -1.0,    1, 1,
+		-1.0, 1.0, -1.0,    1, 0,
+
+		// Bottom
+		-1.0, -1.0, -1.0,   1, 1,
+		-1.0, -1.0, 1.0,    1, 0,
+		1.0, -1.0, 1.0,     0, 0,
+		1.0, -1.0, -1.0,    0, 1,
+	]);
+
+
+
+const indices = new Uint8Array([
+		// Top
+		0, 1, 2,
+		0, 2, 3,
+
+		// Left
+		5, 4, 6,
+		6, 4, 7,
+
+		// Right
+		8, 9, 10,
+		8, 10, 11,
+
+		// Front
+		13, 12, 14,
+		15, 14, 12,
+
+		// Back
+		16, 17, 18,
+		16, 18, 19,
+
+		// Bottom
+		21, 20, 22,
+		22, 20, 23,
+]);
+
+
+
+
+
+
+
+const vao1=gl.createVertexArray();
+
+
+const vbo1 = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, vbo1);
+gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
+
+const ibo1 = gl.createBuffer();
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo1);
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+
+
+
+//1st bind
+gl.bindVertexArray(vao1);
+gl.bindBuffer(gl.ARRAY_BUFFER, vbo1);
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo1);
+gl.vertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 4 * 5, 4 * 0);
+gl.enableVertexAttribArray(0);
+
+
+gl.vertexAttribPointer(1, 2, gl.FLOAT, gl.FALSE, 4 * 5, 4 * 3);
+gl.enableVertexAttribArray(1);
+
+gl.bindBuffer(gl.ARRAY_BUFFER,null);
+gl.bindVertexArray(null);
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null)
+
+
+
+
+
+//console.log(mat4)
+
+const UP_VEC = vec3.fromValues(0, 1, 0);
+console.log(indices.length)
+const shapes=[
+new Shape(vec3.fromValues(0, 1, -0.5), 1, UP_VEC, glMatrix.toRadian(90), vao1, indices.length)
+];
+
+
+
+console.log(shapes)
+let angle=0;
+
+//console.log(vec3)
+const _IDENTITY = mat4.create();
+const viewMat = mat4.create();
+const projMat = mat4.create();
+
+mat4.lookAt(viewMat,
+[0, 1, -10],
+[0, 0, 0],
+[0, 1, 0]);
+
+
+
+
+mat4.perspective(projMat, glMatrix.toRadian(45), gl.canvas.width / gl.canvas.height, 1, 100)
+
+
+
+
+gl.enable(gl.DEPTH_TEST);
+
+gl.enable(gl.BLEND);
+
+
+const update=(dt)=>{
+
+//clearing canvas
+gl.clearColor(0.2, 0.2, 0.2, 1.0);
+gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+gl.viewport(0, 0, canvas.width, canvas.height);
+
+
+const viewProj= mat4.mul(mat4.create(), projMat, viewMat);
+//gl.uniformMatrix4fv(uModelMatLoc, gl.FALSE, modelMat);
+//gl.uniformMatrix4fv(uCameraMatLoc, gl.FALSE, viewProj);
+
+
+
+
+angle += 0.005 * dt;
+
+const CameraX = cos(angle*.2) * 30;
+const CameraZ = sin(angle*.2) * 30;
+mat4.lookAt(viewMat,
+[CameraX, 10, CameraZ],
+[0, 0, 0],
+[0, 1, 0]);
+
+
+
+gl.activeTexture(gl.TEXTURE0+ _texSlot0);
+gl.bindTexture(gl.TEXTURE_2D, tex0);
+
+
+shapes.forEach((shape, i)=>{
+
+
+//mat4.rotate(modelMat, mat4.create(), angle, [1, 0, 0]);
+//mat4.scale(modelMat, modelMat, [10, 1, 10])
+//gl.uniformMatrix4fv(uModelMatLoc, gl.FALSE, box.mat);
+
+//gl.bindVertexArray(box.vao);
+//console.log(uModelMatLoc)
+//shape.draw(gl, shaderProgram, uModelMatLoc);
+
+gl.bindVertexArray(shape.vao);
+gl.drawElements(gl.TRIANGLES, shape.indices_count, gl.UNSIGNED_BYTE, 0);
+gl.bindVertexArray(null);
+});
+
+
+
+
+}
+
+
+let lastTimeFrame=performance.now();
+const MainLoop=(ts)=>{
+const currentTimeFrame = performance.now();
+const delta = currentTimeFrame - lastTimeFrame;
+lastTimeFrame=currentTimeFrame
+update(delta);
+webkitRequestAnimationFrame(MainLoop);
+}
+webkitRequestAnimationFrame(MainLoop);
+
+
+}
+
+
+
+
+
+
+
+
+try{
+init();
+}catch(err){
+console.log(`javascript uncatch error ${err}`);
+}
+
+
+</script>
+
+</body>
+</html>

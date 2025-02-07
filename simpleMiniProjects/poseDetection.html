@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+
+<style>
+
+*:after,*,*:before{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+:root{
+
+}
+
+*::selection{
+color: red;
+background: tan;
+}
+
+html{
+font-size: 10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style-type: none;
+}
+
+
+
+
+
+.wrapper{
+margin: 1rem auto;
+padding: 0.4rem;
+width: min(38rem, 100% - 2rem);
+background: #0e00FF21;
+border-radius: 1rem;
+}
+
+main{
+	
+	background: #A3FFDC;
+	border-radius: 5rem;
+	height: min(60rem, 100dvh - 4rem);
+}
+
+h1{
+margin: 1rem;
+color: #f01111;
+font-size: 4rem;
+text-align: center;
+text-transform: capitalize;
+}
+
+canvas{
+margin: auto;
+display: block;
+width: 90%;
+background: salmon;
+}
+
+video{
+	width: min(100vw - 2rem, 30rem);
+}
+
+.container{
+padding: 1rem;
+width: 100%;
+display: flex;
+justify-content: space-around;
+align-items: center;
+}
+
+button{
+padding: 1rem;
+color: red;
+background: #00D7FF;
+border-radius: 1rem;
+}
+
+.hide{
+display: none;
+}
+
+</style>
+
+<title>pose detection</title>
+
+</head>
+<body>
+
+<main>
+<h1>pose detection</h1>
+
+
+<canvas id="canvas"></canvas>
+<video id="vid1" autoplay muted></video>
+<!-- <video id="vid1" muted controls src="/sdcard/Download/কালো ভ্রমর নাচ _ Ekta Kalo Vromor Gun Gun _ Dance Cover _ Fagune agun legechhe _ Bengali Folk Song.mp4"></video> -->
+
+<div class="container">
+<button class="getPose">get pose</button>
+
+<button class="clearBTN">clear</button>
+<button class="drawPose">draw pose</button>
+
+<button class="takePicture">takePicture</button>
+
+</div>
+
+
+<div class="hide">
+
+</div>
+
+</div>
+
+</main>
+
+
+<script src="/sdcard/g_js_libs/tf.min.js"></script>
+<script src="/sdcard/g_js_libs/models/poseNet/posenet.js"></script>
+
+
+
+<script type="module">
+"use strict";
+
+
+//some utils
+class Rand{
+
+static Float(min=0, max=1){
+return Math.random() * (max - min+1) + min;
+}
+
+static Int(min=6, max=9){
+return Math.floor( Rand.Float(min, max));
+}
+
+static Choice(...args){
+return args[Rand.Int(0, args.length - 1)];
+}
+
+static Color(len=3){
+let outColor="#";
+for(let i=0;i<len;++i){
+outColor+=Rand.Choice(..."0123456789abcdef".split(""));
+}
+return outColor;
+}
+
+}
+
+
+
+//sleep function help to wait/puase for a particular amount of time
+const sleep=time=>new Promise((res,rej)=>{
+setTimeout(()=>{res(true)}, time*1000);
+});
+
+
+const confidentThreshold = 0.2;
+//querySelector
+let isLoop=!1, aniLoop, model, poses= {}, net, keyPoints = [], videoSRC_OBJ;
+
+
+
+
+
+
+const INITIAL=async()=>{
+
+const buttonGetPose = document.querySelector("button.getPose");
+const buttonDrawPose = document.querySelector("button.drawPose");
+
+const clearBTN = document.querySelector("button.clearBTN");
+const takePicture = document.querySelector("button.takePicture");
+
+const vid1 = document.querySelector("video#vid1");
+
+const canvas = document.querySelector("canvas");
+const ctx = canvas.getContext("2d");
+
+const clearColor = Rand.Color(6);
+
+canvas.width = 300;
+canvas.height = 300;
+
+
+
+
+videoSRC_OBJ = await navigator.mediaDevices.getUserMedia({
+	audio:false,
+ 	video: {
+		width:480,
+		height:640,
+		facingMode: "environment"
+}
+});
+
+vid1.srcObject = videoSRC_OBJ
+
+
+
+
+const modelURL = "/sdcard/g_js_libs/models/poseNet/model.json";
+model = await tf.loadGraphModel(modelURL);
+net = await posenet.load(model);
+
+console.log(posenet);
+console.log(model);
+console.log(net)
+
+
+
+
+
+//
+const getPose = async()=>{
+if(!net) return -1;
+poses = await net.estimateSinglePose(canvas);
+keyPoints = poses.keypoints;
+}
+
+
+const draw=()=>{
+if (keyPoints.length <= 0) return -1;
+
+keyPoints.forEach((key)=>{
+
+if(key.score > confidentThreshold){
+ctx.beginPath();
+ctx.fillStyle="red";
+ctx.arc(key.position.x, key.position.y, 5, 0, Math.PI*2, false);
+ctx.fill();
+ctx.closePath();
+}
+});
+
+
+
+posenet.poseChain.forEach((a)=>{
+
+const KeyA = a[0], KeyB = a[1];
+const ValA = keyPoints.filter( k => k.part === KeyA)[0];
+const ValB = keyPoints.filter( k => k.part === KeyB)[0];
+
+if(ValA.score > confidentThreshold && ValB.score > confidentThreshold){
+ctx.beginPath();
+ctx.strokeStyle="blue";
+ctx.moveTo(ValA.position.x, ValA.position.y);
+ctx.lineTo(ValB.position.x, ValB.position.y);
+ctx.stroke();
+ctx.closePath();
+}
+});
+}
+
+
+
+const update=()=>{
+ctx.fillStyle = clearColor;
+ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+
+ctx.drawImage(vid1, 0, 0, vid1.videoWidth, vid1.videoHeight, 0, 0, canvas.width, canvas.height);
+
+}
+
+
+
+
+const animate=()=>{
+update();
+aniLoop = requestAnimationFrame(animate);
+}
+requestAnimationFrame(animate);
+
+
+buttonGetPose.addEventListener("click",async ()=>{
+getPose()
+
+});
+
+buttonDrawPose.addEventListener("click", ()=>{
+draw()
+});
+
+
+clearBTN.addEventListener("click", ()=>{
+
+if(isLoop){
+keyPoints =[];
+animate()
+isLoop=!1;
+}
+
+});
+
+
+takePicture.addEventListener("click", ()=>{
+
+cancelAnimationFrame(aniLoop);
+isLoop=!0;
+});
+
+
+}
+
+
+
+
+try{
+console.log("JavaScript is Awesome ");
+console.log(window);
+INITIAL();
+
+}catch(err){
+console.log(`javascript uncatch error: ${err} `);
+}
+
+
+</script>
+
+</body>
+</html>

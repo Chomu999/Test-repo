@@ -279,7 +279,7 @@ constructor(){}
 
 
 async loadModel(){
-return await tf.loadGraphModel("../models/posenet/posenet_model.json");
+return await tf.loadGraphModel("/sdcard/g_js_libs/models/poseNet/model.json");
 }
 
 
@@ -430,7 +430,7 @@ keypoints=poses.keypoints;
 
 const loadModelFunc = async ()=>{
 loadModelBtn.disabled=true;
-const modelUrl="../models/posenet/posenet_model.json";
+const modelUrl="/sdcard/g_js_libs/models/poseNet/model.json";
 model = await tf.loadGraphModel(modelUrl);
 if(!model) return -1;
 net = await posenet.load(model);

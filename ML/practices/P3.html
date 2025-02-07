@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta charset="utf-8">
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0"/>
+
+<style>
+*{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+html{
+font-size: 10px;
+}
+
+h1{
+margin: 10px;
+padding: 20px;
+text-align: center;
+color: salmon;
+}
+
+canvas{
+margin: auto;
+width: 90%;
+display: block;
+background: salmon;
+}
+
+.btnContainer{
+text-align: center;
+}
+
+.btn{
+margin: 10px;
+padding: 20px;
+color: salmon;
+background: gray;
+}
+
+</style>
+
+
+<title>ml practice 3</title>
+
+</head>
+<body>
+
+
+<h1>ML practice 3</h1>
+<canvas id="canvas"></canvas>
+
+<div class="btnContainer">
+	<button class="btn predict">predict</button>
+	<button class="btn train">train</button>
+	<button class="btn download">download</button>
+</div>
+
+
+<script src="/sdcard/g_js_libs/tf.min.js"></script>
+
+<script>
+
+
+const randFloat=(min=1, max=2)=>Math.random() * (max - min+1) + min;
+const randInt=(min=1, max=2)=>Math.floor(randFloat(min, max));
+const randChoice=(...args)=>args[randInt(0, args.length)];
+
+const randColor=(l=6)=>{
+	let o="#";
+	for(let i=0;i<l;i++){
+		o+=randChoice(..."0123456789abcdef");
+	}
+	return o;
+}
+
+
+console.log(tf);
+console.log(tf.layers);
+console.log([tf.layers.dense]);
+//console.log([tf.train]);
+console.log([tf.nextFrame]);
+
+//normalize
+
+const normalize=(value, min, max) => (value - min) / (max - min);
+
+
+//normalize with scaler
+const normalizeScale=(value, min, max, d, e)=>{
+
+const out = normalize(value, min, max);
+
+return d + out * (e - d);
+
+}
+
+
+const predictBtn = document.querySelector(".btn.predict");
+const trainBtn = document.querySelector(".btn.train");
+const downloadBtn = document.querySelector(".btn.download");
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+const ClearColor 	= "#ff5765";
+const CellsColor 	= "#000000";
+
+const canvasWidth   = 360;
+const canvasHeight  = 360;
+const resulotion    = 18;
+
+const cellsA 		= [];
+const cellsB 		= [];
+
+const row 			= canvasWidth / resulotion;
+const col 			= canvasHeight / resulotion;
+
+
+
+const LR 			= 2e-1;
+const optimizer 	= tf.train.adam(LR);
+const loss 			= "meanSquaredError";
+
+canvas.width = canvasWidth;
+canvas.height = canvasHeight;
+
+
+const dataSet=[
+	{x:[0, 0], y:0},
+	{x:[0, 1], y:1},
+	{x:[1, 0], y:1},
+	{x:[1, 1], y:0},
+];
+
+const trainOptions = {
+	epochs:100,
+	batchSize:4,
+	shuffle:!0,
+	callbacks:{
+		onEpochBegin: (a, b)=>{
+			console.log("epoch start");
+			console.log(a, b);
+		},
+		onBatchBegin: (a, b)=>{
+			console.log("batch start");
+			console.log(a, b);
+		},
+		onBatchEnd: (a, b)=>{
+			console.log("batch end");
+			console.log(a, b);
+			return tf.nextFrame;
+		},
+		onTrainStart: (a, b)=>{
+			console.log("train start");
+			console.log(a, b);
+		},
+		onTrainEnd: (a, b)=>{
+			console.log("train end");
+			console.log(a, b);
+		},
+		onEpochEnd: (a, b)=>{
+			console.log("epoch end");
+			console.log(a, b);
+		},
+	}
+};
+
+const dx = dataSet.map(d=>d.x);
+const dy = dataSet.map(d=>d.y);
+
+const dxT = tf.tensor(dx);
+const dyT = tf.tensor(dy);
+
+const model = tf.sequential();
+
+model.add(tf.layers.dense({
+	units:2,
+	inputShape:[2],
+	activation: "sigmoid",
+}));
+
+model.add(tf.layers.dense({
+	units:1,
+	activation:"sigmoid"
+}));
+
+
+model.compile({
+	optimizer,
+	loss
+})
+
+//model.summary();
+
+
+for(let x = 0;x < row; x++){
+for(let y = 0;y < col; y++){
+const a = normalizeScale(x * resulotion, 0, canvasWidth, -1, 1);
+const b = normalizeScale(y * resulotion, 0, canvasHeight, -1, 1);
+cellsA.push([ a ,  b ]);
+}
+}
+
+cellsA.forEach(c=>{
+cellsB.push({
+	x:normalizeScale(c[0], -1, 1, 0, canvasWidth),
+	y:normalizeScale(c[1], -1, 1, 0, canvasHeight),
+	color: randColor(),
+});
+
+});
+
+const screenPositions = tf.tensor(cellsA, );
+//screenPositions.print(!0);
+
+
+const train_=()=>{
+	const trainResult = model.fit(dxT, dyT, trainOptions);
+	trainResult.then((a)=>{
+		console.log(a);
+	});
+};
+
+// update and draw
+const update=()=>{
+ctx.fillStyle=ClearColor;
+ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+cellsB.forEach(cell=>{
+	ctx.strokeStyle= CellsColor;
+	ctx.fillStyle= cell.color;
+	ctx.fillRect(cell.x, cell.y, resulotion, resulotion);
+	ctx.strokeRect(cell.x, cell.y, resulotion, resulotion);
+});
+
+}
+
+// looping
+const MainLoop=()=>{
+update();
+
+requestAnimationFrame(MainLoop);
+}
+requestAnimationFrame(MainLoop);
+
+
+
+
+
+
+// controls
+
+trainBtn.addEventListener("click", ()=>{
+
+train_();
+
+});
+
+
+
+predictBtn.addEventListener("click", ()=>{
+
+const outTensor = model.predict(screenPositions);
+const arr = outTensor.dataSync();
+outTensor.dispose()
+
+arr.forEach((a,i)=>{
+	cellsB[i]["color"]=`rgb(${a*255}, ${a*255}, ${a*255})`;
+});
+console.log(arr);
+
+const inputTensor = tf.tensor([0, 0], [1, 2])
+const ot = model.predict(inputTensor);
+ot.print(!0);
+});
+
+downloadBtn.addEventListener("click", ()=>{
+	model.save("downloads://xor-model")
+});
+
+
+</script>
+
+
+</body>
+</html>
