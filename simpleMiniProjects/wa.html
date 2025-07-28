@@ -131,7 +131,8 @@ background:rgba(30, 30, 30, 1.0);
 
 
 function init(){
-console.log(window)
+
+//console.log(window)
 
 //console.log(WebAssembly)
 
@@ -142,8 +143,10 @@ console.log(window)
 
 //console.log(0x101001 << 0x102001)
 //console.log(0x101001 >> 0x102001)
+
 let g=new Gyroscope()
 g.start()
+
 console.log(g)
 
 g.addEventListener("activate", (e)=>{
@@ -161,15 +164,23 @@ output.innerHTML=`x:${g.x} y:${g.y} z:${g.z}`
 
 }
 
+
+
+
 let lt=1;
 const GameLoop=(ts)=>{
 
-const dt=ts-lt; lt+=ts;
-animate(dt)
+const dt=(ts-lt)/1000;
+lt=ts;
+animate(dt);
 
 requestAnimationFrame(GameLoop)
 }
-GameLoop(0)
+GameLoop(0);
+
+
+
+
 
 }
 

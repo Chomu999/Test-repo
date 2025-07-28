@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta http-equiv="X-UA-Compatible" content="IE=7,8,edge,safari=1, chrome=1" />
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+<meta name="author" content="hexbyte" />
+
+<title>wellcome to xss practice 1</title>
+</head>
+<body>
+	
+
+<h1>wellcome to xss practice 1</h1>
+
+<button onclick="_c()" value="my button">my button</button>
+
+<iframe id="iff"  frameborder="10"></iframe>
+
+<input type="text/submit/hidden/button/image" name="" id="" value="" />
+
+<textarea id="codeText" rows="8" cols="40"></textarea>
+
+<script>
+
+//console.log(window);
+function _c(){
+_="chrome://quit";
+window.location.assign(_);
+console.log("quit ")
+}
+_="javascript:(alert('hi'))";
+_="https://alupur.com/data/";
+//window.location.assign(_)
+
+//console.log([iff]);
+let c = "<p>hello iframe</p>";
+let el = iff.contentDocument.createElement("h1");
+
+
+el.innerHTML=c;
+iff.contentDocument.body.append(el);
+console.log(iff.contentDocument.body);
+console.log(iff.contentDocument.head);
+iff.allowFullscreen=(true);
+console.log([iff]);
+
+//iff.contentWindow.location = "http://loc/"
+
+//console.log([iff.src]);
+console.log(window.location);
+
+</script>
+
+</body>
+</html>

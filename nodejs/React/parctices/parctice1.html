@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width initial-scale=1"/>
+<title>react app</title>
+
+<meta name="author" content="techbyte ">
+
+<style>
+
+*:before, *, *:after{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+:root{
+--shadow1:2px 2px 4px #BBBBBB,
+-2px -2px 4px #fff8 inset,
+-2px -2px 4px #fff8;
+
+--shadow2: 2px 2px 4px #BBBBBB,
+-2px -2px 4px #ffffff;
+
+--shadow3:1px 1px 2px #0008 inset,
+-1px -1px 2px  #fff8 inset;
+
+--shadow4:-3px -3px 6px #0008 inset,
+3px 3px 6px #fff8 inset,
+1px 1px 2px #0008,
+-1px -1px 2px #fff8;
+
+
+}
+
+h1{
+padding: 20px;
+color:red;
+}
+
+p{
+padding: 30px;
+color:gray;
+}
+
+
+.radioButtonBox{
+padding:20px ;
+background: #ACACAC;
+display: flex;
+justify-content: space-around;
+align-items: center;
+}
+
+.radioButtonBox{
+
+:nth-child(even){ color:blue; }
+
+}
+
+button{
+padding: 8px 10px;
+background: #cacaca;
+color: gray;
+border: none;
+
+border-radius: 8px;
+}
+
+button:first-child{
+box-shadow: var(--shadow3);
+}
+
+button:last-child{
+box-shadow: var(--shadow4);
+}
+
+</style>
+
+</head>
+<body>
+
+
+
+
+<div id="root"></div>
+
+
+<noscript>
+	dear user please enabel javascript first to use our applicaton
+</noscript>
+
+<script src="/sdcard/g_js_libs/babel.min.js"></script>
+
+<script src="/sdcard/g_js_libs/react.development18.2.0.js"></script>
+<script src="/sdcard/g_js_libs/react-dom.development18.2.0.js"></script>
+
+
+
+<script  type="text/babel">
+
+
+const {useState} = React;
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+
+
+
+function App(){
+
+let [value, setValue] = useState(1);
+
+
+let plusFunc=()=> setValue((value + 1) % 10);
+
+let minusFunc=()=> setValue( (value - 1 + 10) % 10);
+
+
+
+return (
+<React.Fragment>
+<div>
+
+<h1 className="hi">Hello React</h1>
+<p>count vlaue is min value is 0 and max value is 9</p>
+<p> the count Number {value}</p>
+<div className="radioButtonBox">
+<button onClick={minusFunc} >minus</button>
+<span>{value}</span>
+<button onClick={plusFunc} >plus</button>
+</div>
+
+</div>
+</React.Fragment>
+);
+
+}
+
+root.render(
+<React.StrictMode>
+<App/>
+</React.StrictMode>
+);
+
+</script>
+
+</body>
+</html>

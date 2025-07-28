@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Clone</title>
+    <style type="text/css" media="all">
+.post {
+    background-color: white;
+    margin-bottom: 20px;
+    border: 1px solid #dbdbdb;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.post .post-image {
+    width: 100%;
+}
+
+.post .post-info {
+    padding: 15px;
+}
+
+.like-button {
+    background: none;
+    border: none;
+    color: #3897f0;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.like-count {
+    margin-left: 10px;
+}
+
+    </style>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <section class="posts">
+        <div class="post">
+            <img class="post-image" src="/sdcard/Download/Zelda2.png" alt="Post Image">
+            <div class="post-info">
+                <h3>@username</h3>
+                <p>Exploring the mountains!</p>
+                <button class="like-button">❤️ Like</button>
+                <span class="like-count">0 likes</span>
+            </div>
+        </div>
+    </section>
+
+
+<script type="text/javascript" charset="utf-8">
+
+
+// Get all like buttons
+const likeButtons = document.querySelectorAll('.like-button');
+
+// Add event listener to each like button
+likeButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        // Get the like count element
+        const likeCountElement = button.nextElementSibling;
+        // Increment the like count
+        let likeCount = parseInt(likeCountElement.textContent.split(' ')[0]);
+        likeCount++;
+        // Update the like count element
+        likeCountElement.textContent = `${likeCount} likes`;
+        // Change the button's color to indicate it's been liked
+        button.style.color = 'red';
+    });
+});
+</script>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -60,7 +60,7 @@ const WALLS=[];
 const CAPSULES=[];
 
 const friction=0.01;
-
+let action;
 
 class Rand{
 static Float(min=1,max=2){
@@ -164,7 +164,9 @@ ball.vel = ball.vel.add(normal.mul(-vsepDiff))
 
 const rotateMat=(angle)=>{
 let mx = new Mat2(2,2);
-
+//is mandatory
+//[c, -s]//
+//[s, c]//
 mx.Data[0][0] = Math.cos(angle);
 mx.Data[0][1] = -Math.sin(angle);
 mx.Data[1][0] = Math.sin(angle);
@@ -344,7 +346,7 @@ this.refDir = this.end.sub(this.start).unit();
 
 this.refAngle = Math.acos(Vec2.dot(this.refDir, new Vec2(1, 0)));
 
-if(Vec2.cross(this.refDir, new Vec2(1, 0)) >= 0) this.refAngle *= -1;
+if(Vec2.cross(this.refDir, new Vec2(1, 0)) > 0) this.refAngle *= -1;
 
 
 
@@ -483,13 +485,14 @@ return this.end.sub(this.start).unit();
 const app=(ctx)=>{
 
 
-const action={
+action={
 a:0, d:0, s:0, w:0
 }
 
 
 const cap1 = new Capsule(300, 200, 400, 300, 20);
 const cap2 = new Capsule(150, 50, 150, 300, 20);
+
 cap1.player=1;
 
 

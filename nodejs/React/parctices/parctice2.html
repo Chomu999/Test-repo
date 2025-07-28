@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width initial-scale=1"/>
+<title>react app</title>
+
+<meta name="author" content="techbyte ">
+
+<style>
+
+*:before, *, *:after{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+
+
+</style>
+
+</head>
+<body>
+
+
+
+
+<div id="root"></div>
+
+
+<noscript>
+	dear user please enabel javascript first to use our applicaton
+</noscript>
+
+<script src="/sdcard/g_js_libs/babel.min.js"></script>
+
+<script src="/sdcard/g_js_libs/react.development18.2.0.js"></script>
+<script src="/sdcard/g_js_libs/react-dom.development18.2.0.js"></script>
+
+
+
+<script type="text/babel">
+
+
+const {useState} = React;
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+
+
+
+function App(){
+
+let [n, setN] = useState("");
+let [fn, setFN] = useState(n);
+
+let EnvetChange=(e)=>{
+e.preventDefault();
+setN(e.target.value)
+}
+
+
+let post=(e)=>{
+e.preventDefault()
+//console.log(e);
+setFN(n);
+setN("");
+}
+
+
+return (
+<React.Fragment>
+<h1>hello React</h1>
+
+<p>user is posting : {fn}</p>
+
+<input placeholder="red" value={n} onChange={EnvetChange} />
+
+<button onClick={post}> post </button>
+
+</React.Fragment>
+);
+}
+
+root.render(
+<React.StrictMode>
+<App/>
+</React.StrictMode>
+);
+
+</script>
+
+</body>
+</html>

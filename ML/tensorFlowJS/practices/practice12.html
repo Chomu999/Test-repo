@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="hexbyte"/>
+
+
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+:root{
+
+--box-shadow0: -2px -2px 4px #fff8,
+inset 2px 2px 8px #fff8,
+inset -2px -2px 8px black,
+2px 2px 4px #0008;
+
+
+--box-shadow1:inset -2px -2px 2px white,
+inset 2px 2px 4px black;
+
+
+--box-shadow2:
+-2px -2px 4px  white,
+2px 2px 4px  black;
+
+--box-shadow3:
+-2px -2px 6px 0 #fff,
+2px 2px 6px 0 #000;
+
+
+
+--box-shadow4:2px 2px 4px black,
+inset -1px -1px 2px white,
+inset 1px 1px 4px black,
+-1px -1px 4px white;
+
+--box-shadow5:2px 2px 4px red,
+inset -2px -2px 4px red,
+inset 2px 2px 4px yellow,
+-1px -1px 4px yellow;
+
+
+
+}
+
+
+html{
+font-size: 10px;
+}
+
+a{
+text-decoration: none;
+}
+
+body{
+color-scheme: default;
+background: #353535;
+}
+
+
+h1{
+color: #F1F1F1;
+text-align: center;
+}
+
+
+.labelBox{
+margin: 10px auto;
+width: 90vmin;
+height: 100px;
+background: gray;
+text-align: center;
+.label{
+margin: 10px;
+padding: 10px;
+display: inline-block;
+font-size: 20px;
+font-weight: 700;
+color: black;
+background: lightgray;
+border-radius: 10px;
+box-shadow: var(--box-shadow5);
+}
+
+}
+
+canvas{
+margin: auto;
+width:90vmin;
+display: block;
+background: gray;
+}
+
+
+
+
+.btnBox{
+margin: 10px auto;
+background: gray;
+width: 90vmin;
+height: 200px;
+text-align: center;
+
+.btn{
+margin: 10px 8px;
+padding: 10px 18px;
+color: black;
+background: lightgray;
+font-size: 20px;
+border: none;
+border-radius: 10px;
+font-weight: 800;
+box-shadow: var(--box-shadow3);
+
+transition:all 0.2s ease;
+
+&:hover{
+/* background: #A9A9A9; */
+color: blue;
+
+box-shadow: var(--box-shadow2);
+
+}
+
+}
+
+
+}
+
+
+.center{
+margin: 10px 20px;
+padding: 10px ;
+text-align: center;
+/* background: #f004; */
+}
+
+</style>
+
+
+
+<title> TFJS practice 12 Data Augment</title>
+
+
+
+
+</head>
+
+<body>
+
+
+
+<h1>TFJS practice 12 Data Augment</h1>
+
+<div class="labelBox">
+
+<span class="label predict">hello world</span>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<div class="btnBox">
+
+<div class="center">
+
+<button class="btn train">train</button>
+<button class="btn predict">predict</button>
+</div>
+<button class="btn clear">clear</button>
+
+</div>
+
+
+<script  src="/sdcard/g_js_libs/tf.min.js"></script>
+
+
+<script>
+//"use strict";
+
+
+
+let canvas, ctx;
+
+
+async function LoadFile(p,t="json"){
+let d=await fetch(p);
+return await d[t]();
+}
+
+
+
+
+//console.log(tf.regularizers);
+
+
+
+function getCurrnetTime(type=true){
+return  (type)?Date.now():performance.now();
+}
+
+
+
+
+function checkMemory(){
+let memory = tf.memory();
+let outStr="";
+for(let i in memory) outStr += `${i} : ${memory[i]}\n`;
+return outStr;
+}
+
+
+//console.log(tf.addWeight)
+
+
+
+//console.log(tf.keras)
+//console.log(tf.Sequential())
+
+
+function getImageData(arr, w=28, h=28){
+let imgData = new ImageData(w??28, h??28);
+for(let i=0;i<784;i++){
+let idx = i*4, color =arr[i]??0;
+imgData.data[idx+0] = color;
+imgData.data[idx+1] = color;
+imgData.data[idx+2] = color;
+imgData.data[idx+3] = 255;
+}
+return imgData;
+}
+
+
+
+
+
+function contentDownloader(data, name="file.txt", type="bin/json"){
+
+let _a = document.createElement("a");
+
+let _b = new Blob( [ data ], {
+	type
+});
+
+let _u = URL.createObjectURL(_b);
+
+_a.download = name??"dummy.bin";
+_a.href = _u;
+_a.click();
+
+}
+
+
+
+
+async function LoadDataSet(){
+
+//data url
+let _url = "/sdcard/g_js_libs/DataSets/mnist/mnist_mini.bin";
+let dataset = await LoadFile(_url, "arrayBuffer");
+
+let ta = new Uint8Array(dataset);
+
+return tf.tidy(()=>{
+
+
+let dataTensor = tf.tensor(ta).reshape([-1, 785]);
+let [ys, xs] = dataTensor.split([1, 784], [1, ]);
+
+xs = xs.cast("float32");//.div(255);
+ys = ys.cast("float32");//.reshape([-1]);
+
+
+
+return [xs, ys];
+
+});
+
+
+}
+
+
+
+function _augment(a){
+let {xs, ys } = a;
+
+xs = tf.div(xs, 255);
+
+return { xs, ys };
+}
+
+
+
+function myMap(a, b, c){
+return (b - a) / (c - b);
+}
+
+
+
+function getCoord(event){
+
+let {width, height, offsetWidth, offsetHeight, offsetLeft, offsetTop} = event.target;
+
+//let oo = event.target.getClientRects()[0];
+let outArr=[];
+for(let i=0;i<event.changedTouches.length;i++){
+outArr[i] = [event.changedTouches[i].pageX - offsetLeft, event.changedTouches[i].pageY - offsetTop]
+}
+
+return outArr;
+}
+
+
+
+function drawArc(c, x, y, r, color="#fff"){
+c.beginPath();
+c.arc(x, y, r, 0, 2*Math.PI, false);
+c.fillStyle=color;
+c.fill();
+}
+
+
+
+function drawPonit(event){
+let posArr = getCoord(event);
+
+let color = "#fff"//"#"+Math.floor(Math.random() * 0xfff).toString(16);
+for(let i=0;i<posArr.length;i++){
+drawArc(ctx, posArr[i][0], posArr[i][1], 10, color);
+}
+
+}
+
+
+
+
+
+async function INITIAL(){
+
+
+
+console.log(tf)
+console.log(tf.version.tfjs)
+console.log(tf.getBackend());
+
+canvas = document.querySelector("#canvas");
+ctx = canvas.getContext("2d");
+
+let cs=innerWidth>innerHeight?innerHeight:innerWidth;
+//let {clientWidth:cw, clientHeight:ch} = canvas;
+
+canvas.width=cs;
+canvas.height=cs;
+
+// let x = myMap(cw/4, cw/2, cw)*cw;
+// let y = myMap(ch/4, ch/2, ch)*ch;
+// ctx.fillRect(x, y, 10, 10);
+
+
+
+
+
+let [XS, YS] =await LoadDataSet();
+
+
+//let  imgData = getImageData(imgArr[0], 28, 28)
+//ctx.putImageData(imgData, 0, 0);
+
+
+
+//let xs = tf.randomNormal([10, 784]);
+//let ys = tf.randomUniform([10], 0, 10).toInt().toFloat();
+
+
+let _x = tf.data.array([XS]);
+let _y = tf.data.array([YS]);
+
+
+//console.log(tf.data)
+
+
+
+let dataset = tf.data.zip({ xs:_x, ys:_y });
+
+dataset = dataset.map(_augment);
+console.log(dataset)
+
+//dataset = dataset.batch(32);
+
+
+//with (dataTensor) as vv{
+//iterator();
+//}
+
+
+
+
+let model = tf.sequential();
+model.add(tf.layers.inputLayer({inputShape:[784]}));
+model.add(tf.layers.dense({units:512 }));
+model.add(tf.layers.dropout({ rate:0.2 }));
+model.add(tf.layers.dense({units:256 }));
+model.add(tf.layers.dropout({ rate:0.2 }));
+model.add(tf.layers.dense({units:10, activation:"softmax" }));
+
+
+
+model.compile({
+	loss:"sparseCategoricalCrossentropy",
+	optimizer:"adam",
+	metrics: ["accuracy"],
+});
+
+console.log(model)
+
+
+
+
+
+
+
+
+canvas.addEventListener("touchstart", drawPonit);
+canvas.addEventListener("touchmove", drawPonit);
+canvas.addEventListener("touchend", drawPonit);
+
+//canvas.addEventListener("click", getCoord);
+
+
+
+
+
+
+
+document.querySelector(".btn.train").addEventListener("click", ()=>{
+
+
+model.fitDataset(dataset, {
+	epochs:5,
+	//batchSize:32,
+	verbose:2
+}).then((result)=>{
+	console.log(result);
+
+//model.evaluateDataset(dataset, {batchSize:32 }).then((eResult)=>{
+//let [_loss, _acc] = eResult;
+//console.log(`loss ${_loss.dataSync()[0]} `);
+//console.log(`acc ${_acc.dataSync()[0]} `);
+//});
+
+});
+
+
+});
+
+
+
+
+
+document.querySelector(".btn.predict").addEventListener("click", ()=>{
+
+tf.tidy(()=>{
+
+let imgTensor = tf.browser.fromPixels(canvas, 1)
+.resizeNearestNeighbor([28, 28])
+.cast("float32").reshape([1, 784])
+.div(255);
+let outTensor = model.predict(imgTensor).argMax(1);
+let out = outTensor.dataSync()[0];
+
+document.querySelector(".label.predict").textContent = `model prediction : ${out}`;
+
+});
+
+
+});
+
+
+document.querySelector(".btn.clear").addEventListener("click", ()=>{
+
+//ctx.fillStyle="#000";
+//ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+console.log(checkMemory())
+});
+
+
+
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+try{
+
+
+if( true ){
+tf.ready().then(INITIAL);
+}else{
+let [x, a, b, c, s1, s2] = [0, 50, 100, 200, 100, 1000];
+console.log(a,b,c)
+x = (b - a) / (c - b);
+console.log(x, x*b, x*c);
+
+x = (c - x) * (s2 - s1);
+console.log(x)
+}
+
+}catch(err){
+console.log(err)
+}
+
+</script>
+
+</body>
+</html>

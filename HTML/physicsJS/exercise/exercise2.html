@@ -372,7 +372,7 @@ requestAnimationFrame(MainLoop);
 MainLoop(0);
 
 
-ctx.canvas.addEventListener("keydown", (e)=>{
+window.addEventListener("keydown", (e)=>{
 
 if(e.key==="w") action.up=1;
 if(e.key==="a") action.left=1;
@@ -381,7 +381,7 @@ if(e.key==="s") action.down=1;
 
 })
 
-ctx.canvas.addEventListener("keyup", (e)=>{
+window.addEventListener("keyup", (e)=>{
 
 if(e.key==="w") action.up=0;
 if(e.key==="a") action.left=0;

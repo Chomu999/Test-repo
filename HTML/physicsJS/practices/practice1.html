@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0" />
+<title>simple vector arithmetic operations</title>
+<meta name="author" content="techbyte"/>
+
+<style>
+
+*{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+html{
+font-size: 10px;
+}
+
+body{
+background: #505050;
+/* display: grid;
+place-items: center; */
+}
+
+canvas{
+margin: 0 auto;
+background: salmon;
+display: block;
+image-rendering: pixelated;
+}
+
+.btnBox{
+margin: 10px auto;
+background: #f0f0f0;
+width: 90vmin;
+height: 90vmin;
+text-align: center;
+border-radius: 10px;
+}
+
+.btn{
+width: 30%;
+height: 30%;
+background: #212121;
+display: inline-block;
+}
+
+.up, .left, .right, .down{
+background: lime;
+/* transition: all 0.1s ease-in; */
+&:is(:hover){
+/* border-radius: 20px; */
+/* background: #FF747C; */
+}
+&:not(:hover){
+
+/* background: #FFD788; */
+}
+}
+
+</style>
+
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<div class="btnBox">
+
+<span class="btn"></span>
+<span class="btn up"></span>
+<span class="btn"></span>
+
+<span class="btn left"></span>
+<span class="btn"></span>
+<span class="btn right"></span>
+
+<span class="btn"></span>
+<span class="btn down"></span>
+<span class="btn"></span>
+
+</div>
+
+<script>
+//"use strict";
+
+let inputDir;
+;(function INITIAL(){
+//querySelector
+const {PI, sin, cos} = Math;
+
+const canvas = document.querySelector("canvas");
+const ctx = canvas.getContext("2d");
+
+
+const btns = document.querySelectorAll(".btn");
+//console.log(btns)
+
+const canvasSize = innerWidth>innerHeight?innerHeight:innerWidth;
+const CW = CH = canvasSize;
+canvas.width=CW;
+canvas.height=CH;
+
+const speed = 2;
+
+
+
+const BALLS=[];
+const WALLS=[];
+const CAPS=[];
+
+let isLoop=true;
+let clearColor="#000";
+
+inputDir={
+up:false,
+left:false,
+right:false,
+down:false,
+}
+
+let friction = 0.05;
+let elasticity = 0.1;
+
+
+
+
+//
+class Rand{
+
+static float(min=1, max=2){
+return Math.random() * ( max - min + 1) + min;
+}
+
+static int(min=1, max=2){
+return Math.floor(Rand.float(min, max))
+}
+
+static choice(...arg){
+return arg[Rand.int(0, arg.length - 1)];
+}
+static color(len=3){
+let out = "#";
+for(let i=0;i<len;++i){
+out += Rand.choice(..."0123456789abcdef".split(""));
+
+}
+return out;
+}
+
+}
+//
+
+
+
+
+//
+function round(number, precision=2){
+let factor= (10 ** precision);
+return Math.round(number * factor) / factor;
+}
+//
+
+
+
+//
+function angleToRadian(angle=0){
+return ( ( (2*Math.PI)*360)/angle);
+}
+//
+
+
+
+//
+function Vector2(x=0, y=0){return [x, y] };
+
+Vector2.__proto__.add = function (a, b){
+return Vector2(a[0] + b[0], a[1]+ b[1]);
+}
+
+
+Vector2.__proto__.sub = function (a, b){
+return Vector2(a[0] - b[0], a[1] -b[1]);
+}
+
+
+Vector2.__proto__.div = function (a, s=1){
+return Vector2(a[0] / s , a[1] / s);
+}
+
+
+Vector2.__proto__.mul = function (a, s=1){
+return Vector2(a[0] * s , a[1] * s);
+}
+
+Vector2.__proto__.mag = function (v){
+return Math.sqrt( (v[0]**2) + (v[1]**2) );
+}
+
+Vector2.__proto__.dot = function (a, b){
+return (a[0] * b[0] + a[1] * b[1]);
+}
+
+Vector2.__proto__.cross = function (a, b){
+return (a[0] * b[1] - a[1] * b[0]);
+}
+
+Vector2.__proto__.unit = function (v){
+let magnitude = Vector2.mag(v);
+if(magnitude === 0){
+return Vector2(0, 0);
+}
+else{
+return Vector2(v[0] / magnitude, v[1] / magnitude);
+}
+}
+
+Vector2.__proto__.normal = function(v){
+return Vector2.unit(Vector2(-v[1], v[0]) );
+}
+
+Vector2.__proto__.drawLine = function(start, end, n, color){
+
+ctx.beginPath();
+ctx.moveTo(start[0], start[1]);
+ctx.lineTo(start[0] + end[0] * n, start[1] + end[1] * n);
+ctx.strokeStyle=color;
+ctx.stroke();
+
+}
+//
+
+
+
+//
+function Mat2(){
+return [[1, 0],[0, 1]];
+}
+
+Mat2.__proto__.matMul = function(v, m){
+let x = m[0][0]*v[0] + m[0][1]*v[1];
+let y = m[1][0]*v[0] + m[1][1]*v[1];
+return Vector2(x, y);
+}
+
+Mat2.__proto__.rot = function(angle=0){
+let c = Math.cos(angle), s = Math.sin(angle);
+//[c, -s]//
+//[s, c]//
+return [[c, -s], [s, c]];
+}
+//
+
+
+
+
+//
+class Ball{
+constructor(x, y, r, m=0){
+this.pos = Vector2(x, y);
+this.r = r;
+this.m = m;
+if(this.m === 0){
+this.inv_m = 0;
+}
+else{
+this.inv_m = 1 / this.m;
+}
+this.elasticity = 1;
+this.acc = Vector2(0, 0);
+this.vel = Vector2(0, 0);
+this.acceleration = 1;
+
+this.color = Rand.color(3);
+this.player = false;
+BALLS.push(this);
+}
+
+draw(c){
+c.beginPath();
+c.arc(this.pos[0], this.pos[1], this.r, angleToRadian(360), 0, false);
+c.fillStyle=this.color;
+c.fill();
+c.strokeStyle="#fff"
+c.stroke();
+}
+
+update(c, dt){
+//this.draw(c)
+//this.reposition();
+}
+
+
+
+reposition(){
+
+this.acc = Vector2.mul(Vector2.unit(this.acc), this.acceleration);
+
+this.vel = Vector2.add(this.vel, this.acc);
+
+this.vel = Vector2.mul(this.vel, (1 - friction) );
+
+this.pos = Vector2.add(this.pos, this.vel);
+}
+
+drawLine(c){
+
+
+Vector2.drawLine(this.pos, Vector2.unit(this.acc), 50, "tan");
+
+Vector2.drawLine(this.pos, this.vel, 10, "blue");
+
+//Vector2.drawLine(Vector2(300, 300), Vector2.normal(this.acc), 50, "orange");
+
+//console.log(Vector2.normal(this.acc))
+
+
+
+}
+
+
+keyInput(input){
+
+if(input.up){
+this.acc[1] = -this.acceleration;
+}
+
+if(input.left){
+this.acc[0] = -this.acceleration;
+}
+
+if(input.right){
+this.acc[0] = this.acceleration;
+}
+
+if(input.down){
+this.acc[1] = this.acceleration;
+}
+
+if(!input.up && !input.down){
+this.acc[1] = 0;
+}
+
+if(!input.left && !input.right){
+this.acc[0] = 0;
+}
+
+}
+
+ 
+}
+//
+
+
+
+
+
+
+///
+class Wall{
+constructor(sx, sy, ex, ey){
+this.start=Vector2(sx,sy);
+this.end=Vector2(ex, ey);
+this.center = Vector2.mul(Vector2.add(this.start, this.end), 0.5);
+this.length = Vector2.mag(Vector2.sub(this.end, this.start));
+
+this.refStart = Vector2(sx, sy);
+this.refEnd = Vector2(ex, ey);
+
+this.refUnit = Vector2.unit(Vector2.sub(this.end, this.start));
+
+//console.log(this.refUnit)
+this.angVel=0;
+this.angle=0;
+WALLS.push(this);
+}
+
+draw(c){
+c.beginPath();
+c.moveTo(this.start[0], this.start[1]);
+c.lineTo(this.end[0], this.end[1]);
+c.strokeStyle="#fff";
+c.stroke();
+}
+
+reposition(){
+let rotMat = Mat2.rot(this.angle);
+//console.log(rotMat)
+let newDir = Mat2.matMul(this.refUnit , rotMat);
+
+//console.log(newDir)
+
+this.start = Vector2.add(this.center, Vector2.mul(newDir, -this.length/2 ) );
+this.end = Vector2.add(this.center, Vector2.mul(newDir, this.length/2 ) );
+
+this.angle += this.angVel;
+this.angVel *= 0.9;
+}
+
+static WallUnit(w){
+return Vector2.unit(Vector2.sub(w.end, w.start));
+}
+
+keyInput(input){
+
+if(input.left){
+this.angVel = 0.1;
+}
+
+if(input.right){
+this.angVel  = -0.1
+}
+
+}
+
+
+
+}
+//
+
+
+
+
+
+//
+class Capsule{
+constructor(x1, y1, x2, y2, r){
+
+this.start = Vector2(x1, y1);
+this.end = Vector2(x2, y2);
+this.r=r;
+
+this.acceleration = 1;
+
+this.acc=Vector2(0, 0);
+this.vel=Vector2(0, 0);
+this.pos= Vector2.mul(Vector2.add(this.start, this.end), 0.5);
+
+
+this.angle= 0;
+this.angVel = 0;
+
+this.length = Vector2.mag(Vector2.sub(this.end, this.start));
+this.dir = Vector2.unit(Vector2.sub(this.end, this.start));
+this.refDir = Vector2.unit(Vector2.sub(this.end, this.start));
+
+this.refAngle = Math.acos( Vector2.dot( this.refDir, Vector2(1, 0) ) );
+
+if(Vector2.cross(this.refDir, Vector2(1, 0)) > 0){
+this.refAngle *= -1;
+}
+
+CAPS.push(this);
+
+
+}
+
+draw(c){
+
+
+c.beginPath();
+c.arc(this.start[0], this.start[1], this.r, this.refAngle+this.angle+Math.PI/2 , this.refAngle+this.angle+3*Math.PI/2);
+c.arc(this.end[0], this.end[1], this.r, this.refAngle+this.angle-Math.PI/2 , this.refAngle+this.angle+Math.PI/2);
+c.closePath();
+
+c.fillStyle="hotpink";
+c.fill();
+c.strokeStyle="yellow";
+c.stroke();
+
+}
+
+
+reposition(){
+
+this.acc = Vector2.mul(Vector2.unit(this.acc), this.acceleration);
+
+this.vel = Vector2.add(this.vel, this.acc);
+
+this.vel = Vector2.mul(this.vel, (1 - friction) );
+
+this.pos = Vector2.add(this.pos, this.vel);
+
+
+let rotMat = Mat2.rot(this.angle);
+
+this.dir = Mat2.matMul(this.refDir, rotMat);
+
+this.start = Vector2.add(this.pos, Vector2.mul( this.dir, -this.length/2));
+this.end = Vector2.add(this.pos, Vector2.mul( this.dir, this.length/2));
+
+
+
+this.angle += this.angVel;
+this.angVel *= 0.9;
+
+
+//this.refAngle = Math.acos( Vector2.dot( this.refDir, Vector2(1, 0) ) );
+
+
+
+
+}
+
+
+keyInput(input){
+
+if(input.up){
+this.acc = Vector2.mul(this.dir, -this.acceleration);
+}
+
+if(input.left){
+this.angVel = 0.1;
+}
+
+if(input.right){
+this.angVel  = -0.1
+}
+
+if(input.down){
+this.acc = Vector2.mul(this.dir, this.acceleration);
+}
+
+if(!input.up && !input.down){
+this.acc = Vector2(0, 0);
+}
+
+
+
+
+}
+
+
+}
+//
+
+
+
+
+
+//
+function keyControl(b){
+
+
+btns.forEach((btn, btnIndex)=>{
+
+btn.addEventListener("touchstart", (event)=>{
+let _cn_ = btn.classList[1];
+if(!_cn_) return -1;
+inputDir[_cn_] = true;
+});
+
+btn.addEventListener("touchend", (event)=>{
+let _cn_ = btn.classList[1];
+if(!_cn_) return -1;
+inputDir[_cn_] = false;
+});
+
+
+
+});
+
+}
+
+
+
+
+
+function closestPointBW(b1, w1){
+
+let balltoWallStart = Vector2.sub(w1.start, b1.pos);
+if(Vector2.dot(Wall.WallUnit(w1), balltoWallStart) > 0){
+return w1.start;
+}
+
+
+let wallEndtoBall = Vector2.sub(b1.pos, w1.end);
+if(Vector2.dot(Wall.WallUnit(w1), wallEndtoBall) > 0){
+return w1.end;
+}
+
+let closestDist = Vector2.dot(Wall.WallUnit(w1), balltoWallStart) ;
+let closestVec = Vector2.mul(Wall.WallUnit(w1), closestDist);
+return Vector2.sub(w1.start, closestVec);
+
+}
+
+
+
+
+function coll_det_bb(b1, b2){
+if(b1.r + b2.r >= Vector2.mag(Vector2.sub(b2.pos, b1.pos) ) ){
+return true;
+}
+else{
+return false;
+}
+}
+
+function coll_det_bw(b1, w1){
+let closePoint = Vector2.mag( Vector2.sub(closestPointBW(b1, w1), b1.pos) );
+if (closePoint <= b1.r){
+return true;
+}
+else{
+return false
+}
+
+}
+
+function pen_res_bb(b1, b2){
+let dist = Vector2.sub(b1.pos, b2.pos);
+let pen_depth = b1.r + b2.r - Vector2.mag(dist);
+let pen_res = Vector2.mul(Vector2.unit(dist), pen_depth / (b1.inv_m + b2.inv_m));
+b1.pos = Vector2.add(b1.pos, Vector2.mul(pen_res, b1.inv_m));
+b2.pos = Vector2.add(b2.pos, Vector2.mul(pen_res, -b2.inv_m));
+}
+
+function pen_res_bw(b1, w1){
+let penVec = Vector2.sub(b1.pos, closestPointBW(b1, w1));
+b1.pos= Vector2.add(b1.pos, Vector2.mul(Vector2.unit(penVec), b1.r - Vector2.mag(penVec) ) );
+}
+
+function coll_res_bb(b1, b2){
+let norml = Vector2.unit(Vector2.sub(b1.pos, b2.pos) );
+let relVel = Vector2.sub(b1.vel, b2.vel);
+let sepVel = Vector2.dot(relVel, norml);
+let newSpeVel = (-sepVel * Math.min(b1.elasticity, b2.elasticity));
+
+
+let vsepDiff = newSpeVel - sepVel;
+let impules = vsepDiff / (b1.inv_m * b2.inv_m);
+let impulesVec = Vector2.mul(norml, vsepDiff);
+
+b1.vel = Vector2.add(b1.vel, Vector2.mul(impulesVec, b1.inv_m ) );
+b2.vel = Vector2.add(b2.vel, Vector2.mul(impulesVec, -(b2.inv_m ) ));
+
+}
+
+function coll_res_bw(b1, w1){
+let norml = Vector2.unit(Vector2.sub(b1.pos, closestPointBW(b1, w1) ) );
+let sepVel = Vector2.dot(b1.vel, norml);
+
+let newSepVel = -sepVel * b1.elasticity;
+
+let vsepDiff = sepVel - newSepVel;
+
+b1.vel = Vector2.add(b1.vel, Vector2.mul(norml, -(vsepDiff)));
+}
+
+
+
+let caps1 = new Capsule(100, 300, 300, 100, 30);
+let caps2 = new Capsule(100, 300, 100, 100, 30);
+
+
+
+function update(dt){
+
+ctx.fillStyle=clearColor;
+ctx.fillRect(0, 0, CW, CH);
+
+
+//keyControl();
+
+BALLS.forEach((ball, index, thisArr)=>{
+
+//ball.update(ctx, dt);
+
+
+if(ball.player){
+ball.keyInput(inputDir);
+}
+
+
+
+
+
+WALLS.forEach((wall, wIndex, wallArr)=>{
+
+if(coll_det_bw( BALLS[index], wall) ){
+pen_res_bw(BALLS[index], wall);
+coll_res_bw(BALLS[index], wall);
+}
+
+});
+
+
+for(let i=index+1;i<thisArr.length;i++){
+if( coll_det_bb(thisArr[index], thisArr[i]) ){
+pen_res_bb(thisArr[index], thisArr[i]);
+coll_res_bb(thisArr[index], thisArr[i]);
+}
+}
+
+//drawVec(ball.x, ball.y, ball.r, ball.color);
+ball.draw(ctx);
+ball.reposition();
+ball.drawLine(ctx);
+
+});
+
+WALLS.forEach((w)=>{
+w.draw(ctx);
+w.reposition();
+w.keyInput(inputDir);
+});
+
+CAPS.forEach((c)=>{
+c.draw(ctx);
+c.reposition();
+c.keyInput(inputDir);
+});
+
+
+
+
+
+
+
+ctx.fillStyle="red";
+ctx.fillText(`  up ${inputDir["up"]}`, 20, 30);
+ctx.fillText(` left  ${inputDir["left"]}`, 20, 30*3);
+ctx.fillText(` right  ${inputDir["right"]}`, 20, 30*4);
+ctx.fillText(` down  ${inputDir["down"]}`, 20, 30*6);
+
+
+
+
+}
+
+
+
+let lt=performance.now();
+function animate(ts){
+
+let curr = performance.now();
+let dt = (curr - lt) / 1000;
+lt = curr;
+
+//let fps = ( dt%30*1000) / 30 ; // %  dt/1000 / 30;
+//console.log(fps)
+//if(fps >= 0.5) console.log("loop");
+//else console.log("no loop")
+
+if(isLoop){
+update(dt)
+}
+
+
+window.webkitRequestAnimationFrame(animate)
+}
+
+//webkitCancelAnimationFrame
+//webkitRequestAnimationFrame
+animate(0)
+
+
+
+
+keyControl()
+
+//key inputs
+ctx.canvas.addEventListener("dblclick", ()=>{
+//console.log();
+if(clearColor == "#000") clearColor = "#0001";
+else clearColor = "#000";
+
+isLoop = !isLoop;
+
+});
+
+
+
+})();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+
+<title>snake game prototype 1.0.alpha</title>
+
+<style>
+
+*{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+html{
+font-size: 10px;
+}
+
+body{
+background: #111111;
+}
+
+.wrapper{
+/* margin-inline: auto; */
+width: min(100% - 10, 360px);
+padding: 10px;
+margin: 10px auto;
+}
+
+main{
+background: linear-gradient(-45deg, purple, pink);
+}
+
+h1{
+margin: 10;
+padding: 10px 20px;
+font-size: 20px;
+color:red;
+font-weight: bold;
+text-transform: capitalize;
+text-align: center;
+background: tan;
+border-radius: 10px;
+}
+
+canvas{
+width:100%;
+background: salmon;
+margin: auto;
+display: block;
+image-rendering: pixelated;
+}
+
+.controlCont{
+border-radius: 10px;
+background: #B000FF;
+text-align: center;
+}
+
+
+.btn{
+width: 90px;
+display: inline-block;
+aspect-ratio: 1;
+background: red;
+transition: .2s;
+border-radius: 5px;
+}
+
+.dummy{
+opacity: 0.5;
+}
+
+.up, .down{
+background: tan;
+}
+
+.left, .right{
+background: brown;
+}
+
+.btn:hover:not(.dummy){
+scale: 0.8;
+border-radius: 50%;
+}
+</style>
+
+</head>
+<body>
+
+
+
+<main class="wrapper" id="main">
+<section class="wrapper">
+
+<h1>snake game prototype 1.0.alpha</h1>
+
+<canvas id="canvas" class="canvas"></canvas>
+</section>
+
+<section class="wrapper controlCont">
+	
+<!-- <h1>hi</h1> -->
+
+
+<span class="btn dummy"></span>
+<span  class="btn up"></span>
+<span class="btn dummy"></span>
+<span  class="btn left"></span>
+<span class="btn dummy"></span>
+
+<span  class="btn right"></span>
+<span class="btn dummy"></span>
+<span  class="btn down"></span>
+<span class="btn dummy"></span>
+
+</section>
+
+</main>
+
+
+
+<script>
+// 3090 12 31    202C713EF040
+
+const INIT = ()=>{
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+ctx.imageSmoothingEnabled=false;
+
+canvas.width=300;
+canvas.height=300;
+
+//tick per loop 
+const gameSpeed = 205;
+
+const snakeW=30, snakeH=30;
+const snakeSpeed=1;
+
+const _RIGHT="right", _LEFT="left", _UP="up", _DOWN="down";
+
+let dir=_RIGHT;
+
+let food={
+	x:Math.floor(Math.random()*(canvas.width/snakeW)),
+	y:Math.floor(Math.random()*(canvas.height/snakeH)),
+}
+
+
+
+const snakeBody=[];
+
+//create snake
+
+// snake initial length
+
+let snakeInitLength=4;
+
+for(let i=snakeInitLength-1;i>=0;i--){
+	snakeBody.push({
+		x:i,
+		y:0
+	});
+}
+
+
+
+const drawStroke=(x, y, width, height, color="tan")=>{
+	ctx.beginPath();
+	ctx.strokeStyle=color;
+	ctx.strokeRect(x, y, width, height);
+	ctx.closePath();
+}
+
+const draw=(x, y, width, height, color="red")=>{
+	ctx.beginPath();
+	ctx.fillStyle=color;
+	ctx.fillRect(x, y, width, height);
+	ctx.closePath();
+}
+
+
+
+const drawSnake=()=>{
+
+//draw
+for(let i=0;i<snakeBody.length;i++){
+const snakeValue = snakeBody[i];
+ctx.beginPath()
+ctx.fillStyle="seagreen";
+ctx.strokeStyle="blue";
+ctx.fillRect(snakeValue.x * snakeW, snakeValue.y * snakeH, snakeW, snakeH);
+//ctx.strokeRect(snakeValue.x * snakeW, snakeValue.y * snakeH, snakeW, snakeH);
+ctx.closePath()
+}
+
+//update 
+
+let snakeHead = {...snakeBody[0]};
+
+if(dir==_UP) snakeHead.y-=snakeSpeed;
+else if(dir==_LEFT) snakeHead.x-=snakeSpeed;
+else if(dir==_RIGHT) snakeHead.x+=snakeSpeed;
+else if(dir==_DOWN) snakeHead.y+=snakeSpeed;
+
+
+
+
+// adding head
+if(snakeHead.x==food.x && snakeHead.y==food.y){
+
+
+food={
+	x:Math.floor(Math.random()*(canvas.width/snakeW)),
+	y:Math.floor(Math.random()*(canvas.height/snakeH)),
+}
+
+
+}
+else snakeBody.pop();
+
+
+
+snakeBody.unshift({...snakeHead})
+
+
+
+}
+
+
+//logic and some update
+const update=()=>{
+
+//clear screen
+draw(0, 0, canvas.width, canvas.height, "#434343");
+
+//draw snake
+drawSnake();
+
+//drawing snake food apple
+draw(food.x * snakeW, food.y * snakeH,snakeW, snakeH, "red")
+
+
+}
+
+
+
+
+
+
+
+
+//game loop
+
+let loopInterval = 0;
+
+let lastTime=0;
+const animate=(timeStamp)=>{
+	const delta = (timeStamp - lastTime);
+	lastTime = timeStamp;
+	if(loopInterval>gameSpeed){
+		loopInterval=0;
+		update();
+	}else loopInterval+=delta;
+	webkitRequestAnimationFrame(animate);
+}
+webkitRequestAnimationFrame(animate);
+
+//loop starting point
+//setInterval(animate, 200)
+
+
+
+//control entry
+document.querySelector(".controlCont").addEventListener("click", e => {
+
+const cl = e.target.classList;
+
+if(cl[0] != "btn") return false;
+
+if(cl[1] == _UP&&dir!=_DOWN) dir=_UP;
+else if(cl[1] == _LEFT&&dir!=_RIGHT) dir=_LEFT;
+else if(cl[1] == _RIGHT&&dir!=_LEFT) dir=_RIGHT;
+else if(cl[1] == _DOWN&&dir!=_UP) dir=_DOWN;
+else return false;
+
+});
+
+
+}
+
+
+
+//
+try{
+// call main init func
+INIT();
+}catch(err){
+//catching any errors
+console.log(err)
+}
+
+
+</script>
+
+</body>
+</html>

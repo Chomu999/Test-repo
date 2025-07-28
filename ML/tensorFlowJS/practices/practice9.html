@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="hexbyte"/>
+
+
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+
+body{
+
+color-scheme: default;
+background: #353535;
+}
+
+h1{
+color: #F1F1F1;
+text-align: center;
+}
+
+</style>
+
+<title> TFJS practice 9 save and load</title>
+
+
+
+
+</head>
+
+<body>
+
+
+
+<h1>TFJS practice 9 save and load</h1>
+
+
+<script  src="/sdcard/g_js_libs/tf.min.js"></script>
+
+
+<script>
+//"use strict";
+
+
+
+
+
+
+async function LoadFile(p,t="json"){
+let d=await fetch(p);
+return await d[t]();
+}
+
+
+
+
+//console.log(tf.regularizers);
+
+
+
+function getCurrnetTime(type=true){
+return  (type)?Date.now():performance.now();
+}
+
+
+function checkMemory(){
+let memory = tf.memory();
+let outStr="";
+for(let i in memory){
+outStr += `${i} : ${memory[i]}\n`;
+}
+console.log(outStr);
+}
+
+
+//console.log(tf.addWeight)
+
+
+
+
+function makeModel(mt){
+let input=0, x=0, output=0,m=0;
+if(0==mt){
+
+input = tf.input({shape: [784] });
+x =  tf.layers.dense({units:32}).apply(input);
+output = tf.layers.dense({units:10}).apply(x);
+m = tf.model({inputs:input, outputs:output })
+}
+
+else if(1==mt){
+m = tf.sequential();
+m.add(tf.layers.inputLayer({ inputShape: [784] }));
+m.add(tf.layers.dense({units:32}));
+m.add(tf.layers.dense({units:10}));
+}
+
+return m;
+}
+
+
+//console.log(tf.Sequential())
+
+async function INITIAL(){
+
+
+
+//let model = makeModel(0);
+let modelURL="saved_model/s1/saved_model1.json";
+let model = await tf.loadLayersModel(modelURL);
+
+console.log(model);
+
+let lr = 1e-2;
+let loss = (false)?"categoricalCrossentropy": "sparseCategoricalCrossentropy";//tf.losses.softmaxCrossEntropy;
+let optimizer = tf.train.adam(lr);
+let metrics = [ "accuracy"];
+
+model.compile({loss, optimizer, metrics});
+
+model.summary()
+
+const XS = tf.randomNormal([10, 784]);
+//XS.print(true)
+const YS = tf.randomUniform([10, 1], 0, 10);
+//YS.print(true)
+
+checkMemory();
+
+//model.predict(XS).print(true);
+
+
+let ct = getCurrnetTime();
+
+let traintResult = await model.fit(XS, YS, {
+	epochs: 5,
+	batchSize: 64,
+	verbose:2,
+});
+
+
+console.log(traintResult);
+console.log(getCurrnetTime() - ct);
+
+
+//model.save("downloads://saved_model1")
+
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+try{
+
+
+console.log(tf)
+tf.ready().then(INITIAL);
+
+}catch(err){
+console.log(err)
+}
+
+</script>
+
+</body>
+</html>

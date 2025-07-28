@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+
+<title>mnist dc gan</title>
+
+<style>
+
+
+*{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+
+
+html{
+font-size: 10px;
+}
+
+a{
+text-decoration: none;
+}
+
+body{
+background: #111111;
+}
+
+canvas{
+margin: auto;
+display: block;
+
+width: 90vmin;
+/* aspect-ratio: 1; */
+background: #575757;
+image-rendering: pixelated;
+}
+
+</style>
+
+<script src="/sdcard/g_js_libs/tf.min.js"></script>
+
+
+</head>
+
+<body>
+
+
+
+<canvas class="canvas"></canvas>
+
+
+
+<script type=module>
+//"use strict";
+
+
+
+
+let EPOCH =5;
+let BACTHSIZE = 16;
+
+
+let noiseDim = 100;
+let lenExample = 32;
+
+
+
+//
+class Rand{
+
+static Float(a,b){
+return Math.random() * (b-a+1) + a;
+}
+
+static Int(a,b){
+return Math.floor(Rand.Float(a,b));
+}
+
+static Choice(...arg){
+return arg[Rand.Int(0, arg.length - 1)];
+}
+
+static Color(l=3){
+let out = "#";
+let cstr="0123456789abcdef".split("");
+for(let c=0;c<l;c++) out += Rand.Choice(...cstr);
+return out;
+}
+
+}
+
+
+
+
+function checkMemory(){
+let memory = tf.memory();
+let outStr="";
+for(let i in memory) outStr += `${i} : ${memory[i]}\n`;
+return outStr;
+}
+
+
+
+
+const sleep=(t=0)=>new Promise(res=>setTimeout(()=>res(!0),t));
+
+
+
+
+function getImageData(arr, w=28, h=28){
+let imgData = new ImageData(w, h);
+for(let i=0;i<arr.length;i++){
+let idx = (i*4), color =arr[i]??255;
+imgData.data[idx+0] = color;
+imgData.data[idx+1] = color;
+imgData.data[idx+2] = color;
+imgData.data[idx+3] = 255;
+}
+return imgData;
+}
+
+
+
+const strToHtmlElement=(str)=>{
+if(!str) return;
+const div = document.createElement("div");
+div.innerHTML+=str;
+return div.firstElementChild;
+}
+
+
+//
+const LoadFile=async(p,t="json")=>{
+const d = await fetch(p);
+return await d[t]();
+}
+
+
+
+
+function makeGen(){
+let model = tf.sequential();
+model.add(tf.layers.inputLayer({ inputShape:[100] }));
+
+model.add(tf.layers.dense({ units:7*7*256, useBias: false, }));
+model.add(tf.layers.batchNormalization());
+model.add(tf.layers.leakyReLU());
+
+model.add(tf.layers.reshape({targetShape:[7, 7, 256]}));
+
+
+model.add(tf.layers.conv2dTranspose({ filters: 128, kernelSize:5, strides: [1, 1], padding: "same", useBias: false }));
+model.add(tf.layers.batchNormalization());
+model.add(tf.layers.leakyReLU());
+
+model.add(tf.layers.conv2dTranspose({ filters: 64, kernelSize: [5,5], strides: [2,2], padding: "same", useBias: false }));
+model.add(tf.layers.batchNormalization());
+model.add(tf.layers.leakyReLU());
+
+model.add(tf.layers.conv2dTranspose({ filters: 1, kernelSize: [5,5], strides: [2,2], padding: "same", useBias: false, activation: "tanh" }));
+
+return model;
+}
+
+
+
+function makeDis(){
+let model = tf.sequential();
+model.add(tf.layers.inputLayer({ inputShape:[28, 28, 1] }));
+
+model.add(tf.layers.conv2d({ filters: 64, kernelSize: [5,5], strides: [2,2], padding: "same" }));
+model.add(tf.layers.leakyReLU());
+model.add(tf.layers.dropout({ rate: 0.3 }));
+
+model.add(tf.layers.conv2d({ filters: 128, kernelSize: [5,5], strides: [2,2], padding: "same" }));
+model.add(tf.layers.leakyReLU());
+model.add(tf.layers.dropout({ rate: 0.3 }));
+
+model.add(tf.layers.flatten());
+model.add(tf.layers.dense({ units: 1, activation:"sigmoid" }));
+return model;
+}
+
+
+
+//let at0 = tf.randomNormal([10]);
+
+
+let crossentropy = tf.metrics.binaryCrossentropy; //(tf.onesLike(at0), at0);
+
+//console.log(crossentropy);
+
+
+function genLoss(r){
+return crossentropy(tf.onesLike(r), r);
+}
+
+function disLoss(r, f){
+let r_loss = crossentropy(tf.onesLike(r), r);
+let f_loss = crossentropy(tf.zerosLike(f), f);
+return tf.add(r_loss, f_loss);
+}
+
+
+
+
+function trainStep(genModel, genOptimizer, disModel, disOptimizer){
+
+
+//disOptimizer.computeGradients((a)=>{
+//let y_pred = genModel.call(tf.randomNormal([1, 100]))[0];
+//return y_pred;
+//});
+
+//console.log(disOptimizer);
+let latent = tf.randomNormal([1, 100]);
+let y_pred = genModel.call(latent, true)[0];
+
+//y_pred.print(true);
+
+//genOptimizer.applyGradients(tf.onesLike());
+
+}
+
+
+
+
+
+//
+const INITIAL=async () => {
+console.log(tf)
+
+
+const canvas = document.querySelector("canvas");
+const ctx 	 = canvas.getContext("2d");
+
+//const canvasSize = innerWidth>innerHeight?innerHeight:innerWidth;
+ctx.canvas.width =28;
+ctx.canvas.height =28;
+
+console.log(tf.layers)
+
+
+console.log(checkMemory());
+
+
+let gen_model = makeGen();
+//console.log(gen_model.call(tf.randomNormal([1, 100]), true));
+//gen_model.summary();
+
+
+
+let noise = tf.randomNormal([1, 100]);
+let genretared_img = gen_model.predict(noise).mul(127.5).add(127.5);
+
+let imgDataArr = genretared_img.dataSync();
+
+let imgData = getImageData(imgDataArr, 28, 28)
+ctx.putImageData(imgData, 0, 0);
+
+
+// tf.getGradient
+
+//console.log(gen_model);
+//console.log(tf.getGradient());
+
+
+
+
+let dis_model = makeDis();
+console.log(dis_model );
+//dis_model.summary();
+
+
+let gen_optimizer =  tf.train.adam(0.002);
+//console.log(gen_optimizer);
+
+let dis_optimizer =  tf.train.adam(0.002);
+console.log(dis_optimizer);
+
+//dis_optimizer.getWeights().then(r=>{});
+
+//dis_optimizer.applyGradients( dis_model)
+
+
+let seed = tf.randomNormal([lenExample, noiseDim]);
+
+
+trainStep(gen_model, gen_optimizer, dis_model, dis_optimizer)
+//seed.print(true)
+
+
+
+
+console.log(checkMemory());
+
+
+canvas.addEventListener("touchmove", ()=>{
+
+
+});
+
+
+
+
+
+window.addEventListener("resize", ()=>{
+
+});
+
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+try{
+
+INITIAL();
+
+
+}catch(err){
+console.log(err);
+}
+
+</script>
+
+</body>
+</html>

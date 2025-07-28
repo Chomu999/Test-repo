@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+
+<title>particle Emiter</title>
+
+<style>
+
+*{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+html{
+font-size: 10px;
+}
+
+a{
+text-decoration: none;
+}
+
+body{
+background: #111111;
+}
+
+canvas{
+background: salmon;
+}
+
+
+
+.controlBox{
+margin: auto;
+width: 90vw;
+height: 90vw;
+background: gray;
+
+}
+
+
+</style>
+
+</head>
+
+<body>
+
+<canvas id="canvas" ></canvas>
+
+<div class="controlBox">
+
+<button >update</button>
+
+<input class="ranges pos_x" type="range" min="0" max="300" value="0" />
+<input class="ranges pos_y" type="range" min="0" max="300" value="0" />
+
+<input class="color_v" type="color" value="white">
+
+</div>
+
+
+
+
+
+
+
+<script>
+
+class Rand{
+
+static Float(a,b){
+return Math.random() * (b-a+1) + a;
+}
+
+static Int(a,b){
+return Math.floor(Rand.Float(a,b));
+}
+
+static Choice(...arg){
+return arg[Rand.Int(0, arg.length - 1)];
+}
+
+static Color(l=3){
+let out = "#";
+for(let c=0;c<l;c++) out += Rand.Choice(..."0123456789abcdef".split(""));
+return out;
+}
+
+}
+
+
+const canvas = document.getElementById("canvas");
+const ctx 	 = canvas.getContext("2d");
+const canvasSize = innerWidth>innerHeight?innerHeight:innerWidth;
+canvas.width = canvasSize;
+canvas.height = canvasSize;
+
+const PI = Math.PI;
+const TAU = 2*PI;
+
+
+class Particle{
+
+constructor(gravity, position, color){
+
+this.gravity=gravity;
+
+this.position = position;
+
+this.radius=Rand.Int(10, 20);
+
+this.angle = Math.random() * TAU;
+
+this.color = color;//Rand.Color(6);
+
+
+
+this.speed = Rand.Int(1,3);
+
+
+this.vel = {
+	x:Math.cos(this.angle) * this.speed,
+	y:Math.sin(this.angle) * this.speed,
+}
+
+this.lifeTime=Rand.Int(2, 20) * this.radius;
+}
+
+update(delta){
+
+this.vel.y += this.gravity * delta;
+
+this.position.x += this.vel.x;
+this.position.y += this.vel.y;
+this.lifeTime -= 1;
+}
+
+render(c){
+c.beginPath();
+c.fillStyle=this.color;
+c.arc(this.position.x, this.position.y, this.radius, 0, TAU);
+c.fill();
+}
+
+
+}
+
+
+
+
+class Emiter{
+constructor(position, gravity){
+this.gravity=gravity;
+this.position=position;
+this.particles=[];
+this.color="#fff";
+this.maxParticle = 200;
+this.addBrust();
+
+this.spawnInterval=1400;
+this.spawnTimer=0;
+this.spawnRate=10;
+}
+
+update(c, delta){
+for(let i=this.particles.length-1;i>=0;i--){
+const p = this.particles[i];
+	p.render(c);
+	p.update(delta);
+}
+
+if(this.spawnTimer>this.spawnInterval){
+	this.spawnTimer=0;
+	this.addBrust()
+}else this.spawnTimer+=this.spawnRate;
+
+this.particles = this.particles.filter(p=>!(p.lifeTime<0));
+
+}
+
+addParticle(){
+this.particles.push(new Particle(this.gravity, {...this.position}, this.color));
+}
+
+addBrust(){
+for(let i=0;i<this.maxParticle;i++){
+	this.addParticle()
+}
+
+}
+
+}
+
+
+
+class PS{
+constructor(){
+
+this.e
+
+}
+
+update(c, delta){
+
+}
+
+}
+
+
+let pos_x = document.querySelector(".pos_x");
+let pos_y = document.querySelector(".pos_y");
+let color_v = document.querySelector(".color_v");
+
+const gravity = 9.8;
+
+const e = new Emiter({x:canvasSize/2, y:canvasSize/2}, gravity);
+//console.log(e);
+
+
+let lastTime=performance.now();
+
+const animate=(timeStamp)=>{
+//ctx.clearRect(0, 0, canvas.width, canvas.height);
+ctx.fillStyle="#0001";
+ctx.fillRect(0, 0, canvas.width, canvas.height);
+const currTime = performance.now();
+const deltaTime = (currTime - lastTime) / 1000;
+lastTime = currTime;
+e.update(ctx, deltaTime);
+
+webkitRequestAnimationFrame(animate);
+}
+animate();
+
+
+
+pos_x.addEventListener("change", ()=>{
+
+e.position.x=parseFloat(pos_x.value);
+
+});
+
+pos_y.addEventListener("change", ()=>{
+
+e.position.y=parseFloat(pos_y.value);
+
+});
+
+
+color_v.addEventListener("change", ()=>{
+
+e.color=color_v.value;
+
+});
+
+
+</script>
+
+</body>
+</html>

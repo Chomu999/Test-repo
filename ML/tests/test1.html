@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+:root{
+--box-shadow1:2px 2px 2px 10px red inset;
+--box-shadow2:1rem 1rem 2.2rem #0004,
+inset .5rem .6rem 2.2rem #fff4,
+inset -.5rem -.6rem 2.2rem #0004,
+-1rem -1rem 2.2rem #fff4;
+
+}
+
+
+html{
+font-size:10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style: none;
+}
+
+
+body{
+color-scheme: default;
+background: #353535;
+}
+
+
+
+
+
+
+.wrapper{
+margin:.8rem auto;
+padding:.8rem;
+width: min(39rem, 100% - 1rem);
+background: #9400FF23;
+border: .3rem solid #DADDDD;
+border-radius:2rem;
+box-shadow:var(--box-shadow2);
+
+}
+
+
+.appContainer{
+/* aspect-ratio: 1; */
+background: #E1FFF133;
+/* overflow: hidden auto; */
+}
+
+.appContainer *{
+  background: inherit;
+}
+
+.appTitle{
+padding: 1rem;
+color: red;
+background: tan;
+text-align: center;
+text-transform: capitalize;
+}
+
+
+.outputContainer{
+
+height: 40dvh;
+background: #CFB8D2;
+overflow: hidden auto;
+text-align: center;
+
+}
+
+
+.outputContainer canvas{
+margin: auto;
+width: 90%;
+display: block;
+background: salmon;
+}
+
+.label{
+margin: 0.4rem;
+padding: .2rem 1rem;
+display: inline-block;
+color: #333;
+font-weight: 700;
+background: #00A4FF;
+font-size: 1rem;
+border: 1px solid ;
+border-radius: 2rem;
+}
+
+
+
+.btnContainer{
+aspect-ratio: 3;
+text-align: center;
+}
+
+.btnContainer .btn{
+cursor: pointer;
+margin: .8rem;
+padding: .8rem 2rem;
+display: inline-block;
+color: #00FF35;
+background: #060066;
+font-size: 2rem;
+border: 1px solid ;
+border-radius: 2rem;
+}
+
+
+
+
+
+
+
+@media screen and (min-width:320px) and (max-width:767px) and (orentation:landscape){
+
+body{
+color: red!important;
+}
+
+.label{
+font-size: 40rem;
+color: purple!important;
+}
+
+
+}
+
+
+</style>
+
+<title>ml test1</title>
+
+
+
+<script  src="/sdcard/g_js_libs/tf.min.js"></script>
+<!-- <script  src="/storage/emulated/0/g_js_libs/tf-backend-webgpu.js"></script> -->
+
+
+
+</head>
+
+<body>
+
+
+
+<div class="wrapper appContainer">
+
+<div class="wrapper titleContainer">
+  <h1 class="appTitle">
+    ML Test 1
+  </h1>
+</div>
+
+<div class="wrapper outputContainer"></div>
+
+
+
+<div class="wrapper btnContainer">
+
+
+  <button class="btn trainBtn">train</button>
+  <span class="btn predictBtn">predict</span>
+  <span class="btn clearBais">clearBais</span>
+  
+
+
+</div>
+
+</div>
+
+
+
+
+
+
+
+
+<script type="module">
+"use strict";
+
+
+
+///
+const randInt=(min=1,max=255)=>{
+return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+//
+const strToHtml=(html)=>{
+const element = document.createElement("div");
+element.innerHTML = html;
+return  element.firstElementChild??undefined;
+}
+
+//sleep function helps to hold up workflow
+const sleep=async (t=1) => new Promise( res => setTimeout( () => res(true), t*1000) );
+
+
+
+//fetch files from fileSystem
+const LoadFile=async(path, type="text")=>{
+const file = await fetch(path);
+return await file[type]();
+}
+
+
+
+//
+const ContentDownloader =(name, blob)=>{
+
+//create a tag for net trick
+const _a = document.createElement("a");
+
+//passing blob obj to the url obj
+const _u = URL?.createObjectURL(blob);
+
+//assing url obj to the a.href
+_a.href = _u;
+
+//assing name to the file
+_a.download = name??"dummy.name.txt";
+
+//clicking a tag by code
+_a.click();
+
+}
+
+
+const checkMemory=()=>{
+
+let memorys = tf.memory();
+for(const i in memorys){
+console.log(`${i} ${memorys[i]}`);
+}
+
+}
+
+
+//load model
+const loadModel=async()=>{
+
+
+const model= await tf.loadLayersModel("/sdcard/g_js_libs/models/xor/xor-model.json");
+
+
+return model;
+
+}
+
+
+//cnn
+const makeModel=()=>{
+
+
+const model=tf.sequential();
+
+model.add(tf.layers.dense({
+  inputShape:[2],
+  units:4,
+}));
+
+model.add(tf.layers.dense({
+  units:1,
+  activation:"sigmoid",
+}));
+
+
+model.predict(tf.tensor([[0, 0]]));
+
+
+
+const lr=0.5;
+const optimizer = tf.train.adam(lr);
+const loss = "meanSquaredError";
+
+
+model.compile({
+  optimizer,
+  loss
+});
+
+return model;
+
+}
+
+
+
+//
+const Normalize=(value, min, max)=>{
+return (value-min) / (max-min);
+}
+
+
+
+//
+const NormalizeScale=(value, min, max, sMin, sMax)=>{
+const out = Normalize(value, min, max)
+return sMin + out * (sMax-sMin);
+}
+
+
+
+
+const addPredict=(value=0)=>{
+const elmt  = strToHtml(`<span class="label outputResult">${value}</span>`);
+document.querySelector(".outputContainer").append(elmt);
+}
+
+const deletePredict=()=>{
+const cont = document.querySelector(".outputContainer");
+for(let i=cont.childElementCount;i>0;i--){
+	cont.removeChild(cont.lastElementChild);
+}
+}
+
+
+
+
+
+
+
+
+
+
+// INITIAL point aka starting point
+const INITIAL = async ()=>{
+
+
+console.log(tf.getBackend());
+
+const trainBtn = document.querySelector(".trainBtn");
+const predictBtn = document.querySelector(".predictBtn");
+const clearBaisBtn = document.querySelector(".clearBais");
+
+
+
+
+const model = (true)? await loadModel(): makeModel();
+console.log(model)
+
+const ds = [
+{x:[0, 0], y: 0},
+{x:[0, 1], y: 1},
+{x:[1, 0], y: 1},
+{x:[1, 1], y: 0},
+];
+
+const dx = ds.map(d=> d.x);
+const dy = ds.map(d=> d.y);
+
+const dxt = tf.tensor(dx);
+const dyt = tf.tensor(dy);
+
+
+
+//train func
+const trainModel =()=> {
+	trainBtn.disabled = (true);
+	console.log("gi")
+
+	const options = {
+		epochs: 100,
+		shuffle: false,
+		batchSize: 256,
+		callbacks: {
+			onTrainBegin: ()=> {
+				console.log("train start...");
+			},
+			onEpochBegin: (epoch, log) => {
+				console.log(`start epoch : ${epoch}`);
+			},
+			onEpochEnd: (epoch, log) => {
+				console.log(`end epoch : ${epoch} loss : ${log.loss}`);
+			},
+			onBatchBegin: () => {
+				console.log("batching begin");
+			},
+			onBatchEnd: tf.nextFrame,
+			onTrainEnd: ()=> {
+				console.log(`train completed...`);
+			},
+		},
+	};
+	model.fit(dxt, dyt, options).then(result=>{
+		console.log(result);
+		trainBtn.disabled = (false);
+	});
+}
+
+//prediction func
+const modelPredict = ()=> {
+	console.log([predictBtn])
+	tf.tidy(()=> {
+		const outTensor = model.predict(dxt);
+		const arr = outTensor.dataSync();
+		arr.forEach((value, index)=>{
+			addPredict(`prediction no ${index} result ${value}`);
+		});
+	});
+}
+
+
+
+
+const clearBaisFunc=()=>{
+model.weights.forEach((a)=>{
+const t = tf.randomNormal(a.shape);
+a.val.assign(t)
+});
+}
+
+
+
+//emit train fuuc
+trainBtn.addEventListener("click", trainModel);
+
+
+
+//emit prediction func
+predictBtn.addEventListener("click", modelPredict);
+
+
+//
+clearBaisBtn.addEventListener("click", clearBaisFunc);
+
+
+
+document.addEventListener("keydown", e=>{
+
+const {key } = e;
+switch (key) {
+
+case "d":
+deletePredict();
+break;
+
+case "c":
+clearBaisFunc();
+break;
+
+case "t":
+trainModel();
+break;
+
+case "p":
+modelPredict();
+}
+
+});
+
+
+
+
+}
+
+
+
+
+
+
+try{
+
+console.log(tf)
+console.log("JS is Awesome");
+tf.setBackend('webgl');
+tf.ready().then(()=>{
+INITIAL();
+});
+
+
+}catch(e){
+console.log(`JavaScript uncatch error : ${e.stack}`);
+}
+
+
+</script>
+
+</body>
+</html>

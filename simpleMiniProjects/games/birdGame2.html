@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="hexbyte"/>
+
+
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+html{
+font-size: 10px;
+}
+
+body{
+color-scheme: default;
+background: #353535;
+}
+
+canvas{
+margin: auto;
+/* width:90vmin; */
+display: block;
+background: salmon;
+}
+
+h1{
+color: #F1F1F1;
+text-align: center;
+}
+
+</style>
+
+<title> bird game 2</title>
+
+
+
+
+</head>
+
+<body>
+
+
+
+<h1> bird game 2</h1>
+
+<canvas id="canvas"></canvas>
+
+
+<script src="/sdcard/g_js_libs/kaboom.js"></script>
+
+
+<script>
+//"use strict";
+kaboom({canvas, width:360, height:360});
+
+debug.error("hi");
+
+scene("game", ()=>{
+
+let a =add([
+//rect(0, 0, 30, 40),
+pos(0, 0),
+drawRect({ width:40, height:60})
+]);
+
+
+a.draw()
+console.log(a)
+debug.log(a);
+
+});
+
+go("game");
+
+
+console.log(window)
+
+</script>
+
+</body>
+</html>

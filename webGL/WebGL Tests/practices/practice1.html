@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+
+<title>WebGL parctice 1</title>
+
+<style>
+
+*{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+html{
+font-size: 10px;
+}
+
+a{
+text-decoration: none;
+}
+
+body{
+background: #111111;
+}
+
+.wrapper{
+/* margin-inline: auto; */
+width: min(100% - 10, 360px);
+padding: 8px;
+margin: 8px auto;
+box-shadow:2px 2px 4px 0px #fff8 ;
+}
+
+main{
+padding: 0;
+background: linear-gradient(105deg, #93FFA4, #94FAFF, #86005E);
+height: min(100vh,100dvh - 2rem);
+
+}
+
+.title{
+margin: 10;
+padding: 10px 20px;
+font-size: 20px;
+color:red;
+font-weight: bold;
+text-transform: capitalize;
+text-align: center;
+background: tan;
+box-shadow:2px 2px 7px black ;
+border-radius: 10px;
+}
+
+canvas{
+width:100%;
+background: salmon;
+margin: auto;
+display: block;
+box-shadow:2px 2px 7px black ;
+image-rendering: pixelated;
+}
+
+.errorCont{
+height: 200px;
+border-radius: 10px;
+background: #424242;
+overflow: hidden auto;
+transform: opacity 1.1s ease;
+}
+
+.errorCont > .eps{
+margin: 10px 0;
+padding: 2px 10px;
+	text-align: start;
+display: block;
+color: tan;
+font-size: 20px;
+font-weight: bold;
+border: 1px solid ;
+}
+
+.errorCont:not(:focus){
+opacity: 0.5;
+}
+
+.errorCont:hover{
+opacity: 1.0;
+}
+
+</style>
+
+</head>
+<body>
+
+
+
+<main class="wrapper" id="main">
+
+<h1 class="title">WebGL parctice 1</h1>
+
+<canvas id="canvas" class="canvas"></canvas>
+
+<section class="wrapper errorCont">
+
+<h1 class="title">errors and warning
+</h1>
+
+</section>
+
+</main>
+
+
+
+<script>
+// 3090 12 31    202C713EF040
+
+
+const showError=(msg)=>{
+console.log(msg);
+const cont = document.querySelector(".errorCont");
+if(!cont) return -1;
+cont.innerHTML += `<span class="eps">${msg}</span>`;
+}
+
+
+
+
+const INIT = ()=>{
+
+const canvas = document.getElementById("canvas");
+const gl = canvas.getContext("webgl2");
+
+
+canvas.width=300;
+canvas.height=300;
+
+showError(gl);
+
+
+const vss=`
+void main(void){
+gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
+gl_PointSize = 130.0;
+}
+`;
+
+const fss=`
+void main(void){
+gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+}
+`;
+
+const vs=gl.createShader(gl.VERTEX_SHADER);
+gl.shaderSource(vs, vss);
+gl.compileShader(vs);
+
+const fs=gl.createShader(gl.FRAGMENT_SHADER);
+gl.shaderSource(fs, fss);
+gl.compileShader(fs);
+
+const program = gl.createProgram();
+gl.attachShader(program, vs);
+gl.attachShader(program, fs);
+
+gl.linkProgram(program);
+gl.validateProgram(program);
+gl.useProgram(program);
+
+
+const update=()=>{
+
+gl.viewport(0, 0, canvas.width, canvas.height)
+gl.clearColor(0.2, .2, .2, 1);
+gl.clear(gl.COLOR_BUFFER_BIT);
+
+
+gl.drawArrays(0, 0, 1);
+
+
+console.log("loop");
+
+}
+
+
+
+
+
+
+
+
+//game loop
+
+
+let lastTime=0;
+const animate=(timeStamp)=>{
+	const delta = (timeStamp - lastTime);
+	lastTime = timeStamp;
+	update();
+//	webkitRequestAnimationFrame(animate);
+}
+webkitRequestAnimationFrame(animate);
+
+
+
+//control entry
+document.querySelector(".errorCont").addEventListener("click", e => {
+
+
+
+
+});
+
+
+}
+
+
+
+//
+try{
+// call main init func
+INIT();
+}catch(err){
+//catching any errors
+console.log(err)
+}
+
+
+</script>
+
+</body>
+</html>

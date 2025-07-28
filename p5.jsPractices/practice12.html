@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+
+<title>p5 practice 12</title>
+
+<style>
+
+
+*{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+
+
+html{
+font-size: 10px;
+font-style: italic;
+
+body{
+
+a{
+text-decoration: none;
+}
+background: #f0f0f0;
+canvas{
+	margin: auto;
+display: block;
+background: salmon;
+}
+}
+
+}
+
+
+
+
+
+</style>
+
+
+</head>
+
+<body>
+
+
+
+
+
+
+<script defer src="/sdcard/g_js_libs/p5.min.js"></script>
+
+
+<script>
+
+//12-1
+//let stats;
+
+//12-2
+//let stats, homeRuns=[];
+
+//12-3
+let cities;
+
+
+function preload(){
+
+//12-1
+//stats = loadTable("ortiz.csv")
+
+//12-2
+//stats = loadTable("ortiz.csv")
+
+//12-3
+cities = loadTable("cities.csv", "header");
+
+}
+
+
+
+
+function setup(){
+
+createCanvas(380, 380);
+
+//12-1
+//for(let i=0;i<stats.getRowCount(); ++i){
+//let years=stats.get(i, 0);
+//let hr=stats.get(i, 1);
+//let rbi=stats.get(i, 2);
+//let avg=stats.get(i, 3);
+//console.log(years, hr, rbi, avg)
+//}
+
+
+//12-2
+//for(let i=0;i<stats.getRowCount(); i++) homeRuns.push(stats.get(i, 1));
+
+
+
+
+
+
+
+function draw(){
+
+
+//12-2
+// background(204);
+//  // Draw background grid for data
+//  stroke(153);
+//  line(20, 100, 20, 20);
+//  line(20, 100, 460, 100);
+//  for (var i = 0; i < homeRuns.length; i++) {
+//  var x = map(i, 0, homeRuns.length-1, 10, width);
+//  line(x, 20, x, 100);
+//  }
+//  // Draw lines based on home run data
+//  noFill();
+//  stroke(0);
+//  beginShape();
+//  for (var i = 0; i < homeRuns.length; i++) {
+//  var x = map(i, 0, homeRuns.length-1, 20, 460);
+//  var y = map(homeRuns[i], 0, 60, 100, 20);
+//  vertex(x, y);
+//  }
+//  endShape();
+
+}
+
+
+
+
+
+
+</script>
+
+</body>
+</html>

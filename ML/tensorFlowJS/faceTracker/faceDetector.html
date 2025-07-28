@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+
+<title>TensorFlow face detector</title>
+
+<style>
+
+:root{
+--bgColor0:#444;
+--bgColor1:#fff4;
+
+--borderRadius0:0;
+--borderRadius1:1rem;
+}
+
+*{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+
+
+html{
+font-size: 10px;
+}
+
+a{
+text-decoration: none;
+}
+
+body{
+background: #111111;
+}
+
+
+.wrapper{
+margin: 10px auto;
+padding: 2px;
+width: min(390px, 100% - 2rem);
+display: block;
+}
+
+
+.center{
+text-align: center;
+}
+
+.hide{
+display: none;
+}
+
+.mainCont{
+height: min(100dvh, 100% - 2rem);
+background: var(--bgColor0);
+border-radius: var(--borderRadius1);
+z-index: 0;
+}
+
+
+.titleCont{
+background: red;
+}
+
+
+
+.controlCont{
+background: var(--bgColor1);
+height: max(40% - 10rem, 30rem);
+overflow: hidden auto;
+border-radius: var(--borderRadius1);
+}
+
+.infoCont{
+height: 8rem;
+background: var(--bgColor1);
+border-radius: var(--borderRadius1);
+}
+
+.notificationCont{
+position: absolute;
+background: var(--bgColor1);
+aspect-ratio: 1;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+border-radius: var(--borderRadius1);
+overflow: hidden;
+z-index: -10;
+}
+
+.drawCont{
+background: var(--bgColor1);
+border-radius: var(--borderRadius1);
+}
+
+.btns{
+margin: 0.8rem 0.6rem;
+padding: .4rem 2rem;
+color: red;
+font-size: 1.8rem;
+font-weight: 600;
+display: inline-block;
+background: white;
+border-radius: 1rem;
+}
+
+.para{
+color: #3A3A3A;
+padding: 2px 10px;
+margin: 4px;
+display: inline-block;
+font-size: 2rem;
+text-align: center;
+border-radius: 2rem;
+background: #C3C9BD;
+}
+
+.notification{
+margin: 4px 6px;
+padding: 2px 8px;
+display: block;
+color:red;
+background: yellow;
+font-weight: 500;
+text-align: center;
+font-size: 2rem;
+border-radius: 1rem;
+
+}
+
+canvas{
+/* width: 100%; */
+margin: auto;
+display: block;
+background: salmon;
+/* image-rendering: pixelated; */
+}
+
+
+.fadeIn{
+transform: translate(0, 0);
+animation: notificationIn 0s ease 1;
+}
+
+.fadeOut{
+transform: translate(-120%, 0);
+animation: notificationOut 0s ease 1; 
+}
+
+
+@keyframes notificationIn{
+0%{
+transform: translate(-120%, 0);
+}
+100%{
+transform: translate(0%,0);
+}
+}
+
+@keyframes notificationOut{
+0%{
+transform: translate(0, 0);
+}
+100%{
+transform: translate(-120%,0);
+}
+}
+
+</style>
+
+
+<link rel="alternate" href="atom.xml" title="Atom" type="application/atom+xml" />
+<link rel="alternate" href="rss.xml" title="RSS" type="application/atom+xml" />
+
+</head>
+
+<body>
+
+
+<div class="wrapper  notificationCont">
+
+
+</div>
+
+
+<main class="wrapper mainCont">
+
+<div class="wrapper titleCont">
+<h1 class="appTitle">app title</h1>
+</div>
+
+<div class="wrapper infoCont">
+
+<p class="para predictLabel">hi</p>
+<p class="para label">bye</p>
+
+</div>
+
+<div class="wrapper drawCont">
+
+<img class="testImage hide" src="/sdcard/DCIM/100PINT/Pins/321cc5328da1208b7049bd7d366b9d57.jpg" alt="face Img">
+
+<canvas id="canvas" ></canvas>
+
+</div>
+
+<div class="wrapper controlCont">
+
+
+<div class="center">
+
+<span class="btns predict">Predict</span>
+<span class="btns clearCanvas">Clear</span>
+<span class="btns next">Next</span>
+</div>
+
+
+
+</div>
+
+
+</main>
+
+
+
+
+<script defer src="/sdcard/g_js_libs/p5.min.js"></script>
+<script defer src="/sdcard/g_js_libs/tf.min.js"></script>
+<script defer src="/sdcard/g_js_libs/face_mesh.js"></script>
+
+
+<script type=module>
+"use strict";
+import * as imm from "/sdcard/g_js_libs/models/facemesh/coords.js";
+
+
+
+console.log(imm);
+
+
+//
+class Rand{
+
+static Float(a,b){
+return Math.random() * (b-a+1) + a;
+}
+
+static Int(a,b){
+return Math.floor(Rand.Float(a,b));
+}
+
+static Choice(...arg){
+return arg[Rand.Int(0, arg.length - 1)];
+}
+
+static Color(l=3){
+let out = "#";
+let cstr="0123456789abcdef".split("");
+for(let c=0;c<l;c++) out += Rand.Choice(...cstr);
+return out;
+}
+
+}
+
+
+
+
+
+
+const sleep=(t=0)=>new Promise(res=>setTimeout(()=>res(!0),t));
+
+
+
+
+
+
+const strToHtmlElement=(str)=>{
+if(!str) return;
+const div = document.createElement("div");
+div.innerHTML+=str;
+return div.firstElementChild;
+}
+
+
+//
+const LoadFile=async(p,t="json")=>{
+const d = await fetch(p);
+return await d[t]();
+}
+
+
+
+
+//Noise as a imgData r=~, g=~, b=~ a=255, w=28, h=28
+const NoiseImage=(w=28, h=28)=>{
+const imd = new ImageData(w, h);
+for(let i=0;i<imd.data.length/4;i++){
+imd.data[i*4+0] = Rand.Int(0, 255);
+imd.data[i*4+1] = 0;//Rand.Int(0, 255);
+imd.data[i*4+2] = 0;//Rand.Int(0, 255);
+imd.data[i*4+3] = 255;
+}
+return imd;
+}
+
+
+
+//
+const getImgData = (arr)=> {
+	const imgData = new ImageData(28, 28);
+	for (let i = 0; i < arr.length; i++) {
+		const color = arr[i] * 255;
+		imgData.data[i*4+0] = color;
+		imgData.data[i*4+1] = color;
+		imgData.data[i*4+2] = color;
+		imgData.data[i*4+3] = 255;
+	}
+	return imgData;
+}
+
+
+
+//
+const ContentDownloader = (_data, _type, _name)=> {
+	let _b = new Blob([JSON.stringify(_data)]);
+	let _a = document.createElement("a");
+	let _url = URL.createObjectURL(_b, {
+		type: _type??"json/text"
+	});
+	_a.download = _name??"dummy.txt";
+	_a.href = _url;
+	_a.click();
+}
+
+
+
+
+
+
+//
+const clearCanvas=(_context, condition=!1)=>{
+	if(condition) _context.clearRect(0, 0, _context.canvas.width, _context.canvas.height);
+	else{
+		_context.fillStyle="#000";
+		_context.fillRect(0, 0, _context.canvas.width, _context.canvas.height);
+	}
+}
+
+
+//
+const addNotification = (msg, time = 2000)=> {
+	const nCont = document.querySelector(".notificationCont");
+	nCont.style.zIndex=10;
+	const element = strToHtmlElement(`<span class="notification">${msg}</span>`);
+	element.classList.add("fadeIn");
+	nCont.append(element);
+	element.style.animationDuration = `${time}ms`;
+	sleep(time).then(()=> {
+		element.classList.remove("fadeIn");
+		sleep(time).then(()=> {
+			element.classList.add("fadeOut");
+			element.onanimationend = ()=>{
+				nCont.removeChild(element);
+				if (nCont.childElementCount<=0) nCont.style.zIndex= -10;
+			}
+		});
+	});
+}
+
+
+
+
+
+
+
+
+
+
+
+
+// draw setting
+let pxielSize=12, pxielColor="#fff";
+
+
+const mapDrawCoord = (event, c)=>{
+	const px = event.touches[0]?.pageX;
+	const py = event.touches[0]?.pageY;
+	const x = px - c.canvas.offsetLeft;
+	const y = py - c.canvas.offsetTop;
+	c.beginPath();
+	c.fillStyle=pxielColor;
+	c.arc(x, y, pxielSize, 0, Math.PI*2);
+	c.fill();
+	c.closePath();
+	//return {x, y};
+}
+
+
+let setup,draw;
+
+
+//
+const INITIAL=async () => {
+
+
+
+//console.log(facemesh);
+//console.log(tf.getBackend());
+//console.log(tf);
+
+
+const predictBtn=document.querySelector(".btns.predict");
+
+const clearCanvasBtn=document.querySelector(".btns.clearCanvas");
+
+const nextBtn=document.querySelector(".btns.next");
+
+const testImage=document.querySelector(".testImage");
+
+
+
+const canvas = document.querySelector("canvas");
+const ctx 	 = canvas.getContext("2d");
+
+const canvasSize = 340;//innerWidth>innerHeight?innerHeight:innerWidth;
+
+canvas.width = canvasSize;
+canvas.height = canvasSize;
+
+const modelPath="/sdcard/g_js_libs/models/facemesh/model.json";
+
+//const modelPath= "https://storage.googleapis.com/tfjs-models/tfjs/blazeface/model.json";
+//const modelPath= "https://tfhub.dev/tensorflow/tfjs-model/blazeface/1/default/1";
+
+const model = await tf.loadGraphModel(modelPath);
+let facePoses=[];
+
+
+
+let lastTime=performance.now();
+
+const animate=(timeStamp)=>{
+	ctx.fillStyle="#0001";
+	ctx.fillRect(0, 0, canvas.width, canvas.height);
+	const currTime = performance.now();
+	const deltaTime = (currTime - lastTime) / 1000;
+	lastTime = currTime;
+	
+	
+	ctx.drawImage(testImage,0, 0, testImage.naturalWidth, testImage.naturalHeight, 0, 0, canvas.width, canvas.height);
+	
+	
+	
+	
+	//requestAnimationFrame(animate);
+}
+animate();
+
+
+const drawBall=(c, x, y)=>{
+c.beginPath();
+    c.arc(x, y, 2, 0, 2 * Math.PI);
+    c.fillStyle = 'red';
+    c.fill();
+c.closePath();
+}
+
+
+const drawBox=(c, x, y, w, h)=>{
+c.beginPath();
+    c.beginPath();
+  c.rect(x, y, w, h);
+  c.strokeStyle = 'red';
+  c.stroke();
+
+c.closePath();
+}
+
+
+
+//btns emits //
+
+clearCanvasBtn.addEventListener("click", ()=>{
+	clearCanvas(ctx);
+	//model.save("downloads://bf1");
+});
+
+
+
+
+
+nextBtn.addEventListener("click", () => {
+
+//for(let i=0;i<40)
+
+
+for (let i = 0; i < facePoses.length; i += 17) {
+  
+  const detection = facePoses.slice(i, i + 17);
+  const bbox = detection.slice(0, 4);
+  const leftEye = [detection[4], detection[5]];
+  const rightEye = [detection[6], detection[7]];
+  const nose = [detection[8], detection[9]];
+  const mouth = [detection[10], detection[11]];
+  const leftEar = [detection[12], detection[13]];
+  const rightEar = [detection[14], detection[15]];
+  const score = detection[16];
+  
+
+
+  drawBox(ctx, bbox[0], bbox[1], bbox[2], bbox[3]);
+
+  // Landmarks ko draw karein
+
+
+
+ 
+drawBall(ctx, leftEye[0], leftEye[1])
+drawBall(ctx, rightEye[0], rightEye[1])
+drawBall(ctx, nose[0], nose[1])
+drawBall(ctx, mouth[0], mouth[1])
+drawBall(ctx, leftEar[0], leftEar[1])
+drawBall(ctx, rightEar[0], rightEar[1])
+  
+
+
+
+  // Score ko display karein
+  ctx.font = '14px Arial';
+  ctx.fillStyle = 'red';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  ctx.fillText(`Score: ${score.toFixed(2)}`, bbox[0], bbox[1]);
+}
+
+});
+
+
+
+predictBtn.addEventListener("click", () => {
+
+facePoses = tf.tidy(()=>{
+
+let IT= tf.browser.fromPixels(canvas, 3)
+.toFloat()
+.resizeNearestNeighbor([ 128, 128])
+.expandDims();
+
+
+const OT=model.predict(IT);
+
+return OT.dataSync();
+
+});
+
+//console.log(facePoses);
+
+});
+
+
+
+
+
+
+
+
+
+
+
+canvas.addEventListener("touchstart", e=>{
+	mapDrawCoord(e, ctx);
+});
+
+
+canvas.addEventListener("touchmove", e=>{
+	mapDrawCoord(e, ctx);
+});
+
+
+canvas.addEventListener("touchend", e=>{
+	mapDrawCoord(e, ctx);
+});
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+try{
+tf.setBackend("webgl").then(()=>{
+
+tf.ready().then(INITIAL);
+});
+
+
+}catch(err){
+console.log(err);
+}
+
+</script>
+
+</body>
+</html>
