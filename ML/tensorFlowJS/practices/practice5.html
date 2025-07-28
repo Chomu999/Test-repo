@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+:root{
+
+
+}
+
+
+html{
+font-size:10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style: none;
+}
+
+
+body{
+color-scheme: default;
+background: #353535;
+}
+
+h1{
+font-size: 30px;
+color: lime;
+text-align: center;
+padding: 10px;
+}
+
+.outputBox{
+margin:10px auto;
+width: 90%;
+height: 100px;
+background: #666666;
+text-align: center;
+overflow: hidden auto;
+border-radius: 20px;
+}
+
+.outputLabel{
+margin: 10px auto;
+padding: 20px;
+display: inline-block;
+color: red;
+background: blue;
+font-size: 20px;
+text-align: center;
+}
+
+canvas{
+margin: 10px auto;
+display: block;
+background: salmon;
+}
+
+
+.btnBox{
+margin:10px auto;
+width: 90%;
+height: 300px;
+background: #C4C5C4;
+border-radius: 20px;
+}
+
+.btn{
+margin: 10px;
+padding: 10px 20px;
+color: #fff;
+display: inline-block;
+background: #464646;
+font-size: 30px;
+}
+
+.errorBox{
+
+margin: 10px auto;
+padding:10px  10px;
+width: 90%;
+height:240px;
+background: #fff5;
+border-radius: 20px;
+}
+
+.errorBox .errorCont{
+width: 100%;
+height: 50%;
+background: inherit;
+text-align: center;
+overflow:hidden auto;
+}
+
+.errorBox h2{
+margin: 10px;
+padding: 10 20px;
+color: red;
+background: pink;
+text-align: center;
+font-size: 20px;
+}
+
+.errorBox .errorCont .errorText{
+margin: 10px;
+padding: 10px;
+color: black;
+background: inherit;
+display: inline-block;
+font-size: 16px;
+}
+
+</style>
+
+<title>practice 5</title>
+
+
+
+<script  src="/sdcard/g_js_libs/tf.min.js"></script>
+
+
+</head>
+
+<body>
+
+
+
+<h1>TensorFlowJS practice 5</h1>
+
+<div class="outputBox">
+
+<span class="outputLabel">hi</span>
+</div>
+
+<canvas></canvas>
+
+<div class="btnBox">
+
+<span class="btn clean">clean</span>
+<span class="btn predict">predictBtn</span>
+<span class="btn train">train</span>
+</div>
+
+
+<div class="errorBox">
+<h2>error / warning</h2>
+
+<div class="errorCont"></div>
+
+</div>
+
+<script>
+//"use strict";
+
+
+const Epoch = 2;
+const BatchSize = 4;
+
+let canvas, ctx;
+
+const dataSetPath = "/sdcard/g_js_libs/dataSets/mnist/parseMiniData.json";
+
+let dataSet, ImageDataArray, LabelDataArray ;
+
+//load cifar 10 data and also download
+
+let x_train, y_train;
+let x_valid, y_valid;
+let x_test, y_test;
+
+let model;
+
+
+function  strToHtmlElement(str){
+if(!str) return;
+const div = document.createElement("div");
+div.innerHTML+=str;
+return div.firstElementChild??-1;
+}
+
+
+function addError(err){
+let errbox = document.querySelector(".errorBox>.errorCont");
+errbox.append(strToHtmlElement(`<span class="errorText">${err}</span>`));
+}
+
+function addOutput(out){
+let errbox = document.querySelector(".outputBox");
+errbox.append(strToHtmlElement(`<span class="outputLabel">${out}</span>`));
+}
+
+
+async function LoadFile(p,t="json"){
+let d=await fetch(p);
+return await d[t]();
+}
+
+
+function drawArc(e){
+const {pageX:mx, pageY:my} = e.changedTouches[0];
+const {x, y} = canvas.getClientRects()[0],
+r=12, color="#fff9";
+ctx.beginPath();
+ctx.fillStyle=color;
+ctx.arc( mx - x, my - y, r, 0, 2*Math.PI, false);
+ctx.fill();
+ctx.closePath();
+}
+
+
+function clearCanvas(){
+ctx.fillStyle="#000";
+ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+}
+
+
+//console.log(tf.regularizers);
+
+//tf.regularizers
+function makeModel(modelType=0){
+let m;
+
+switch (modelType) {
+case 0:
+m = tf.sequential();
+m.add(tf.layers.inputLayer({inputShape: [null, 28]}));
+m.add(tf.layers.simpleRNN({units: 2, returnSequences: true, activation: "tanh"}));
+m.add(tf.layers.simpleRNN({units: 2, activation: "tanh"}));
+m.add(tf.layers.dense({units: 10}));
+
+break;
+case 1:
+m = tf.sequential();
+m.add(tf.layers.inputLayer({inputShape: [null, 28]}));
+m.add(tf.layers.gru({units: 4, returnSequences: true, activation: "tanh"}));
+m.add(tf.layers.gru({units: 4, activation: "tanh"}));
+m.add(tf.layers.dense({units: 10}));
+break;
+
+case 2:
+m = tf.sequential();
+m.add(tf.layers.inputLayer({inputShape: [null, 28]}));
+m.add(tf.layers.lstm({units: 4, returnSequences: true, activation: "relu"}));
+m.add(tf.layers.lstm({units: 4, activation: "relu"}));
+m.add(tf.layers.dense({units: 10}));
+break;
+
+case 3:
+m = tf.sequential();
+m.add(tf.layers.inputLayer({inputShape: [null, 28]}));
+m.add(tf.layers.bidirectional({
+	layer: tf.layers.lstm({units: 4, returnSequences: true, activation: "relu"})
+	}));
+m.add(tf.layers.bidirectional({
+	layer: tf.layers.lstm({units: 4, activation: "relu"}) }));
+m.add(tf.layers.dense({units: 10}));
+break;
+}
+
+return m;
+}
+
+
+function trainingModel(m) {
+
+	let opt = {
+		epochs: Epoch,
+		batchSize: BatchSize,
+
+		//	validationData: [x_valid, y_valid],
+
+		callbacks: {
+			onTrainBegin: function onTrainBegin() {
+				addError("train start")
+			},
+			onBatchBegin: function onBatchBegin() {
+				addError("batch start")
+			},
+			onBatchEnd: function onBatchEnd(batch, log) {
+				addError(`batch  no ${batch} end loss ${log.loss} accuracy ${log.acc}`);
+			},
+			onTrainEnd: function onTrainEnd() {
+				addError("train end");
+			},
+		},
+	};
+
+	model.fit(x_train, y_train, opt).then(result=> {
+
+		addError(`total epochs is ${result.epoch[result.epoch.length - 1] + 1}`);
+
+		addError(`accuracy ${result.history.acc.toString()}`);
+
+		addError(`loss ${result.history.loss.toString()} `);
+
+	});
+
+}
+
+
+
+
+
+
+
+
+
+
+async function INITIAL(){
+
+ canvas = document.querySelector("canvas");
+ ctx = canvas.getContext("2d");
+
+const cleanBtn = document.querySelector(".btn.clean");
+const predictBtn = document.querySelector(".btn.predict");
+const trainBtn = document.querySelector(".btn.train");
+
+const cs = 280;
+canvas.width = cs;
+canvas.height = cs;
+
+console.log(ctx)
+
+
+
+console.log(tf.layers);
+
+//let cl=tf.layers.conv2d({
+//	kernelSize:3,
+//	filters:33
+//});
+//console.log(cl)
+
+x_train = tf.randomUniformInt([10, 10, 28], 255).toFloat().div(255);
+//x_train.print(true)
+
+y_train = tf.randomUniformInt([10, 1], 10).toFloat()
+//y_train.print(true)
+
+//x=tf.layers.dense({units:32, inputShape:784})
+//let bdl = tf.layers.bidirectional({layer: x});
+
+model = makeModel(0);
+
+
+console.log(model);
+model.summary();
+
+//console.log(tf.metrics)
+//console.log(tf.losses, tf.train);
+
+let lr = 3e-4;
+console.log(lr);
+let loss = !true?"categoricalCrossentropy": "sparseCategoricalCrossentropy";//tf.losses.softmaxCrossEntropy;
+let optimizer = tf.train.adam(lr);
+
+//console.log(loss, optimizer, lr);
+
+model.compile({
+	loss,
+	optimizer,
+	metrics: ['accuracy']
+});
+
+
+
+
+
+
+
+
+
+
+cleanBtn.addEventListener("click", clearCanvas)
+
+
+ctx.canvas.addEventListener("touchstart", drawArc)
+ctx.canvas.addEventListener("touchmove", drawArc)
+ctx.canvas.addEventListener("touchend", drawArc)
+
+
+predictBtn.addEventListener("click", ()=>{
+	//let result =modelPredict(model, canvas);
+	let it = tf.randomUniform([1, 10, 28]);
+	let r =model.predict(it);
+r.print(true)
+//addOutput(`predict : ${result}`);
+});
+
+
+
+
+trainBtn.addEventListener("click", ()=>{
+	trainingModel(model);
+});
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+try{
+console.log(tf)
+
+tf.ready().then(INITIAL);
+
+}catch(err){
+console.log(err)
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+:root{
+
+
+}
+
+
+html{
+font-size:10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style: none;
+}
+
+
+body{
+color-scheme: default;
+background: #353535;
+}
+
+h1{
+font-size: 30px;
+color: lime;
+text-align: center;
+padding: 10px;
+}
+
+.outputBox{
+margin:10px auto;
+width: 90%;
+height: 100px;
+background: #666666;
+text-align: center;
+overflow: hidden auto;
+border-radius: 20px;
+}
+
+.outputLabel{
+margin: 10px auto;
+padding: 20px;
+display: inline-block;
+color: red;
+background: blue;
+font-size: 20px;
+text-align: center;
+}
+
+canvas{
+margin: 10px auto;
+display: block;
+background: salmon;
+}
+
+
+.btnBox{
+margin:10px auto;
+width: 90%;
+height: 300px;
+background: #C4C5C4;
+border-radius: 20px;
+}
+
+.btn{
+margin: 10px;
+padding: 10px 20px;
+color: #fff;
+display: inline-block;
+background: #464646;
+font-size: 30px;
+border: none;
+border-radius: 10px;
+&[disabled]{
+opacity: 0.5;
+/* background: ; */
+}
+}
+
+
+
+</style>
+
+<title>TFJS practice 2 NN</title>
+
+
+
+<script  src="/sdcard/g_js_libs/tf.min.js"></script>
+
+
+</head>
+
+<body>
+
+
+
+<h1>TFJS practice 2 NN</h1>
+
+<div class="outputBox">
+
+<span class="outputLabel predictPara">hi</span>
+
+</div>
+
+<canvas></canvas>
+
+<div class="btnBox">
+<!-- 
+<span class="btn clean">clean</span>
+<span class="btn predict">predictBtn</span>
+<span class="btn train">train</span>
+<span class="btn evaluate">evaluate</span>
+<span class="btn download">download</span>
+
+ -->
+
+<button class="btn clean">clean</button>
+<button class="btn predict">predict</button>
+<button class="btn train">train</button>
+<button class="btn evaluate">evaluate</button>
+<button class="btn download">download</button>
+
+</div>
+
+
+<script>
+//"use strict";
+
+
+const Epoch = 3;
+const BatchSize = 32;
+
+let canvas, ctx;
+
+
+let x_train, x_test, y_train, y_test;
+
+let model;
+
+
+function  strToHtmlElement(str){
+if(!str) return;
+const div = document.createElement("div");
+div.innerHTML+=str;
+return div.firstElementChild??-1;
+}
+
+
+
+async function LoadFile(p,t="json"){
+let d=await fetch(p);
+return await d[t]();
+}
+
+
+async function LoadDataSet(_dataUrl){
+
+const binData =await LoadFile(_dataUrl, "arrayBuffer");
+const data = new Uint8Array(binData);
+
+return tf.tidy(()=>{
+let dt = tf.tensor(data).reshape([-1, 785]);
+
+let [YS, XS] = dt.split([1, 784], [1, 0]);
+
+XS = XS.toFloat().div(255);
+YS = YS.toFloat();
+
+return [XS, YS];
+
+});
+
+}
+
+
+function getCurrentNow(){
+
+let _d = new Date();
+
+return [_d.getHours(), _d.getMinutes(), _d.getSeconds(), _d.getMilliseconds()];
+}
+
+
+function drawArc(e){
+const {pageX:mx, pageY:my} = e.changedTouches[0];
+const {x, y} = canvas.getClientRects()[0],
+r=12, color="#fff9";
+ctx.beginPath();
+ctx.fillStyle=color;
+ctx.arc( mx - x, my - y, r, 0, 2*Math.PI, false);
+ctx.fill();
+ctx.closePath();
+}
+
+
+function clearCanvas(){
+ctx.fillStyle="#000";
+ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+}
+
+
+function makeModel(modelType=true){
+
+let m;
+if(modelType){
+m= tf.sequential();
+m.add(tf.layers.inputLayer({ inputShape: 784}));
+m.add(tf.layers.dense({units:512, activation:"relu"}));
+m.add(tf.layers.dense({units:256, activation:"relu"}));
+m.add(tf.layers.dense({units:10, activation:"softmax"}));
+}else{
+let il = tf.input({shape: [ 784]});
+let ol1 = tf.layers.dense({units:512, activation:"relu"}).apply(il);
+let ol2 = tf.layers.dense({units:256, activation:"relu"}).apply(ol1);
+let ol3 = tf.layers.dense({units:10}).apply(ol2);
+m=tf.model({inputs: il, outputs:ol3});
+
+}
+
+return m;
+
+}
+
+
+function trainingModel(m) {
+	if(m.isTraining) return -1;
+	
+	//time to train
+	let _train_time =0, _epoch_time = 0, _out=""
+	
+	let opt = {
+		epochs: Epoch,
+		batchSize: BatchSize,
+		verbose: 2,
+		callbacks: {
+			onTrainBegin: (a, b)=>{
+				_train_time = getCurrentNow();
+				_out += `training start time ${_train_time[1]}:${_train_time[2]}\n`;
+				console.log(a, b);
+			},
+			onEpochBegin: (a, b)=>{
+				_epoch_time = getCurrentNow();
+				console.log("epoch begin :", a, b);
+			},
+			onEpochEnd: (a, log)=>{
+				let currTime = getCurrentNow();
+				_out += `epoch ${a} start= ${_epoch_time[1]}:${_epoch_time[2]}, end= ${currTime[1]}:${currTime[2]} acc=${log.acc.toFixed(3)}, loss=${log.loss.toFixed(3)}\n`;
+				console.log("epoch end :", a , log);
+			},
+			onTrainEnd: (a, b)=>{
+				let currTime = getCurrentNow();
+				_out += `training end time ${ currTime[1]}:${currTime[2]}`;
+				console.log(a, b);
+			},
+		},
+	};
+	
+	return model.fit(x_test, y_test, opt).then((r)=>{
+		return _out;
+	});
+	
+}
+
+
+
+function modelPredict(m, img) {
+	return tf.tidy(()=> {
+		const imgTensor = tf.browser.fromPixels(img, 1).resizeBilinear([28, 28]).toFloat().div(255).reshape([1, 784]);
+		const output = m.predict(imgTensor).argMax(1).dataSync()[0];
+		return output;
+	});
+}
+
+
+
+
+
+
+async function INITIAL(){
+
+canvas = document.querySelector("canvas");
+ctx = canvas.getContext("2d");
+
+const cleanBtn = document.querySelector(".btn.clean");
+const predictBtn = document.querySelector(".btn.predict");
+const trainBtn = document.querySelector(".btn.train");
+const evaluateBtn = document.querySelector(".btn.evaluate");
+const downloadBtn = document.querySelector(".btn.download");
+
+const predictPara = document.querySelector(".predictPara");
+
+
+const cs = 280;
+canvas.width = cs;
+canvas.height = cs;
+
+
+const LABELList=["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "noise" , "oooo", "zzzz"];
+
+const testDataUrl = "/sdcard/g_js_libs/dataSets/mnist/mnist_mini.bin";
+const trainDataUrl = "/sdcard/g_js_libs/dataSets/mnist/mnist_test.bin";
+
+//[x_train, y_train] = await LoadDataSet(trainDataUrl);
+[x_test, y_test] = await LoadDataSet(testDataUrl);
+
+
+
+const modelUrl = "/sdcard/g_js_libs/models/HandReco/v4/model.json"
+
+model = (false)? makeModel(true): await tf.loadLayersModel(modelUrl);
+
+
+//let _tc =`{"loss":"sparse_categorical_crossentropy","metrics":["accuracy"],"optimizer_config":{"class_name":"Adam","config":{"learningRate":0.001,"beta1":0.9,"beta2":0.999,"epsilon":0.0001}}}`;
+//model.loadTrainingConfig(JSON.parse(_tc))
+
+// let _tc = `{"loss":"sparse_categorical_crossentropy","metrics":["accuracy"],"optimizer_config":{"class_name":"Adam","config":{"learningRate":0.01,"beta1":0.9,"beta2":0.999,"epsilon":0.0001}}}`;
+// let _tc = JSON.stringify(model.getTrainingConfig());
+
+
+// console.log(model)
+// model.summary();
+
+
+
+// let lr = 0.69; //1e-2;
+// let loss = false?"categoricalCrossentropy": "sparseCategoricalCrossentropy";
+// let optimizer = tf.train.adam(lr);
+
+
+// model.compile({ loss, optimizer, metrics: ['accuracy'] });
+
+
+
+
+
+
+cleanBtn.addEventListener("click", clearCanvas)
+
+
+ctx.canvas.addEventListener("touchstart", drawArc)
+ctx.canvas.addEventListener("touchmove", drawArc)
+ctx.canvas.addEventListener("touchend", drawArc)
+
+
+predictBtn.addEventListener("click", (e)=>{
+	
+//	console.log(predictBtn.disabled)
+	
+//	console.log(getCurrentNow())
+
+	let result =modelPredict(model, canvas);
+	console.log(result);
+	predictPara.textContent = `predict : ${LABELList[result].toUpperCase()}`;
+});
+
+
+
+
+trainBtn.addEventListener("click", ()=>{
+
+//console.log(model.isTraining);
+
+
+
+trainBtn.disabled = (true);
+trainingModel(model).then((r)=>{
+//console.log(r);
+
+trainBtn.disabled = (false);
+});
+
+
+
+
+});
+
+
+evaluateBtn.addEventListener("click", ()=>{
+	let [_loss, _acc] = model.evaluate(x_test, y_test, {
+		batchSize:BatchSize, //verbose:2
+	});
+	
+	let f_loss = _loss.dataSync()[0];
+	let f_acc = _acc.dataSync()[0];
+	console.log("loss : ", f_loss);
+	console.log("accuracy : ", f_acc);
+});
+
+
+downloadBtn.addEventListener("click",async ()=>{
+
+const saveINfO  = await model.save("downloads://mnistModel");
+console.log(saveINfO);
+
+});
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+try{
+console.log(tf)
+
+tf.ready().then(INITIAL);
+
+}catch(err){
+console.log(err)
+}
+
+</script>
+
+</body>
+</html>

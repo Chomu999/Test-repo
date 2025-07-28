@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0" />
+<title>test engine</title>
+<meta name="author" content="techbyte"/>
+
+<style>
+
+*{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+html{
+font-size: 10px;
+}
+
+body{
+background: #505050;
+}
+
+canvas{
+background: salmon;
+}
+
+
+
+.btnBox{
+margin: 10px auto;
+background: #f0f0f0;
+width: 90vmin;
+height: 90vmin;
+text-align: center;
+border-radius: 10px;
+
+
+}
+
+.btn{
+width: 30%;
+height: 30%;
+background: #212121;
+display: inline-block;
+}
+
+.up, .left, .right, .down{
+/* background: hotpink; */
+transition: all 0.1s ease-in;
+&:is(:hover){
+border-radius: 20px;
+/* background: #FF747C; */
+}
+&:not(:hover){
+
+/* background: #FFD788; */
+}
+}
+
+.btnBox{
+:nth-child(odd){
+background: red;
+}
+:nth-child(even){
+background: cyan;
+}
+}
+
+
+</style>
+
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+
+<div class="btnBox">
+
+<span class="btn"></span>
+<span class="btn up"></span>
+<span class="btn"></span>
+
+<span class="btn left"></span>
+<span class="btn"></span>
+<span class="btn right"></span>
+
+<span class="btn"></span>
+<span class="btn down"></span>
+<span class="btn"></span>
+
+</div>
+
+<script>
+
+let INPUTS={};
+
+;(function (){
+//querySelector
+const {PI, sin, cos} = Math;
+
+const canvas = document.querySelector("canvas");
+const ctx = canvas.getContext("2d");
+
+
+const btns = document.querySelectorAll(".btn");
+//console.log(btns)
+
+
+const canvasSize = innerWidth>innerHeight?innerHeight:innerWidth;
+
+const CW = canvasSize, CH = canvasSize;
+canvas.width=CW;
+canvas.height=CH;
+
+let clearColor="#000";
+const gravity = 9.8;
+
+
+
+class Rand{
+
+static float(min=1, max=2){
+return Math.random() * ( max - min + 1) + min;
+}
+
+static int(min=1, max=2){
+return Math.floor(Rand.float(min, max))
+}
+
+static choice(...arg){
+return arg[Rand.int(0, arg.length - 1)];
+}
+static color(len=3){
+let out = "#";
+for(let i=0;i<len;++i){
+out += Rand.choice(..."0123456789abcdef".split(""));
+
+}
+return out;
+}
+
+}
+
+
+class Vec3{
+constructor({x=0, y=0, z=0}){
+this.x=x;
+this.y=y;
+this.z=z;
+}
+
+}
+
+function vec3(x=0, y=0, z=0){
+return new Vec3({x, y, z});
+}
+
+
+function Mat3(){
+return [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+}
+
+
+function angleToRadian(angle=360){
+return ((2*PI)/360)*angle;
+}
+
+
+vec3.__proto__.mulMat = function mulMat(v, m){
+
+let x = (v.x*m[0][0]) + (v.y*m[0][1]) + (v.z*m[0][2]);
+let y = (v.x*m[1][0]) + (v.y*m[1][1]) + (v.z*m[1][2]);
+let z = (v.x*m[2][0]) + (v.y*m[2][1]) + (v.z*m[2][2]);
+
+return  vec3(x, y, z);
+}
+
+
+Mat3.__proto__.rotX = function(angle=0){
+let c = cos(angle), s =sin(angle);
+return [
+	[  1,  0,  0],
+	[  0,  c,  s],
+	[  0, -s,  c],
+	];
+}
+
+
+
+Mat3.__proto__.rotY =function(angle=0){
+let c = cos(angle), s =sin(angle);
+return [
+	[  c,  0,  s],
+	[  0,  1,  0],
+	[ -s,  0,  c],
+	];
+}
+
+
+
+
+Mat3.__proto__.rotZ = function(angle=0){
+let c = cos(angle), s =sin(angle);
+return [
+	[  c,  s,  0],
+	[ -s,  c,  0],
+	[  0,  0,  1],
+	];
+}
+
+function drawVec(x, y, r=5, color="#fff"){
+ctx.beginPath();
+ctx.fillStyle=color;
+ctx.strokeStyle="#fff";
+ctx.arc(x, y, r, 0, angleToRadian(360), false);
+ctx.fill();
+ctx.stroke()
+}
+
+
+
+function keyControl(b){
+
+
+btns.forEach((btn, btnIndex)=>{
+
+btn.addEventListener("touchstart", (event)=>{
+let _cn_ = btn.classList[1];
+if(!_cn_) return -1;
+INPUTS[_cn_] = true;
+});
+
+btn.addEventListener("touchend", (event)=>{
+let _cn_ = btn.classList[1];
+if(!_cn_) return -1;
+INPUTS[_cn_] = false;
+});
+
+
+
+});
+
+}
+
+
+
+
+
+const center = vec3(CW/2, CH/2, 1000);
+
+
+const proj = Mat3();
+
+const Points=[];
+
+
+Points[0] = vec3(100, 100, 100);
+Points[1] = vec3(100, 200, 100);
+Points[2] = vec3(200, 100, 100);
+Points[3] = vec3(200, 200, 100);
+
+
+Points[4] = vec3(100, 100, -100);
+Points[5] = vec3(100, 200, -100);
+Points[6] = vec3(200, 100, -100);
+Points[7] = vec3(200, 200, -100);
+
+
+
+
+let angle = 0;
+
+
+function update(dt){
+
+ctx.fillStyle=clearColor;
+ctx.fillRect(0, 0, CW, CH);
+
+angle += angleToRadian(5) * dt;
+
+for (const p of Points){
+
+
+let translated = vec3( p.x - center.x , p.y - center.y, p.z - center.z);
+
+let rotated = vec3.mulMat(translated, Mat3.rotZ(angle));
+
+rotated = vec3.mulMat(rotated, Mat3.rotX(angle));
+
+//rotated = vec3.mulMat(rotated, Mat3.rotX(angle));
+
+let moveBack = vec3(rotated.x + center.x, rotated.y + center.y, rotated.z + center.z);
+
+let proj2D = vec3.mulMat(moveBack, proj);
+
+drawVec(proj2D.x, proj2D.y, 3);
+
+
+}
+
+
+
+
+
+}
+
+
+
+let lt=performance.now();
+function animate(ts){
+
+let curr = performance.now();
+let dt = (curr - lt) / 1000;
+lt = curr;
+update(dt)
+
+window.webkitRequestAnimationFrame(animate)
+}
+
+//webkitCancelAnimationFrame
+//webkitRequestAnimationFrame
+
+animate(0);
+
+
+
+
+
+
+
+//key inputs
+window.addEventListener("dblclick", ()=>{
+//console.log();
+if(clearColor == "#000") clearColor = "#0001";
+else clearColor = "#000";
+console.log(angle)
+});
+
+
+
+
+
+})();
+
+</script>
+
+</body>
+</html>

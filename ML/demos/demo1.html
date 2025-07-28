@@ -363,28 +363,40 @@ const trainDataSet = [
 {x:6, y:12},
 ];
 
+const xs = trainDataSet.map(d => d.x);
+const ys = trainDataSet.map(d => d.y);
+
+const xTensor = tf.tensor2d(xs, [xs.length, 1]);
+const yTensor = tf.tensor2d(ys, [ys.length, 1]);
+
+
 const model = tf.sequential();
-model.add(tf.layers.dense({ units: 1, inputShape: [1] }));
+model.add(tf.layers.dense({ units: 32, inputShape: [1] }));
+model.add(tf.layers.dense({ units: 1, activation:"sigmoid" }));
 //model.compile({ optimizer: tf.optimizers.adam(), loss: 'meanSquaredError' });
-model.compile({loss: 'meanSquaredError', optimizer: 'relu'});
+model.compile({loss: 'binaryCrossentropy', optimizer: 'adam'});
 
 
 
 
 
 trainBtnEl.addEventListener('click', () => {
-  const xs = trainDataSet.map(d => d.x);
-  const ys = trainDataSet.map(d => d.y);
-  const xTensor = tf.tensor2d(xs, [xs.length, 1]);
-  const yTensor = tf.tensor2d(ys, [ys.length, 1]);
-  model.fit(xTensor, yTensor, { epochs: 100 });
+
+model.fit(xTensor, yTensor, { epochs: 100 }).then(result=>{
+console.log(result)
 });
+
+});
+
+
+
+
 
 predictBtnEl.addEventListener('click', () => {
   const input = parseFloat(inputNumber.value);
   const xTensor = tf.tensor2d([input], [1, 1]);
-  const output = model.predict(xTensor);
-  outputTextEl.innerText = `Prediction: ${Math.round(output.dataSync()[0])}`;
+  const output = model.predict(xTensor).dataSync()[0];
+  outputTextEl.innerText = `Prediction: ${Math.round(output)}`;
 });
 
 

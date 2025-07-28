@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en-in">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+
+<style>
+
+*:after,*,*:before{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+:root{
+
+}
+
+*::selection{
+color: red;
+background: tan;
+}
+
+html{
+font-size: 10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style-type: none;
+}
+
+
+
+
+
+.wrapper{
+margin: 1rem auto;
+padding: 0.4rem;
+width: min(38rem, 100% - 2rem);
+background: #0e00FF21;
+border-radius: 1rem;
+}
+
+main{
+	
+	background: #A3FFDC;
+	border-radius: 5rem;
+	height: min(60rem, 100dvh - 4rem);
+}
+
+h1{
+margin: 1rem;
+color: #f01111;
+font-size: 4rem;
+text-align: center;
+text-transform: capitalize;
+}
+
+
+
+</style>
+
+<title>FETCH</title>
+
+</head>
+<body>
+
+<main>
+<h1>FETCH</h1>
+
+<div class="wrapper">
+
+
+
+</div>
+
+
+</main>
+
+
+
+
+<script type="module">
+"use strict";
+
+
+//some utils
+class Rand{
+
+static Float(min=0, max=1){
+return Math.random() * (max - min+1) + min;
+}
+
+static Int(min=6, max=9){
+return Math.floor( Rand.Float(min, max));
+}
+
+static Choice(...args){
+return args[Rand.Int(0, args.length - 1)];
+}
+
+static Color(len=3){
+let outColor="#";
+for(let i=0;i<len;++i){
+outColor+=Rand.Choice(..."0123456789abcdef".split(""));
+}
+return outColor;
+}
+
+}
+
+
+
+//sleep function help to wait/puase for a particular amount of time
+const sleep=time=>new Promise((res,rej)=>{
+setTimeout(()=>{res(true)}, time*1000);
+});
+
+
+
+
+
+const loadFile=(url=0)=>{
+
+}
+
+
+
+
+
+//main-entry
+const INITIAL=()=>{
+
+
+
+
+let serverUrl="http://localhost:3000/data";
+
+console.log("start")
+window.fetch(serverUrl).then( (r)=>{
+console.log(r??0)
+});
+
+console.log("end")
+
+
+}
+
+
+
+
+try{
+console.log("JavaScript is Awesome ");
+console.log(window);
+INITIAL();
+
+}catch(err){
+console.log(`javascript uncatch error: ${err} `);
+}
+
+
+</script>
+
+</body>
+</html>

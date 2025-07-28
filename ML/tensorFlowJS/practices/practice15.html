@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="hexbyte"/>
+
+
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+
+body{
+	color-scheme: default;
+	background: #353535;
+}
+
+canvas{
+margin: auto;
+width:90vmin;
+display: block;
+background: salmon;
+}
+
+h1{
+color: #F1F1F1;
+text-align: center;
+}
+
+</style>
+
+<title> TFJS practice 15 custom training</title>
+
+
+
+
+</head>
+
+<body>
+
+
+
+<h1>TFJS practice 15 custom training</h1>
+
+<canvas id="canvas"></canvas>
+
+
+<script  src="/sdcard/g_js_libs/tf.min.js"></script>
+
+
+<script>
+//"use strict";
+
+
+
+
+
+
+async function LoadFile(p,t="json"){
+let d=await fetch(p);
+return await d[t]();
+}
+
+
+
+
+//console.log(tf.regularizers);
+
+
+
+function getCurrnetTime(type=true){
+return  (type)?Date.now():performance.now();
+}
+
+
+function checkMemory(){
+let memory = tf.memory();
+let outStr="";
+for(let i in memory){
+outStr += `${i} : ${memory[i]}\n`;
+}
+return outStr;
+}
+
+
+//console.log(tf.addWeight)
+
+
+
+//console.log(tf.keras)
+//console.log(tf.Sequential())
+
+
+function getImage(arr, w=28, h=28){
+
+
+let imgData = new ImageData(w??28, h??28);
+
+for(let i=0;i<784;i++){
+let idx = i*4, color =arr[i]??0;// Math.floor(Math.random() * 255);
+
+imgData.data[idx+0] = color;
+imgData.data[idx+1] = color;
+imgData.data[idx+2] = color;
+imgData.data[idx+3] = 255;
+//console.log(idx)
+
+}
+
+return imgData;
+}
+
+
+
+function normalize(a, b, c){
+return (a - b) / (c - b);
+}
+
+
+
+function normalizeScale(v, min, max, smin, smax){
+return smin + normalize(v, min, max) * (smax - smin);
+}
+
+
+function drawCells(context, cells, cellSize){
+
+cells.forEach((cell, idx)=>{
+context.beginPath();
+if(cell.out){
+context.fillStyle=cell.color;
+context.fillRect(cell.x, cell.y, cellSize, cellSize);
+}
+
+context.strokeRect(cell.x, cell.y, cellSize, cellSize);
+//context.stroke();
+
+});
+
+
+
+}
+
+
+
+async function INITIAL(){
+
+let canvas = document.getElementById("canvas");
+let ctx = canvas.getContext("2d");
+
+let CW = 280, CH = 280;
+canvas.width=CW;
+canvas.height=CH;
+
+
+let rows=8, cols=8, cells=[], inputCells=[], cellSize = CW/rows;
+
+//console.log(myMap(CW/2, 0, CW));
+
+
+for(let r=0;r<rows;r++){
+for(let c=0;c<cols;c++){
+let x = r*CW/rows, y = c*CH/cols;
+cells.push({out:0, x, y});
+inputCells.push([ normalizeScale(x, 0, CW, -1, 1), normalizeScale(y, 0, CH, -1, 1) ]);
+}
+}
+
+
+
+
+drawCells(ctx, cells, cellSize);
+
+
+//data url
+let _url = "/sdcard/g_js_libs/DataSets/mnist/mnist_test.csv";
+
+
+console.log(checkMemory())
+
+let dataArray=[
+[0, 0, 0],
+[0, 1, 1],
+[1, 0, 1],
+[1, 1, 0],
+];
+
+let xData = dataArray.map(v=> [v[0], v[1]] );
+let yData = dataArray.map(v=> [v[2]] );
+
+//console.log(xData);
+//console.log(yData);
+
+
+
+let inputCellsTensor = tf.tensor(inputCells);
+let xs = tf.tensor(xData);
+let ys = tf.tensor(yData);
+
+//xs.print(true);
+//ys.print(true);
+
+let model = tf.sequential({
+	layers: [
+		tf.layers.inputLayer({inputShape:[2]}),
+		tf.layers.dense({units:8, activation:"relu"}),
+		tf.layers.dense({units:1, activation:"sigmoid"})
+	],
+});
+
+
+//console.log(tf.metrics)
+
+//model.compile({
+//	loss: "sparseCategoricalCrossentropy",
+//	optimizer: "adam",
+//	metrics: ["accuracy"],
+//});
+
+
+let eposhs = 30;
+let batchSize = 1;
+
+console.log(checkMemory())
+
+// console.log( tf.metrics)
+
+let optimizer = tf.train.adam(2e-2);
+let lossFunc = tf.metrics.binaryCrossentropy;
+let accFunc = tf.metrics.binaryAccuracy;
+
+
+
+
+
+
+
+
+console.log(checkMemory())
+
+
+
+
+console.log( "traing start\n");
+
+for(let eposh = 0; eposh < eposhs; eposh++ ){
+
+//no shuffel
+
+
+
+console.log("eposh start\n");
+
+for(let i = 0; i < xs.shape[0]; i += batchSize ){
+
+
+console.log("batch start\n");
+
+
+let xBatch = xs.slice([i], [batchSize]);
+let yBatch = ys.slice([i], [batchSize]);
+
+
+optimizer.minimize(()=> tf.tidy( () => lossFunc(yBatch, model.predict(xBatch) ).mean() ) );
+
+
+
+xBatch.dispose()
+yBatch.dispose()
+
+
+
+console.log("batch end\n");
+
+
+}
+
+
+
+console.log("eposh end\n");
+
+
+}
+
+
+console.log("traing end\n")
+
+
+let predicts = model.predict(xs);
+
+let _acc = accFunc( ys, predicts).dataSync()[0];
+console.log("accuracy :", _acc);
+
+let _loss = lossFunc( ys, predicts).dataSync()[0];
+console.log("loss :", _loss);
+
+
+console.log(checkMemory())
+
+
+
+
+
+
+
+
+
+
+canvas.addEventListener("dblclick", ()=>{
+
+
+//let imt0 = tf.browser.fromPixels(canvas, 1).reshape([1, 784]);
+
+let outArr = model.predict(inputCellsTensor).mul(255).dataSync();
+
+outArr.forEach((cv, idx)=>{
+cells[idx].out=(cv>0.01)?!0:!1;
+cells[idx].color=`rgb(${cv}, ${cv}, ${cv})`;
+});
+
+ctx.clearRect(0, 0, CW, CH)
+drawCells(ctx, cells, cellSize);
+
+model.predict(xs).print(true);
+
+
+});
+
+
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+try{
+
+console.log(tf)
+tf.ready().then(INITIAL);
+
+}catch(err){
+console.log(err)
+}
+
+</script>
+
+</body>
+</html>

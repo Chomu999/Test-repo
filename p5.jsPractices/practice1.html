@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+
+<title>p5 practice 1</title>
+
+<style>
+
+
+*{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+
+
+html{
+font-size: 10px;
+}
+
+a{
+text-decoration: none;
+}
+
+body{
+background: #111111;
+}
+
+
+
+
+</style>
+
+
+</head>
+
+<body>
+
+
+
+
+
+
+<script defer src="/sdcard/g_js_libs/p5.min.js"></script>
+
+
+<script>
+
+
+
+
+function setup(){
+createCanvas(380, 380);
+}
+
+
+function draw(){
+//background(204);
+if(mouseIsPressed){
+fill(0);
+
+}else fill(255, 0, 0);
+
+ellipse(mouseX, mouseY, 80, 80);
+
+}
+
+</script>
+
+</body>
+</html>

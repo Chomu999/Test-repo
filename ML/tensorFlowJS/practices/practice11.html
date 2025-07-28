@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="hexbyte"/>
+
+
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+
+body{
+
+color-scheme: default;
+background: #353535;
+}
+
+canvas{
+margin: auto;
+width:90vmin;
+display: block;
+background: salmon;
+}
+
+h1{
+color: #F1F1F1;
+text-align: center;
+}
+
+.center{
+width: 100%;
+background: #f002;
+text-align: center;
+}
+
+.hide{
+display: none;
+}
+
+img, canvas{
+	image-rendering: pixelated;
+}
+
+</style>
+
+<title> TFJS practice 11 DataSets</title>
+
+
+
+
+</head>
+
+<body>
+
+
+
+<h1>TFJS practice 11 DataSets</h1>
+
+<canvas id="canvas"></canvas>
+
+<div class="center hide">
+
+<img loading="lazy" id="testImage" class="testImage" src="/sdcard/Download/cat.jpg" alt="testImage">
+<img  class="mnistImage" src="/sdcard/Download/processedMnist (2).png" alt="mnist data">
+<img  class="mnist2" src="/sdcard/Download/2.png" alt="mnist 2">
+
+
+</div>
+
+
+<script  src="/sdcard/g_js_libs/tf.min.js"></script>
+
+
+<script>
+//"use strict";
+
+
+
+
+
+
+async function LoadFile(p,t="json"){
+let d=await fetch(p);
+return await d[t]();
+}
+
+
+
+
+//console.log(tf.regularizers);
+
+
+
+function getCurrnetTime(type=true){
+return  (type)?Date.now():performance.now();
+}
+
+
+function getMomoryStatus(){
+let memory = tf.memory();
+let outStr="";
+for(let i in memory) outStr += `${i} : ${memory[i]}\n`;
+return outStr;
+}
+
+
+//console.log(tf.addWeight)
+
+
+
+//console.log(tf.keras)
+//console.log(tf.Sequential())
+
+
+function getImageData(arr, w=28, h=28){
+
+
+let imgData = new ImageData(w??28, h??28);
+
+for(let i=0;i<784;i++){
+let idx = i*4, color =arr[i]??0;// Math.floor(Math.random() * 255);
+
+imgData.data[idx+0] = color;
+imgData.data[idx+1] = color;
+imgData.data[idx+2] = color;
+imgData.data[idx+3] = 255;
+//console.log(idx)
+
+}
+
+return imgData;
+}
+
+
+
+function contentDownloader(data, name="file.txt", type="bin/json"){
+
+let _a = document.createElement("a");
+
+let _b = new Blob( [ data ], {
+	type
+});
+
+let _u = URL.createObjectURL(_b);
+
+_a.download = name??"dummy.bin";
+_a.href = _u;
+_a.click();
+
+}
+
+
+async function INITIAL(){
+
+let canvas = document.getElementById("canvas");
+let ctx = canvas.getContext("2d");
+
+
+const CW = 1*28//window.innerWidth;
+const CH = 1*28//window.innerHeight;
+canvas.width= CW;
+canvas.height=CH;
+
+
+//Number of image =  60000, width = 28, height = 28, channel = 1, label = 1
+//60000*28*28+1*1
+let a=47100000; // 10000*(28*28+1)*1
+let _bit = 1;
+let _byte = _bit*8;
+let _kilobyte = _byte*1024;
+let _megabyte = _kilobyte*1024;
+//console.log(bit, bytes, kbs, mbs);
+
+//console.log(a*bytes / mbs)
+//console.log(a)
+
+
+
+
+//data url
+//let _url = "/sdcard/g_js_libs/DataSets/mnist/mnist_test.csv";
+
+
+let model = tf.sequential({layers:[
+tf.layers.dense({units:4, inputShape:[2]}),
+tf.layers.dense({units:1}),
+]});
+model.compile({optimizer:"adam", loss:"meanSquaredError", metrics:["accuracy"] });
+//model.summary()
+//console.log(model)
+
+
+console.log(tf.data)
+
+let xs = tf.randomNormal([1000, 2]);
+let ys = tf.randomNormal([1000, 1]);
+
+let xval = tf.data.array([xs]);
+let yval = tf.data.array([ys]);
+
+//zip
+//let _dataset_ = new tf.data.zip({ xs:xval, ys:yval });
+//console.log(_dataset_);
+
+//Dataset
+//let _dataset_ = new tf.data.Dataset();
+//console.log(_dataset_);
+
+//FileDataSource
+//let _dataset_ = new tf.data.FileDataSource("nices");
+//console.log(_dataset_);
+
+//TextLineDataset
+//let _dataset_ = new tf.data.TextLineDataset("abcd");
+//console.log(_dataset_);
+
+return
+
+model.fitDataset(_dataset_, {epochs:10, batchSize:32, verbose:2}).then(r=>{
+console.log(r);
+model.evaluateDataset(_dataset_, {batchSize:32}).then(r2=>{
+let [loss, acc] = r2;
+
+console.log(loss.dataSync()[0])
+console.log(acc.dataSync()[0])
+
+});
+
+})
+
+//FileDataSource
+//let myData = new tf.data.FileDataSource(_url);
+//console.log(myData)
+//URLDataSource
+//let myData = new tf.data.URLDataSource(_url, {method:"get"});
+//console.log(myData)
+
+//CSVDataset
+//let myData = new tf.data.CSVDataset(_url);
+//console.log(myData)
+
+//Dataset
+//let myData = new tf.data.Dataset(_url);
+//console.log(myData)
+
+//array
+//let myData = new tf.data.array(_url);
+//console.log(myData)
+
+//csv
+//let rd = await LoadFile(_url, "text");
+//let myData =  tf.data.csv(_url, {	delimiter:"\n" });
+
+
+//csv
+//let rd = await LoadFile(_url, "text");
+//let myData =  tf.data.csv(_url, {	delimiter:"\n" });
+
+
+//DataStorage
+//let idk = new tf.DataStorage()
+//console.log(idk)
+
+
+
+
+
+return
+
+
+let mnist2 = document.querySelector("img.mnist2");
+
+
+console.log(mnist2);
+ctx.drawImage(mnist2, 0, 0)
+console.log([canvas]);
+//console.log(canvas.getContext("2d"));
+//console.log(canvas.captureStream());
+
+let newImgElem = new Image(280, 280);
+let _b64imgSrc = ctx.canvas.toDataURL();
+
+//console.log(_b64imgSrc);
+
+newImgElem.src=_b64imgSrc;
+document.body.append(newImgElem);
+
+
+
+//return
+
+let testImage = document.querySelector("img.testImage");
+let mnistImage = document.querySelector("img.mnistImage");
+
+
+
+//console.log([mnistImage]);
+
+
+let imgWidth = 28;
+let imgHeight = 28;
+
+//console.log(mnistImage.width / imgWidth)
+//console.log(mnistImage.height / imgHeight)
+
+let rows = mnistImage.width / imgWidth;
+let cols = mnistImage.height / imgHeight;
+
+
+
+//canvas.width = rows * imgWidth;
+//canvas.height = cols * imgHeight;
+
+let finalArr=[];
+
+for(let i=0;i<rows;i++){
+
+for(let j=0;j<cols;j++){
+
+
+//ctx.drawImage(mnistImage, i*imgWidth, j*imgHeight, imgWidth, imgHeight, i*imgWidth, j*imgHeight, imgWidth, imgWidth);
+ctx.drawImage(mnistImage, i*imgWidth, j*imgHeight, imgWidth, imgHeight, 0, 0, imgWidth, imgWidth);
+
+
+
+let imgData = ctx.getImageData(0, 0, imgWidth, imgHeight).data;
+
+
+let pixelR = [];
+
+for(let v=0;v<imgData.length / 4;v++){
+pixelR.push(imgData[v*4+0]);
+}
+
+finalArr.push(pixelR);
+
+}
+
+}
+
+
+console.log(finalArr.length);
+
+//ctx.clearRect(0, 0, CW, CH);
+
+let imgData = getImageData(finalArr[ 0 ], 28, 28);
+
+ctx.putImageData(imgData, 0, 0);
+
+
+
+
+return
+
+//let imageTensor = tf.browser.fromPixels(mnistImage, 1);//.reshape([-1, 28, 28]).reshape([-1, 784]);//.flatten();
+//let imgArr = await imageTensor.array();
+
+//let mnistImageData = getImageData(imgArr[0], 28, 28);
+//ctx.putImageData(mnistImageData, 0, 0);
+
+
+
+//let _a = /[1-7] [a-f]/;
+//let _b = RegExp("[1-7] [a-f]");
+//let _c = new RegExp("[1-7] [a-f]");
+
+
+console.log("8mgs")
+console.log(tf.browser)
+console.log(tf.image)
+
+
+
+
+
+
+
+return
+
+canvas.addEventListener("dblclick",async ()=>{
+return
+
+let rd =await LoadFile(_url, "text");
+
+//console.log(rd)
+
+let d2 = rd.split("\n");
+
+d2.pop();
+console.log(d2[d2.length - 1 ]);
+let fd = d2.map(r=>r.split(",").map(c=>+c));
+//let fd = d2[d2.length - 1].split(",");
+console.log("fd", fd.length)
+
+
+
+let imgArr= fd[0];//.slice(0, 784);
+
+//console.log(imgArr)
+
+let imgData = getImage(imgArr, 28, 28);
+ctx.putImageData(imgData, 0, 0)
+
+let full_data=[];
+
+for(let i=0;i<fd.length*0.1;i++){
+//pixed[i] = fd[i]
+//label[i] = pixed[i].shift()
+//console.log(1*i*784)
+full_data.push(...fd[i]);
+}
+
+//full_data.push(...pixed);
+
+full_data = full_data.flat();
+
+//full_data.push([label, pixed]);
+
+//console.log(full_data[0]);
+
+let sd = new Uint8Array(full_data).buffer;
+
+//console.log(sd)
+
+contentDownloader(sd, "mnist_mini.bin", "bin");
+
+})
+
+
+
+
+}
+
+
+
+
+
+
+
+
+try{
+
+
+console.log(tf)
+tf.ready().then(INITIAL);
+
+}catch(err){
+console.log(err)
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="hexbyte"/>
+
+
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+
+body{
+
+color-scheme: default;
+background: #353535;
+}
+
+h1{
+color: #F1F1F1;
+text-align: center;
+}
+
+canvas{
+margin:10 auto;
+width: 90vmin;
+display: block;
+background: salmon;
+image-rendering: pixelated;
+}
+
+.btnBox{
+margin: auto;
+padding: 10px;
+width:90vmin;
+height:90vmin;
+background: tan;
+text-align: center;
+
+.btn{
+/* margin: 10px 20px; */
+width: 30%;
+height: 30%;
+background: orange;
+display:inline-block;
+transition: 0.5s;
+}
+
+.btn:is(.w,.a,  .d, .s):hover{
+background: red;
+
+}
+
+
+}
+
+.hide{
+display: none;
+}
+
+</style>
+
+<title>Find Pair Game</title>
+
+
+
+
+</head>
+
+<body>
+
+
+
+<h1>Find Pair Game</h1>
+
+<canvas id="canvas"></canvas>
+
+<div class="btnBox">
+	<span class="btn "></span>
+	<span class="btn w"></span>
+	<span class="btn "></span>
+	<span class="btn a"></span>
+	<span class="btn "></span>
+	<span class="btn d"></span>
+	<span class="btn "></span>
+	<span class="btn s"></span>
+	<span class="btn "></span>
+</div>
+
+
+<script>
+"use strict";
+
+
+class Rand{
+
+static float(min=1, max=2){
+return Math.random() * (max-min+1) + min;
+}
+
+static int(min=10, max=20){
+return Math.floor(Rand.float(min, max));
+}
+
+static choice(...arg){
+return arg[Rand.int(0, arg.length - 1)];
+}
+
+static color(cl=3){
+let o="#";
+for(let i=0;i<cl;++i) o+=Rand.choice(..."0123456789abcdef".split(""));
+return o;
+}
+
+}
+
+
+
+
+
+
+function isEven(a) {
+	return !Boolean(a % 2);
+}
+
+
+
+
+
+
+
+
+
+function drawBall(context, x=10, y=10, r=9, color="red"){
+context.beginPath();
+context.arc(x, y, r, 0, 2*Math.PI, false);
+context.fillStyle = color;
+context.fill();
+}
+
+function drawBox(context, x=10, y=10, w=10, h=10, color="red"){
+context.beginPath();
+context.strokeStyle = color;
+context.strokeRect(x, y, w, h);
+//context.fillStyle = color;
+//context.fillRect(x, y, w, h);
+
+}
+
+
+function cleanCanvas(context){
+context.fillStyle="black";
+context.fillRect(0, 0, context.canvas.width, context.canvas.height);
+}
+
+
+
+let INPUTS = {};
+
+
+
+async function INITIAL(){
+//querySelector
+
+const btnBox = document.querySelector(".btnBox");
+
+const canvas = document.querySelector("canvas");
+const ctx = canvas.getContext("2d");
+
+let CW = 164;//innerWidth;
+let CH = 164;//innerHeight - 40;
+ctx.canvas.width = CW;
+ctx.canvas.height = CH;
+ctx.imageSmoothingEnabled  = false;
+
+cleanCanvas(ctx)
+console.log(ctx)
+
+///
+let pairTypeList, fpl, rows, cols, outRender;
+pairTypeList = ["red", "lightblue", "green", "yellow", "chocolate"];
+
+
+fpl = [];
+
+rows = 5, cols = 4;
+
+for(let r=0;r<rows;r++){
+fpl[r]=[];
+for(let c=0;c<cols;c++){
+
+let newPairItem = Rand.choice(...pairTypeList);
+fpl[r][c] = newPairItem;
+
+}
+
+}
+
+console.log(fpl)
+console.log(fpl.flat())
+console.log(fpl.toString())
+
+//console.log(fpl.toLocaleString())
+
+
+
+
+//render
+
+outRender = "";
+for(let r=0;r<rows;r++){
+outRender += "::";
+for(let c=0;c<cols;c++){
+outRender += fpl[r][c];
+if (c == 0) outRender += "^"
+}
+if(r == rows - 1 ) outRender += "::"
+}
+
+
+//console.log(outRender);
+
+
+
+
+
+
+//canvas.addEventListener("dblclick", ()=>{});
+
+
+//render and update
+function animate(dt){
+
+//cleanCanvas
+cleanCanvas(ctx)
+
+
+
+//graphis render
+
+fpl.forEach((row, i)=>{
+
+
+row.forEach((col, j)=>{
+
+let radius = 10;
+let rx =  radius*2 + i * (radius + radius*2);
+let ry =  radius*2 + j * (radius + radius*2);
+drawBall(ctx, rx , ry , radius, col);
+
+//console.log(col)
+
+
+let x, y, w =20, h=20;
+
+x = w/2 + i * (w + w/2);
+y = h/2 + j * (h + h/2);
+
+drawBox(ctx, x, y, w, h, "#ffffff");
+
+});
+
+});
+
+
+}
+
+
+
+
+
+let lt = 0;
+function MainLoop(){
+
+
+animate(0);
+
+
+
+window.webkitRequestAnimationFrame(MainLoop)
+
+}
+MainLoop();
+
+
+
+
+
+btnBox.addEventListener("touchstart", (event)=>{
+
+let _cn = event.target.classList[1];
+if(!_cn) return -1;
+INPUTS[_cn] = true
+//console.log(_cn);
+
+});
+
+
+
+
+
+}
+
+
+
+
+try{
+
+INITIAL();
+
+}catch(err){
+console.log(err)
+}
+
+</script>
+
+</body>
+</html>

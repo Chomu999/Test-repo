@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="hexbyte"/>
+
+
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+
+body{
+
+color-scheme: default;
+background: #353535;
+}
+
+h1{
+color: #F1F1F1;
+text-align: center;
+}
+
+</style>
+
+<title> tfjs practice 8 custom layers</title>
+
+
+
+
+</head>
+
+<body>
+
+
+
+<h1>TFJS practice 8 custom layers</h1>
+
+
+<script  src="/sdcard/g_js_libs/tf.min.js"></script>
+
+
+<script>
+//"use strict";
+
+
+
+
+
+
+async function LoadFile(p,t="json"){
+let d=await fetch(p);
+return await d[t]();
+}
+
+
+
+
+//console.log(tf.regularizers);
+
+
+
+function getCurrnetTime(type=true){
+return  (type)?Date.now():performance.now();
+}
+
+
+function checkMemory(){
+let memory = tf.memory();
+let outStr="";
+for(let i in memory){
+outStr += `${i} : ${memory[i]}\n`;
+}
+console.log(outStr);
+}
+
+
+//console.log(tf.addWeight)
+
+
+class AD extends tf.layers.Layer{
+constructor(units, inputDim){
+super({});
+
+this.w = tf.variable([1, 2] );
+this.b = tf.variable([0, 0] );
+}
+
+call(inputTensor, t){
+return tf.add(tf.matMul(inputTensor, this.w), this.b)
+}
+
+// __________________________________________________________________________________________
+
+getClassName(){
+return "ADLayer";
+}
+
+//build(e){
+//console.log(e)
+//}
+
+
+}
+
+
+
+
+
+function MODEL(){
+
+let ipt = tf.randomNormal([1, 784]);
+
+let w1 = tf.randomNormal([784, 32]);
+let b1 = tf.randomNormal([32]);
+let w2 = tf.randomNormal([32, 10]);
+let b2 = tf.randomNormal([10]);
+
+tf.tidy(()=>{
+
+let mlt1 = tf.matMul(ipt, w1);
+let a1 = tf.add(mlt1, b1);
+let r1 = tf.relu(a1);
+let mlt2 = tf.matMul(r1, w2);
+let a2 = tf.add(mlt2, b2);
+let p = a2.argMax(1);
+
+p.print(true);
+
+});
+
+
+}
+
+
+function makeModel(mt){
+let input=0, x=0, output=0,m=0;
+if(0==mt){
+
+input = tf.input({shape: [784] });
+x = new AD(32, 784).apply(input);
+output = new AD(10, 32).apply(x);
+m = tf.model({inputs:input, outputs:output })
+}
+
+else if(1==mt){
+m = tf.sequential();
+m.add(tf.layers.inputLayer({ inputShape: [784] }));
+m.add(new AD(32, 784))
+m.add(new AD(10, 32));
+}
+
+return m;
+}
+
+
+//console.log(tf.Sequential())
+
+async function INITIAL(){
+
+
+
+let model = makeModel(1);
+
+//return
+
+
+let lr = 1e-2;
+let loss = (false)?"categoricalCrossentropy": "sparseCategoricalCrossentropy";//tf.losses.softmaxCrossEntropy;
+let optimizer = tf.train.adam(lr);
+let metrics = [ "accuracy"];
+
+model.compile({loss, optimizer, metrics});
+
+model.summary()
+
+
+const XS = tf.randomNormal([1, 784]);
+//XS.print(true)
+const YS = tf.randomUniform([1, 1], 0, 10);
+//YS.print(true)
+
+checkMemory();
+
+model.predict(XS).print(true);
+return
+
+let ct = getCurrnetTime();
+
+let traintResult = await model.fit(XS, YS, {
+	epochs: 2,
+	batchSize: 64,
+	verbose:2,
+});
+
+
+console.log(traintResult);
+console.log(getCurrnetTime() - ct);
+
+
+
+
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+try{
+
+
+console.log(tf)
+tf.ready().then(INITIAL);
+
+}catch(err){
+console.log(err)
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="hexbyte"/>
+
+
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+html{
+font-size: 10px;
+}
+
+body{
+color-scheme: default;
+background: #353535;
+}
+
+canvas{
+margin: auto;
+/* width:90vmin; */
+display: block;
+background: white;
+}
+
+h1{
+color: #F1F1F1;
+text-align: center;
+}
+
+</style>
+
+<title> bird game</title>
+
+
+
+
+</head>
+
+<body>
+
+
+
+<h1> bird game</h1>
+
+<canvas id="canvas"></canvas>
+
+
+
+
+<script>
+"use strict";
+
+let canvas = document.querySelector("canvas");
+let ctx = canvas.getContext("2d");
+let CW=360, CH = 360;
+let gravity = 9.8;
+canvas.width = CW;
+canvas.height = CH;
+
+console.log(ctx)
+
+
+
+function randInt(min=1, max=10){
+return Math.floor(Math.random() * (max - min + 1) + min)
+}
+
+
+function drawArc(x, y, r, color="blue"){
+ctx.beginPath()
+ctx.arc(x, y, r, 0, 2*Math.PI);
+ctx.fillStyle=color;
+ctx.fill();
+
+}
+
+function drawBox(x, y, w, h, color="red"){
+
+ctx.beginPath()
+ctx.fillStyle=color;
+ctx.fillRect(x, y, w, h);
+ctx.strokeRect(x, y, w, h);
+
+}
+
+
+let pipes = [];
+
+let jumpVel = -100;
+let pipeVel = -15;
+let pipeInterval = 1000;
+let pipeTimer=0;
+let pipeTimeFactor=80;
+
+function genPipe(i=1){
+
+
+//let w  = 50;
+//let y = randInt(4, 8) * 20;
+//let h = randInt(2, 8) * 20;
+//let x =  CW + (w*5 * i);
+
+
+//let bottomY = h + y;
+//let bottomHeight = CH - (h + y);
+let w=50;
+let x = CW+w;
+let spacing = 140;
+let h =spacing// randInt(w, spacing);
+let bottomY = h + spacing;
+let bottomHeight = CH - bottomY;
+
+pipes.push({x, w, h, bottomY, bottomHeight});
+//pipes.push({x, y, w, h, bottomY, bottomHeight});
+
+//console.log("gen")
+
+}
+
+
+
+
+
+let x=80, y=80, radius=20;
+let vel_x =0, vel_y = 0;
+
+function draw(dt){
+ctx.beginPath()
+ctx.clearRect(0, 0, CW, canvas.height);
+//drawBox(x, y, 30, 30);
+
+//drawBox(0, 360, 40, 40);
+
+
+pipes.forEach((pipe)=>{
+drawBox(pipe.x, 0, pipe.w, pipe.h, "rgba(200, 0, 0, 0.3)");
+
+drawBox(pipe.x, pipe.h, pipe.w, pipe.bottomY - pipe.h, "rgba(0,200,0,0.3)");
+
+drawBox(pipe.x, pipe.bottomY,  pipe.w,  pipe.bottomHeight, "rgba(0, 0, 200, 0.1)");
+
+pipe.x += pipeVel * dt;
+
+});
+
+//bird
+drawArc(x, y, radius);
+
+
+vel_y += gravity;// * dt;
+y += vel_y * dt;
+
+
+//
+for(let i=pipes.length - 1;i>=0;i--){
+//console.log(i)
+let pipe = pipes[i];
+if(pipe.x <= 0 - pipe.w){
+pipes.splice(i, 1);
+}
+
+}
+
+
+if(pipeInterval < pipeTimer){
+pipeTimer=0;
+genPipe();
+}else{
+pipeTimer += pipeTimeFactor * dt;
+}
+
+
+
+}
+
+
+
+
+
+function update(dt){
+
+draw(dt)
+//console.log(dt)
+
+}
+
+
+let lt=0;
+function mainLoop(ts){
+//console.log("looping")
+
+let dt = (ts - lt) / 100;
+lt = ts;
+update(dt);
+
+requestAnimationFrame(mainLoop);
+}
+requestAnimationFrame(mainLoop);
+
+
+
+
+
+addEventListener("click", ()=>{
+
+vel_y += jumpVel;
+
+//console.log(pipes.length)
+
+
+});
+
+
+</script>
+
+</body>
+</html>

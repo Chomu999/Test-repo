@@ -1,0 +1,10 @@
+
+//helper commands//
+[+]curl
+[+]cat
+
+//helper websites//
+[+]arcabrr.com
+
+//hunting websites//
+[+]https://google.com

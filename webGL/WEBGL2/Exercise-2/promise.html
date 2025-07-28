@@ -73,19 +73,29 @@ const app=async()=>{
 
 
 
-
-
 let _freeTime=12;
 
-let a= async() => new Promise((resolve,reject)=>{
+let  LoadImage= async (src) => new Promise((resolve,reject)=>{
 const image=new Image();
-image.src="/storage/emulated/0/Download/Zelda2.png";
-image.onload = resolve(image)
+image.src=src??"/storage/emulated/0/Download/Zelda2.png";
+image.addEventListener("load", ()=> resolve(image) );
 //ans>=_freeTime?resolve():reject();
-})
+});
 
-let b=await a()
+
+
+let now = Date.now()
+
+let b=await LoadImage()
 console.log( b)
+console.log( Date.now() - now)
+
+
+
+
+
+
+
 
 }
 

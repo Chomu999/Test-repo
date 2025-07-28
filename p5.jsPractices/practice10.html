@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+
+<title>p5 practice 1</title>
+
+<style>
+
+
+*{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+
+
+html{
+font-size: 10px;
+font-style: italic;
+}
+
+a{
+text-decoration: none;
+}
+
+body{
+background: #f0f0f0;
+}
+
+
+canvas{
+	margin: auto;
+display: block;
+background: salmon;
+}
+
+</style>
+
+
+</head>
+
+<body>
+
+
+
+
+
+
+<script defer src="/sdcard/g_js_libs/p5.min.js"></script>
+
+
+<script>
+
+//10-1
+//let bug;
+
+//10-2
+let bug, jit;
+
+function preload(){
+
+
+}
+
+
+function setup(){
+
+createCanvas(380, 380);
+
+//10-1
+//bug = new JitterBug(width/2, height/2, 30);
+
+//10-2
+bug = new JitterBug(width/2, height/2, 30);
+jit = new JitterBug(width/4, height/9, 10);
+
+
+
+}
+
+
+
+
+
+
+function draw(){
+
+bug.move();
+bug.draw()
+jit.move()
+jit.draw()
+
+}
+
+
+
+
+
+
+
+
+//10-1
+function JitterBug(x, y, diameter){
+this.x=x;
+this.y=y;
+this.diameter=diameter;
+this.speed=2.5;
+this.move=function(){
+this.x += random(-this.speed, this.speed);
+
+this.y += random(-this.speed, this.speed);
+}
+this.draw=function(){
+ellipse(this.x, this.y, this.diameter, this.diameter)
+}
+
+}
+
+
+//todo robote
+
+
+</script>
+
+</body>
+</html>

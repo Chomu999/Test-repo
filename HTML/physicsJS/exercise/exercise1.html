@@ -64,8 +64,8 @@ const ctx=canvas.getContext("2d")
 
 //console.log([])
 
-canvas.width=640
-canvas.height=270
+canvas.width=380
+canvas.height=400
 
 const balls=[];
 const walls=[];
@@ -100,7 +100,6 @@ if(Vec2.dot(w1.unit(), wall_end_to_ball) > 0) return w1.end;
 
 let closestDist = Vec2.dot(w1.unit(), ball_to_wall_start);
 let closestVec = w1.unit().mul(closestDist);
-
 return w1.start.sub(closestVec);
 
 
@@ -496,7 +495,7 @@ requestAnimationFrame(MainLoop)
 
 
 
-canvas.addEventListener("keydown", (e)=>{
+window.addEventListener("keydown", (e)=>{
 if(!e.key) return 
 if(e.key=="w") action.up=1
 if(e.key=="a") action.left=1
@@ -504,7 +503,7 @@ if(e.key=="d") action.right=1
 if(e.key=="s") action.down=1
 })
 
-canvas.addEventListener("keyup", (e)=>{
+window.addEventListener("keyup", (e)=>{
 if(!e.key) return 
 if(e.key=="w") action.up=0
 if(e.key=="a") action.left=0

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="hexbyte"/>
+
+
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+
+body{
+
+color-scheme: default;
+background: #353535;
+}
+
+h1{
+color: #F1F1F1;
+text-align: center;
+}
+
+</style>
+
+<title> tfjs practice 7 subclass</title>
+
+
+
+
+</head>
+
+<body>
+
+
+
+<h1>TFJS practice 7 subclass</h1>
+
+
+<script  src="/sdcard/g_js_libs/tf.min.js"></script>
+
+
+<script>
+//"use strict";
+
+
+
+
+
+class CNNBlock extends tf.layers.Layer{
+constructor(out=33, kr=3){
+super({});
+this.conv = tf.layers.conv2d({filters:out, kernelSize:kr, padding: "same"});
+this.bn = tf.layers.batchNormalization();
+this.ralu = tf.layers.reLU();
+}
+
+apply(xTensor, training=false){
+let x = this.conv.apply(xTensor, training);
+x = this.bn.apply(x, training);
+x = this.ralu.apply(x, training);
+return x;
+}
+
+getClassName(){
+return "CNNBlockLayer";
+}
+
+}
+
+
+class ResBlock extends tf.layers.Layer{
+constructor(channels){
+super()
+this.cnn1 = new CNNBlock(channels[0]);
+this.cnn2 = new CNNBlock(channels[1]);
+this.cnn3 = new CNNBlock(channels[2]);
+this.pooling = tf.layers.maxPooling2d({ poolSize: [2, 2] });
+
+//this.eye_map = tf.layers.conv2d({filters:channels[1], kernelSize:1, padding: "same"});
+
+//console.log(this.eye_map);
+
+}
+
+apply(inputTensor, training=false){
+let x = this.cnn1.apply(inputTensor, training);
+x = this.cnn2.apply(x, training);
+
+//x = this.eye_map.apply(x, training);
+
+
+x = this.cnn3.apply( x, training);
+
+
+return this.pooling.apply(x);
+}
+
+getClassName(){
+
+return "ResBlockLayer";
+}
+
+
+}
+
+
+class BDBlock extends tf.layers.Layer{
+constructor(u=10){
+super({});
+
+this.l = tf.layers.dense({units:u});
+this.a = tf.layers.reLU();
+}
+
+
+call(xTensor, training=false){
+let x = this.l.apply(xTensor, training);
+x = this.a.call(x);
+return x;
+}
+
+
+apply(xTensor, training=false){
+let x = this.l.apply(xTensor, training);
+x = this.a.apply(x);
+return x;
+}
+
+getClassName(){
+return "BDBlockLayer";
+}
+
+config(){
+
+}
+
+}
+
+
+
+
+//
+class ResNet extends tf.layers.Layer{
+
+constructor(numChannel){
+super({});
+this.block1 = new ResBlock([32, 32, 64]);
+this.block2 = new ResBlock([128, 128, 256]);
+this.block3 = new ResBlock([128, 256, 512]);
+this.pooling = tf.layers.globalAveragePooling2d({});
+this.classifier = tf.layers.dense({ units: numChannel} );
+}
+
+
+apply(inputTensor, training=false){
+let x = this.block1.apply(inputTensor, training);
+x = this.block2.apply(x, training);
+x = this.block3.apply(x, training);
+x = this.pooling.apply(x, training);
+x = this.classifier.apply(x, training);
+return x;
+}
+
+
+getClassName(){
+return "ResNetLayer"
+}
+
+
+
+}
+
+
+
+async function LoadFile(p,t="json"){
+let d=await fetch(p);
+return await d[t]();
+}
+
+
+
+
+//console.log(tf.regularizers);
+
+
+
+function getCurrnetTime(type=true){
+return  (type)?Date.now():performance.now();
+}
+
+
+function checkMemory(){
+let memory = tf.memory();
+let outStr="";
+for(let i in memory){
+outStr += `${i} : ${memory[i]}\n`;
+}
+console.log(outStr);
+}
+
+
+
+function myModel(mt=0){
+
+	let model = 0;
+	let input=0, x=0, output=0;
+	
+	if(0==mt){
+		model = tf.sequential({layers:[
+		tf.layers.inputLayer({inputShape:[784]}),
+		tf.layers.dense({units:512, name:"a1a",}),
+		tf.layers.reLU(),
+		tf.layers.dense({units:256, name:"a1b",}),
+		tf.layers.reLU(),
+		tf.layers.dense({units:10}),
+		]});
+	}
+	else if(1==mt){
+		input = tf.layers.input({shape:[784]});
+		x = tf.layers.dense({units:512}).apply(input);
+		x = tf.layers.reLU().apply(x);
+		x = tf.layers.dense({units:256}).apply(x);
+		x = tf.layers.reLU().apply(x);
+		output = tf.layers.dense({units:10}).apply(x);
+		model = tf.model({inputs:input, outputs:output});
+	}
+	else if(2==mt){
+		input = tf.layers.input({shape: [28, 28, 1] });
+		x = new CNNBlock(32, 3).apply(input);
+		x = new CNNBlock(64, 5).apply(x);
+		x = new CNNBlock(128, 5).apply(x);
+		x = tf.layers.flatten().apply(x);
+		output = tf.layers.dense({units:10 }).apply(x);
+		model = tf.model({ inputs: input, outputs: output });
+	}
+	else if(3==mt){
+		input = tf.input({shape:[784]});
+		x = new BDBlock(512).apply(input);
+		x = new BDBlock(256).apply(x);
+		output = tf.layers.dense({units:10}).apply(x)
+		model = tf.model({inputs:input, outputs:output});
+	}
+	else if(4==mt){
+		input = tf.input({shape: [28, 28, 1]});
+		output = new ResNet(10).apply(input);
+		model = tf.model({inputs: input, outputs: output });
+	}
+	
+	return model;
+}
+
+
+
+
+
+async function INITIAL(){
+
+
+const DATASET_SHAPE = [28, 28, 1];
+const EPOCH = 2;
+const BATCHSIZE = 32;
+
+
+
+
+
+const dataSetPath = "/sdcard/g_js_libs/dataSets/mnist/parseMiniData.json";
+
+
+const dataset = await LoadFile(dataSetPath, "json");
+
+let imageArr = dataset.map(d=>d[1]);
+let labelArr = dataset.map(d=>d[0]);
+
+
+let XS = tf.tidy( () => tf.tensor(imageArr).div(255).reshape([-1, ...DATASET_SHAPE ]) );
+//XS.print(true)
+
+
+let YS = tf.tidy( () => tf.tensor(labelArr) );
+//YS.print(true)
+
+
+
+
+//13306 with out relu
+//90586
+//361354
+//671242
+//672138
+
+
+//1576458
+//resbit model tp starting 2326314// 2326314  2326314 // finsh//2990570
+//2409674
+let model = myModel(4);
+
+//535818
+//my custom layer block model total parameters 535818
+
+//console.log(model);
+
+model.summary()
+
+//model.save("downloads://ResNet-model");
+
+
+
+
+let _x = tf.randomNormal([1, ...DATASET_SHAPE] );
+let _o = model.predict(_x);
+
+
+_x.dispose();
+_o.dispose();
+
+//tf.metrics tf.losses, tf.train
+
+//console.log(tf.metrics)
+//console.log(tf.metrics.sparseCategoricalAccuracy([10]))
+
+
+let lr = 1e-2;
+let loss = (false)?"categoricalCrossentropy": "sparseCategoricalCrossentropy";//tf.losses.softmaxCrossEntropy;
+let optimizer = tf.train.adam(lr);
+let metrics = [ "accuracy"];
+
+model.compile({loss, optimizer, metrics});
+
+
+
+checkMemory();
+
+
+return -1;
+
+
+let ct = getCurrnetTime();
+
+let traintResult = await model.fit(XS, YS, {
+	epochs: EPOCH,
+	//initialEpoch: 2,
+	batchSize: BATCHSIZE,
+	verbose:2,
+});
+
+
+console.log(traintResult);
+console.log(getCurrnetTime() - ct);
+
+
+
+
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+try{
+
+
+console.log(tf)
+tf.ready().then(INITIAL);
+
+}catch(err){
+console.log(err)
+}
+
+</script>
+
+</body>
+</html>

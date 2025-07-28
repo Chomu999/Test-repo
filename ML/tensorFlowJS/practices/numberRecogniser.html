@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="bytebhowmick"/>
+
+
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+:root{
+
+
+}
+
+
+html{
+font-size:10px;
+}
+
+a{
+text-decoration: none;
+}
+
+ul{
+list-style: none;
+}
+
+
+body{
+color-scheme: default;
+background: #353535;
+}
+
+h1{
+font-size: 30px;
+color: lime;
+text-align: center;
+padding: 10px;
+}
+
+canvas{
+margin: 10px auto;
+display: block;
+background: salmon;
+}
+
+button{
+margin: 10px;
+padding: 10px 20px;
+color: #fff;
+background: #979797;
+font-size: 30px;
+}
+
+
+
+</style>
+
+<title>practice 2</title>
+
+
+
+<script  src="/sdcard/g_js_libs/tf.min.js"></script>
+
+
+</head>
+
+<body>
+
+
+
+<hr>
+<h1 id="outputPara">777</h1>
+
+<hr>
+<canvas id="canvas"></canvas>
+
+<hr>
+<button id="cleanBtn">clean</button>
+
+<button id="predictBtn">predict</button>
+
+<hr>
+
+<button id="testModelBtn">test Model</button>
+
+
+
+<button id="previousBtn">previosBtn</button>
+
+<button id="nextBtn">next</button>
+<!-- <button id="predictBtn">predict</button> -->
+<hr>
+
+
+<script>
+//"use strict";
+
+
+const dataSetPath = "/sdcard/g_js_libs/dataSets/mnist/parseMiniData.json";
+const modelPath = "/sdcard/g_js_libs/models/HandReco/v3/model.json";
+
+
+let canvas, ctx;
+
+
+let dataSet, labelDataArray, imageDataArray;
+
+let model;
+
+let x_test, y_predicts;
+
+
+function drawArc(e){
+
+if(!e.isTrusted) return -1;
+
+let mx = e.clientX ?? e?.changedTouches[0].clientX;
+let my = e.clientY ?? e?.changedTouches[0].clientY;
+let r= 16, color="#FFFa";
+
+
+let {x:px, y:py} = ctx.canvas.getClientRects()[0];
+
+ctx.beginPath();
+ctx.fillStyle=color;
+ctx.arc(mx - px, my - py, r, 0, 2*Math.PI);
+ctx.fill();
+ctx.closePath();
+}
+
+
+//
+const getImgData = (arr, f=255)=> {
+	const imgData = new ImageData(28, 28);
+	for (let i = 0; i < arr.length; i++) {
+		const color = arr[i] * f;
+		imgData.data[i*4+0] = color;
+		imgData.data[i*4+1] = color;
+		imgData.data[i*4+2] = color;
+		imgData.data[i*4+3] = 255;
+	}
+	return imgData;
+}
+
+
+
+
+
+async function LoadFile(p,t="json"){
+const d = await fetch(p);
+return await d[t]();
+}
+
+function MakeModelv1(){
+
+let m = tf.sequential()
+m.add(tf.layers.dense( {inputShape:28*28} ) )
+m.add(tf.layers.dense( {inputShape:784, units:512, activation:"relu"} ) )
+n.add(tf.layers.dense( {units:256, activation:"relu"} ) )
+m.add(tf.layers.dense( {units:10, activation:"softmax"} ) )
+
+//console.log(tf.losses);
+//let loss = tf.losses.softmaxCrossEntropy()
+
+return m
+}
+
+function MakeModelv2(){
+
+let m = tf.sequential()
+m.add(tf.layers.dense( {inputShape:28*28} ) )
+m.add(tf.layers.dense( {inputShape:784, units:512, activation:"relu"} ) )
+n.add(tf.layers.dense( {units:256, activation:"relu"} ) )
+m.add(tf.layers.dense( {units:10, activation:"softmax"} ) )
+
+//console.log(tf.losses);
+//let loss = tf.losses.softmaxCrossEntropy()
+
+return m
+}
+
+
+
+
+async function INITIAL(){
+
+ canvas = document.getElementById("canvas");
+ ctx = canvas.getContext("2d");
+
+const canvasSize= 380;
+ctx.canvas.width=canvasSize;
+ctx.canvas.height=canvasSize
+
+//console.log(tf.cast([1, 2, 3], "float32"));
+
+
+dataSet = await LoadFile(dataSetPath);
+imageDataArray = dataSet.map(v=> v[1]);
+labelDataArray = dataSet.map(v=> v[0]);
+
+x_test = tf.tensor(imageDataArray);
+
+
+model = await tf.loadLayersModel(modelPath);
+
+
+
+
+cleanBtn.addEventListener("click", ()=>{
+ctx.fillStyle="#000";
+ctx.fillRect(0,0, ctx.canvas.width, ctx.canvas.height);
+});
+
+
+predictBtn.addEventListener("click", ()=>{
+
+tf.tidy(()=>{
+
+let imgTen = tf.browser.fromPixels(canvas, 1)
+.resizeNearestNeighbor([28, 28])
+.flatten()
+.cast("float32")
+.div(255)
+.expandDims();
+
+let output = model.predict(imgTen)
+.argMax(1)
+.dataSync()[0];
+
+outputPara.textContent=`prediction is ${output}`
+});
+
+
+});
+
+console.log([ctx.canvas])
+
+//for phone/tabelet
+ctx.canvas.addEventListener("touchstart", drawArc);
+
+ctx.canvas.addEventListener("touchmove", drawArc);
+
+ctx.canvas.addEventListener("touchend", drawArc);
+
+
+//for pc/computer
+ctx.canvas.addEventListener("mouseenter", drawArc)
+
+ctx.canvas.addEventListener("mousemove", drawArc)
+
+ctx.canvas.addEventListener("mouseleave", drawArc)
+
+
+
+
+
+nextBtn.addEventListener("click", () => {
+	if ( (!imageDataArray && !labelDataArray) || !y_predicts) return;
+	imageDataArray.push(imageDataArray.shift());
+	labelDataArray.push(labelDataArray.shift());
+	y_predicts.push(y_predicts.shift());
+	const imgArr = imageDataArray[0];
+	if (!imgArr) return;
+	const imgContext = getImgData(imgArr, 1);
+	if (!imgContext) return;
+	ctx.putImageData(imgContext, 0, 0);
+	
+	
+	outputPara.textContent = `label : ${labelDataArray[0]} predict : ${y_predicts[0]}`;
+});
+
+
+
+
+previousBtn.addEventListener("click", () => {
+	if ((!imageDataArray && !labelDataArray) || !y_predicts) return;
+	imageDataArray.unshift(imageDataArray.pop());
+	labelDataArray.unshift(labelDataArray.pop());
+	y_predicts.unshift(y_predicts.pop());
+	const imgArr = imageDataArray[0];
+	if (!imgArr) return;
+	const imgContext = getImgData(imgArr, 1);
+	if (!imgContext) return;
+	ctx.putImageData(imgContext, 0, 0);
+	
+	outputPara.textContent = `label : ${labelDataArray[0]} predict : ${y_predicts[0]}`;
+});
+
+
+testModelBtn.addEventListener("click", ()=>{
+
+if(!model) return -1;
+if(y_predicts) return -1;
+
+y_predicts = tf.tidy(()=>{
+
+let outputTensor = model.predict(x_test).argMax(1);
+
+return outputTensor.arraySync();
+});
+
+
+});
+
+
+
+}
+
+
+try{
+INITIAL()
+}catch(err){
+console.log(err)
+}
+
+</script>
+
+</body>
+</html>

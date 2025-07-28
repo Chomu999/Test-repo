@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="hexbyte"/>
+
+
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+
+body{
+
+color-scheme: default;
+background: #353535;
+}
+
+h1{
+color: #F1F1F1;
+text-align: center;
+}
+
+canvas{
+margin: auto;
+width: 90%;
+display: block;
+background: salmon;
+image-rendering: pixelated;
+}
+
+.hide{
+display: none;
+}
+
+</style>
+
+<title>Image Filter 2</title>
+
+
+
+
+</head>
+
+<body>
+
+
+
+<h1>Image Filter 2</h1>
+
+<canvas id="canvas"></canvas>
+
+<div class="hide">
+
+<img  class="testImage" src="/sdcard/Download/cat.jpg" alt="testImage" />
+<img  class="testImage" src="/sdcard/Download/2.png" alt="testImage" />
+
+</div>
+
+
+
+<!-- <script  src="/sdcard/g_js_libs/tf.min.js"></script> -->
+
+
+<script>
+//"use strict";
+
+
+
+class Rand{
+
+static float(min=1, max=2){
+return Math.random() * (max-min+1) + min;
+}
+
+static int(min=10, max=20){
+return Math.floor(Rand.float(min, max));
+}
+
+static choice(...arg){
+return arg[Rand.int(0, arg.length - 1)];
+}
+
+static color(cl=3){
+let o="#";
+for(let i=0;i<cl;++i) o+=Rand.choice(..."0123456789abcdef".split(""));
+return o;
+}
+
+}
+
+
+
+
+
+
+var  myRandom = function(s=null) {
+let seed = s??Date.now();
+let x = seed;
+
+
+x = (x ^ x << 13);
+x = (x ^ x >> 5);
+x = (x ^ x << 17);
+x = (x ^ x << 4);
+console.log(x)
+return+("0."+x.toString().replace("-", ""));
+}
+
+
+
+
+
+
+
+
+let canvas, ctx, testImage;
+
+
+let rawImgData, filteredImage, pooledImage;
+
+
+let stride = 2;
+
+let filter = [
+[  -1,  1,  0],
+[  -1,  1,  0],
+[  -1,  1,  0],
+];
+
+
+
+
+async function LoadFile(p,t="json"){
+let d=await fetch(p);
+return await d[t]();
+}
+
+
+
+
+function getIndex(x, y, w, c){
+return (x + y * w) * c;
+}
+
+function getCurrnetTime(type=true){
+return  (type)?Date.now():performance.now();
+}
+
+
+
+function getRandomFilter(){
+let out=[];
+for(let i=0;i<3;i++){
+out[i]=[];
+for(let j=0;j<3;j++){
+out[i][j]=Rand.int(-1, 1);
+}
+}
+return out;
+}
+
+
+
+
+
+function make2D(arr, x, y, width, height){
+	let out=[];
+	for(let i=x;i<width;i++){
+		out[i]=[];
+		for(let j=y;j<height;j++){
+			let index = (j+i*width)*4;
+			out[i][j] = [arr[index+0], arr[index+1], arr[index+2]];
+		}
+	}
+	return out;
+}
+
+
+function make1D(arr2d){
+let out=[], w = arr2d.length, h = arr2d[0].length;
+
+for(let i=0;i<w;i++){
+for(let j=0;j<h;j++){
+out.push(...arr2d[i][j]);
+}
+
+}
+
+return out;
+}
+
+
+
+function paresArrToImage(arr, width, height, channel){
+
+let imgData = new ImageData(width??28, height??28);
+for(let i=0;i<arr.length/channel;i++){
+let xi = (i);
+
+imgData.data[xi*4+0] = arr[xi*channel+0]??0;
+imgData.data[xi*4+1] = arr[xi*channel+1]??0;
+imgData.data[xi*4+2] = arr[xi*channel+2]??0;
+imgData.data[xi*4+3] = channel==4?arr[xi*channel+3]:255;
+
+}
+
+return imgData;
+}
+
+
+
+function MyPool(img, x ,y){
+
+let r= -Infinity, g=-Infinity, b=-Infinity;
+//let r= 0, g=0, b=0;
+for(let i=0;i<2;i++){
+
+for(let j=0;j<2;j++){
+let index = getIndex(x, y, img.width, 4);
+r = Math.max(img.data[index+0], r);
+g = Math.max(img.data[index+1], g);
+b = Math.max(img.data[index+2], b);
+}
+
+}
+return [r, g, b];
+}
+
+
+function Pool(img){
+
+//console.log(img)
+
+const outImg = new ImageData( img.width / stride, img.height / stride);
+
+
+for(let x = 0; x < img.width - 1; x+=stride){
+for(let y = 0; y < img.height - 1; y+=stride){
+
+let rgb = MyPool(img, x, y);
+
+let index = getIndex(x / stride, y /stride, outImg.width, 4);
+
+outImg.data[index+0] = rgb[0];
+outImg.data[index+1] = rgb[1];
+outImg.data[index+2] = rgb[2];
+outImg.data[index+3] = 255;
+
+}
+
+
+}
+
+return outImg;
+
+}
+
+
+
+
+function MyConv(img, x, y, filter){
+
+let r=0,g=0,b=0;
+
+for(let i=0;i<filter.length;i++){
+for(let j=0;j<filter[i].length;j++){
+
+const factor = filter[j][i];
+
+let pixelIndex = getIndex(x+i,  y+j, img.width, 4);
+r += img.data[pixelIndex+0] * factor;
+g += img.data[pixelIndex+1] * factor;
+b += img.data[pixelIndex+2] * factor;
+
+}
+
+}
+
+return [r, g, b];
+
+}
+
+
+function Conv(img, filter){
+
+const outImg = new ImageData( img.width, img.height);
+
+
+for(let x = 1; x < img.width-1; x++){
+for(let y = 1; y < img.height-1; y++){
+
+let rgb = MyConv(img, x, y, filter);
+
+let index = getIndex(x, y, img.width, 4);
+
+outImg.data[index+0] = rgb[0];
+outImg.data[index+1] = rgb[1];
+outImg.data[index+2] = rgb[2];
+outImg.data[index+3] = 255;
+
+}
+
+
+}
+
+return outImg;
+
+}
+
+
+
+async function INITIAL(){
+//console.log(document)
+//querySelector
+
+testImage = document.querySelector(".testImage");
+canvas = document.querySelector("canvas");
+ctx = canvas.getContext("2d");
+let dim = 28;
+
+let CW = 64;//innerWidth;
+let CH = 64;//innerHeight - 40;
+ctx.canvas.width = CW;
+ctx.canvas.height = CH;
+
+
+
+//console.log(testImage)
+
+
+//ctx.fillStyle="rgb(50, 100, 250)";
+//ctx.fillRect(0, 0, 28, 28);
+
+//ctx.fillStyle="rgb(60, 160, 260)";
+//ctx.fillRect(0, 0, 2, 2);
+
+
+ctx.drawImage(testImage, 90, 50, 64, 64, 0, 0, dim, dim);
+rawImgData = ctx.getImageData(0, 0, dim, dim);
+
+//filter = getRandomFilter();
+
+filteredImage = Conv(rawImgData, filter);
+ctx.putImageData(filteredImage, dim, dim * 0)
+
+pooledImage = Pool(filteredImage);
+ctx.putImageData(pooledImage, dim*0, dim * 1)
+
+
+
+canvas.addEventListener("dblclick", ()=>{
+
+true?window.INITIAL():window.location.reload();
+
+//console.log(location)
+
+});
+
+
+
+
+
+
+}
+
+
+
+
+try{
+
+
+INITIAL();
+
+
+
+
+
+}catch(err){
+console.log(err)
+}
+
+</script>
+
+</body>
+</html>

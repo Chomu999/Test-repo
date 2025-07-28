@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="hexbyte"/>
+
+
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+
+body{
+
+color-scheme: default;
+background: #353535;
+}
+
+canvas{
+margin: auto;
+width:90vmin;
+display: block;
+background: salmon;
+}
+
+h1{
+color: #F1F1F1;
+text-align: center;
+}
+
+</style>
+
+<title> TFJS practice 14 custom fit</title>
+
+
+
+
+</head>
+
+<body>
+
+
+
+<h1>TFJS practice 14 custom fit</h1>
+
+<canvas id="canvas"></canvas>
+
+
+<script  src="/sdcard/g_js_libs/tf.min.js"></script>
+
+
+<script>
+"use strict";
+
+
+
+
+// todo not implements yet
+// please maje it work
+
+async function LoadFile(p,t="json"){
+let d=await fetch(p);
+return await d[t]();
+}
+
+
+
+
+//console.log(tf.regularizers);
+
+
+
+function getCurrnetTime(type=true){
+return  (type)?Date.now():performance.now();
+}
+
+
+function checkMemory(){
+let memory = tf.memory();
+let outStr="";
+for(let i in memory){
+outStr += `${i} : ${memory[i]}\n`;
+}
+console.log(outStr);
+}
+
+
+//console.log(tf.addWeight)
+
+
+
+//console.log(tf.keras)
+//console.log(tf.Sequential())
+
+
+function getImage(arr, w=28, h=28){
+
+
+let imgData = new ImageData(w??28, h??28);
+
+for(let i=0;i<784;i++){
+let idx = i*4, color =arr[i]??0;// Math.floor(Math.random() * 255);
+
+imgData.data[idx+0] = color;
+imgData.data[idx+1] = color;
+imgData.data[idx+2] = color;
+imgData.data[idx+3] = 255;
+//console.log(idx)
+
+}
+
+return imgData;
+}
+
+
+
+function contentDownloader(data, name="file.txt", type="bin/json"){
+
+let _a = document.createElement("a");
+
+let _b = new Blob( [ data ], {
+	type
+});
+
+let _u = URL.createObjectURL(_b);
+
+_a.download = name??"dummy.bin";
+_a.href = _u;
+_a.click();
+
+}
+
+
+async function INITIAL(){
+
+let canvas = document.getElementById("canvas");
+let ctx = canvas.getContext("2d");
+
+canvas.width=28;
+canvas.height=28;
+
+
+//Number of image =  60000, width = 28, height = 28, channel = 1, label = 1
+//60000*28*28+1*1
+let a=47100000; // 10000*(28*28+1)*1
+let bit = 1;
+let bytes = bit*8;
+let kbs = bytes*1024;
+let mbs = kbs*1024;
+console.log(bit, bytes, kbs, mbs);
+
+console.log(a*bytes / mbs)
+console.log(a)
+
+
+
+
+
+//data url
+let _url = "/sdcard/g_js_libs/DataSets/mnist/mnist_test.csv";
+
+
+
+
+let xs = tf.randomNormal([100, 784]);
+let ys = tf.randomUniform([100, 1], 1, 10).toInt().toFloat();
+//ys.print(true)
+
+let model = tf.sequential({
+	layers:[
+	tf.layers.inputLayer({inputShape:[784]}),
+	tf.layers.dense({units:512}),
+	tf.layers.dense({units:256}),
+	tf.layers.dense({units:10, activation:"softmax"})
+	],
+});
+
+
+//console.log(tf.metrics)
+
+model.compile({
+	loss: "sparseCategoricalCrossentropy",
+	optimizer: "adam",
+	metrics: ["accuracy"],
+});
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+try{
+
+console.log(tf)
+tf.ready().then(INITIAL);
+
+}catch(err){
+console.log(err)
+}
+
+</script>
+
+</body>
+</html>

@@ -23,15 +23,15 @@ background: #414141;
 
 </style>
 
+<script async src="/sdcard/g_js_libs/THREE.min.js"></script>
+
 </head>
 <body>
 
 
 <canvas id="canvas"></canvas>
 
-<script src="/storage/emulated/0/g_js_libs/THREE.min.js"></script>
-
-<script >
+<script>
 
 
 let camera, scene, renderer;
@@ -55,12 +55,12 @@ function init() {
 	renderer = new THREE.WebGLRenderer( { canvas, antialias: true } );
 	renderer.setSize( window.innerWidth, window.innerHeight );
 //	document.body.appendChild( renderer.domElement );
-	renderer.setAnimationLoop( MailLoop );
+	renderer.setAnimationLoop( MainLoop );
 }
 
 
 
-function MailLoop( time ) {
+function MainLoop( time ) {
 
 	mesh.rotation.x = time / 2000;
 	mesh.rotation.y = time / 1000;

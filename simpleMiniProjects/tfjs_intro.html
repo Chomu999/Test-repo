@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width-device, initial-scale=1.0, user-scalable=no" />
+<meta charset="utf-8" />
+
+<title>TFJS INTRO</title>
+
+<style>
+
+:root{
+
+}
+
+*:after, *, *:before{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+html{
+font-size: 10px;
+}
+
+
+body{
+background: #414141;
+}
+
+
+.wrapper{
+width: min(100% - 1rem, 390px);
+margin-inline: auto;
+display: block;
+}
+
+.mainCont{
+background: #999;
+height: min(100dvh - 2rem, 100% - 2rem);
+}
+
+.titleCont{
+margin: 10px auto;
+padding: 10px;
+background: #555;
+
+.appTitle{
+	margin: 10px;
+padding: 20px ;
+color:magenta;
+border-radius: 1rem;
+background: aqua;
+text-align: center;
+}
+}
+
+
+.contentCont{
+margin: 10px auto;
+padding: 20px;
+background: #FFE685;
+}
+
+
+.probCont{
+margin: 10px auto;
+padding: 4px 20px;
+background: seaGREEN;
+height:20%;
+overflow: hidden auto;
+span{
+padding: 10px;
+margin: 10px auto;
+display: block;
+color:saddlebrown;
+font-size: 2rem;
+font-weight: 600;
+text-align: center;
+background: chocolate;
+border-radius: 1rem;
+}
+}
+
+
+.controlCont{
+background: #008DFF44;
+
+.btn{
+margin: 10px 20px;
+padding: 8px 10px;
+display: inline-block;
+color:green;
+background: yellow;
+font-size: 2rem;
+border-radius: 1rem;
+}
+}
+
+
+
+
+.center{
+text-align: center;
+}
+
+</style>
+
+<script  src="/sdcard/g_js_libs/tf.min.js"></script>
+
+</head>
+<body>
+
+<main class="wrapper mainCont">
+
+
+<div class="wrapper titleCont">
+
+<h1 class="appTitle">simple classifier</h1>
+</div>
+
+<div class="wrapper contentCont">
+
+
+<div class="center">
+<img class="testImg" src="/sdcard/Download/cat.jpg" alt="cat" />
+</div>
+</div>
+
+<div class="wrapper probCont">
+
+</div>
+
+<div class="wrapper controlCont">
+
+
+<div class="center">
+<span class="btn check">check</span>
+
+</div>
+
+<div class="center">
+
+<span class="btn predict">Predict</span>
+
+<span class="btn loadModel">Load Model</span>
+
+</div>
+
+</div>
+
+</main>
+
+<script type="module">
+import  {IMAGENET_CLASSES} from "/sdcard/g_js_libs/imagenet_classes.js";
+
+
+
+
+window.mn=0;
+
+
+
+class MobileNet{
+
+constructor(){
+this.model=0;
+this.image=0;
+this.p=0;
+}
+
+async Load(){
+if(this.model) return -1;
+const _ModelPath="/sdcard/g_js_libs/models/";
+const _ModelName="mobileNet/model.json";
+this.model = await tf.loadGraphModel(_ModelPath+_ModelName);
+}
+
+Dispose(){
+if(this.model){
+	this.model.dispose();
+}
+}
+
+getImage(imgElement){
+
+return tf.tidy(()=>{
+
+const processDivisor = tf.scalar(255/2);
+
+const inputTensor = tf.browser.fromPixels(imgElement, 3);
+
+const preProcessedInputTensor=tf.div(tf.sub(inputTensor.asType("float32"), processDivisor), processDivisor);
+
+const reShapeInputTensor= preProcessedInputTensor.reshape([1, ...preProcessedInputTensor.shape]);
+
+return reShapeInputTensor;
+});
+
+
+}
+
+Predict(imgData){
+
+if(!this.model) return -1;
+
+return tf.tidy(()=>{
+
+const INPUT_NODE_NAME = "images";
+const OUTPUT_NODE_NAME ="module_apply_default/MobilenetV2/Logits/output";
+
+const ImageTensor=this.getImage(imgData);
+
+const Logits=this.model.execute({
+	[INPUT_NODE_NAME]: ImageTensor,
+}, OUTPUT_NODE_NAME);
+
+return tf.softmax(Logits);
+
+});
+
+}
+
+
+getTopClasses(img, num){
+if(!this.model) return -1;
+const predictions=this.Predict(img);
+const values=predictions.dataSync();
+predictions.dispose()
+let predictionList=[];
+for(let i=0;i<values.length;i++){
+predictionList.push({value: values[i], index:i})
+}
+predictionList = predictionList.sort((a, b)=>{
+	return (b.value - a.value);
+}).slice(0, num);
+
+return predictionList.map(x=>{
+	return {label: IMAGENET_CLASSES[x.index], prob: x.value.toFixed(3)};
+});
+
+}
+
+}
+
+
+const strElement=(str)=>{
+const div=document.createElement("div");
+div.innerHTML=str;
+return div.firstElementChild??null;
+}
+
+const addProbability=(probArr)=>{
+const probCont=document.querySelector(".probCont");
+if(!probCont) return -1;
+probCont.innerHTML="";
+for(let i of probArr) probCont.append(strElement(`<span class="probability">probability ${i.prob}% ${i.label} </span>`));
+}
+
+
+const INITIAL = async __ => {
+
+
+
+const CheckBtn=document.querySelector(".btn.check");
+
+const predictBtn=document.querySelector(".btn.predict");
+const loadModelBtn=document.querySelector(".btn.loadModel");
+
+
+const testImg=document.querySelector(".testImg");
+
+
+
+
+mn = new MobileNet();
+
+
+
+CheckBtn.addEventListener("click",async e=>{
+const idb = window.indexedDB;
+console.log(idb);
+
+//save name or path
+let _path="tensorflowjs"
+let a = await idb.databases();
+console.log(a);
+
+let b = await idb.open(_path);
+console.log(b);
+let b2= b;
+console.log(b2);
+
+idb.deleteDatabase("tenson-model")
+//document.write({})
+//let c = idb.cmp(b, 9);
+//console.log(c)
+
+});
+
+
+
+
+
+
+loadModelBtn.addEventListener("click", e=>{
+mn.Load();
+});
+
+
+
+
+predictBtn.addEventListener("click", ()=>{
+
+console.log(mn.model)
+
+let probList = mn.getTopClasses(testImg, 5);
+
+if(!probList.length) return -1;
+else addProbability(probList);
+
+});
+
+
+
+
+}
+
+
+
+
+try{
+
+tf.ready().then(()=>INITIAL(0));
+
+}catch(err){
+console.log(err);
+}
+
+</script>
+</body>
+</html>

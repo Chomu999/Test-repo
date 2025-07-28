@@ -1,0 +1,211 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+<meta name="author" content="techbyte, " />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+
+<title>nodejs simple test app1</title>
+
+<style>
+
+*{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+
+.cont{
+margin: 80px auto;
+width: 90vmin;
+height: 90vmin;
+background: #f0f0f0;
+text-align: center;
+box-shadow: 2px 2px 42px 8px #ccc;
+border-radius: 8px;
+}
+
+
+h2{
+padding: 10px;
+font-size: 40px;
+color: red;
+text-align: center;
+
+}
+
+.in-group{
+margin: 0 0 15px;
+text-align: center;
+}
+
+.in-group label{
+margin: 0 auto;
+display: block;
+color: #666;
+font-size: 30px;
+letter-spacing: 4px;
+word-spacing: 4px;
+text-transform: capitalize;
+}
+
+.in-group input{
+padding: 10px;
+width: 90%;
+height: 40px;
+color: magenta;
+border: 2px solid #ccc;
+border-radius: 8px;
+outline: none;
+}
+
+button{
+margin: 0 auto;
+width: 90%;
+height: 40px;
+background: #76FF64;
+font-weight: 800;
+font-size: 34px;
+border: none;
+border-radius: 8px;
+text-transform: uppercase;
+}
+
+button:hover{
+background: #58A452;
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="wrapper cont">
+
+<h2>connect to server</h2>
+
+<form  id="formElement" action="http://localhost:3000/data" draggable="true" method="post" accept-charset="utf-8">
+
+<div class="in-group">
+<label for="n1">first name</label>
+<input type="text" name="n1" id="n1" value="bat" />
+
+</div>
+
+<div class="in-group">
+
+<label for="n2">last name</label>
+<input type="text" name="n2" id="n2" value="man" />
+</div>
+
+<button type="submit">submit</button>
+
+</form>
+
+
+</div>
+
+
+
+<script>
+
+
+let a=0;
+console.log(window)
+console.log(document)
+
+//http://localhost:3000/data
+let _u = "http://localhost:3000/data?n1=bat&n2=man";
+let b = new URLSearchParams(_u);
+console.log(b)
+
+b.forEach(bbb=>{
+console.log(bbb)
+})
+
+console.log(b.has("n1=bat"));
+console.log(b.get(0));
+console.log(b.getAll(""))
+let b2 = b.keys();
+console.log(b2.next())
+console.log(b2.next())
+console.log(b2.next())
+
+console.log(b.toString())
+let c = b.values();
+console.log(c.next())
+console.log(c.next())
+console.log(c.next())
+
+
+formElement.addEventListener("submit", (_event)=>{
+
+//_event.preventDefault();
+
+console.log(_event)
+
+//alert("submit")
+
+console.log(document)
+});
+
+
+
+async function INIT(){
+
+
+//let type = "application/x-www-form-urlencoded";
+
+
+let myUrl = "http://localhost:3000/data";
+let myOp = {
+method: "POST",
+headers: {
+"Content-Type": "application/json",
+},
+body: JSON.stringify({
+	name:"bis", age:21
+}),
+};
+
+
+
+let _dd= await fetch(myUrl, myOp);
+
+console.log(_dd)
+}
+
+//INIT();
+
+</script>
+
+
+<!-- 
+
+<div>
+
+<iframe src="http://localhost:3000/data" frameborder="0">
+
+</iframe>
+
+</div> -->
+
+<!-- 
+
+
+<script>
+let _url = "http://localhost:3000/"
+document.location.assign(_url);// = _url
+
+
+</script> -->
+
+</body>
+</html>
+

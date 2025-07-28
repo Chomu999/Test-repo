@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta charset="ISO-8859-1"/>
+
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+
+
+<meta name="viewport" content="width=device-width, user-scalable=no ,initial-scale=1.0, maximum-scale=1.0">
+
+<meta name="author" content="hexbyte"/>
+
+
+
+<style>
+
+*:before,*,*:after{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+
+
+
+body{
+
+color-scheme: default;
+background: #353535;
+}
+
+h1{
+color: #F1F1F1;
+text-align: center;
+}
+
+</style>
+
+<title> TFJS practice 10 transfer learning</title>
+
+
+
+
+</head>
+
+<body>
+
+
+
+<h1>TFJS practice 10 transfer learning</h1>
+
+<div class="btnBox">
+
+<button id="trainBTN">train</button>
+<br>
+<button id="downloadBTN">download</button>
+
+</div>
+
+
+<script  src="/sdcard/g_js_libs/tf.min.js"></script>
+
+
+<script>
+//"use strict";
+
+
+
+
+
+
+async function LoadFile(p,t="json"){
+let d=await fetch(p);
+return await d[t]();
+}
+
+
+
+
+//console.log(tf.regularizers);
+
+
+
+function getCurrnetTime(type=true){
+return  (type)?Date.now():performance.now();
+}
+
+
+async function LoadDataSet(_dataUrl){
+
+const binData =await LoadFile(_dataUrl, "arrayBuffer");
+const data = new Uint8Array(binData);
+
+return tf.tidy(()=>{
+let dt = tf.tensor(data).reshape([-1, 785]);
+
+let [YS, XS] = dt.split([1, 784], [1, 0]);
+
+
+XS = XS.toFloat().div(255);
+YS = YS.toFloat();
+
+return [XS, YS];
+
+});
+
+}
+
+
+//data anum
+async function preprosData(){
+
+
+const dataUrl = "/sdcard/g_js_libs/dataSets/mnist/mnist_mini.bin";
+const [x_train, y_train] = await LoadDataSet(dataUrl);
+
+const [parseX, parseY] = tf.tidy(()=>{
+
+//noises
+let x_noise = tf.randomUniform([...x_train.shape], 0, 1)
+
+let y_noise = tf.ones(y_train.shape).add( 9);
+
+//ones
+let x_one = tf.ones(x_train.shape);
+
+let y_one = tf.ones(y_train.shape).add( 10);
+
+
+//zeros
+let x_zero = tf.zeros(x_train.shape);
+
+let y_zero = tf.ones(y_train.shape).add( 11);
+
+
+
+let x = tf.stack([x_train, x_noise, x_one, x_zero], [0,]);
+x=x.reshape([-1, x_train.shape[1]]);
+
+let y = tf.stack([y_train, y_noise, y_one, y_zero], [0,]);
+y=y.reshape([-1, y_train.shape[1]]);
+
+
+return [x, y];
+
+});
+
+x_train.dispose();
+y_train.dispose();
+
+return [parseX, parseY];
+
+}
+
+
+function checkMemory(){
+let memory = tf.memory();
+let outStr="";
+for(let i in memory){
+outStr += `${i} : ${memory[i]}\n`;
+}
+console.log(outStr);
+}
+
+
+//console.log(tf.addWeight)
+
+
+
+
+function makeModel(mt){
+let input=0, x=0, output=0,m=0;
+if(0==mt){
+
+input = tf.input({shape: [784] });
+x =  tf.layers.dense({units:32}).apply(input);
+output = tf.layers.dense({units:10}).apply(x);
+m = tf.model({inputs:input, outputs:output })
+}
+
+else if(1==mt){
+m = tf.sequential();
+m.add(tf.layers.inputLayer({ inputShape: [784] }));
+m.add(tf.layers.dense({units:32}));
+m.add(tf.layers.dense({units:10}));
+}
+
+return m;
+}
+
+
+//console.log(tf.keras)
+//console.log(tf.Sequential())
+
+
+
+
+async function INITIAL(){
+
+
+
+
+//console.log(tf.stack)
+
+
+checkMemory();
+
+let [XS, YS] = await preprosData();
+
+let modelURL="/sdcard/g_js_libs/models/HandReco/v4/model.json";
+let model = await tf.loadLayersModel(modelURL);
+
+
+
+model.trainable = (false);
+//for(const l of model.layers){
+//l.trainable = (false);
+//}
+
+model.summary();
+console.log(model);
+
+
+checkMemory();
+
+
+
+//medthod 1
+let base_input = model.layers[0].input;
+let base_output = model.layers[model.layers.length - 2].output;
+
+let final_outputs = tf.layers.dense({ name:"classifier", units:13, activation:"softmax" }).apply(base_output);
+let new_model = tf.model({ inputs:base_input, outputs:final_outputs });
+
+
+
+new_model.summary();
+console.log(new_model);
+
+
+checkMemory();
+
+
+let lr = 1e-2;
+let loss = (false)?"categoricalCrossentropy": "sparseCategoricalCrossentropy";//tf.losses.softmaxCrossEntropy;
+let optimizer = tf.train.adam(lr);
+let metrics = [ "accuracy"];
+
+
+
+// medthod 2
+//let new_model = tf.sequential({name: "BCNet", layers:[
+//	model,
+//	tf.layers.dense({name : "classifier", units:12}),
+//]});
+
+new_model.compile({loss, optimizer, metrics});
+
+checkMemory();
+
+
+
+trainBTN.addEventListener("click", ()=>{
+
+
+let ct = getCurrnetTime();
+
+new_model.fit(XS, YS, { epochs: 6, batchSize: 32, verbose:2 }).then(r=>{
+
+console.log(r);
+console.log(getCurrnetTime() - ct);
+
+
+
+let [_loss, _acc] = new_model.evaluate(XS, YS, { batchSize: 32, });
+
+let f_loss = _loss.dataSync()[0];
+let f_acc = _acc.dataSync()[0];
+console.log("loss : ", f_loss);
+console.log("accuracy : ", f_acc);
+
+
+});
+
+
+
+});
+
+
+downloadBTN.addEventListener("click", ()=>{
+new_model.save("downloads://mnistModel");
+});
+
+
+}
+
+
+
+
+
+
+
+
+try{
+
+
+console.log(tf)
+tf.ready().then(INITIAL);
+
+}catch(err){
+console.log(err)
+}
+
+</script>
+
+</body>
+</html>

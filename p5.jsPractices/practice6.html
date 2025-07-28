@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+
+<title>p5 practice 6</title>
+
+<style>
+
+
+*{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+
+
+html{
+font-size: 10px;
+}
+
+a{
+text-decoration: none;
+}
+
+body{
+background: #f0f0f0;
+}
+
+
+
+
+</style>
+
+
+</head>
+
+<body>
+
+
+
+
+
+
+<script defer src="/sdcard/g_js_libs/p5.min.js"></script>
+
+
+<script>
+
+
+
+
+
+
+//6-5
+//let angle=0;
+
+//6-6
+//let angle=0;
+
+
+//6-7
+//let angle=0, angleDirection=1 , speed=0.005;
+
+
+//robote
+
+var x = 60; // x coordinate
+var y = 340; // y coordinate
+var radius = 45; // Head radius
+var bodyHeight = 180; // Body height
+var neckHeight = 40; // Neck height
+var easing = 0.04;
+
+
+function setup(){
+
+createCanvas(380, 380);
+
+}
+
+
+function draw(){
+//background(100);
+
+
+//print(window);
+
+
+//6-1
+//background(0)
+//translate(mouseX, mouseY)
+//rect(0, 0, 40, 40);
+
+//6-2
+//translate(mouseX, mouseY)
+//rect(0, 0, 40, 40);
+//translate(35, 10)
+//rect(0, 0, 40, 40);
+
+
+
+//6-3
+//rotate(mouseX / 100);
+//rect(width/ 2 + 40, 30, width, 20);
+
+//6-4
+//rotate(mouseX / 100);
+//rect(-(width/3)*3, -120, 50, 60)
+
+
+//6-5
+//translate(mouseX, mouseY);
+//rotate(angle);
+//rect(-20, -20, 40, 40)
+//angle+=0.01
+
+
+//6-6
+//rotate(angle);
+//translate(mouseX, mouseY);
+//rect(-20, -20, 40, 40)
+//angle+=0.1
+
+
+
+//6-7
+//background(130);
+//translate(20, 25);
+//rotate(angle);
+//strokeWeight(12);
+//line(0, 0, 40, 0);
+
+//translate(40, 0);
+//rotate(angle * 2);
+//strokeWeight(6);
+//line(0, 0, 30, 0);
+
+//translate(30, 0);
+//rotate(angle * 2.5);
+//strokeWeight(3);
+//line(0, 0, 20, 0)
+
+//angle += speed * angleDirection;
+
+//if(angle > QUARTER_PI || angle < 0 ) angleDirection *= -1;
+
+
+
+
+
+
+//6-8
+//translate(mouseX, mouseY);
+//scale(mouseX / 60)
+//rect(0, 0, 40, 40)
+
+//6-9
+//translate(mouseX, mouseY);
+//let scalar = mouseX / 60;
+//scale(scalar);
+//strokeWeight(scalar / 1.0)
+//rect(0, 0, 40, 40)
+
+//6-10
+//push();
+//translate(mouseX, mouseY);
+//rect(0, 0, 40, 40);
+///pop();
+//translate(35, 10)
+//rect(-10, 10, 20, 20)
+
+
+//robote
+
+
+
+
+
+strokeWeight(2);
+ ellipseMode(RADIUS);
+
+
+var neckY = -1 * (bodyHeight + neckHeight + radius);
+ 
+ background(204);
+ 
+ translate(mouseX, y); // Move all to (mouseX, y)
+ 
+ if (mouseIsPressed) {
+ scale(1.0);
+ } else {
+ scale(0.6); // 60% size when mouse is pressed
+ }
+ 
+ // Body
+ noStroke();
+ fill(102);
+ ellipse(0, -33, 33, 33);
+ fill(0);
+ rect(-45, -bodyHeight, 90, bodyHeight-33);
+ // Neck
+ stroke(102);
+ line(12, -bodyHeight, 12, neckY);
+ 
+ // Hair
+ push();
+ translate(12, neckY);
+ var angle = -PI/30.0;
+ for (var i = 0; i <= 30; i++) {
+ line(80, 0, 0, 0);
+ rotate(angle);
+ }
+ pop();
+
+
+
+
+
+
+
+// Head
+ noStroke();
+ fill(0);
+ ellipse(12, neckY, radius, radius);
+ fill(255);
+ ellipse(24, neckY-6, 14, 14);
+ fill(0);
+ ellipse(24, neckY-6, 3, 3)
+
+
+
+
+
+
+
+
+
+
+
+//noLoop();
+}
+
+</script>
+
+</body>
+</html>

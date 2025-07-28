@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+
+<title> Data Refactor</title>
+
+<style>
+
+
+*{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+
+
+html{
+font-size: 10px;
+}
+
+a{
+text-decoration: none;
+}
+
+body{
+background: #111111;
+}
+
+canvas{
+margin: auto;
+display: block;
+--hw:90%;
+
+width: var(--hw);
+height: var(--hw);
+/* aspect-ratio: 1; */
+
+image-rendering: pixelated;
+}
+
+</style>
+
+<!-- <script defer src="/sdcard/g_js_libs/tf.min.js"></script> -->
+
+
+</head>
+
+<body>
+
+
+
+<canvas class="canvas"></canvas>
+
+
+
+<script type=module>
+"use strict";
+
+
+
+//
+class Rand{
+
+static Float(a,b){
+return Math.random() * (b-a+1) + a;
+}
+
+static Int(a,b){
+return Math.floor(Rand.Float(a,b));
+}
+
+static Choice(...arg){
+return arg[Rand.Int(0, arg.length - 1)];
+}
+
+static Color(l=3){
+let out = "#";
+let cstr="0123456789abcdef".split("");
+for(let c=0;c<l;c++) out += Rand.Choice(...cstr);
+return out;
+}
+
+}
+
+
+
+
+
+
+
+const sleep=(t=0)=>new Promise(res=>setTimeout(()=>res(!0),t));
+
+
+
+
+
+
+const strToHtmlElement=(str)=>{
+if(!str) return;
+const div = document.createElement("div");
+div.innerHTML+=str;
+return div.firstElementChild;
+}
+
+
+//
+const LoadFile=async(p,t="json")=>{
+const d = await fetch(p);
+return await d[t]();
+}
+
+
+
+
+//Noise as a imgData r=~, g=~, b=~ a=255, w=28, h=28
+const NoiseImage=(w=28, h=28, r=[0, 0], g=[0, 0], b=[0, 0])=>{
+const imd = new ImageData(w, h);
+for(let i=0;i<imd.data.length/4;i++){
+imd.data[i*4+0] = Rand.Int(r[0], r[1]);
+imd.data[i*4+1] = Rand.Int(g[0], g[1]);
+imd.data[i*4+2] = Rand.Int(b[0], b[1]);
+imd.data[i*4+3] = 255;
+}
+return imd;
+}
+
+
+
+//
+const getImgData = (arr, mulFactor=255)=> {
+	const imgData = new ImageData(28, 28);
+	for (let i = 0; i < arr.length; i++) {
+		const color = arr[i] * mulFactor;
+		imgData.data[i*4+0] = color;
+		imgData.data[i*4+1] = color;
+		imgData.data[i*4+2] = color;
+		imgData.data[i*4+3] = 255;
+	}
+	return imgData;
+}
+
+
+
+//
+const ContentDownloader = (_blob, _type, _name)=> {
+	let _a = document.createElement("a");
+	let _url = URL.createObjectURL(_blob, {
+		type: _type??"json/text"
+	});
+	_a.download = _name??"dummy.txt";
+	_a.href = _url;
+	_a.click();
+}
+
+
+
+
+
+
+//
+const clearCanvas=(_context, condition=!1)=>{
+	if(condition) _context.clearRect(0, 0, _context.canvas.width, _context.canvas.height);
+	else{
+		_context.fillStyle="#000";
+		_context.fillRect(0, 0, _context.canvas.width, _context.canvas.height);
+	}
+}
+
+
+const getProcessImage = (_c, ds)=> {
+	let d = [];
+	let canvasWidth = _c.canvas.width,
+	canvasHeight = _c.canvas.height;
+	let imgWidth = 28,
+	imgHeight = 28;
+	let row = (canvasWidth / imgWidth),
+	col = (canvasHeight / imgHeight);
+	for (let x = 0, i = 0; x < row; x++) {
+		for (let y = 0; y < col; y++) {
+			const imageArray = ds[i][1];
+			const imageData = getImgData(imageArray, 1);
+			d.push({
+				data: imageData, x: (x * imgWidth), y: (y * imgWidth)});
+			
+			i++;
+		}
+	}
+	return d;
+}
+
+
+
+const draw=(c, list)=>{
+	for(const i of list){
+		c.putImageData(i.data, i.x, i.y);
+	}
+}
+
+
+
+
+//
+const INITIAL=async () => {
+
+
+
+const canvas = document.querySelector("canvas");
+const ctx 	 = canvas.getContext("2d");
+
+//const canvasSize = innerWidth>innerHeight?innerHeight:innerWidth;
+
+
+const dataSet = await LoadFile("/sdcard/g_js_libs/dataSets/mnist/parseMiniData.json", "json");
+
+
+
+let overAllSize = dataSet.length;
+
+const widthPercent=0.9, heightPercent=0.1;
+
+const _h=(overAllSize*heightPercent)/10, _v=(overAllSize*widthPercent)/10;
+
+const imgW=28, imgH=28;
+
+const LengthStreanth=(_h>_v)?{x:10, y:1}:{x:1, y:10};
+
+canvas.width = imgW * ((_h+_v) / LengthStreanth.x);
+canvas.height = imgH * ((_h+_v) / LengthStreanth.y);
+
+console.log(canvas.width, canvas.height)
+
+let processedImgDataList = getProcessImage(ctx, dataSet);
+
+
+draw(ctx, processedImgDataList);
+
+
+
+
+
+
+
+//
+canvas.addEventListener("dblclick", e=>{
+
+
+processedImgDataList = getProcessImage(ctx, dataSet)
+
+draw(ctx, processedImgDataList);
+
+//canvas.toBlob(b=> ContentDownloader(b, b.type, "processedMnist.png") );
+
+});
+
+
+
+
+canvas.addEventListener("touchmove", ()=>{
+
+//dataSet.push(dataSet.shift());
+//const r=[100, 200], g=[10, 100], b=[40, 50];
+//const noiseImgData = NoiseImage(canvas.width, canvas.height, r, g, b);
+//ctx.putImageData(noiseImgData, 0, 0);
+});
+
+
+
+
+
+window.addEventListener("resize", ()=>{
+
+canvas.width = imgW * (_h+_v);
+canvas.height = imgH * ((_h+_v)/10);
+
+
+//canvas.width = window.innerWidth;
+//canvas.height = window.innerHeight;
+});
+
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+try{
+
+INITIAL();
+
+
+}catch(err){
+console.log(err);
+}
+
+</script>
+
+</body>
+</html>

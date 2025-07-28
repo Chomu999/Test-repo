@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+
+<title>p5 practice 8</title>
+
+<style>
+
+
+*{
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+
+
+html{
+font-size: 10px;
+font-style: italic;
+}
+
+a{
+text-decoration: none;
+}
+
+body{
+background: #f0f0f0;
+}
+
+
+
+
+</style>
+
+
+</head>
+
+<body>
+
+
+
+
+
+
+<script defer src="/sdcard/g_js_libs/p5.min.js"></script>
+
+
+<script>
+
+
+
+//8-3
+//let radius=40, x = -radius, speed=0.6;
+
+
+//8-4
+//let radius=40, x = -radius, speed=0.6;
+
+//8-5
+//let radius=40, x = 300, speed=0.6, direction = 1;
+
+
+//8-6
+//let radius = 40, startX=30, startY=20, stopX=300, stopY=300, x=startX, y=startY, pct=0.0, step=0.001;
+
+
+//8-9
+//let speed = 2.5, diameter=40, x, y;
+
+//8-11
+//let x=200, t1=2000, t2=4000;
+
+
+//8-12
+//let angle=0.0;
+
+//8-13
+//let angle = 0, scalar = 60, offset=40, speed=0.05;
+
+//8-14
+//let angle = 0, scalar = 60, offset=40, speed=0.05;
+
+//8-15
+//let angle = 0, scalar = 0, offset=40, speed=0.05;
+
+
+function preload(){
+
+
+}
+
+
+function setup(){
+
+createCanvas(380, 380);
+
+
+//8-2
+//frameRate(12);
+
+//8-3
+//ellipseMode(RADIUS);
+
+//8-4
+//ellipseMode(RADIUS);
+
+//8-5;
+//ellipseMode(RADIUS);
+
+//8-9
+//x=width/2;
+//y=height/2;
+//background(135);
+
+
+
+
+//8-14
+//offset = width/2;
+
+//8-15
+//offset = width/2;
+
+}
+
+
+
+
+
+
+function draw(){
+
+//8-1
+//let fr=frameRate();
+//print(fr)
+
+//8-2
+//let fr = frameRate();
+//print(fr);
+
+//8-3
+//background(0)
+//x+=speed;
+//arc(x, 100, radius, radius, 0.52, 5.67);
+
+//8-4
+//background(0)
+//x+=speed;
+//if(x > width+radius) x = -radius
+//arc(x, 100, radius, radius, 0.52, 5.67);
+
+//8-5
+//background(0);
+//x+=speed*direction;
+//if( (x > width+radius) || (x < radius)) direction = -direction;
+//if(direction == 1) arc(x, 100, radius, radius, 0.52, 5.67);
+//else arc(x, 100, radius, radius, 3.67, 8.9);
+
+
+
+//8-6
+//background(120)
+//if(pct < 1.0){
+//x= startX + ((stopX - startX) * pct);
+//y= startY + ((stopY - startX) * pct);
+//pct += step;
+//}
+//ellipse(x, y, radius, radius)
+
+//8-7
+//background(120);
+//let r0 = floor(random(0, mouseX));
+//text(r0, width/2, height/2);
+
+
+
+//8-8
+//background(120);
+//for(let x=20;x<width;x+=20){
+//let mx = mouseX / 10;
+//let offsetA = random(-mx, mx);
+//let offsetB = random(-mx, mx);
+//line(x + offsetA, 10, x - offsetB, height - 20)
+//}
+
+
+
+
+//8-9
+//x+= random(-speed, speed);
+//y+= random(-speed, speed);
+//ellipse(x, y, diamater, diamater)
+
+//8-9 2
+//x += random(-speed, speed);
+//y += random(-speed, speed);
+//x = constrain(x, 0, width);
+//y = constrain(y, 0, height);
+//ellipse(x, y, diameter, diameter);
+
+
+
+
+
+//8-10
+//background(120)
+//let t0 = floor(millis());
+//text(t0, width/2, height/2)
+
+
+
+
+
+//8-11
+//let crrTime = millis();
+//if(crrTime > t2) x -= 0.5;
+//else if(crrTime > t1) x += 2;
+//ellipse(x, height/2, 40, 40);
+
+
+
+//8-12
+//let sinVal = sin(angle);
+//let cVal = map(sinVal, -1, 1, 0, 255);
+//background(cVal);
+//angle+=0.01;
+
+
+
+
+//8-13
+//let y1 = offset + sin(angle + 0.0) * scalar;
+//let y2 = offset + sin(angle + 0.4) * scalar;
+//let y3 = offset + sin(angle + 0.8) * scalar;
+
+//ellipse(30, y1, 40, 40);
+//ellipse(60, y1, 40, 40);
+//ellipse(90, y1, 40, 40);
+//angle+=speed;
+
+
+//8-14
+//let x = offset + sin(angle) * scalar;
+//let y = offset + cos(angle) * scalar;
+//ellipse(x, y, 40, 40);
+//angle+=speed;
+
+
+//8-15
+//let x = offset + cos(angle) * scalar;
+//let y = offset + sin(angle) * scalar;
+//ellipse(x, y, 2, 2);
+//angle+=speed;
+//scalar+=speed;
+
+// todo robote
+
+
+
+}
+
+
+
+
+
+</script>
+
+</body>
+</html>

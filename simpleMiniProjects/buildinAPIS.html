@@ -25,15 +25,19 @@ padding:0;
 box-sizing:border-box;
 }
 
+body{
+background: #444444;
+}
 
 #myTable{
+margin: auto;
 color: #02004F;
-background: #00A4FF;
-position: absolute;
-top: 25%;
-left: 25%;
+background: #CBCBCB;
+/* position: absolute; */
+/* top: 50%; */
+/* left: 50%; */
 /* inset: 50%; */
-transform: translate(-50% -50%);
+/* transform: translate(-50% -50%); */
 border-collapse:separate ;
 border-spacing: 12px 4px;
 
@@ -52,7 +56,29 @@ table-layout auto | fixed
 
 th, td{
 border: 1px solid red;
+padding: 2px 4px;
 }
+
+.wrapper{
+width: min(100% - 20px, 390px);
+margin: 10px auto;
+background: #fff3;
+}
+
+.center{
+text-align: center;
+}
+
+
+
+.disCont{
+height: 300px;
+video{
+width: 100%;
+height: 100%;
+}
+}
+
 
 
 </style>
@@ -106,10 +132,50 @@ border: 1px solid red;
 </table>
 
 
-<!-- <script  src="/storage/emulated/0/g_js_libs/eruda.min.js"></script> -->
+<main class="wrapper mainCont">
+
+<div class="wrapper titleCont">
+<h1>app</h1>
+</div>
+
+<div class="wrapper disCont">
+
+<video id="vid1" autoplay="autoplay" ></video>
+
+</div>
+
+
+</main>
 
 
 <script type="module">
+
+
+const playAudio=()=>{
+
+let rootDirName="/sdcard/";
+let dirName="Download/";
+let AudioName="Paani Wala Dance - Sunny Leone - Full Video ｜ Kuch Kuch Locha Hai ｜ Ikka ｜ Arko ｜ Intense.mp3";
+let AudioSRC=`${rootDirName+dirName+AudioName}`;
+
+let a0 =new Audio(AudioSRC);
+
+if(a0.paused){
+a0.play();
+}else a0.pause();
+
+
+}
+
+
+
+
+const Init=async ()=>{
+
+
+console.log(window)
+
+
 
 
 //var a = new XSLTProcessor();
@@ -146,21 +212,48 @@ AudioWorkletNode: ƒ AudioWorkletNode()
 
 
 */
-let rootDirName="/storage/emulated/0/"
-let dirName="Download/"
-let AudioName="y2mate.com - Imagine Dragons  Believer Official Music Video.mp3"
-let AudioSRC=`${rootDirName+dirName+AudioName}`;
-
-let a0 =new Audio(AudioSRC);
-console.log(a0);
-
-document.addEventListener("click", () =>{
 
 
-if(0){
-a0.play();
+//let idk = window.fetchLater("https://wa.html");
+//console.log(idk);
+
+
+//showDirectoryPicker()
+//showOpenFilePicker()
+//showSaveFilePicker()
+
+//let a={x:1, y:64}
+//const idk = await window.showDirectoryPicker("a");
+//console.log(idk)
+
+//let idk =await window.showOpenFilePicker("")
+//console.log(idk)
+
+//environment facing
+let vidSrc=await window.navigator.mediaDevices.getUserMedia({
+	audio:false,
+	video:{
+		width:300, height:300,
+		facingMode: "environment"
+	}
+});
+
+vid1.srcObject=vidSrc;
+
+console.log(vidSrc)
+
+
+
 }
 
+
+window.addEventListener("load", () =>{
+
+try{
+Init()
+}catch(err){
+console.error(err)
+}
 
 });
 
@@ -168,8 +261,6 @@ a0.play();
 
 
 
-
-console.log(window)
 
 
 
